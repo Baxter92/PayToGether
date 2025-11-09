@@ -1,0 +1,30 @@
+spring:
+  profiles:
+    active: dev
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+  app:
+    backend-url: http://bfb.dev.svc.cluster.local
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: hml
+  app:
+    backend-url: http://bfb.hml.svc.cluster.local
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+  app:
+    backend-url: http://bfb.prod.svc.cluster.local

@@ -20,3 +20,21 @@ rad.json
 *.flf
 #Test results file
 TestResults.xml
+#Node modules
+node_modules/
+dist/
+#Package-lock file
+package-lock.json
+#Yarn lock file
+yarn.lock
+#Target folder
+bff-provider/target/
+bff-wsclient/target/
+bff-core/target/
+bff-configuration/target/
+bff-front/node_modules/
+bff-front/node/
+#Compiled JavaScript files
+*.js
+#Compiled JavaScript map files
+*.js.map
