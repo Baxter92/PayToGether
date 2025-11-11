@@ -1,35 +1,42 @@
 import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
-import { useI18n } from "./context/I18nProvider";
+import { useI18n } from "./context/I18nContext";
 import LanguageSelector from "./components/LanguageSelector";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { ProtectedRoutes } from "./routing/ProtectedRoutes";
+import Login from "./pages/auth/Login";
+import Home from "./pages/home";
+import { MainLayout } from "./layouts/MainLayout";
 
 function App() {
   const [count, setCount] = useState(0);
   const { t } = useI18n();
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1 className="bg-amber-600">Vite + React</h1>
-      <div className="p-4">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <LanguageSelector />
-      <p className="read-the-docs">{t("hello")}</p>
-    </>
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          {/* Routes publiques avec AuthLayout */}
+          <Route>
+            <Route path="/login" element={<Login />} />
+          </Route>
+
+          {/* Routes protégées avec MainLayout */}
+          <Route element={<ProtectedRoutes />}>
+            <Route element={<MainLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/dashboard" element={<div>Dashboard</div>} />
+              <Route path="/profile" element={<div>Profile</div>} />
+            </Route>
+          </Route>
+
+          {/* Route par défaut */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
