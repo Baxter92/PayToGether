@@ -5,7 +5,7 @@ COPY package.json package-lock.json* ./
 RUN npm install
 COPY src src
 COPY public public
-COPY webpack.config.js ./
+COPY webpack.config.cjs ./
 RUN npm run build
 
 # Production stage
