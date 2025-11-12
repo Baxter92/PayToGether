@@ -1,0 +1,30 @@
+name: Vérification du nom de branche
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  check-branch-name:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Vérifier le nom de la branche
+        run: |
+          BRANCH_NAME="${GITHUB_REF##*/}"
+          echo "Nom de la branche détecté : $BRANCH_NAME"
+
+          if [[ ! "$BRANCH_NAME" =~ ^feature\/[a-z0-9._-]+$ ]]; then
+            echo "❌ Erreur : le nom de branche doit respecter le format 'feature/<nom>'"
+            echo "Exemples valides :"
+            echo " - feature/ajout-login"
+            echo " - feature/fix-auth-token"
+            echo " - feature/api-v2"
+            exit 1
+          fi
+
+          echo "✅ Nom de branche valide : $BRANCH_NAME"
