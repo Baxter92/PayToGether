@@ -55,7 +55,7 @@ const Header = () => {
   ];
 
   return (
-    <header className="sm:sticky top-0 z-50 w-full border-b bg-white shadow-sm">
+    <header className="top-0 z-50 w-full border-b bg-white shadow-sm">
       {/* Top Bar - Promo Banner */}
       <div className="bg-linear-to-r from-primary-500 to-teal-500 text-white py-2">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
