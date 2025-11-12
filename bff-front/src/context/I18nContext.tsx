@@ -12,7 +12,7 @@ export type I18nContextProps = {
   /** change la langue */
   changeLanguage: (lng: ILanguages) => void;
   /** langues disponibles (supportedLngs) */
-  availableLanguages: false | readonly string[] | undefined;
+  availableLanguages: readonly string[];
 };
 
 /** default safe stubs */
@@ -32,7 +32,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   const changeLanguage = (lng: ILanguages) => {
     i18n.changeLanguage(lng);
   };
-  const availableLanguages = i18n.options?.supportedLngs;
+  const availableLanguages = i18n.options?.supportedLngs || [];
 
   const value = useMemo(
     () => ({
@@ -40,7 +40,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       i18n,
       language,
       changeLanguage,
-      availableLanguages,
+      availableLanguages: availableLanguages.filter((lng) => lng !== "cimode"),
     }),
     [t, i18n, language, availableLanguages]
   );

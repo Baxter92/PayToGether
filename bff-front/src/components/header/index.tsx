@@ -30,6 +30,7 @@ import CategoriesBar from "./components/CategoriesBar";
 import type { ICategory } from "./types";
 import SearchBar from "./components/SearchBar";
 import SidebarMenu from "./components/SidebarMenu";
+import LanguageSelector from "../LanguageSelector";
 
 const Header = () => {
   const { user, logout } = useAuth();
@@ -218,6 +219,11 @@ const Header = () => {
               </Link>
             </Button>
 
+            {/* Language Selector - Mobile Only */}
+            <div className="flex">
+              <LanguageSelector />
+            </div>
+
             {/* Mobile Menu */}
             <SidebarMenu
               categories={categories}
@@ -225,6 +231,11 @@ const Header = () => {
               setLocation={setLocation}
               favoritesCount={favoritesCount}
             />
+          </div>
+
+          {/* Language Selector - Desktop Only */}
+          <div className="hidden lg:flex ml-4">
+            <LanguageSelector />
           </div>
         </div>
 
