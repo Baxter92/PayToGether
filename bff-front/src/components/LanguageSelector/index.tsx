@@ -1,6 +1,6 @@
 import { useI18n, type ILanguages } from "@/context/I18nContext";
 import React from "react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 
 export default function LanguageSelector() {
   const { changeLanguage } = useI18n();

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Play, Sparkles } from "lucide-react";
 import { Button } from "../ui/button";
-import HStack from "../hstack";
+import HStack from "../HStack";
 
 // Types pour les slides
 interface Slide {

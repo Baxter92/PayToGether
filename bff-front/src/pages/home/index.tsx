@@ -1,6 +1,6 @@
 import { mockDeals } from "@/constants/data";
 import DealsList from "./components/DealsList";
-import Hero from "@/components/hero";
+import Hero from "@/components/Hero";
 import Features from "./components/Features";
 
 export default function Home() {
