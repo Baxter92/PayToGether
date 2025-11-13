@@ -17,108 +17,208 @@ interface Slide {
   badge?: string;
 }
 
-const Hero = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+interface HeroStats {
+  value: string;
+  label: string;
+}
 
-  // Données des slides - FACILEMENT CUSTOMISABLE
-  const slides: Slide[] = [
-    {
-      id: 1,
-      title: "Découvrez les Meilleurs Deals",
-      subtitle: "Jusqu'à 70% de réduction",
-      description:
-        "Restaurants, spa, activités et bien plus encore dans votre ville",
-      buttonText: "Explorer maintenant",
-      buttonLink: "/deals",
-      image:
-        "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80",
-      gradient: "from-purple-600/50 to-pink-600/50",
-      textColor: "text-white",
-      badge: "Nouveauté",
-    },
-    {
-      id: 2,
-      title: "Bien-être & Détente",
-      subtitle: "Offres exclusives Spa",
-      description:
-        "Profitez d'un moment de relaxation avec nos offres spa et massage",
-      buttonText: "Voir les offres spa",
-      buttonLink: "/deals/spa",
-      image:
-        "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1200&q=80",
-      gradient: "from-teal-600/50 to-cyan-600/50",
-      textColor: "text-white",
-      badge: "Populaire",
-    },
-    {
-      id: 3,
-      title: "Saveurs Gastronomiques",
-      subtitle: "Restaurants étoilés à prix réduits",
-      description:
-        "Découvrez les meilleurs restaurants de votre ville à des prix imbattables",
-      buttonText: "Réserver une table",
-      buttonLink: "/deals/restaurants",
-      image:
-        "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=80",
-      gradient: "from-orange-600/50 to-red-600/50",
-      textColor: "text-white",
-      badge: "Tendance",
-    },
-    {
-      id: 4,
-      title: "Activités & Loisirs",
-      subtitle: "Vivez des expériences uniques",
-      description:
-        "Sport, culture, aventure... Trouvez l'activité qui vous correspond",
-      buttonText: "Découvrir les activités",
-      buttonLink: "/deals/activities",
-      image:
-        "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1200&q=80",
-      gradient: "from-blue-600/50 to-indigo-600/50",
-      textColor: "text-white",
-      badge: "Aventure",
-    },
+interface HeroProps {
+  // Slides
+  slides: Slide[];
+
+  // Dimensions
+  height?: {
+    mobile?: string;
+    desktop?: string;
+  };
+
+  // Auto-play
+  autoPlay?: boolean;
+  autoPlayInterval?: number;
+  pauseOnHover?: boolean;
+
+  // Navigation
+  showArrows?: boolean;
+  showDots?: boolean;
+  showPlayPause?: boolean;
+  arrowsPosition?: "top-right" | "top-left" | "center-sides" | "bottom-sides";
+  dotsPosition?: "bottom-center" | "bottom-left" | "bottom-right";
+
+  // Content
+  showBadge?: boolean;
+  showStats?: boolean;
+  stats?: HeroStats[];
+  maxContentWidth?: string;
+  contentAlignment?: "left" | "center" | "right";
+
+  // Animations
+  transitionDuration?: number;
+  transitionType?: "slide" | "fade";
+
+  // Style
+  backgroundColor?: string;
+  overlayOpacity?: number;
+
+  // Callbacks
+  onSlideChange?: (index: number) => void;
+  onButtonClick?: (slide: Slide) => void;
+}
+
+const Hero = ({
+  slides,
+  height = { mobile: "400px", desktop: "500px" },
+  autoPlay = true,
+  autoPlayInterval = 5000,
+  pauseOnHover = true,
+  showArrows = true,
+  showDots = true,
+  showPlayPause = true,
+  arrowsPosition = "top-right",
+  dotsPosition = "bottom-center",
+  showBadge = true,
+  showStats = true,
+  stats,
+  maxContentWidth = "2xl",
+  contentAlignment = "left",
+  transitionDuration = 700,
+  transitionType = "slide",
+  backgroundColor = "bg-gray-900",
+  overlayOpacity = 50,
+  onSlideChange,
+  onButtonClick,
+}: HeroProps) => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(autoPlay);
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Stats par défaut
+  const defaultStats: HeroStats[] = [
+    { value: "5000+", label: "Offres disponibles" },
+    { value: "98%", label: "Clients satisfaits" },
+    { value: "24/7", label: "Support client" },
   ];
+
+  const displayStats = stats || defaultStats;
 
   // Auto-play
   useEffect(() => {
-    if (!isAutoPlaying) return;
+    if (!isAutoPlaying || (pauseOnHover && isHovered)) return;
 
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
+      setCurrentSlide((prev) => {
+        const newIndex = (prev + 1) % slides.length;
+        onSlideChange?.(newIndex);
+        return newIndex;
+      });
+    }, autoPlayInterval);
 
     return () => clearInterval(interval);
-  }, [isAutoPlaying, slides.length]);
+  }, [
+    isAutoPlaying,
+    isHovered,
+    pauseOnHover,
+    slides.length,
+    autoPlayInterval,
+    onSlideChange,
+  ]);
 
   const goToSlide = (index: number) => {
     setCurrentSlide(index);
-    setIsAutoPlaying(false);
-    setTimeout(() => setIsAutoPlaying(true), 10000);
+    onSlideChange?.(index);
+    if (autoPlay) {
+      setIsAutoPlaying(false);
+      setTimeout(() => setIsAutoPlaying(true), autoPlayInterval * 2);
+    }
   };
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-    setIsAutoPlaying(false);
-    setTimeout(() => setIsAutoPlaying(true), 10000);
+    const newIndex = (currentSlide + 1) % slides.length;
+    setCurrentSlide(newIndex);
+    onSlideChange?.(newIndex);
+    if (autoPlay) {
+      setIsAutoPlaying(false);
+      setTimeout(() => setIsAutoPlaying(true), autoPlayInterval * 2);
+    }
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-    setIsAutoPlaying(false);
-    setTimeout(() => setIsAutoPlaying(true), 10000);
+    const newIndex = (currentSlide - 1 + slides.length) % slides.length;
+    setCurrentSlide(newIndex);
+    onSlideChange?.(newIndex);
+    if (autoPlay) {
+      setIsAutoPlaying(false);
+      setTimeout(() => setIsAutoPlaying(true), autoPlayInterval * 2);
+    }
+  };
+
+  const handleButtonClick = (slide: Slide) => {
+    if (onButtonClick) {
+      onButtonClick(slide);
+    }
+  };
+
+  // Classes dynamiques
+  const heightClass = `h-[${height.mobile}] md:h-[${height.desktop}]`;
+  const contentWidthClass = `max-w-${maxContentWidth}`;
+  const alignmentClass =
+    contentAlignment === "center"
+      ? "items-center text-center"
+      : contentAlignment === "right"
+      ? "items-end text-right"
+      : "items-start text-left";
+
+  const getArrowsContainerClass = () => {
+    switch (arrowsPosition) {
+      case "top-left":
+        return "absolute top-4 left-4";
+      case "center-sides":
+        return "absolute top-1/2 -translate-y-1/2 w-full px-4 flex justify-between pointer-events-none";
+      case "bottom-sides":
+        return "absolute bottom-4 w-full px-4 flex justify-between pointer-events-none";
+      default: // top-right
+        return "absolute top-4 right-4";
+    }
+  };
+
+  const getDotsContainerClass = () => {
+    switch (dotsPosition) {
+      case "bottom-left":
+        return "absolute bottom-6 left-8";
+      case "bottom-right":
+        return "absolute bottom-6 right-8";
+      default: // bottom-center
+        return "absolute bottom-6 left-1/2 -translate-x-1/2";
+    }
   };
 
   return (
-    <div className="relative w-full h-[400px] md:h-[400px] overflow-hidden bg-gray-900">
+    <div
+      className={`relative w-full ${heightClass} overflow-hidden ${backgroundColor}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {/* Slides Container */}
       <div
-        className="flex transition-transform duration-700 ease-out h-full"
-        style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+        className={`flex h-full transition-all duration-${transitionDuration} ease-out ${
+          transitionType === "fade" ? "absolute inset-0" : ""
+        }`}
+        style={
+          transitionType === "slide"
+            ? { transform: `translateX(-${currentSlide * 100}%)` }
+            : {}
+        }
       >
-        {slides.map((slide) => (
-          <div key={slide.id} className="min-w-full h-full relative">
+        {slides.map((slide, index) => (
+          <div
+            key={slide.id}
+            className={`min-w-full h-full relative ${
+              transitionType === "fade"
+                ? `absolute inset-0 transition-opacity duration-${transitionDuration} ${
+                    index === currentSlide ? "opacity-100" : "opacity-0"
+                  }`
+                : ""
+            }`}
+          >
             {/* Background Image */}
             <div
               className="absolute inset-0 bg-cover bg-center"
@@ -127,16 +227,27 @@ const Hero = () => {
 
             {/* Gradient Overlay */}
             <div
-              className={`absolute inset-0 bg-linear-to-r ${slide.gradient}`}
+              className={`absolute inset-0 bg-gradient-to-r ${slide.gradient}`}
+              style={{ opacity: overlayOpacity / 100 }}
             />
 
             {/* Content */}
             <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex items-center h-full">
-                <div className="max-w-2xl space-y-6 animate-fade-in">
+              <div className={`flex h-full ${alignmentClass}`}>
+                <div
+                  className={`${contentWidthClass} space-y-4 md:space-y-6 animate-fade-in`}
+                >
                   {/* Badge */}
-                  {slide.badge && (
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30">
+                  {showBadge && slide.badge && (
+                    <div
+                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 ${
+                        contentAlignment === "center"
+                          ? "mx-auto"
+                          : contentAlignment === "right"
+                          ? "ml-auto"
+                          : ""
+                      }`}
+                    >
                       <Sparkles className="w-4 h-4" />
                       <span className="text-sm font-semibold">
                         {slide.badge}
@@ -146,63 +257,84 @@ const Hero = () => {
 
                   {/* Subtitle */}
                   <p
-                    className={`text-md md:text-xl font-medium ${slide.textColor} uppercase tracking-wide`}
+                    className={`text-sm md:text-xl font-medium ${slide.textColor} uppercase tracking-wide`}
                   >
                     {slide.subtitle}
                   </p>
 
                   {/* Title */}
                   <h1
-                    className={`text-2xl md:text-3xl font-bold ${slide.textColor} leading-tight`}
+                    className={`text-3xl md:text-5xl lg:text-6xl font-bold ${slide.textColor} leading-tight`}
                   >
                     {slide.title}
                   </h1>
 
                   {/* Description */}
                   <p
-                    className={`text-md md:text-lg ${slide.textColor} opacity-90 max-w-xl`}
+                    className={`text-base md:text-lg lg:text-xl ${slide.textColor} opacity-90`}
                   >
                     {slide.description}
                   </p>
 
                   {/* Button */}
-                  <Button
-                    className="bg-white text-gray-900 rounded-full"
-                    asChild
+                  <div
+                    className={
+                      contentAlignment === "center"
+                        ? "flex justify-center"
+                        : contentAlignment === "right"
+                        ? "flex justify-end"
+                        : ""
+                    }
                   >
-                    <a href={slide.buttonLink}>
-                      {slide.buttonText}
-                      <Play className=" fill-current" />
-                    </a>
-                  </Button>
-
-                  {/* Stats or Features */}
-                  <div className="flex gap-8 pt-3">
-                    <div>
-                      <p className={`text-md font-bold ${slide.textColor}`}>
-                        5000+
-                      </p>
-                      <p className={`text-sm ${slide.textColor} opacity-80`}>
-                        Offres disponibles
-                      </p>
-                    </div>
-                    <div>
-                      <p className={`text-md font-bold ${slide.textColor}`}>
-                        98%
-                      </p>
-                      <p className={`text-sm ${slide.textColor} opacity-80`}>
-                        Clients satisfaits
-                      </p>
-                    </div>
-                    <div>
-                      <p className={`text-md font-bold ${slide.textColor}`}>
-                        24/7
-                      </p>
-                      <p className={`text-sm ${slide.textColor} opacity-80`}>
-                        Support client
-                      </p>
-                    </div>
+                    <Button
+                      className="bg-white text-gray-900 hover:bg-gray-100 rounded-full px-6 py-6 text-base"
+                      onClick={() => handleButtonClick(slide)}
+                      asChild={!onButtonClick}
+                    >
+                      {onButtonClick ? (
+                        <span className="flex items-center gap-2">
+                          {slide.buttonText}
+                          <Play className="w-4 h-4 fill-current" />
+                        </span>
+                      ) : (
+                        <a
+                          href={slide.buttonLink}
+                          className="flex items-center gap-2"
+                        >
+                          {slide.buttonText}
+                          <Play className="w-4 h-4 fill-current" />
+                        </a>
+                      )}
+                    </Button>
                   </div>
+
+                  {/* Stats */}
+                  {showStats && displayStats.length > 0 && (
+                    <div
+                      className={`flex gap-6 md:gap-8 pt-2 md:pt-4 ${
+                        contentAlignment === "center"
+                          ? "justify-center"
+                          : contentAlignment === "right"
+                          ? "justify-end"
+                          : ""
+                      }`}
+                    >
+                      {displayStats.map((stat, idx) => (
+                        <div key={idx}>
+                          <p
+                            className={`text-lg md:text-2xl font-bold ${slide.textColor}`}
+                          >
+                            {stat.value}
+                          </p>
+                          <p
+                            className={`text-xs md:text-sm ${slide.textColor} opacity-80`}
+                          >
+                            {stat.label}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -211,52 +343,80 @@ const Hero = () => {
       </div>
 
       {/* Navigation Arrows */}
-      <HStack className="absolute top-1 right-0">
-        <button
-          onClick={prevSlide}
-          className="p-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
-          aria-label="Slide précédent"
-        >
-          <ChevronLeft className="w-6 h-6 group-hover:scale-110 transition-transform" />
-        </button>
-
-        <button
-          onClick={nextSlide}
-          className="p-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
-          aria-label="Slide suivant"
-        >
-          <ChevronRight className="w-6 h-6 group-hover:scale-110 transition-transform" />
-        </button>
-        <button
-          onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-          className="p-1 ml-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
-          aria-label={isAutoPlaying ? "Pause" : "Play"}
-        >
-          {isAutoPlaying ? (
-            <div className="w-5 h-5 flex items-center justify-center">
-              <div className="w-1 h-4 bg-white rounded mr-1" />
-              <div className="w-1 h-4 bg-white rounded" />
-            </div>
+      {showArrows && (
+        <div className={getArrowsContainerClass()}>
+          {arrowsPosition === "center-sides" ||
+          arrowsPosition === "bottom-sides" ? (
+            <>
+              <button
+                onClick={prevSlide}
+                className="pointer-events-auto p-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
+                aria-label="Slide précédent"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button
+                onClick={nextSlide}
+                className="pointer-events-auto p-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
+                aria-label="Slide suivant"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </>
           ) : (
-            <Play className="w-5 h-5 fill-current" />
+            <HStack className="gap-2">
+              <button
+                onClick={prevSlide}
+                className="p-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
+                aria-label="Slide précédent"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={nextSlide}
+                className="p-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
+                aria-label="Slide suivant"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+              {showPlayPause && (
+                <button
+                  onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+                  className="p-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
+                  aria-label={isAutoPlaying ? "Pause" : "Play"}
+                >
+                  {isAutoPlaying ? (
+                    <div className="w-5 h-5 flex items-center justify-center">
+                      <div className="w-1 h-4 bg-white rounded mr-1" />
+                      <div className="w-1 h-4 bg-white rounded" />
+                    </div>
+                  ) : (
+                    <Play className="w-5 h-5 fill-current" />
+                  )}
+                </button>
+              )}
+            </HStack>
           )}
-        </button>
-      </HStack>
+        </div>
+      )}
+
       {/* Dots Indicators */}
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-3 z-10">
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToSlide(index)}
-            className={`transition-all ${
-              index === currentSlide
-                ? "w-6 h-2 bg-white rounded-full"
-                : "w-3 h-2 bg-white/50 rounded-full hover:bg-white/75"
-            }`}
-            aria-label={`Aller au slide ${index + 1}`}
-          />
-        ))}
-      </div>
+      {showDots && (
+        <div className={`${getDotsContainerClass()} flex gap-3 z-10`}>
+          {slides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={`transition-all ${
+                index === currentSlide
+                  ? "w-8 h-2 bg-white rounded-full"
+                  : "w-2 h-2 bg-white/50 rounded-full hover:bg-white/75"
+              }`}
+              aria-label={`Aller au slide ${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

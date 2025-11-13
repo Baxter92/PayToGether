@@ -1,12 +1,11 @@
-import { mockDeals } from "@/constants/data";
-import DealsList from "./components/DealsList";
+import { mockDeals, slides } from "@/constants/data";
 import Hero from "@/components/Hero";
 import Features from "./components/Features";
 
 export default function Home() {
   return (
     <div className="mx-auto">
-      <Hero />
+      <Hero slides={slides} />
       <Features />
     </div>
   );

@@ -110,3 +110,62 @@ export const features = [
     description: "Paiement sécurisé et garantie de satisfaction client",
   },
 ];
+
+export const slides = [
+  {
+    id: 1,
+    title: "Découvrez les Meilleurs Deals",
+    subtitle: "Jusqu'à 70% de réduction",
+    description:
+      "Restaurants, spa, activités et bien plus encore dans votre ville",
+    buttonText: "Explorer maintenant",
+    buttonLink: "/deals",
+    image:
+      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80",
+    gradient: "from-purple-600/50 to-pink-600/50",
+    textColor: "text-white",
+    badge: "Nouveauté",
+  },
+  {
+    id: 2,
+    title: "Bien-être & Détente",
+    subtitle: "Offres exclusives Spa",
+    description:
+      "Profitez d'un moment de relaxation avec nos offres spa et massage",
+    buttonText: "Voir les offres spa",
+    buttonLink: "/deals/spa",
+    image:
+      "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1200&q=80",
+    gradient: "from-teal-600/50 to-cyan-600/50",
+    textColor: "text-white",
+    badge: "Populaire",
+  },
+  {
+    id: 3,
+    title: "Saveurs Gastronomiques",
+    subtitle: "Restaurants étoilés à prix réduits",
+    description:
+      "Découvrez les meilleurs restaurants de votre ville à des prix imbattables",
+    buttonText: "Réserver une table",
+    buttonLink: "/deals/restaurants",
+    image:
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=80",
+    gradient: "from-orange-600/50 to-red-600/50",
+    textColor: "text-white",
+    badge: "Tendance",
+  },
+  {
+    id: 4,
+    title: "Activités & Loisirs",
+    subtitle: "Vivez des expériences uniques",
+    description:
+      "Sport, culture, aventure... Trouvez l'activité qui vous correspond",
+    buttonText: "Découvrir les activités",
+    buttonLink: "/deals/activities",
+    image:
+      "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=1200&q=80",
+    gradient: "from-blue-600/50 to-indigo-600/50",
+    textColor: "text-white",
+    badge: "Aventure",
+  },
+];
