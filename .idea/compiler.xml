@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="bff-configuration" />
+        <module name="bff-api" />
+        <module name="bff-provider" />
+        <module name="bff-wsclient" />
+        <module name="bff-core" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="bff-api" options="-parameters" />
+      <module name="bff-configuration" options="-parameters" />
+      <module name="bff-core" options="-parameters" />
+      <module name="bff-provider" options="-parameters" />
+      <module name="bff-wsclient" options="-parameters" />
+    </option>
+  </component>
+</project>
