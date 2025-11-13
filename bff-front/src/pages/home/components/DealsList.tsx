@@ -1,4 +1,4 @@
-import DealCard from "@/components/dealCard";
+import DealCard from "@/components/DealCard";
 
 interface DealsListProps {
   deals: any[];

@@ -1,6 +1,5 @@
 import { useI18n, type ILanguages } from "@/context/I18nContext";
 import React from "react";
-import { Button } from "./ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,7 +7,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+} from "../ui/dropdown-menu";
+import { Button } from "../ui/button";
+import { ChevronDown } from "lucide-react";
 
 export default function LanguageSelector() {
   const { changeLanguage, language, availableLanguages } = useI18n();
@@ -25,6 +26,7 @@ export default function LanguageSelector() {
             <span className="text-sm font-medium">
               {language.toUpperCase()}
             </span>
+            <ChevronDown className="w-4 h-4 " />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
