@@ -1,3 +1,4 @@
+import Grid from "@/components/Grid";
 import { features } from "@/constants/data";
 
 const Features = () => {
@@ -14,7 +15,7 @@ const Features = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <Grid cols={{ md: 2, lg: 4 }} gap="gap-8">
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
@@ -33,7 +34,7 @@ const Features = () => {
               </div>
             );
           })}
-        </div>
+        </Grid>
       </div>
     </section>
   );
