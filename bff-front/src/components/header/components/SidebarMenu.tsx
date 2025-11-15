@@ -1,11 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import {
   ChevronDown,
@@ -23,31 +17,161 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useAuth } from "@/context/AuthContext";
 import type { ICategory } from "../types";
+import VStack from "@/components/VStack";
+import { Dropdown } from "@/components/Dropdown";
 
-export type SidebarMenuProps = {
+export interface SidebarMenuProps {
+  // Compteurs
   favoritesCount?: number;
+  cartCount?: number;
+
+  // Localisation
   location?: string;
+  locations?: Array<{ label: string; value: string }>;
+  showLocationSelector?: boolean;
+  onLocationChange?: (location: string) => void;
+
+  // Catégories
   categories?: ICategory[];
-  setLocation?: (location: string) => void;
-};
+  showCategories?: boolean;
+
+  // Navigation links
+  profileLink?: string;
+  ordersLink?: string;
+  favoritesLink?: string;
+  settingsLink?: string;
+  loginLink?: string;
+  registerLink?: string;
+
+  // User info
+  userName?: string;
+  userEmail?: string;
+  userAvatar?: ReactNode;
+
+  // Callbacks
+  onLogout?: () => void;
+  onLoginClick?: () => void;
+  onRegisterClick?: () => void;
+
+  // Menu items personnalisés
+  customMenuItems?: Array<{
+    label: string;
+    icon?: ReactNode;
+    href?: string;
+    onClick?: () => void;
+  }>;
+
+  // Style
+  className?: string;
+  width?: string;
+  side?: "left" | "right";
+
+  // Textes personnalisables
+  texts?: {
+    myProfile?: string;
+    myOrders?: string;
+    myFavorites?: string;
+    settings?: string;
+    logout?: string;
+    login?: string;
+    register?: string;
+    yourCity?: string;
+    categories?: string;
+  };
+}
 
 const SidebarMenu = ({
-  favoritesCount,
-  location,
-  categories,
-  setLocation,
+  favoritesCount = 0,
+  cartCount = 0,
+  location = "Douala",
+  locations = [
+    { label: "Douala", value: "Douala" },
+    { label: "Yaoundé", value: "Yaoundé" },
+    { label: "Bafoussam", value: "Bafoussam" },
+    { label: "Garoua", value: "Garoua" },
+  ],
+  showLocationSelector = true,
+  onLocationChange,
+  categories = [],
+  showCategories = true,
+  profileLink = "/profile",
+  ordersLink = "/orders",
+  favoritesLink = "/favorites",
+  settingsLink = "/settings",
+  loginLink = "/login",
+  registerLink = "/register",
+  userName,
+  userEmail,
+  userAvatar,
+  onLogout,
+  onLoginClick,
+  onRegisterClick,
+  customMenuItems,
+  className = "",
+  width = "w-80",
+  side = "right",
+  texts = {
+    myProfile: "Mon profil",
+    myOrders: "Mes commandes",
+    myFavorites: "Mes favoris",
+    settings: "Paramètres",
+    logout: "Se déconnecter",
+    login: "Se connecter",
+    register: "S'inscrire",
+    yourCity: "Votre ville",
+    categories: "Catégories",
+  },
 }: SidebarMenuProps) => {
   const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await logout();
-    navigate("/login");
+    setMobileMenuOpen(false);
+    if (onLogout) {
+      onLogout();
+    } else {
+      await logout();
+      navigate(loginLink);
+    }
   };
+
+  const handleLogin = () => {
+    setMobileMenuOpen(false);
+    if (onLoginClick) {
+      onLoginClick();
+    } else {
+      navigate(loginLink);
+    }
+  };
+
+  const handleRegister = () => {
+    setMobileMenuOpen(false);
+    if (onRegisterClick) {
+      onRegisterClick();
+    } else {
+      navigate(registerLink);
+    }
+  };
+
+  const handleLocationSelect = (newLocation: string) => {
+    if (onLocationChange) {
+      onLocationChange(newLocation);
+    }
+  };
+
+  const closeMenu = () => setMobileMenuOpen(false);
+
+  // Avatar par défaut
+  const defaultAvatar = (
+    <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-teal-600 rounded-full flex items-center justify-center">
+      <User className="w-6 h-6 text-white" />
+    </div>
+  );
+
   return (
     <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
       <SheetTrigger asChild>
@@ -55,161 +179,154 @@ const SidebarMenu = ({
           <Menu className="w-6 h-6" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-80 overflow-y-auto p-2">
-        <div className="space-y-6">
-          {/* User Section */}
-          {!user ? (
-            <div className="pb-6 border-b">
+      <SheetContent
+        side={side}
+        className={`${width} overflow-y-auto p-6 ${className}`}
+      >
+        <VStack className="space-y-6">
+          {/* User Section - Si connecté */}
+          {user ? (
+            <div className="pb-6 border-b w-full">
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-12 h-12 bg-linear-to-br from-primary-500 to-teal-600 rounded-full flex items-center justify-center">
-                  <User className="w-6 h-6 text-white" />
-                </div>
+                {userAvatar || defaultAvatar}
                 <div>
-                  <p className="font-medium">John</p>
-                  <p className="text-sm text-gray-500">test@test.com</p>
+                  <p className="font-medium">
+                    {userName || user?.name || "Utilisateur"}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {userEmail || user?.email}
+                  </p>
                 </div>
               </div>
-              <div className="space-y-2">
+              <VStack className="space-y-2 w-full">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start"
-                  asChild
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <Link to="/profile">
-                    <User className="w-4 h-4 mr-2" />
-                    Mon profil
-                  </Link>
-                </Button>
+                  onClick={closeMenu}
+                  title={texts.myProfile}
+                  leftIcon={<User className="w-4 h-4" />}
+                />
                 <Button
                   variant="ghost"
-                  className="w-full justify-start"
-                  asChild
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <Link to="/orders">
-                    <ShoppingBag className="w-4 h-4 mr-2" />
-                    Mes commandes
-                  </Link>
-                </Button>
+                  onClick={closeMenu}
+                  title={texts.myOrders}
+                  leftIcon={<ShoppingBag className="w-4 h-4" />}
+                />
                 <Button
                   variant="ghost"
-                  className="w-full justify-start"
-                  asChild
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <Link to="/favorites">
-                    <Heart className="w-4 h-4 mr-2" />
-                    Mes favoris ({favoritesCount})
-                  </Link>
-                </Button>
-              </div>
+                  onClick={closeMenu}
+                  title={texts.myFavorites}
+                  leftIcon={<Heart className="w-4 h-4" />}
+                />
+              </VStack>
             </div>
           ) : (
-            <div className="pb-6 border-b space-y-2">
+            /* Login/Register - Si non connecté */
+            <VStack className="pb-6 border-b space-y-2 w-full mt-3">
               <Button
                 className="w-full bg-primary-600 hover:bg-primary-700"
-                asChild
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={handleRegister}
               >
-                <Link to="/register">S'inscrire</Link>
+                {texts.register}
               </Button>
               <Button
                 variant="outline"
                 className="w-full"
-                asChild
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={handleLogin}
               >
-                <Link to="/login">Se connecter</Link>
+                {texts.login}
               </Button>
-            </div>
+            </VStack>
           )}
 
-          {/* Location */}
-          <div className="pb-6 border-b">
-            <p className="text-sm font-medium text-gray-500 mb-3">
-              Votre ville
-            </p>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full justify-between">
-                  <div className="flex items-center">
-                    <MapPin className="w-4 h-4 text-primary-600 mr-2" />
-                    <span>{location}</span>
-                  </div>
-                  <ChevronDown className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-full">
-                <DropdownMenuItem onClick={() => setLocation?.("Douala")}>
-                  Douala
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLocation?.("Yaoundé")}>
-                  Yaoundé
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLocation?.("Bafoussam")}>
-                  Bafoussam
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLocation?.("Garoua")}>
-                  Garoua
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          {/* Location Selector */}
+          {showLocationSelector && (
+            <VStack className="pb-6 border-b w-full mt-3">
+              <p className="text-sm font-medium text-gray-500 mb-3">
+                {texts.yourCity}
+              </p>
+              <Dropdown
+                label={location}
+                items={locations.map((loc) => ({
+                  value: loc.value,
+                  label: loc.label,
+                  icon: <MapPin className="w-4 h-4 text-primary-600" />,
+                }))}
+              />
+            </VStack>
+          )}
 
           {/* Categories */}
-          <div className="pb-6 border-b">
-            <p className="text-sm font-medium text-gray-500 mb-3">Catégories</p>
-            <div className="space-y-2">
-              {categories &&
-                categories.map((category) => {
+          {showCategories && categories.length > 0 && (
+            <div className="pb-6 border-b">
+              <p className="text-sm font-medium text-gray-500 mb-3">
+                {texts.categories}
+              </p>
+              <div className="space-y-2">
+                {categories.map((category) => {
                   const Icon = category.icon;
                   return (
                     <Button
                       key={category.name}
                       variant="ghost"
                       className="w-full justify-start"
-                      asChild
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <Link to={category.href}>
+                      onClick={closeMenu}
+                      title={category.name}
+                      leftIcon={
                         <Icon className="w-4 h-4 mr-2 text-primary-600" />
-                        {category.name}
-                      </Link>
-                    </Button>
+                      }
+                    />
                   );
                 })}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Settings & Logout */}
-          {!user && (
+          {/* Custom Menu Items */}
+          {customMenuItems && customMenuItems.length > 0 && (
+            <div className="pb-6 border-b">
+              <div className="space-y-2">
+                {customMenuItems.map((item, index) => (
+                  <Button
+                    key={index}
+                    variant="ghost"
+                    className="w-full justify-start"
+                    title={item.label}
+                    leftIcon={item.icon}
+                    onClick={() => {
+                      closeMenu();
+                      if (item.onClick) item.onClick();
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Settings & Logout - Si connecté */}
+          {user && (
             <div className="space-y-2">
               <Button
                 variant="ghost"
                 className="w-full justify-start"
                 asChild
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={closeMenu}
               >
-                <Link to="/settings">
+                <Link to={settingsLink}>
                   <Settings className="w-4 h-4 mr-2" />
-                  Paramètres
+                  {texts.settings}
                 </Link>
               </Button>
               <Button
                 variant="ghost"
                 className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-                onClick={() => {
-                  handleLogout();
-                  setMobileMenuOpen(false);
-                }}
+                onClick={handleLogout}
               >
                 <LogOut className="w-4 h-4 mr-2" />
-                Se déconnecter
+                {texts.logout}
               </Button>
             </div>
           )}
-        </div>
+        </VStack>
       </SheetContent>
     </Sheet>
   );

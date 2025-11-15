@@ -1,21 +1,190 @@
-import * as React from "react"
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
-import { cn } from "@/lib/utils"
+type Size = "sm" | "md" | "lg";
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+export type InputProps = Omit<
+  React.ComponentPropsWithoutRef<"input">,
+  "size"
+> & {
+  label?: React.ReactNode;
+  helperText?: React.ReactNode;
+  error?: React.ReactNode;
+  loading?: boolean;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+  size?: Size;
+  inputClassName?: string;
+  labelClassName?: string;
+  wrapperClassName?: string;
+  helperClassName?: string;
+  errorClassName?: string;
+
+  /** NEW: Debounce delay in ms */
+  debounce?: number;
+};
+
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  (
+    {
+      id,
+      label,
+      helperText,
+      error,
+      loading = false,
+      leftIcon,
+      rightIcon,
+      size = "md",
+      labelClassName,
+      wrapperClassName,
+      helperClassName,
+      errorClassName,
+      disabled,
+      className,
+
+      debounce,
+      onChange,
+      ...props
+    },
+    ref
+  ) => {
+    const wouldBeDisabled = !!(disabled || loading || props.readOnly);
+
+    const inputId = id ?? React.useId();
+    const helperId = helperText ? `${inputId}-helper` : undefined;
+    const errorId = error ? `${inputId}-error` : undefined;
+    const describedBy =
+      [errorId, helperId].filter(Boolean).join(" ") || undefined;
+
+    const sizeClasses =
+      size === "sm"
+        ? "h-8 text-sm px-2"
+        : size === "lg"
+        ? "h-11 text-base px-4"
+        : "h-9 text-sm px-3";
+
+    // --- Debounce logic ---
+    const debounceTimer = React.useRef<number | null>(null);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (!debounce || !onChange) {
+        return onChange?.(e);
+      }
+
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+
+      const eventCopy = { ...e };
+
+      debounceTimer.current = setTimeout(() => {
+        onChange(eventCopy as any);
+      }, debounce);
+    };
+
+    return (
+      <div className={cn("flex flex-col", wrapperClassName)}>
+        {label && (
+          <label
+            htmlFor={inputId}
+            className={cn("mb-1 text-sm font-medium", labelClassName)}
+          >
+            {label}
+          </label>
+        )}
+
+        <div
+          className={cn(
+            "relative flex items-center rounded-md border bg-transparent transition-shadow",
+            error
+              ? "border-destructive/80 focus-within:ring-destructive/30"
+              : "border-input focus-within:ring-ring/30",
+            wouldBeDisabled ? "opacity-60 pointer-events-none" : "opacity-100",
+            size === "sm" ? "rounded-sm" : "rounded-md"
+          )}
+        >
+          {leftIcon && (
+            <span className="ml-2 mr-1 flex items-center text-muted-foreground">
+              {leftIcon}
+            </span>
+          )}
+
+          <input
+            id={inputId}
+            ref={ref}
+            className={cn(
+              "flex-1 bg-transparent outline-none placeholder:text-muted-foreground",
+              sizeClasses,
+              leftIcon ? "pl-1" : "",
+              rightIcon || loading ? "pr-10" : "",
+              className
+            )}
+            disabled={wouldBeDisabled}
+            aria-invalid={!!error || undefined}
+            aria-describedby={describedBy}
+            onChange={handleChange}
+            {...props}
+          />
+
+          <div className="absolute right-2 inline-flex items-center">
+            {loading ? (
+              <SpinnerSmall />
+            ) : rightIcon ? (
+              <span className="flex items-center text-muted-foreground">
+                {rightIcon}
+              </span>
+            ) : null}
+          </div>
+        </div>
+
+        {error || helperText ? (
+          <div className="mt-1 min-h-[1rem]">
+            {error ? (
+              <p
+                id={errorId}
+                className={cn("text-xs text-destructive", errorClassName)}
+              >
+                {error}
+              </p>
+            ) : helperText ? (
+              <p
+                id={helperId}
+                className={cn("text-xs text-muted-foreground", helperClassName)}
+              >
+                {helperText}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+);
+
+Input.displayName = "Input";
+
+function SpinnerSmall() {
   return (
-    <input
-      type={type}
-      data-slot="input"
-      className={cn(
-        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-        className
-      )}
-      {...props}
-    />
-  )
+    <svg
+      className="animate-spin h-4 w-4 text-current"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeOpacity="0.25"
+      />
+      <path
+        d="M22 12a10 10 0 00-10-10"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
 }
-
-export { Input }
