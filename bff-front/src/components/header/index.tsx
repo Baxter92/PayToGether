@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useI18n } from "@/context/I18nContext";
@@ -14,192 +14,340 @@ import {
   LogOut,
   Settings,
   ShoppingBag,
-  ChevronDown,
+  type LucideIcon,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import CategoriesBar from "./components/CategoriesBar";
-import type { ICategory } from "./types";
-import SearchBar from "./components/SearchBar";
 import SidebarMenu from "./components/SidebarMenu";
 import LanguageSelector from "../LanguageSelector";
+import { Dropdown } from "../Dropdown";
+import SearchBar from "./components/SearchBar";
 
-const Header = () => {
-  const { user, logout } = useAuth();
-  const { t } = useI18n();
-  const navigate = useNavigate();
-  const [location, setLocation] = useState("Douala");
+// Types pour les props du Header
+export interface HeaderProps {
+  // Configuration de base
+  appName?: string;
+  appLogo?: ReactNode;
 
-  // Nombre de favoris et panier (à remplacer par vos vraies données)
-  const favoritesCount = 3;
-  const cartCount = 2;
+  // Bannière promo
+  showPromoBanner?: boolean;
+  promoBannerText?: string;
+  promoBannerIcon?: LucideIcon;
+  promoBannerBgColor?: string;
 
-  const handleLogout = async () => {
-    await logout();
-    navigate("/login");
+  // Localisation
+  showLocationSelector?: boolean;
+  defaultLocation?: string;
+  locations?: Array<{ label: string; value: string }>;
+  onLocationChange?: (location: string) => void;
+
+  // Recherche
+  showSearchBar?: boolean;
+  searchPlaceholder?: string;
+  onSearch?: (query: string) => void;
+
+  // Navigation
+  showFavorites?: boolean;
+  favoritesCount?: number;
+  favoritesLink?: string;
+
+  showCart?: boolean;
+  cartCount?: number;
+  cartLink?: string;
+
+  // Catégories
+  categories?: Array<{
+    name: string;
+    icon: LucideIcon;
+    href: string;
+  }>;
+  showCategoriesBar?: boolean;
+
+  // Langue
+  showLanguageSelector?: boolean;
+
+  // Comportement sticky
+  sticky?: boolean;
+
+  // Styles personnalisés
+  className?: string;
+  headerBgColor?: string;
+  primaryColor?: string;
+
+  // Menu utilisateur personnalisé
+  customUserMenuItems?: Array<{
+    value: string;
+    label: string;
+    icon?: ReactNode;
+    onClick?: () => void;
+    href?: string;
+  }>;
+
+  // Callbacks
+  onLoginClick?: () => void;
+  onRegisterClick?: () => void;
+  onLogoutClick?: () => void;
+
+  // Textes personnalisables (i18n)
+  texts?: {
+    login?: string;
+    register?: string;
+    myAccount?: string;
+    myProfile?: string;
+    myOrders?: string;
+    myFavorites?: string;
+    settings?: string;
+    logout?: string;
   };
+}
 
-  const categories: ICategory[] = [
+const Header = ({
+  // Valeurs par défaut
+  appName = "PayToGether",
+  appLogo,
+  showPromoBanner = true,
+  promoBannerText = "Jusqu'à 70% de réduction sur les activités locales",
+  promoBannerIcon: PromoBannerIcon = Tag,
+  promoBannerBgColor = "bg-linear-to-r from-primary-500 to-teal-500",
+  showLocationSelector = true,
+  defaultLocation = "Douala",
+  locations = [
+    { label: "Douala", value: "Douala" },
+    { label: "Yaoundé", value: "Yaoundé" },
+    { label: "Bafoussam", value: "Bafoussam" },
+    { label: "Garoua", value: "Garoua" },
+  ],
+  onLocationChange,
+  showSearchBar = true,
+  searchPlaceholder,
+  onSearch,
+  showFavorites = true,
+  favoritesCount = 0,
+  favoritesLink = "/favorites",
+  showCart = true,
+  cartCount = 0,
+  cartLink = "/cart",
+  categories = [
     { name: "Restaurants", icon: Utensils, href: "/deals/restaurants" },
     { name: "Beauté & Spa", icon: Sparkles, href: "/deals/beauty" },
     { name: "Sport & Fitness", icon: Dumbbell, href: "/deals/fitness" },
     { name: "Cadeaux", icon: Gift, href: "/deals/gifts" },
     { name: "Shopping", icon: ShoppingBag, href: "/deals/shopping" },
+  ],
+  showCategoriesBar = true,
+  showLanguageSelector = true,
+  sticky = true,
+  className = "",
+  headerBgColor = "bg-white",
+  customUserMenuItems,
+  onLoginClick,
+  onRegisterClick,
+  onLogoutClick,
+  texts = {
+    login: "Se connecter",
+    register: "S'inscrire",
+    myAccount: "Mon compte",
+    myProfile: "Mon profil",
+    myOrders: "Mes commandes",
+    myFavorites: "Mes favoris",
+    settings: "Paramètres",
+    logout: "Se déconnecter",
+  },
+}: HeaderProps) => {
+  const { user, logout } = useAuth();
+  const { t } = useI18n();
+  const navigate = useNavigate();
+  const [location, setLocation] = useState(defaultLocation);
+
+  const handleLogout = async () => {
+    if (onLogoutClick) {
+      onLogoutClick();
+    } else {
+      await logout();
+      navigate("/login");
+    }
+  };
+
+  const handleLogin = () => {
+    if (onLoginClick) {
+      onLoginClick();
+    } else {
+      navigate("/login");
+    }
+  };
+
+  const handleRegister = () => {
+    if (onRegisterClick) {
+      onRegisterClick();
+    } else {
+      navigate("/register");
+    }
+  };
+
+  const handleLocationChange = (newLocation: string) => {
+    setLocation(newLocation);
+    if (onLocationChange) {
+      onLocationChange(newLocation);
+    }
+  };
+
+  // Menu utilisateur par défaut ou personnalisé
+  const userMenuItems = customUserMenuItems || [
+    {
+      value: "profile",
+      label: texts.myProfile || "Mon profil",
+      icon: <User className="w-4 h-4 mr-2" />,
+      onClick: () => navigate("/profile"),
+    },
+    {
+      value: "orders",
+      label: texts.myOrders || "Mes commandes",
+      icon: <ShoppingBag className="w-4 h-4 mr-2" />,
+      onClick: () => navigate("/orders"),
+    },
+    {
+      value: "favorites",
+      label: texts.myFavorites || "Mes favoris",
+      icon: <Heart className="w-4 h-4 mr-2" />,
+      onClick: () => navigate("/favorites"),
+    },
+    {
+      value: "settings",
+      label: texts.settings || "Paramètres",
+      icon: <Settings className="w-4 h-4 mr-2" />,
+      onClick: () => navigate("/settings"),
+    },
+    {
+      value: "logout",
+      label: texts.logout || "Se déconnecter",
+      icon: <LogOut className="w-4 h-4 mr-2" />,
+      onClick: handleLogout,
+    },
   ];
 
   return (
-    <header className="sm:sticky top-0 z-50 w-full border-b bg-white shadow-sm">
+    <header
+      className={`${
+        sticky ? "sm:sticky" : ""
+      } top-0 z-50 w-full border-b ${headerBgColor} shadow-sm ${className}`}
+    >
       {/* Top Bar - Promo Banner */}
-      <div className="bg-linear-to-r from-primary-500 to-teal-500 text-white py-2">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center text-sm font-medium">
-            <Tag className="w-4 h-4 mr-2" />
-            Jusqu'à 70% de réduction sur les activités locales
+      {showPromoBanner && (
+        <div className={`${promoBannerBgColor} text-white py-2`}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-center text-sm font-medium">
+              <PromoBannerIcon className="w-4 h-4 mr-2" />
+              {promoBannerText}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Main Header */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 shrink-0">
-            <span className="text-xl font-bold bg-linear-to-r from-primary-600 to-primary-900 bg-clip-text text-transparent">
-              PayToGether
-            </span>
+            {appLogo || (
+              <span className="text-xl font-bold bg-linear-to-r from-primary-600 to-primary-900 bg-clip-text text-transparent">
+                {appName}
+              </span>
+            )}
           </Link>
 
           {/* Location Selector - Desktop */}
-          <div className="hidden lg:flex items-center ml-6">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-2">
-                  <MapPin className="w-4 h-4 text-primary-600" />
-                  <span className="font-medium">{location}</span>
-                  <ChevronDown className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48">
-                <DropdownMenuLabel>Changer de ville</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setLocation("Douala")}>
-                  Douala
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLocation("Yaoundé")}>
-                  Yaoundé
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLocation("Bafoussam")}>
-                  Bafoussam
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setLocation("Garoua")}>
-                  Garoua
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          {showLocationSelector && (
+            <div className="hidden lg:flex items-center ml-6">
+              <Dropdown
+                label={
+                  <>
+                    <MapPin className="w-4 h-4 text-primary-600" />
+                    <span className="font-medium">{location}</span>
+                  </>
+                }
+                items={locations}
+                selectedValue={location}
+                onChange={handleLocationChange}
+                className="px-3"
+                triggerOptions={{
+                  variant: "ghost",
+                }}
+              />
+            </div>
+          )}
 
           {/* Search Bar - Desktop Only */}
-          <div className="hidden lg:flex flex-1 max-w-2xl  flex-col space-y-2 py-1">
-            <SearchBar />
-          </div>
+          {showSearchBar && (
+            <div className="hidden lg:flex flex-1 max-w-2xl flex-col">
+              <SearchBar placeholder={searchPlaceholder} onSearch={onSearch} />
+            </div>
+          )}
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-1">
+          <nav className="hidden lg:flex items-center space-x-4 mx-1">
             {/* Favorites */}
-            <Button variant="ghost" size="sm" className="relative" asChild>
-              <Link to="/favorites">
-                <Heart className="w-5 h-5" />
-                {favoritesCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500">
-                    {favoritesCount}
-                  </Badge>
-                )}
-              </Link>
-            </Button>
+            {showFavorites && (
+              <Button variant="ghost" size="sm" asChild>
+                <Link
+                  to={favoritesLink}
+                  className="inline-flex items-center relative"
+                >
+                  <Heart className="w-5 h-5" />
+                  {favoritesCount > 0 && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500 rounded-full"
+                    >
+                      {favoritesCount}
+                    </span>
+                  )}
+                </Link>
+              </Button>
+            )}
+
             {/* Cart */}
-            <Button variant="ghost" size="sm" className="relative" asChild>
-              <Link to="/cart">
-                <ShoppingBag className="w-5 h-5" />
-                {cartCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-primary-600">
-                    {cartCount}
-                  </Badge>
-                )}
-              </Link>
-            </Button>
+            {showCart && (
+              <Button variant="ghost" size="sm" asChild>
+                <Link to={cartLink} className="relative">
+                  <ShoppingBag className="w-5 h-5" />
+                  {cartCount > 0 && (
+                    <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-primary-600">
+                      {cartCount}
+                    </Badge>
+                  )}
+                </Link>
+              </Button>
+            )}
+
             {/* User Menu */}
             {!user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="ml-2">
+              <Dropdown
+                label={
+                  <>
                     <User className="w-5 h-5 mr-2" />
-                    <span className="hidden xl:inline">Mon compte</span>
-                    <ChevronDown className="w-4 h-4 ml-1" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>
-                    <div className="flex flex-col">
-                      <span className="font-medium">John</span>
-                      <span className="text-xs text-gray-500">
-                        test@test.com
-                      </span>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/profile" className="cursor-pointer">
-                      <User className="w-4 h-4 mr-2" />
-                      Mon profil
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/orders" className="cursor-pointer">
-                      <ShoppingBag className="w-4 h-4 mr-2" />
-                      Mes commandes
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/favorites" className="cursor-pointer">
-                      <Heart className="w-4 h-4 mr-2" />
-                      Mes favoris
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/settings" className="cursor-pointer">
-                      <Settings className="w-4 h-4 mr-2" />
-                      Paramètres
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={handleLogout}
-                    className="cursor-pointer text-red-600"
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Se déconnecter
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <span className="hidden xl:inline">
+                      {texts.myAccount || "Mon compte"}
+                    </span>
+                  </>
+                }
+                contentClassName="w-56"
+                triggerOptions={{
+                  variant: "ghost",
+                }}
+                items={userMenuItems}
+              />
             ) : (
               <div className="flex items-center space-x-2 ml-2">
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/login">Se connecter</Link>
+                <Button variant="ghost" size="sm" onClick={handleLogin}>
+                  {texts.login || "Se connecter"}
                 </Button>
                 <Button
                   size="sm"
                   className="bg-primary-600 hover:bg-primary-700"
-                  asChild
+                  onClick={handleRegister}
                 >
-                  <Link to="/register">S'inscrire</Link>
+                  {texts.register || "S'inscrire"}
                 </Button>
               </div>
             )}
@@ -208,47 +356,57 @@ const Header = () => {
           {/* Mobile Menu Button */}
           <div className="flex lg:hidden items-center space-x-2">
             {/* Mobile Cart */}
-            <Button variant="ghost" size="icon" className="relative" asChild>
-              <Link to="/cart">
-                <ShoppingBag className="w-5 h-5" />
-                {cartCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-primary-600">
-                    {cartCount}
-                  </Badge>
-                )}
-              </Link>
-            </Button>
+            {showCart && (
+              <Button variant="ghost" size="icon" className="relative" asChild>
+                <Link to={cartLink}>
+                  <ShoppingBag className="w-5 h-5" />
+                  {cartCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-primary-600">
+                      {cartCount}
+                    </Badge>
+                  )}
+                </Link>
+              </Button>
+            )}
 
             {/* Language Selector - Mobile Only */}
-            <div className="flex">
-              <LanguageSelector />
-            </div>
+            {showLanguageSelector && (
+              <div className="flex">
+                <LanguageSelector />
+              </div>
+            )}
 
             {/* Mobile Menu */}
             <SidebarMenu
               categories={categories}
               location={location}
-              setLocation={setLocation}
+              onLocationChange={handleLocationChange}
               favoritesCount={favoritesCount}
             />
           </div>
 
           {/* Language Selector - Desktop Only */}
-          <div className="hidden lg:flex ml-4">
-            <LanguageSelector />
-          </div>
+          {showLanguageSelector && (
+            <div className="hidden lg:flex ml-4">
+              <LanguageSelector />
+            </div>
+          )}
         </div>
 
         {/* Search Bar - Mobile Only */}
-        <div className="lg:hidden">
-          <SearchBar />
-        </div>
+        {showSearchBar && (
+          <div className="lg:hidden">
+            <SearchBar placeholder={searchPlaceholder} onSearch={onSearch} />
+          </div>
+        )}
       </div>
 
       {/* Categories Bar - Desktop Only */}
-      <div className="hidden lg:block border-t bg-gray-50">
-        <CategoriesBar categories={categories} />
-      </div>
+      {showCategoriesBar && (
+        <div className="hidden lg:block border-t bg-gray-50">
+          <CategoriesBar categories={categories} />
+        </div>
+      )}
     </header>
   );
 };

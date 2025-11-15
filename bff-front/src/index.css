@@ -10,6 +10,7 @@
   --radius-xl: calc(var(--radius) + 4px);
 
   /* <CHANGE> Ajout des variations de couleurs primaires (100-900) */
+  --color-primary: oklch(0.75 0.15 230);
   --color-primary-50: oklch(0.97 0.05 230);
   --color-primary-100: oklch(0.94 0.08 230);
   --color-primary-200: oklch(0.88 0.12 230);
@@ -23,6 +24,7 @@
   --color-primary-900: oklch(0.48 0.09 230);
 
   /* <CHANGE> Ajout des variations de couleurs secondaires (100-900) */
+  --color-secondary: oklch(0.97 0.01 230);
   --color-secondary-50: oklch(0.99 0.003 230);
   --color-secondary-100: oklch(0.98 0.005 230);
   --color-secondary-200: oklch(0.97 0.008 230);
@@ -36,6 +38,7 @@
   --color-secondary-900: oklch(0.22 0.03 250);
 
   /* <CHANGE> Ajout des variations de couleurs accent (100-900) */
+  --color-accent: oklch(0.85 0.18 85);
   --color-accent-50: oklch(0.98 0.05 85);
   --color-accent-100: oklch(0.97 0.08 85);
   --color-accent-200: oklch(0.95 0.12 85);
@@ -49,6 +52,7 @@
   --color-accent-900: oklch(0.52 0.12 85);
 
   /* <CHANGE> Ajout des variations de couleurs destructives (100-900) */
+  --color-destructive: oklch(0.65 0.24 25);
   --color-destructive-50: oklch(0.95 0.08 25);
   --color-destructive-100: oklch(0.92 0.12 25);
   --color-destructive-200: oklch(0.88 0.16 25);
