@@ -31,10 +31,7 @@ export interface HeaderProps {
   appLogo?: ReactNode;
 
   // Bannière promo
-  showPromoBanner?: boolean;
-  promoBannerText?: string;
-  promoBannerIcon?: LucideIcon;
-  promoBannerBgColor?: string;
+  topBanner?: ReactNode;
 
   // Localisation
   showLocationSelector?: boolean;
@@ -106,18 +103,10 @@ const Header = ({
   // Valeurs par défaut
   appName = "PayToGether",
   appLogo,
-  showPromoBanner = true,
-  promoBannerText = "Jusqu'à 70% de réduction sur les activités locales",
-  promoBannerIcon: PromoBannerIcon = Tag,
-  promoBannerBgColor = "bg-linear-to-r from-primary-500 to-teal-500",
+  topBanner,
   showLocationSelector = true,
   defaultLocation = "Douala",
-  locations = [
-    { label: "Douala", value: "Douala" },
-    { label: "Yaoundé", value: "Yaoundé" },
-    { label: "Bafoussam", value: "Bafoussam" },
-    { label: "Garoua", value: "Garoua" },
-  ],
+  locations = [],
   onLocationChange,
   showSearchBar = true,
   searchPlaceholder,
@@ -128,13 +117,7 @@ const Header = ({
   showCart = true,
   cartCount = 0,
   cartLink = "/cart",
-  categories = [
-    { name: "Restaurants", icon: Utensils, href: "/deals/restaurants" },
-    { name: "Beauté & Spa", icon: Sparkles, href: "/deals/beauty" },
-    { name: "Sport & Fitness", icon: Dumbbell, href: "/deals/fitness" },
-    { name: "Cadeaux", icon: Gift, href: "/deals/gifts" },
-    { name: "Shopping", icon: ShoppingBag, href: "/deals/shopping" },
-  ],
+  categories = [],
   showCategoriesBar = true,
   showLanguageSelector = true,
   sticky = true,
@@ -233,16 +216,7 @@ const Header = ({
       } top-0 z-50 w-full border-b ${headerBgColor} shadow-sm ${className}`}
     >
       {/* Top Bar - Promo Banner */}
-      {showPromoBanner && (
-        <div className={`${promoBannerBgColor} text-white py-2`}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-center text-sm font-medium">
-              <PromoBannerIcon className="w-4 h-4 mr-2" />
-              {promoBannerText}
-            </div>
-          </div>
-        </div>
-      )}
+      {topBanner}
 
       {/* Main Header */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
