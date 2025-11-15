@@ -19,11 +19,11 @@ export type InputProps = Omit<
   wrapperClassName?: string;
   helperClassName?: string;
   errorClassName?: string;
+
+  /** NEW: Debounce delay in ms */
+  debounce?: number;
 };
 
-/**
- * Input component with label, helper, error, icons and loading state.
- */
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (
     {
@@ -41,6 +41,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       errorClassName,
       disabled,
       className,
+
+      debounce,
+      onChange,
       ...props
     },
     ref
@@ -58,7 +61,26 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         ? "h-8 text-sm px-2"
         : size === "lg"
         ? "h-11 text-base px-4"
-        : "h-9 text-sm px-3"; // md
+        : "h-9 text-sm px-3";
+
+    // --- Debounce logic ---
+    const debounceTimer = React.useRef<number | null>(null);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (!debounce || !onChange) {
+        return onChange?.(e);
+      }
+
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+
+      const eventCopy = { ...e };
+
+      debounceTimer.current = setTimeout(() => {
+        onChange(eventCopy as any);
+      }, debounce);
+    };
 
     return (
       <div className={cn("flex flex-col", wrapperClassName)}>
@@ -74,7 +96,6 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         <div
           className={cn(
             "relative flex items-center rounded-md border bg-transparent transition-shadow",
-            // border color depends on error state
             error
               ? "border-destructive/80 focus-within:ring-destructive/30"
               : "border-input focus-within:ring-ring/30",
@@ -82,21 +103,18 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             size === "sm" ? "rounded-sm" : "rounded-md"
           )}
         >
-          {/* Left icon */}
-          {leftIcon ? (
+          {leftIcon && (
             <span className="ml-2 mr-1 flex items-center text-muted-foreground">
               {leftIcon}
             </span>
-          ) : null}
+          )}
 
-          {/* Input */}
           <input
             id={inputId}
             ref={ref}
             className={cn(
               "flex-1 bg-transparent outline-none placeholder:text-muted-foreground",
               sizeClasses,
-              // ensure padding-left if leftIcon present, padding-right if rightIcon/loading present
               leftIcon ? "pl-1" : "",
               rightIcon || loading ? "pr-10" : "",
               className
@@ -104,10 +122,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             disabled={wouldBeDisabled}
             aria-invalid={!!error || undefined}
             aria-describedby={describedBy}
+            onChange={handleChange}
             {...props}
           />
 
-          {/* Right area: loading spinner OR rightIcon */}
           <div className="absolute right-2 inline-flex items-center">
             {loading ? (
               <SpinnerSmall />
@@ -119,7 +137,6 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           </div>
         </div>
 
-        {/* helper / error */}
         {error || helperText ? (
           <div className="mt-1 min-h-[1rem]">
             {error ? (
@@ -146,7 +163,6 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
 Input.displayName = "Input";
 
-/* Small spinner used for loading */
 function SpinnerSmall() {
   return (
     <svg

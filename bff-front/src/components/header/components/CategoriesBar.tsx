@@ -156,13 +156,10 @@ const CategoriesBar = ({
         {/* Dropdown "Toutes les catégories" */}
         {showDropdown && (
           <Dropdown
-            label={
-              <Button
-                leftIcon={dropdownIcon || defaultDropdownIcon}
-                title={dropdownLabel || texts.allCategories}
-                variant="ghost"
-              />
-            }
+            label={dropdownLabel || texts.allCategories}
+            triggerOptions={{
+              leftIcon: dropdownIcon || defaultDropdownIcon,
+            }}
             items={categories.map((category) =>
               defaultRenderDropdownItem(category)
             )}
