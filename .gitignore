@@ -34,7 +34,5 @@ bff-core/target/
 bff-configuration/target/
 bff-front/node_modules/
 bff-front/node/
-#Compiled JavaScript files
-*.js
 #Compiled JavaScript map files
 *.js.map
