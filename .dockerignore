@@ -1,0 +1,10 @@
+# Patterns to exclude from docker build context
+target/
+**/target/
+node/
+.vscode/
+.idea/
+*.log
+*.tmp
+*.jar
+**/*.iml
