@@ -5,7 +5,7 @@ import {
   PaginationNext,
   PaginationPrevious,
   PaginationEllipsis,
-} from "@/components/ui/pagination";
+} from "@components/ui/pagination";
 import { Button } from "../ui/button";
 import { cn } from "@/common/lib/utils";
 
@@ -22,7 +22,7 @@ export type PaginationProps = {
   totalItems?: number;
 };
 
-export function Pagination({
+export default function Pagination({
   page,
   totalPages,
   onChange,

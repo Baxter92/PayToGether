@@ -8,3 +8,4 @@ export { default as Radio } from "./Radio";
 export { default as CheckboxGroup } from "./CheckboxGroup";
 export { default as Checkbox } from "./Checkbox";
 export { default as Textarea } from "./Textarea";
+export { default as Pagination } from "./Pagination";

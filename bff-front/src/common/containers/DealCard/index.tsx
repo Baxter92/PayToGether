@@ -5,23 +5,26 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../ui/card";
+} from "@components/ui/card";
 import type { IDealCardProps } from "./type";
-import { Button } from "../ui/button";
-import { Progress } from "../ui/progress";
+import { Button } from "@components/ui/button";
+import { Progress } from "@components/ui/progress";
+import type { JSX } from "react";
 
-export default function DealCard({ deal }: IDealCardProps) {
+export default function DealCard({ deal }: IDealCardProps): JSX.Element {
   const percentage = (deal.sold / deal.total) * 100;
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col p-0">
       {/* Image Container */}
-      <CardHeader className="relative w-full h-48 bg-muted p-0">
-        <img
-          src={deal.image || "/placeholder.svg"}
-          alt={deal.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-        />
+      <CardHeader className="relative w-full h-48 bg-muted p-0 overflow-hidden">
+        <div className="w-full h-full overflow-hidden">
+          <img
+            src={deal.image || "/placeholder.svg"}
+            alt={deal.title}
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+          />
+        </div>
         {/* Discount Badge */}
         <div className="absolute top-3 right-3 bg-primary-500 text-primary-foreground px-3 py-1 rounded-full text-sm font-bold">
           -{deal.discount}%

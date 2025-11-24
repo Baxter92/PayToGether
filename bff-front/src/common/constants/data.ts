@@ -4,7 +4,7 @@ export const mockDeals = [
   {
     id: 1,
     title: "Massage Premium Spa",
-    image: "/spa-massage-luxe.jpg",
+    image: "https://picsum.photos/200",
     originalPrice: 150,
     groupPrice: 75,
     unit: "séance",
@@ -18,7 +18,7 @@ export const mockDeals = [
   {
     id: 2,
     title: "Restaurant Gastronomique",
-    image: "/restaurant-gastronomique-diner.jpg",
+    image: "https://picsum.photos/700",
     originalPrice: 85,
     groupPrice: 49,
     unit: "menu",
@@ -32,7 +32,7 @@ export const mockDeals = [
   {
     id: 3,
     title: "Cours de Yoga",
-    image: "/yoga-course-wellness.jpg",
+    image: "https://picsum.photos/600",
     originalPrice: 40,
     groupPrice: 24,
     unit: "mois",
@@ -46,7 +46,7 @@ export const mockDeals = [
   {
     id: 4,
     title: "Gadgets Tech Premium",
-    image: "/tech-gadgets-electronics.jpg",
+    image: "https://picsum.photos/500",
     originalPrice: 199,
     groupPrice: 129,
     unit: "unité",
@@ -60,7 +60,7 @@ export const mockDeals = [
   {
     id: 5,
     title: "Formation Digital Marketing",
-    image: "/digital-marketing-training.jpg",
+    image: "https://picsum.photos/300",
     originalPrice: 299,
     groupPrice: 149,
     unit: "cours",
@@ -74,7 +74,7 @@ export const mockDeals = [
   {
     id: 6,
     title: "Accessoires Fashion",
-    image: "/fashion-accessories-luxury.jpg",
+    image: "https://picsum.photos/400",
     originalPrice: 120,
     groupPrice: 59,
     unit: "article",

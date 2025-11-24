@@ -2,7 +2,7 @@ import * as React from "react";
 import { cn } from "@lib/utils";
 
 type IBreakpoint = "base" | "sm" | "md" | "lg" | "xl";
-type IColsProp = Partial<Record<IBreakpoint, number>>;
+export type IColsProp = Partial<Record<IBreakpoint, number>>;
 
 export type IGridProps = {
   cols?: IColsProp;
