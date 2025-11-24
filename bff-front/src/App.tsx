@@ -1,16 +1,12 @@
-import { useState } from "react";
-import { useI18n } from "./context/I18nContext";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider } from "./common/context/AuthContext";
 import { ProtectedRoutes } from "./routing/ProtectedRoutes";
 import Login from "./pages/auth/Login";
 import Home from "./pages/home";
-import { MainLayout } from "./layouts/MainLayout";
+import { MainLayout } from "./common/layouts/MainLayout";
+import type { JSX } from "react";
 
-function App() {
-  const [count, setCount] = useState(0);
-  const { t } = useI18n();
-
+function App(): JSX.Element {
   return (
     <BrowserRouter>
       <AuthProvider>

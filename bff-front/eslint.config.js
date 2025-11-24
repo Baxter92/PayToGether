@@ -30,7 +30,7 @@ export default tseslint.config(
       languageOptions: {
         parser: tseslint.parser,
         parserOptions: {
-          project: ["./tsconfig.json"],
+          project: ["./tsconfig.app.json", "./tsconfig.node.json"],
           ecmaFeatures: { jsx: true },
         },
         globals: {

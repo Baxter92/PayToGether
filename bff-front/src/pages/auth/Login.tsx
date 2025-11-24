@@ -1,4 +1,4 @@
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/common/context/AuthContext";
 import { Eye, EyeOff, Lock, LogIn, Mail, UserCircle } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";

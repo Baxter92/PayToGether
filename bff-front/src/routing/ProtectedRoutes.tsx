@@ -1,4 +1,4 @@
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/common/context/AuthContext";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 export type ProtectedRouteProps = {
