@@ -1,7 +1,7 @@
 export { default as LanguageSelector } from "./LanguageSelector";
 export { default as Hero } from "../containers/Hero";
 export { default as VStack } from "./VStack";
-export { default as HStack } from "./VStack";
+export { default as HStack } from "./HStack";
 export { default as Select } from "./Select";
 export { default as RadioGroup } from "./RadioGroup";
 export { default as Radio } from "./Radio";

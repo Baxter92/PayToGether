@@ -10,16 +10,12 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
-        outline:
-          "border bg-background shadow-xs hover:bg-secondary hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost:
-          "hover:bg-secondary hover:text-accent-foreground dark:hover:bg-secondary/50",
-        link: "text-primary underline-offset-4 hover:underline",
+        default: "",
+        destructive: "",
+        outline: "",
+        secondary: "",
+        ghost: "",
+        link: "",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
@@ -29,10 +25,108 @@ const buttonVariants = cva(
         "icon-sm": "size-8",
         "icon-lg": "size-10",
       },
+      colorScheme: {
+        default: "",
+        danger: "",
+        info: "",
+        warning: "",
+        success: "",
+        secondary: "",
+      },
     },
+
+    compoundVariants: [
+      // ---- DEFAULT ----
+      {
+        variant: "default",
+        colorScheme: "default",
+        class: "bg-primary text-primary-foreground hover:bg-primary/90",
+      },
+      {
+        variant: "default",
+        colorScheme: "danger",
+        class:
+          "bg-destructive text-white hover:bg-destructive/90 dark:bg-destructive/60",
+      },
+      {
+        variant: "default",
+        colorScheme: "info",
+        class: "bg-blue-500 text-blue-foreground hover:bg-blue-500/90",
+      },
+      {
+        variant: "default",
+        colorScheme: "warning",
+        class: "bg-amber-500 text-amber-foreground hover:bg-amber-500/90",
+      },
+      {
+        variant: "default",
+        colorScheme: "success",
+        class: "bg-green-500 text-green-foreground hover:bg-green-500/90",
+      },
+
+      // ---- OUTLINE ----
+      {
+        variant: "outline",
+        colorScheme: "default",
+        class:
+          "border bg-background shadow-xs hover:bg-secondary dark:bg-input/30 dark:border-input",
+      },
+      {
+        variant: "outline",
+        colorScheme: "danger",
+        class:
+          "border border-destructive text-destructive hover:bg-destructive/10",
+      },
+      {
+        variant: "outline",
+        colorScheme: "info",
+        class: "border border-blue-500 text-blue-600 hover:bg-blue-50",
+      },
+      {
+        variant: "outline",
+        colorScheme: "success",
+        class: "border border-green-500 text-green-600 hover:bg-green-50",
+      },
+
+      // ---- GHOST ----
+      {
+        variant: "ghost",
+        colorScheme: "default",
+        class: "hover:bg-secondary dark:hover:bg-secondary/50",
+      },
+      {
+        variant: "ghost",
+        colorScheme: "danger",
+        class: "text-destructive hover:bg-destructive/10",
+      },
+      {
+        variant: "ghost",
+        colorScheme: "info",
+        class: "text-blue-600 hover:bg-blue-50",
+      },
+      {
+        variant: "ghost",
+        colorScheme: "success",
+        class: "text-green-600 hover:bg-green-50",
+      },
+
+      // ---- LINK ----
+      {
+        variant: "link",
+        colorScheme: "default",
+        class: "text-primary underline-offset-4 hover:underline",
+      },
+      {
+        variant: "link",
+        colorScheme: "danger",
+        class: "text-destructive underline-offset-4 hover:underline",
+      },
+    ],
+
     defaultVariants: {
       variant: "default",
       size: "default",
+      colorScheme: "default",
     },
   }
 );
@@ -45,6 +139,13 @@ export type IButtonProps = React.ComponentProps<"button"> &
     loading?: boolean;
     leftIcon?: React.ReactNode;
     rightIcon?: React.ReactNode;
+    colorScheme?:
+      | "default"
+      | "danger"
+      | "info"
+      | "warning"
+      | "success"
+      | "secondary";
   };
 
 function Button({
@@ -58,6 +159,7 @@ function Button({
   loading = false,
   leftIcon,
   rightIcon,
+  colorScheme = "default",
   ...props
 }: IButtonProps) {
   const Comp: any = asChild ? Slot : "button";
@@ -98,7 +200,9 @@ function Button({
       ) : null}
 
       {/* texte / enfants */}
-      <span className="inline-flex items-center">{children ?? title}</span>
+      {children || title ? (
+        <span className="inline-flex items-center">{children ?? title}</span>
+      ) : null}
 
       {/* right icon (hidden when loading) */}
       {!loading && rightIcon ? (
@@ -110,7 +214,7 @@ function Button({
   const buttonElement = (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, colorScheme, className }))}
       {...props}
       disabled={isDisabled}
       aria-disabled={isDisabled}

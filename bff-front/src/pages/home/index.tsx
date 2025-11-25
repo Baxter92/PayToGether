@@ -26,7 +26,9 @@ export default function Home(): JSX.Element {
           showPagination={false}
           itemsPerPage={4}
         />
+      </VStack>
 
+      <VStack spacing={10} className="bg-muted/30 py-8 max-w-7xl mx-auto px-4">
         <Heading
           title="Populaire sur PayToGether"
           level={2}
@@ -40,7 +42,8 @@ export default function Home(): JSX.Element {
           showPagination={false}
           itemsPerPage={4}
         />
-
+      </VStack>
+      <VStack spacing={10} className="py-8 max-w-7xl mx-auto px-4">
         <Heading
           title="Tellement d'économies... Parcourez-les toutes !"
           level={3}

@@ -5,10 +5,13 @@ import Login from "./pages/auth/Login";
 import Home from "./pages/home";
 import { MainLayout } from "./common/layouts/MainLayout";
 import type { JSX } from "react";
+import DealDetail from "./pages/dealDetail";
+import ScrollToTop from "@utils/ScrollToTop";
 
 function App(): JSX.Element {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AuthProvider>
         <Routes>
           {/* Routes publiques avec AuthLayout */}
@@ -20,8 +23,7 @@ function App(): JSX.Element {
           <Route element={<ProtectedRoutes />}>
             <Route element={<MainLayout />}>
               <Route path="/" element={<Home />} />
-              <Route path="/dashboard" element={<div>Dashboard</div>} />
-              <Route path="/profile" element={<div>Profile</div>} />
+              <Route path="/deals/:id" element={<DealDetail />} />
             </Route>
           </Route>
 

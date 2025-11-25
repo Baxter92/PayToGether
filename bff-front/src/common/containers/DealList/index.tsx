@@ -287,16 +287,16 @@ export default function DealsList({
   );
 
   return (
-    <section className={cn("py-8", className)}>
+    <section className={cn("", className)}>
       <VStack spacing={8}>
         {/* Header */}
         <HStack justify="between">
-          <HStack spacing={8} align="center">
+          {/* <HStack spacing={8} align="center">
             <h2 className="text-2xl font-semibold">Offres</h2>
             <span className="text-sm text-muted-foreground">
               {totalItems} résultats
             </span>
-          </HStack>
+          </HStack> */}
 
           {/* Mobile: bottom sheet trigger */}
           <div className="md:hidden">
