@@ -2,13 +2,19 @@ import React, { useEffect, useMemo, useState, useRef } from "react";
 import Grid, { type IColsProp } from "@components/Grid";
 import DealCard from "../DealCard";
 import Pagination from "@components/Pagination";
-import { Search, Filter, X, Sliders } from "lucide-react";
+import { X, Sliders } from "lucide-react";
 import { cn } from "@lib/utils";
+import Form, { type IFieldConfig } from "@containers/Form";
+import { z } from "zod";
+import VStack from "@components/VStack";
+import HStack from "@components/HStack";
+import { Button } from "@/common/components/ui/button";
 
 /** Déclare le type de filtre */
 interface DealFilters {
   category?: string;
-  priceRange?: [number, number];
+  priceMin?: number;
+  priceMax?: number;
   city?: string;
   status?: string;
   searchQuery?: string;
@@ -72,219 +78,21 @@ function MobileFilterSheet({
         )}
         style={{ minHeight: "40vh", maxHeight: "90vh", overflow: "auto" }}
       >
-        <div className="flex items-center justify-between p-4 border-b">
+        <HStack className="items-center justify-between p-4 border-b">
           <h3 className="text-lg font-semibold">{title}</h3>
           <button onClick={onClose} aria-label="Fermer" className="p-2">
             <X className="w-5 h-5" />
           </button>
-        </div>
+        </HStack>
         <div className="p-4">{children}</div>
       </div>
     </>
   );
 }
 
-/** Small filter row control components */
-function SelectField({
-  label,
-  value,
-  onChange,
-  options,
-}: {
-  label?: string;
-  value?: string;
-  onChange: (v: string) => void;
-  options: { value: string; label: string }[];
-}) {
-  return (
-    <div className="mb-3">
-      {label && (
-        <label className="block text-xs text-muted-foreground mb-1">
-          {label}
-        </label>
-      )}
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded border px-3 py-2 bg-transparent"
-      >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-}
-
-function RangeField({
-  label,
-  min,
-  max,
-  value,
-  onChange,
-}: {
-  label?: string;
-  min: number;
-  max: number;
-  value: [number, number];
-  onChange: (v: [number, number]) => void;
-}) {
-  const [a, b] = value;
-  return (
-    <div className="mb-3">
-      {label && (
-        <label className="block text-xs text-muted-foreground mb-1">
-          {label}
-        </label>
-      )}
-      <div className="flex gap-2 items-center">
-        <input
-          type="number"
-          min={min}
-          max={max}
-          value={a}
-          onChange={(e) =>
-            onChange([Math.min(Number(e.target.value) || min, b), b])
-          }
-          className="w-1/2 rounded border px-2 py-1"
-        />
-        <span className="text-sm text-muted-foreground">—</span>
-        <input
-          type="number"
-          min={min}
-          max={max}
-          value={b}
-          onChange={(e) =>
-            onChange([a, Math.max(Number(e.target.value) || max, a)])
-          }
-          className="w-1/2 rounded border px-2 py-1"
-        />
-      </div>
-      <div className="text-xs text-muted-foreground mt-1">
-        Min: {min} — Max: {max}
-      </div>
-    </div>
-  );
-}
-
-/** The Filters Panel (used both in sidebar & sheet) */
-function FiltersPanel({
-  filters,
-  setFilters,
-  availableFilters,
-  onReset,
-}: {
-  filters: DealFilters;
-  setFilters: (f: DealFilters) => void;
-  availableFilters: ("category" | "price" | "city" | "status" | "search")[];
-  onReset: () => void;
-}) {
-  // Replace these by real options from your API if available
-  const categories = [
-    { value: "all", label: "Toutes les catégories" },
-    { value: "clim", label: "Climatiseurs" },
-    { value: "ventilo", label: "Ventilateurs" },
-  ];
-  const cities = [
-    { value: "all", label: "Toutes les villes" },
-    { value: "yaounde", label: "Yaoundé" },
-    { value: "douala", label: "Douala" },
-  ];
-  const statuses = [
-    { value: "all", label: "Tous" },
-    { value: "active", label: "Actif" },
-    { value: "soldout", label: "Épuisé" },
-  ];
-
-  return (
-    <div>
-      {/* Search */}
-      {availableFilters.includes("search") && (
-        <div className="mb-4">
-          <label className="text-xs text-muted-foreground mb-2 block">
-            Rechercher
-          </label>
-          <div className="flex items-center gap-2">
-            <Search className="w-4 h-4 text-muted-foreground" />
-            <input
-              type="search"
-              value={filters.searchQuery || ""}
-              onChange={(e) =>
-                setFilters({ ...filters, searchQuery: e.target.value })
-              }
-              placeholder="Chercher un produit..."
-              className="flex-1 rounded border px-3 py-2 bg-transparent"
-            />
-            <button
-              onClick={() => setFilters({ ...filters, searchQuery: "" })}
-              className="px-3 py-2 text-sm text-muted-foreground"
-              aria-label="Clear search"
-            >
-              Effacer
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Category */}
-      {availableFilters.includes("category") && (
-        <SelectField
-          label="Catégorie"
-          value={filters.category ?? "all"}
-          onChange={(v) => setFilters({ ...filters, category: v })}
-          options={categories}
-        />
-      )}
-
-      {/* City */}
-      {availableFilters.includes("city") && (
-        <SelectField
-          label="Ville"
-          value={filters.city ?? "all"}
-          onChange={(v) => setFilters({ ...filters, city: v })}
-          options={cities}
-        />
-      )}
-
-      {/* Status */}
-      {availableFilters.includes("status") && (
-        <SelectField
-          label="Etat"
-          value={filters.status ?? "all"}
-          onChange={(v) => setFilters({ ...filters, status: v })}
-          options={statuses}
-        />
-      )}
-
-      {/* Price */}
-      {availableFilters.includes("price") && (
-        <RangeField
-          label="Prix (€)"
-          min={0}
-          max={5000}
-          value={filters.priceRange ?? [0, 300]}
-          onChange={(v) => setFilters({ ...filters, priceRange: v })}
-        />
-      )}
-
-      <div className="flex items-center gap-2 mt-4">
-        <button
-          onClick={() => onReset()}
-          className="px-3 py-2 rounded border bg-transparent text-sm"
-        >
-          Réinitialiser
-        </button>
-        <div className="flex-1" />
-      </div>
-    </div>
-  );
-}
-
 /** Component principal */
 export default function DealsList({
-  cols = { base: 1, md: 2, lg: 4 },
+  cols = { md: 2, lg: 3, xl: 4 },
   deals,
   showPagination = true,
   totalItems = 0,
@@ -298,7 +106,8 @@ export default function DealsList({
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<DealFilters>({
     category: "all",
-    priceRange: [0, 300],
+    priceMin: 0,
+    priceMax: 300,
     city: "all",
     status: "all",
     searchQuery: "",
@@ -322,11 +131,100 @@ export default function DealsList({
   const resetFilters = () =>
     setFilters({
       category: "all",
-      priceRange: [0, 300],
+      priceMin: 0,
+      priceMax: 300,
       city: "all",
       status: "all",
       searchQuery: "",
     });
+
+  // Configuration des champs du formulaire de filtres
+  const filterFields: IFieldConfig[] = useMemo(() => {
+    const fields: IFieldConfig[] = [];
+
+    if (availableFilters.includes("search")) {
+      fields.push({
+        name: "searchQuery",
+        label: "Rechercher",
+        type: "text",
+        placeholder: "Chercher un produit...",
+      });
+    }
+
+    if (availableFilters.includes("category")) {
+      fields.push({
+        name: "category",
+        label: "Catégorie",
+        type: "select",
+        items: [
+          { value: "all", label: "Toutes les catégories" },
+          { value: "clim", label: "Climatiseurs" },
+          { value: "ventilo", label: "Ventilateurs" },
+        ],
+      });
+    }
+
+    if (availableFilters.includes("city")) {
+      fields.push({
+        name: "city",
+        label: "Ville",
+        type: "select",
+        items: [
+          { value: "all", label: "Toutes les villes" },
+          { value: "yaounde", label: "Yaoundé" },
+          { value: "douala", label: "Douala" },
+        ],
+      });
+    }
+
+    if (availableFilters.includes("status")) {
+      fields.push({
+        name: "status",
+        label: "État",
+        type: "select",
+        items: [
+          { value: "all", label: "Tous" },
+          { value: "active", label: "Actif" },
+          { value: "soldout", label: "Épuisé" },
+        ],
+      });
+    }
+
+    if (availableFilters.includes("price")) {
+      fields.push(
+        {
+          name: "priceMin",
+          label: "Prix minimum (€)",
+          type: "number",
+          placeholder: "0",
+        },
+        {
+          name: "priceMax",
+          label: "Prix maximum (€)",
+          type: "number",
+          placeholder: "300",
+        }
+      );
+    }
+
+    return fields;
+  }, [availableFilters]);
+
+  // Schéma de validation pour les filtres
+  const filterSchema = z.object({
+    searchQuery: z.string().optional(),
+    category: z.string().optional(),
+    city: z.string().optional(),
+    status: z.string().optional(),
+    priceMin: z.number().optional(),
+    priceMax: z.number().optional(),
+  });
+
+  // Handle filter form submission
+  const handleFilterSubmit = (data: any) => {
+    setFilters(data);
+    setMobileOpen(false);
+  };
 
   // Pagination derived values
   const _totalPages = useMemo(() => {
@@ -334,8 +232,6 @@ export default function DealsList({
   }, [totalItems, itemsPerPage, totalPages]);
 
   const _deals = useMemo(() => {
-    // NOTE: server side filtering/pagination recommended; this is local slice/example
-    // Apply local filtering for demo (basic)
     let dataset = [...deals];
 
     // search
@@ -358,11 +254,10 @@ export default function DealsList({
       dataset = dataset.filter((d) => d.status === filters.status);
     }
     // price range
-    if (filters.priceRange) {
+    if (filters.priceMin !== undefined && filters.priceMax !== undefined) {
       dataset = dataset.filter(
         (d) =>
-          d.groupPrice >= filters.priceRange![0] &&
-          d.groupPrice <= filters.priceRange![1]
+          d.groupPrice >= filters.priceMin! && d.groupPrice <= filters.priceMax!
       );
     }
 
@@ -375,67 +270,52 @@ export default function DealsList({
   // If filterPosition === "top" we render filters above grid
   const renderFiltersInline = filterPosition === "top";
 
+  // Render filter form
+  const renderFiltersForm = (inSheet = false) => (
+    <VStack spacing={4}>
+      <Form
+        fields={filterFields}
+        columns={inSheet ? 1 : 1}
+        schema={filterSchema}
+        onSubmit={handleFilterSubmit}
+        submitLabel={inSheet ? "Appliquer" : "Filtrer"}
+        resetLabel="Réinitialiser"
+      />
+    </VStack>
+  );
+
   return (
     <section className="py-8">
-      <div className=" mx-auto">
-        {/* Header: mobile bottom bar + top filters */}
-        <div className="mb-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+      <VStack spacing={8}>
+        {/* Header */}
+        <HStack justify="between">
+          <HStack spacing={8} align="center">
             <h2 className="text-2xl font-semibold">Offres</h2>
             <span className="text-sm text-muted-foreground">
               {totalItems} résultats
             </span>
-          </div>
+          </HStack>
 
-          {/* Desktop: show small filters button */}
-          <div className="hidden md:flex items-center gap-3">
-            {showFilters && (
-              <button
-                onClick={() => {
-                  // If sidebar available, scroll to it or toggle? we keep as no-op
-                }}
-                className="inline-flex items-center gap-2 px-3 py-2 rounded border"
-                aria-label="Filtres"
-              >
-                <Filter className="w-4 h-4" />
-                <span className="text-sm">Filtres</span>
-              </button>
-            )}
-          </div>
-
-          {/* Mobile: bottom tab trigger (we render bottom sheet activation button) */}
-          <div className="md:hidden flex items-center gap-2">
-            <button
+          {/* Mobile: bottom sheet trigger */}
+          <div className="md:hidden">
+            <Button
+              variant="outline"
+              leftIcon={<Sliders className="w-4 h-4" />}
+              title="Filtres"
               onClick={() => setMobileOpen(true)}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded border"
-              aria-label="Ouvrir les filtres"
-            >
-              <Sliders className="w-4 h-4" />
-              <span className="text-sm">Filtres</span>
-            </button>
+            />
           </div>
-        </div>
+        </HStack>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
           {/* Sidebar filters (desktop) */}
           {showFilters && !renderFiltersInline && (
             <aside className="hidden md:block md:col-span-3 lg:col-span-3">
               <div className="sticky top-20 bg-transparent p-4 border rounded">
-                <div className="flex items-center justify-between mb-4">
+                <HStack className="items-center justify-between mb-4">
                   <h3 className="font-medium">Filtres</h3>
-                  <button
-                    onClick={resetFilters}
-                    className="text-sm text-muted-foreground"
-                  >
-                    Réinitialiser
-                  </button>
-                </div>
-                <FiltersPanel
-                  filters={filters}
-                  setFilters={setFilters}
-                  availableFilters={availableFilters}
-                  onReset={resetFilters}
-                />
+                </HStack>
+                {renderFiltersForm()}
               </div>
             </aside>
           )}
@@ -445,25 +325,20 @@ export default function DealsList({
             {/* Top inline filters (if filterPosition === 'top') */}
             {showFilters && renderFiltersInline && (
               <div className="mb-6 p-4 border rounded bg-surface-50">
-                <FiltersPanel
-                  filters={filters}
-                  setFilters={setFilters}
-                  availableFilters={availableFilters}
-                  onReset={resetFilters}
-                />
+                {renderFiltersForm()}
               </div>
             )}
 
             {/* Grid */}
-            <Grid cols={cols} gap="gap-8">
-              {_deals.map((deal, idx) => (
-                <DealCard key={deal.id ?? idx} deal={deal} />
-              ))}
-            </Grid>
+            <VStack spacing={6}>
+              <Grid cols={cols} gap="gap-8">
+                {_deals.map((deal, idx) => (
+                  <DealCard key={deal.id ?? idx} deal={deal} />
+                ))}
+              </Grid>
 
-            {/* Pagination */}
-            {showPagination && (
-              <div className="mt-6">
+              {/* Pagination */}
+              {showPagination && (
                 <Pagination
                   page={currentPage}
                   totalPages={_totalPages}
@@ -471,42 +346,29 @@ export default function DealsList({
                   perPage={itemsPerPage}
                   totalItems={totalItems}
                 />
-              </div>
-            )}
+              )}
+            </VStack>
           </div>
         </div>
-      </div>
+      </VStack>
 
       {/* Mobile bottom sheet for filters */}
       <MobileFilterSheet open={mobileOpen} onClose={() => setMobileOpen(false)}>
-        <FiltersPanel
-          filters={filters}
-          setFilters={(f) => setFilters(f)}
-          availableFilters={availableFilters}
-          onReset={() => {
-            resetFilters();
-            setMobileOpen(false);
-          }}
-        />
-        <div className="flex gap-2 mt-4">
+        {renderFiltersForm(true)}
+        <HStack spacing={2} className="mt-4">
           <button
-            onClick={() => {
-              setMobileOpen(false);
-            }}
+            onClick={() => setMobileOpen(false)}
             className="flex-1 px-4 py-2 rounded border"
           >
             Annuler
           </button>
           <button
-            onClick={() => {
-              // apply & close: onFilterChange will be triggered by debounced effect
-              setMobileOpen(false);
-            }}
+            onClick={() => setMobileOpen(false)}
             className="flex-1 px-4 py-2 rounded bg-primary-500 text-white"
           >
-            Appliquer
+            Fermer
           </button>
-        </div>
+        </HStack>
       </MobileFilterSheet>
     </section>
   );
