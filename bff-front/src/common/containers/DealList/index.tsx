@@ -21,7 +21,7 @@ interface DealFilters {
 }
 
 /** Props du composant list */
-interface DealsListProps {
+interface IDealsListProps {
   deals: any[];
   showPagination?: boolean;
   itemsPerPage?: number;
@@ -34,6 +34,7 @@ interface DealsListProps {
   filterPosition?: "top" | "sidebar";
   availableFilters?: ("category" | "price" | "city" | "status" | "search")[];
   onFilterChange?: (filters: DealFilters) => void;
+  className?: string;
 }
 
 /** Debounce hook simple */
@@ -102,7 +103,8 @@ export default function DealsList({
   filterPosition = "sidebar",
   availableFilters = ["search", "category", "price", "city", "status"],
   onFilterChange,
-}: DealsListProps) {
+  className,
+}: IDealsListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<DealFilters>({
     category: "all",
@@ -285,7 +287,7 @@ export default function DealsList({
   );
 
   return (
-    <section className="py-8">
+    <section className={cn("py-8", className)}>
       <VStack spacing={8}>
         {/* Header */}
         <HStack justify="between">
@@ -307,7 +309,14 @@ export default function DealsList({
           </div>
         </HStack>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <div
+          className={cn(
+            "grid gap-6",
+            showFilters && !renderFiltersInline
+              ? "grid-cols-1 md:grid-cols-12"
+              : "grid-cols-1"
+          )}
+        >
           {/* Sidebar filters (desktop) */}
           {showFilters && !renderFiltersInline && (
             <aside className="hidden md:block md:col-span-3 lg:col-span-3">

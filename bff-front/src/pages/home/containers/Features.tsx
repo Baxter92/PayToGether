@@ -1,3 +1,4 @@
+import { Heading } from "@/common/containers/Heading";
 import Grid from "@components/Grid";
 import { features } from "@constants/data";
 
@@ -5,15 +6,14 @@ const Features = () => {
   return (
     <section className="py-20 bg-muted/30">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Comment ça marche ?
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            PayToGether révolutionne le shopping en groupe. Voici ce qui rend
-            notre plateforme unique.
-          </p>
-        </div>
+        <Heading
+          title="Comment ça marche ?"
+          align="center"
+          level={1}
+          spacing={16}
+          description="PayToGether révolutionne le shopping en groupe. Voici ce qui rend notre plateforme unique."
+          className="mb-10"
+        />
 
         <Grid cols={{ md: 2, lg: 4 }} gap="gap-8">
           {features.map((feature, index) => {
