@@ -2,13 +2,17 @@ import React, { useEffect, useMemo, useState, useRef } from "react";
 import Grid, { type IColsProp } from "@components/Grid";
 import DealCard from "../DealCard";
 import Pagination from "@components/Pagination";
-import { X, Sliders } from "lucide-react";
+import { X, Sliders, List, LayoutGrid } from "lucide-react";
 import { cn } from "@lib/utils";
 import Form, { type IFieldConfig } from "@containers/Form";
 import { z } from "zod";
 import VStack from "@components/VStack";
 import HStack from "@components/HStack";
 import { Button } from "@/common/components/ui/button";
+import DataTable from "@components/DataTable";
+import type { ColumnDef } from "@tanstack/react-table";
+import { Avatar, AvatarImage } from "@/common/components/ui/avatar";
+import { Heading } from "../Heading";
 
 /** Déclare le type de filtre */
 interface DealFilters {
@@ -23,6 +27,8 @@ interface DealFilters {
 /** Props du composant list */
 interface IDealsListProps {
   deals: any[];
+  viewMode?: "grid" | "list";
+  viewModeToggleable?: boolean;
   showPagination?: boolean;
   itemsPerPage?: number;
   totalItems?: number;
@@ -35,6 +41,8 @@ interface IDealsListProps {
   availableFilters?: ("category" | "price" | "city" | "status" | "search")[];
   onFilterChange?: (filters: DealFilters) => void;
   className?: string;
+  showTitle?: boolean;
+  title?: string;
 }
 
 /** Debounce hook simple */
@@ -47,7 +55,7 @@ function useDebounced<T>(value: T, delay = 350) {
   return v;
 }
 
-/** Mobile bottom sheet component */
+/** Mobile bottom sheet component (inchangé) */
 function MobileFilterSheet({
   open,
   onClose,
@@ -61,7 +69,6 @@ function MobileFilterSheet({
 }) {
   return (
     <>
-      {/* backdrop */}
       <div
         className={cn(
           "fixed inset-0 bg-black/40 transition-opacity z-40",
@@ -94,6 +101,8 @@ function MobileFilterSheet({
 /** Component principal */
 export default function DealsList({
   cols = { md: 2, lg: 3, xl: 4 },
+  viewMode = "grid",
+  viewModeToggleable = false,
   deals,
   showPagination = true,
   totalItems = 0,
@@ -104,6 +113,8 @@ export default function DealsList({
   availableFilters = ["search", "category", "price", "city", "status"],
   onFilterChange,
   className,
+  showTitle = false,
+  title = "Offres",
 }: IDealsListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<DealFilters>({
@@ -114,6 +125,8 @@ export default function DealsList({
     status: "all",
     searchQuery: "",
   });
+
+  const [view, setView] = useState<"grid" | "list">(viewMode);
 
   // Mobile sheet state
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -226,14 +239,13 @@ export default function DealsList({
   const handleFilterSubmit = (data: any) => {
     setFilters(data);
     setMobileOpen(false);
+    setCurrentPage(1);
   };
 
-  // Pagination derived values
-  const _totalPages = useMemo(() => {
-    return totalPages > 0 ? totalPages : Math.ceil(totalItems / itemsPerPage);
-  }, [totalItems, itemsPerPage, totalPages]);
-
-  const _deals = useMemo(() => {
+  // -------------------------
+  // Filtering (WITHOUT pagination) -> used for LIST view (DataTable)
+  // -------------------------
+  const filteredDeals = useMemo(() => {
     let dataset = [...deals];
 
     // search
@@ -263,13 +275,25 @@ export default function DealsList({
       );
     }
 
-    // pagination slice
+    return dataset;
+  }, [deals, filters]);
+
+  // -------------------------
+  // Grid dataset: apply pagination slice (kept as before)
+  // -------------------------
+  const _totalPages = useMemo(() => {
+    return totalPages > 0
+      ? totalPages
+      : Math.ceil((totalItems || filteredDeals.length) / itemsPerPage);
+  }, [totalItems, itemsPerPage, totalPages, filteredDeals.length]);
+
+  const gridDeals = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
-    return dataset.slice(start, end);
-  }, [deals, filters, currentPage, itemsPerPage]);
+    return filteredDeals.slice(start, end);
+  }, [filteredDeals, currentPage, itemsPerPage]);
 
-  // If filterPosition === "top" we render filters above grid
+  // Filters inline flag
   const renderFiltersInline = filterPosition === "top";
 
   // Render filter form
@@ -286,27 +310,114 @@ export default function DealsList({
     </VStack>
   );
 
+  // -------------------------
+  // Columns for DataTable (LIST view)
+  // -------------------------
+  const tableColumns = useMemo<ColumnDef<any, any>[]>(() => {
+    return [
+      {
+        accessorKey: "image",
+        header: "Image",
+        cell: ({ row }) => {
+          const d = row.original;
+          return (
+            <Avatar>
+              <AvatarImage src={d.image} alt={d.title} />
+            </Avatar>
+          );
+        },
+      },
+      {
+        accessorKey: "title",
+        header: "Titre",
+        cell: ({ row }) => {
+          const d = row.original;
+          return (
+            <div className="flex flex-col">
+              <span className="font-medium">{d.title}</span>
+              {d.subtitle && (
+                <span className="text-xs text-muted-foreground">
+                  {d.subtitle}
+                </span>
+              )}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "category",
+        header: "Catégorie",
+        cell: ({ getValue }) => (
+          <span className="text-sm">{String(getValue() ?? "")}</span>
+        ),
+      },
+      {
+        accessorKey: "groupPrice",
+        header: "Prix",
+        cell: ({ getValue }) => (
+          <span>
+            {typeof getValue() === "number" ? `${getValue()} €` : getValue()}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "city",
+        header: "Ville",
+        cell: ({ getValue }) => (
+          <span className="text-sm">{String(getValue() ?? "")}</span>
+        ),
+      },
+    ];
+  }, []);
+
   return (
     <section className={cn("", className)}>
       <VStack spacing={8}>
-        {/* Header */}
+        {/* Header : titre + toggles */}
         <HStack justify="between">
-          {/* <HStack spacing={8} align="center">
-            <h2 className="text-2xl font-semibold">Offres</h2>
-            <span className="text-sm text-muted-foreground">
-              {totalItems} résultats
-            </span>
-          </HStack> */}
+          {showTitle && (
+            <HStack spacing={4} align="center">
+              <Heading level={2} title={title} underline />
+              <span className="text-sm text-muted-foreground">
+                {filteredDeals.length} résultats
+              </span>
+            </HStack>
+          )}
 
-          {/* Mobile: bottom sheet trigger */}
-          <div className="md:hidden">
-            <Button
-              variant="outline"
-              leftIcon={<Sliders className="w-4 h-4" />}
-              title="Filtres"
-              onClick={() => setMobileOpen(true)}
-            />
-          </div>
+          <HStack spacing={2} className="items-center">
+            {/* Filters mobile trigger */}
+            <div className="md:hidden">
+              <Button
+                variant="outline"
+                leftIcon={<Sliders className="w-4 h-4" />}
+                title="Filtres"
+                onClick={() => setMobileOpen(true)}
+              />
+            </div>
+
+            {/* View toggles */}
+            {viewModeToggleable && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={view === "grid" ? "default" : "outline"}
+                  size="icon-sm"
+                  onClick={() => setView("grid")}
+                  title="Vue grille"
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </Button>
+
+                <Button
+                  variant={view === "list" ? "default" : "outline"}
+                  size="icon-sm"
+                  onClick={() => setView("list")}
+                  title="Vue liste"
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+          </HStack>
         </HStack>
 
         <div
@@ -338,23 +449,44 @@ export default function DealsList({
               </div>
             )}
 
-            {/* Grid */}
             <VStack spacing={6}>
-              <Grid cols={cols} gap="gap-8">
-                {_deals.map((deal, idx) => (
-                  <DealCard key={deal.id ?? idx} deal={deal} />
-                ))}
-              </Grid>
+              {/* GRID VIEW */}
+              {view === "grid" && (
+                <>
+                  <Grid cols={cols} gap="gap-8">
+                    {gridDeals.map((deal, idx) => (
+                      <DealCard key={deal.id ?? idx} deal={deal} />
+                    ))}
+                  </Grid>
 
-              {/* Pagination */}
-              {showPagination && (
-                <Pagination
-                  page={currentPage}
-                  totalPages={_totalPages}
-                  onChange={(p) => setCurrentPage(p)}
-                  perPage={itemsPerPage}
-                  totalItems={totalItems}
-                />
+                  {/* Pagination (externe) */}
+                  {showPagination && (
+                    <Pagination
+                      page={currentPage}
+                      totalPages={_totalPages}
+                      onChange={(p) => setCurrentPage(p)}
+                      perPage={itemsPerPage}
+                      totalItems={filteredDeals.length}
+                    />
+                  )}
+                </>
+              )}
+
+              {/* LIST VIEW (DataTable) */}
+              {view === "list" && (
+                <div className="w-full">
+                  <DataTable
+                    columns={tableColumns}
+                    data={filteredDeals}
+                    searchKey={["title", "category", "city", "status"]}
+                    searchPlaceholder="Rechercher dans la liste..."
+                    // enableSelection={false}
+                    showSelectionCount={true}
+                    enableRowNumber={true}
+                    pageSizeOptions={[itemsPerPage, 24, 50, 100]}
+                  />
+                  {/* note: DataTable gère sa propre pagination */}
+                </div>
               )}
             </VStack>
           </div>

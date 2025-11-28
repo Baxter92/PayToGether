@@ -18,6 +18,7 @@ import SidebarMenu from "./components/SidebarMenu";
 import LanguageSelector from "@components/LanguageSelector";
 import { Dropdown } from "@components/Dropdown";
 import SearchBar from "./components/SearchBar";
+import { PATHS } from "@/common/constants/path";
 
 // Types pour les props du Header
 export interface HeaderProps {
@@ -176,7 +177,7 @@ const Header = ({
       value: "profile",
       label: texts.myProfile || "Mon profil",
       icon: <User className="w-4 h-4 mr-2" />,
-      onClick: () => navigate("/profile"),
+      onClick: () => navigate(PATHS.PROFILE),
     },
     {
       value: "orders",

@@ -16,6 +16,10 @@ const buttonVariants = cva(
         secondary: "",
         ghost: "",
         link: "",
+        square: "",
+        "round-full": "",
+        "square-outline": "",
+        "round-full-outline": "",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
@@ -36,7 +40,7 @@ const buttonVariants = cva(
     },
 
     compoundVariants: [
-      // ---- DEFAULT ----
+      // ---- DEFAULT (solid) ----
       {
         variant: "default",
         colorScheme: "default",
@@ -64,7 +68,7 @@ const buttonVariants = cva(
         class: "bg-green-500 text-green-foreground hover:bg-green-500/90",
       },
 
-      // ---- SECONDARY ----
+      // ---- SECONDARY (solid) ----
       {
         variant: "secondary",
         colorScheme: "default",
@@ -92,7 +96,7 @@ const buttonVariants = cva(
         class: "bg-green-500 text-green-foreground hover:bg-green-500/90",
       },
 
-      // ---- OUTLINE ----
+      // ---- OUTLINE (regular) ----
       {
         variant: "outline",
         colorScheme: "default",
@@ -116,7 +120,7 @@ const buttonVariants = cva(
         class: "border border-green-500 text-green-600 hover:bg-green-50",
       },
 
-      // ---- GHOST ----
+      // ---- GHOST (regular) ----
       {
         variant: "ghost",
         colorScheme: "default",
@@ -138,7 +142,123 @@ const buttonVariants = cva(
         class: "text-green-600 hover:bg-green-50",
       },
 
-      // ---- LINK ----
+      // ---- SQUARE (solid) ----
+      {
+        variant: "square",
+        colorScheme: "default",
+        class:
+          "bg-primary text-primary-foreground hover:bg-primary/90 rounded-none",
+      },
+      {
+        variant: "square",
+        colorScheme: "danger",
+        class:
+          "bg-destructive text-white hover:bg-destructive/90 dark:bg-destructive/60 rounded-none",
+      },
+      {
+        variant: "square",
+        colorScheme: "info",
+        class:
+          "bg-blue-500 text-blue-foreground hover:bg-blue-500/90  rounded-none",
+      },
+      {
+        variant: "square",
+        colorScheme: "warning",
+        class:
+          "bg-amber-500 text-amber-foreground hover:bg-amber-500/90  rounded-none",
+      },
+      {
+        variant: "square",
+        colorScheme: "success",
+        class:
+          "bg-green-500 text-green-foreground hover:bg-green-500/90  rounded-none",
+      },
+
+      // ---- ROUND-FULL (solid) ----
+      {
+        variant: "round-full",
+        colorScheme: "default",
+        class:
+          "bg-primary text-primary-foreground hover:bg-primary/90 rounded-full",
+      },
+      {
+        variant: "round-full",
+        colorScheme: "danger",
+        class:
+          "bg-destructive text-white hover:bg-destructive/90 dark:bg-destructive/60 rounded-full",
+      },
+      {
+        variant: "round-full",
+        colorScheme: "info",
+        class:
+          "bg-blue-500 text-blue-foreground hover:bg-blue-500/90 rounded-full",
+      },
+      {
+        variant: "round-full",
+        colorScheme: "warning",
+        class:
+          "bg-amber-500 text-amber-foreground hover:bg-amber-500/90 rounded-full",
+      },
+      {
+        variant: "round-full",
+        colorScheme: "success",
+        class:
+          "bg-green-500 text-green-foreground hover:bg-green-500/90 rounded-full",
+      },
+
+      // ---- SQUARE-OUTLINE (nouveau) ----
+      {
+        variant: "square-outline",
+        colorScheme: "default",
+        class:
+          "border bg-background shadow-xs hover:bg-secondary dark:bg-input/30 dark:border-input rounded-none",
+      },
+      {
+        variant: "square-outline",
+        colorScheme: "danger",
+        class:
+          "border border-destructive text-destructive hover:bg-destructive/10 rounded-none",
+      },
+      {
+        variant: "square-outline",
+        colorScheme: "info",
+        class:
+          "border border-blue-500 text-blue-600 hover:bg-blue-50 rounded-none",
+      },
+      {
+        variant: "square-outline",
+        colorScheme: "success",
+        class:
+          "border border-green-500 text-green-600 hover:bg-green-50 rounded-none",
+      },
+
+      // ---- ROUND-FULL-OUTLINE (nouveau) ----
+      {
+        variant: "round-full-outline",
+        colorScheme: "default",
+        class:
+          "border bg-background shadow-xs hover:bg-secondary dark:bg-input/30 dark:border-input rounded-full",
+      },
+      {
+        variant: "round-full-outline",
+        colorScheme: "danger",
+        class:
+          "border border-destructive text-destructive hover:bg-destructive/10 rounded-full",
+      },
+      {
+        variant: "round-full-outline",
+        colorScheme: "info",
+        class:
+          "border border-blue-500 text-blue-600 hover:bg-blue-50 rounded-full",
+      },
+      {
+        variant: "round-full-outline",
+        colorScheme: "success",
+        class:
+          "border border-green-500 text-green-600 hover:bg-green-50 rounded-full",
+      },
+
+      // ---- LINK (solid) ----
       {
         variant: "link",
         colorScheme: "default",

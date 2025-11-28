@@ -3,6 +3,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuCheckboxItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@components/ui/dropdown-menu";
@@ -16,18 +17,18 @@ type DropdownItem = {
   value: string;
   disabled?: boolean;
   icon?: React.ReactNode;
-  [key: string]: any;
 };
 
-type IDropdownProps = {
+type DropdownProps = {
   label: React.ReactNode;
   items: DropdownItem[];
-  selectedValue?: string;
-  onChange?: (value: string) => void;
+  selectedValue?: string | string[];
+  onChange?: (value: string | string[]) => void;
   className?: string;
   contentClassName?: string;
-  renderItem?: (item: DropdownItem) => React.ReactNode;
   triggerOptions?: IButtonProps;
+  multiple?: boolean;
+  renderItem?: (item: DropdownItem) => React.ReactNode;
 };
 
 export function Dropdown({
@@ -35,20 +36,35 @@ export function Dropdown({
   items,
   selectedValue,
   onChange,
-  className = "",
-  contentClassName = "",
   renderItem,
+  className,
+  contentClassName,
   triggerOptions,
-}: IDropdownProps) {
+  multiple = false,
+}: DropdownProps) {
+  const isSelected = (value: string) =>
+    multiple
+      ? Array.isArray(selectedValue) && selectedValue.includes(value)
+      : selectedValue === value;
+
+  const toggleMulti = (value: string) => {
+    if (!Array.isArray(selectedValue)) {
+      onChange?.([value]);
+      return;
+    }
+    if (selectedValue.includes(value)) {
+      onChange?.(selectedValue.filter((v) => v !== value));
+    } else {
+      onChange?.([...selectedValue, value]);
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className={cn(
-            `flex justify-between items-center space-x-2`,
-            className
-          )}
+          className={cn("flex justify-between items-center", className)}
           rightIcon={<ChevronDown className="w-4 h-4" />}
           {...triggerOptions}
         >
@@ -60,26 +76,41 @@ export function Dropdown({
         <DropdownMenuLabel>Choisir une option</DropdownMenuLabel>
         <DropdownMenuSeparator />
 
-        {items.map((item) => (
-          <DropdownMenuItem
-            key={item.value}
-            disabled={item.disabled}
-            onClick={() => {
-              item.onClick?.();
-              onChange?.(item.value);
-            }}
-            className={selectedValue === item.value ? "bg-secondary" : ""}
-          >
-            {renderItem ? (
-              renderItem(item)
-            ) : (
-              <div className="flex items-center gap-2">
-                {item.icon}
-                <span>{item.label}</span>
-              </div>
-            )}
-          </DropdownMenuItem>
-        ))}
+        {items.map((item) =>
+          multiple ? (
+            <DropdownMenuCheckboxItem
+              key={item.value}
+              checked={isSelected(item.value)}
+              disabled={item.disabled}
+              onCheckedChange={() => toggleMulti(item.value)}
+            >
+              {renderItem ? (
+                renderItem(item)
+              ) : (
+                <div className="flex items-center gap-2">
+                  {item.icon}
+                  {item.label}
+                </div>
+              )}
+            </DropdownMenuCheckboxItem>
+          ) : (
+            <DropdownMenuItem
+              key={item.value}
+              disabled={item.disabled}
+              onClick={() => onChange?.(item.value)}
+              className={selectedValue === item.value ? "bg-secondary" : ""}
+            >
+              {renderItem ? (
+                renderItem(item)
+              ) : (
+                <div className="flex items-center gap-2">
+                  {item.icon}
+                  {item.label}
+                </div>
+              )}
+            </DropdownMenuItem>
+          )
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

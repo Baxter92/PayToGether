@@ -8,6 +8,8 @@ import type { JSX } from "react";
 import DealDetail from "./pages/dealDetail";
 import ScrollToTop from "@/common/utils/ScrollToTop";
 import Checkout from "./pages/checkout";
+import Profile from "./pages/profile";
+import { PATHS } from "./common/constants/path";
 
 function App(): JSX.Element {
   return (
@@ -22,10 +24,11 @@ function App(): JSX.Element {
 
           {/* Routes protégées avec MainLayout */}
           <Route element={<MainLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/deals/:id" element={<DealDetail />} />
+            <Route path={PATHS.HOME} element={<Home />} />
+            <Route path={PATHS.DEAL_DETAIL()} element={<DealDetail />} />
+            <Route path={PATHS.PROFILE} element={<Profile />} />
             <Route element={<ProtectedRoutes />}>
-              <Route path="/deals/:id/checkout" element={<Checkout />} />
+              <Route path={PATHS.CHECKOUT()} element={<Checkout />} />
             </Route>
           </Route>
 

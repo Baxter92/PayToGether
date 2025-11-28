@@ -11,7 +11,8 @@ export interface IUser {
   email: string;
   name: string;
   avatar?: string;
-  role?: "user" | "admin";
+  role?: "client" | "marchand";
+  location?: string;
 }
 
 export interface IAuthContextType {
@@ -78,7 +79,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         email,
         name: email.split("@")[0],
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-        role: "user",
+        role: "client",
+        location: "Douala, Cameroon",
       };
 
       setUser(userData);

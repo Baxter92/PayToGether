@@ -351,7 +351,7 @@ const Form = <T extends Record<string, any>>({
         </div>
       ))}
 
-      <HStack spacing={5} className="mt-6">
+      <HStack spacing={5} className="mt-6" wrap>
         <Button
           type="submit"
           disabled={isSubmitting}

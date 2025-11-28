@@ -4,6 +4,7 @@ import "./index.css";
 import "./common/lib/i18n/index.ts";
 import App from "./App.tsx";
 import { I18nProvider } from "./common/context/I18nContext.tsx";
+import "./common/extensions/string-extensions";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

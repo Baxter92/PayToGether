@@ -12,3 +12,4 @@ export { default as Pagination } from "./Pagination";
 export { default as DateInput } from "./DateInput";
 export { default as TimeInput } from "./TimeInput";
 export { default as DateTimeInput } from "./DateTimeInput";
+export { default as DataTable } from "./DataTable";
