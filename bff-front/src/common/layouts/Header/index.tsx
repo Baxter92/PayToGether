@@ -1,5 +1,5 @@
 import { useState, type JSX, type ReactNode } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@context/AuthContext";
 import { useI18n } from "@context/I18nContext";
 import {
@@ -137,6 +137,7 @@ const Header = ({
   const { user, logout } = useAuth();
   const { t } = useI18n();
   const navigate = useNavigate();
+  const locationRoute = useLocation();
   const [location, setLocation] = useState(defaultLocation);
 
   const handleLogout = async (): Promise<void> => {
@@ -152,7 +153,7 @@ const Header = ({
     if (onLoginClick) {
       onLoginClick();
     } else {
-      navigate("/login");
+      navigate("/login", { state: { from: locationRoute } });
     }
   };
 

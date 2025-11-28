@@ -17,6 +17,7 @@ type DropdownItem = {
   value: string;
   disabled?: boolean;
   icon?: React.ReactNode;
+  onClick?: () => void;
 };
 
 type DropdownProps = {
@@ -97,7 +98,11 @@ export function Dropdown({
             <DropdownMenuItem
               key={item.value}
               disabled={item.disabled}
-              onClick={() => onChange?.(item.value)}
+              onClick={() => {
+                if (item.onClick) {
+                  item.onClick();
+                } else onChange?.(item.value);
+              }}
               className={selectedValue === item.value ? "bg-secondary" : ""}
             >
               {renderItem ? (
