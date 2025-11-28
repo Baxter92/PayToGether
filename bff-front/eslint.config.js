@@ -51,10 +51,10 @@ export default tseslint.config(
         "@typescript-eslint/consistent-type-imports": ["error", { prefer: "type-imports" }],
 
         /* Style */
-        indent: ["error", 2],
+        indent: ["error", 2, { SwitchCase: 1 }],
         quotes: ["error", "double"],
         semi: ["error", "always"],
-        "comma-dangle": ["error", "always-multiline"],
+       "comma-dangle": ["error", { arrays: "never", objects: "always-multiline", imports: "always-multiline", exports: "always-multiline", functions: "never" }],
         "object-curly-spacing": ["error", "always"],
         "space-before-blocks": ["error", "always"],
         "keyword-spacing": ["error", { before: true, after: true }],

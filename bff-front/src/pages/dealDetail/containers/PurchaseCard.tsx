@@ -6,10 +6,13 @@ import type { Deal } from "../types";
 import Counter from "@/common/components/Counter";
 import { HStack } from "@/common/components";
 import { Heart, Share } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function PurchaseCard({ deal }: { deal: Deal }) {
   const [qty, setQty] = useState(1);
   const [partsSold, setPartsSold] = useState(deal.partsSold);
+
+  const navigate = useNavigate();
 
   const partsRemaining = deal.partsTotal - partsSold;
   const canBuy = qty <= partsRemaining && qty >= 1;
@@ -20,15 +23,9 @@ export default function PurchaseCard({ deal }: { deal: Deal }) {
   function handleAdd() {
     if (!canBuy) return;
     setPartsSold((s) => s + qty);
-    alert(`Merci ! Vous avez réservé ${qty} part(s) pour ${totalPrice}.
-${
-  willReachMin
-    ? "Le deal est désormais activé."
-    : `Il reste ${Math.max(
-        0,
-        deal.minRequired - (partsSold + qty)
-      )} part(s) avant activation.`
-}`);
+    navigate(`/deals/${deal.id}/checkout`, {
+      state: { deal, qty, total: totalPrice },
+    });
   }
 
   return (

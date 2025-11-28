@@ -5,7 +5,7 @@ export type ProtectedRouteProps = {
   guard?: boolean;
 };
 
-export const ProtectedRoutes = ({ guard }: ProtectedRouteProps) => {
+export const ProtectedRoutes = () => {
   const { user, loading } = useAuth();
   const location = useLocation();
 
@@ -17,7 +17,7 @@ export const ProtectedRoutes = ({ guard }: ProtectedRouteProps) => {
     );
   }
 
-  if (guard && !user) {
+  if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

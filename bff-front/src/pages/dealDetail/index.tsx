@@ -1,11 +1,10 @@
-import React from "react";
+import { type JSX } from "react";
 import type { Deal } from "./types";
 import Gallery from "./containers/Gallery";
 import ProductDetails from "./containers/ProductDetails";
 import PurchaseCard from "./containers/PurchaseCard";
 import Reviews from "./containers/Reviews";
 import { Card, CardContent } from "@components/ui/card";
-import { Button } from "@components/ui/button";
 import { VStack } from "@/common/components";
 import { Heading } from "@/common/containers/Heading";
 import DealsList from "@/common/containers/DealList";
@@ -51,7 +50,11 @@ const mockDeal: Deal = {
   shelfLifeDays: 5,
 };
 
-export default function DealDetail({ deal = mockDeal }: { deal?: Deal }) {
+export default function DealDetail({
+  deal = mockDeal,
+}: {
+  deal?: Deal;
+}): JSX.Element {
   return (
     <div className=" bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

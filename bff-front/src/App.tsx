@@ -6,7 +6,8 @@ import Home from "./pages/home";
 import { MainLayout } from "./common/layouts/MainLayout";
 import type { JSX } from "react";
 import DealDetail from "./pages/dealDetail";
-import ScrollToTop from "@utils/ScrollToTop";
+import ScrollToTop from "@/common/utils/ScrollToTop";
+import Checkout from "./pages/checkout";
 
 function App(): JSX.Element {
   return (
@@ -20,10 +21,11 @@ function App(): JSX.Element {
           </Route>
 
           {/* Routes protégées avec MainLayout */}
-          <Route element={<ProtectedRoutes />}>
-            <Route element={<MainLayout />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/deals/:id" element={<DealDetail />} />
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/deals/:id" element={<DealDetail />} />
+            <Route element={<ProtectedRoutes />}>
+              <Route path="/deals/:id/checkout" element={<Checkout />} />
             </Route>
           </Route>
 

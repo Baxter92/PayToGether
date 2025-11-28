@@ -64,6 +64,34 @@ const buttonVariants = cva(
         class: "bg-green-500 text-green-foreground hover:bg-green-500/90",
       },
 
+      // ---- SECONDARY ----
+      {
+        variant: "secondary",
+        colorScheme: "default",
+        class: "bg-secondary text-secondary-foreground hover:bg-secondary/90",
+      },
+      {
+        variant: "secondary",
+        colorScheme: "danger",
+        class:
+          "bg-destructive text-white hover:bg-destructive/90 dark:bg-destructive/60",
+      },
+      {
+        variant: "secondary",
+        colorScheme: "info",
+        class: "bg-blue-500 text-blue-foreground hover:bg-blue-500/90",
+      },
+      {
+        variant: "secondary",
+        colorScheme: "warning",
+        class: "bg-amber-500 text-amber-foreground hover:bg-amber-500/90",
+      },
+      {
+        variant: "secondary",
+        colorScheme: "success",
+        class: "bg-green-500 text-green-foreground hover:bg-green-500/90",
+      },
+
       // ---- OUTLINE ----
       {
         variant: "outline",

@@ -290,7 +290,7 @@ const Header = ({
             )}
 
             {/* User Menu */}
-            {!user ? (
+            {user ? (
               <Dropdown
                 label={
                   <>

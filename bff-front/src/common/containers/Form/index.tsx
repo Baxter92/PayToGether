@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { useForm, type Path, type UseFormReturn } from "react-hook-form";
 import type * as z from "zod";
 import Select, { type ISelectProps } from "@components/Select";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,6 +9,17 @@ import CheckboxGroup, {
 import { Input, type InputProps } from "@components/ui/input";
 import Checkbox, { type ICheckboxProps } from "@components/Checkbox";
 import Textarea from "@components/Textarea";
+import { cn } from "@/common/lib/utils";
+import {
+  DateInput,
+  DateTimeInput,
+  HStack,
+  TimeInput,
+} from "@/common/components";
+import { Button, type IButtonProps } from "@/common/components/ui/button";
+import type { IDateInputProps } from "@/common/components/DateInput";
+import type { ITimeInputProps } from "@/common/components/TimeInput";
+import type { IDateTimeInputProps } from "@/common/components/DateTimeInput";
 
 // Types pour la configuration du formulaire
 export type FieldType =
@@ -19,9 +30,17 @@ export type FieldType =
   | "select"
   | "radio"
   | "checkbox"
-  | "password";
+  | "password"
+  | "date"
+  | "time"
+  | "datetime";
 
-export type IFieldConfig = { name: string; colSpan?: number; label: string } & (
+export type IFieldConfig = {
+  name: string;
+  colSpan?: number;
+  label: string;
+  render?: (field: IFieldConfig, form: UseFormReturn) => React.ReactNode;
+} & (
   | ({
       type: "text";
     } & InputProps)
@@ -32,6 +51,9 @@ export type IFieldConfig = { name: string; colSpan?: number; label: string } & (
   | ({ type: "radio" } & IRadioGroupProps)
   | ({ type: "checkbox" } & (ICheckboxGroupProps | ICheckboxProps))
   | ({ type: "password" } & InputProps)
+  | ({ type: "date" } & IDateInputProps)
+  | ({ type: "time" } & ITimeInputProps)
+  | ({ type: "datetime" } & IDateTimeInputProps)
 );
 
 export interface IFieldGroup {
@@ -39,39 +61,73 @@ export interface IFieldGroup {
   description?: string;
   columns?: number; // Nombre de colonnes par ligne (1-4)
   fields: IFieldConfig[];
+  className?: string;
 }
 
-export interface IFormContainerConfig {
+export interface IFormSubmitOptions<T = any> {
+  data: T;
+  form: UseFormReturn;
+}
+
+export interface IFormResetOptions<T = any> {
+  form: UseFormReturn;
+}
+
+export type IFormContainerConfig<T = any> = {
+  form?: UseFormReturn<T>; // <--- was UseFormReturn (non-generic)
   groups?: IFieldGroup[];
-  fields?: IFieldConfig[]; // Option pour passer directement les champs
-  columns?: number; // Nombre de colonnes si on utilise fields directement
-  schema: z.ZodSchema<any>; // Schéma Zod pour la validation
-  onSubmit: (data: any) => void;
+  fields?: IFieldConfig[];
+  columns?: number;
+  schema: z.ZodSchema<T>;
+  defaultValues?: Partial<T>;
+  onSubmit: (options: IFormSubmitOptions<T>) => void | Promise<void>;
+  onReset?: (options: IFormResetOptions<T>) => void | Promise<void>;
   submitLabel?: string;
   resetLabel?: string;
-}
+  showResetButton?: boolean;
+  titleClassName?: string;
+  descriptionClassName?: string;
+  submitBtnProps?: IButtonProps;
+  resetBtnProps?: IButtonProps;
+};
 
-const Form: React.FC<IFormContainerConfig> = ({
+const Form = <T extends Record<string, any>>({
+  form: externalForm,
   groups,
   fields,
   columns = 1,
   schema,
+  defaultValues,
   onSubmit,
+  onReset,
   submitLabel = "Soumettre",
   resetLabel = "Réinitialiser",
-}) => {
+  showResetButton = true,
+  titleClassName,
+  descriptionClassName,
+  submitBtnProps,
+  resetBtnProps,
+  ...props
+}: IFormContainerConfig<T> &
+  Omit<React.ComponentProps<"form">, "onSubmit">) => {
   // Normaliser la config : si fields est fourni, créer un groupe automatiquement
   const normalizedGroups: IFieldGroup[] =
     groups || (fields ? [{ fields, columns }] : []);
 
+  const internalForm = useForm<T>({
+    resolver: zodResolver(schema as any),
+    defaultValues: defaultValues as any,
+  });
+
+  // Choisir la source de vérité : si externalForm est fourni on l'utilise, sinon internalForm
+  const form = externalForm ?? internalForm;
+
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     reset,
-  } = useForm({
-    resolver: zodResolver(schema),
-  });
+  } = form;
 
   const getColClass = (cols: number = 1) => {
     const colMap: Record<number, string> = {
@@ -104,18 +160,24 @@ const Form: React.FC<IFormContainerConfig> = ({
   };
 
   const renderField = (field: IFieldConfig) => {
+    // Si une fonction render personnalisée est fournie, l'utiliser
+    if (field.render) {
+      return field.render(field, form);
+    }
+
     const error = errors[field.name];
     const errorMessage = error?.message as string;
 
     const baseInputClass = `w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
       error ? "border-red-500" : "border-gray-300"
-    } ${field.disabled ? "bg-gray-100 cursor-not-allowed" : ""}`;
+    } ${(field as any)?.disabled ? "bg-gray-100 cursor-not-allowed" : ""}`;
 
     switch (field.type) {
       case "textarea":
         return (
           <Textarea
-            {...register(field.name)}
+            {...register(field.name as Path<T>)}
+            {...field}
             placeholder={field?.placeholder}
             disabled={field.disabled}
             className={`${baseInputClass} min-h-[100px]`}
@@ -181,11 +243,53 @@ const Form: React.FC<IFormContainerConfig> = ({
           );
         }
 
+      case "date": {
+        const { onChange, ...rest } = register(field.name);
+        return (
+          <DateInput
+            {...rest}
+            {...field}
+            max={field.max}
+            min={field.min}
+            onChange={(date) =>
+              onChange({ target: { value: date, name: field.name } })
+            }
+            error={errorMessage}
+          />
+        );
+      }
+
+      case "datetime": {
+        const { onChange, ...rest } = register(field.name);
+        return (
+          <DateTimeInput
+            {...rest}
+            {...field}
+            onChange={(date) =>
+              onChange({ target: { value: date, name: field.name } })
+            }
+            error={errorMessage}
+          />
+        );
+      }
+
+      case "time": {
+        const { onChange, ...rest } = register(field.name);
+        return (
+          <TimeInput
+            {...rest}
+            {...field}
+            onChange={(time) =>
+              onChange({ target: { value: time, name: field.name } })
+            }
+            error={errorMessage}
+          />
+        );
+      }
       default:
         return (
           <Input
-            type={field.type}
-            {...register(field.name, {
+            {...register(field.name as Path<T>, {
               valueAsNumber: field.type === "number",
             })}
             {...field}
@@ -196,20 +300,42 @@ const Form: React.FC<IFormContainerConfig> = ({
     }
   };
 
+  const handleFormSubmit = async (data: T) => {
+    await onSubmit({ data, form });
+  };
+
+  const handleFormReset = async () => {
+    if (onReset) {
+      await onReset({ form });
+    } else {
+      // Comportement par défaut : réinitialiser aux valeurs par défaut
+      reset(defaultValues as any);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <form onSubmit={handleSubmit(handleFormSubmit)} {...props}>
       {normalizedGroups.map((group, groupIdx) => (
         <div
           key={groupIdx}
-          className="bg-white p-6 rounded-lg shadow-sm border border-gray-200"
+          className={cn(group.className, groupIdx > 0 && "mt-6")}
         >
           {group.title && (
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3
+              className={cn(
+                "text-lg font-semibold text-gray-900 mb-2",
+                titleClassName
+              )}
+            >
               {group.title}
             </h3>
           )}
           {group.description && (
-            <p className="text-sm text-gray-600 mb-4">{group.description}</p>
+            <p
+              className={cn("text-sm text-gray-600 mb-4", descriptionClassName)}
+            >
+              {group.description}
+            </p>
           )}
 
           <div className={`grid ${getColClass(group.columns)} gap-4`}>
@@ -225,21 +351,27 @@ const Form: React.FC<IFormContainerConfig> = ({
         </div>
       ))}
 
-      <div className="flex gap-3">
-        <button
+      <HStack spacing={5} className="mt-6">
+        <Button
           type="submit"
-          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          disabled={isSubmitting}
+          loading={isSubmitting}
+          {...submitBtnProps}
         >
-          {submitLabel}
-        </button>
-        <button
-          type="button"
-          onClick={() => reset()}
-          className="px-6 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
-        >
-          {resetLabel}
-        </button>
-      </div>
+          {isSubmitting ? "En cours..." : submitLabel}
+        </Button>
+        {showResetButton && (
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={isSubmitting}
+            {...resetBtnProps}
+            onClick={handleFormReset}
+          >
+            {resetLabel}
+          </Button>
+        )}
+      </HStack>
     </form>
   );
 };
