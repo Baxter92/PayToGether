@@ -19,6 +19,7 @@ import LanguageSelector from "@components/LanguageSelector";
 import { Dropdown } from "@components/Dropdown";
 import SearchBar from "./components/SearchBar";
 import { PATHS } from "@/common/constants/path";
+import { toast } from "sonner";
 
 // Types pour les props du Header
 export interface HeaderProps {
@@ -147,6 +148,7 @@ const Header = ({
       await logout();
       navigate(PATHS.LOGIN);
     }
+    toast.success("Vous êtes déconnecté");
   };
 
   const handleLogin = (): void => {

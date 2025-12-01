@@ -95,6 +95,58 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* ---- Sonner Toaster type colors mapping using your theme tokens ---- */
+.toaster {
+  /* conserve tes variables normales déjà définies */
+  --normal-bg: var(--popover);
+  --normal-text: var(--popover-foreground);
+  --normal-border: var(--border);
+  --border-radius: var(--radius);
+
+  /* Map types to tes tokens existants (tu peux ajuster les tokens si tu préfères d'autres) */
+  --success-bg: var(--color-accent-600);        /* succès -> accent (ex: vert/jaune selon ton thème) */
+  --success-text: var(--color-accent-50);
+  --success-border: var(--color-accent-700);
+
+  --info-bg: var(--color-primary-600);          /* info -> primary */
+  --info-text: var(--color-primary-50);
+  --info-border: var(--color-primary-700);
+
+  --warning-bg: var(--color-secondary-600);     /* warning -> secondary */
+  --warning-text: var(--color-secondary-50);
+  --warning-border: var(--color-secondary-700);
+
+  --error-bg: var(--color-destructive-600);     /* erreur -> destructive */
+  --error-text: var(--color-destructive-50);
+  --error-border: var(--color-destructive-700);
+}
+
+/* Appliquer les variables sur les éléments toast (Sonner utilise data-type) */
+.toaster [data-type="success"] {
+  background: var(--success-bg) !important;
+  color: var(--success-text) !important;
+  border: 1px solid var(--success-border) !important;
+}
+
+.toaster [data-type="info"] {
+  background: var(--info-bg) !important;
+  color: var(--info-text) !important;
+  border: 1px solid var(--info-border) !important;
+}
+
+.toaster [data-type="warning"] {
+  background: var(--warning-bg) !important;
+  color: var(--warning-text) !important;
+  border: 1px solid var(--warning-border) !important;
+}
+
+.toaster [data-type="error"] {
+  background: var(--error-bg) !important;
+  color: var(--error-text) !important;
+  border: 1px solid var(--error-border) !important;
+}
+
+
 :root {
   --radius: 0.625rem;
   --background: oklch(0.98 0.01 230);
