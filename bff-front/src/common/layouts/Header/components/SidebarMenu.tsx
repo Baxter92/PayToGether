@@ -15,6 +15,7 @@ import { useAuth } from "@/common/context/AuthContext";
 import type { ICategory } from "../types";
 import VStack from "@components/VStack";
 import { Dropdown } from "@components/Dropdown";
+import { PATHS } from "@/common/constants/path";
 
 export interface SidebarMenuProps {
   // Compteurs
@@ -158,6 +159,11 @@ const SidebarMenu = ({
 
   const closeMenu = () => setMobileMenuOpen(false);
 
+  const handleNavigationClick = (path: string) => {
+    navigate(path);
+    closeMenu();
+  };
+
   // Avatar par défaut
   const defaultAvatar = (
     <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-teal-600 rounded-full flex items-center justify-center">
@@ -176,7 +182,7 @@ const SidebarMenu = ({
         side={side}
         className={`${width} overflow-y-auto p-6 ${className}`}
       >
-        <VStack className="space-y-6">
+        <VStack className="">
           {/* User Section - Si connecté */}
           {user ? (
             <div className="pb-6 border-b w-full">
@@ -191,22 +197,22 @@ const SidebarMenu = ({
                   </p>
                 </div>
               </div>
-              <VStack className="space-y-2 w-full">
+              <VStack align="start" spacing={1}>
                 <Button
                   variant="ghost"
-                  onClick={closeMenu}
+                  onClick={() => handleNavigationClick(PATHS.PROFILE)}
                   title={texts.myProfile}
                   leftIcon={<User className="w-4 h-4" />}
                 />
                 <Button
                   variant="ghost"
-                  onClick={closeMenu}
+                  onClick={() => handleNavigationClick(PATHS.ORDERS)}
                   title={texts.myOrders}
                   leftIcon={<ShoppingBag className="w-4 h-4" />}
                 />
                 <Button
                   variant="ghost"
-                  onClick={closeMenu}
+                  onClick={() => handleNavigationClick(PATHS.FAVORITES)}
                   title={texts.myFavorites}
                   leftIcon={<Heart className="w-4 h-4" />}
                 />
@@ -214,7 +220,7 @@ const SidebarMenu = ({
             </div>
           ) : (
             /* Login/Register - Si non connecté */
-            <VStack className="pb-6 border-b space-y-2 w-full mt-3">
+            <VStack className="pb-6 border-b mt-3">
               <Button
                 className="w-full bg-primary-600 hover:bg-primary-700"
                 onClick={handleRegister}
@@ -297,26 +303,22 @@ const SidebarMenu = ({
 
           {/* Settings & Logout - Si connecté */}
           {user && (
-            <div className="space-y-2">
+            <div className="">
               <Button
                 variant="ghost"
                 className="w-full justify-start"
-                asChild
-                onClick={closeMenu}
-              >
-                <Link to={settingsLink}>
-                  <Settings className="w-4 h-4 mr-2" />
-                  {texts.settings}
-                </Link>
-              </Button>
+                onClick={() => handleNavigationClick(PATHS.USERSITTINGS)}
+                title={texts.settings}
+                leftIcon={<Settings className="w-4 h-4" />}
+              />
               <Button
                 variant="ghost"
-                className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                className="w-full justify-start"
                 onClick={handleLogout}
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                {texts.logout}
-              </Button>
+                title={texts.logout}
+                leftIcon={<LogOut className="w-4 h-4" />}
+                colorScheme="danger"
+              />
             </div>
           )}
         </VStack>

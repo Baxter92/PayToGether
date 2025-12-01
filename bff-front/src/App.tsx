@@ -10,6 +10,7 @@ import ScrollToTop from "@/common/utils/ScrollToTop";
 import Checkout from "./pages/checkout";
 import Profile from "./pages/profile";
 import { PATHS } from "./common/constants/path";
+import Orders from "./pages/orders";
 
 function App(): JSX.Element {
   return (
@@ -19,7 +20,7 @@ function App(): JSX.Element {
         <Routes>
           {/* Routes publiques avec AuthLayout */}
           <Route>
-            <Route path="/login" element={<Login />} />
+            <Route path={PATHS.LOGIN} element={<Login />} />
           </Route>
 
           {/* Routes protégées avec MainLayout */}
@@ -29,11 +30,12 @@ function App(): JSX.Element {
             <Route element={<ProtectedRoutes />}>
               <Route path={PATHS.PROFILE} element={<Profile />} />
               <Route path={PATHS.CHECKOUT()} element={<Checkout />} />
+              <Route path={PATHS.ORDERS} element={<Orders />} />
             </Route>
           </Route>
 
           {/* Route par défaut */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to={PATHS.HOME} replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

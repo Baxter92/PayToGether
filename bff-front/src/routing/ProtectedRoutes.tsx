@@ -1,3 +1,4 @@
+import { PATHS } from "@/common/constants/path";
 import { useAuth } from "@/common/context/AuthContext";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 
@@ -18,7 +19,7 @@ export const ProtectedRoutes = () => {
   }
 
   if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to={PATHS.LOGIN} state={{ from: location }} replace />;
   }
 
   return <Outlet />;

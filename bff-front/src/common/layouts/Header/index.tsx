@@ -145,7 +145,7 @@ const Header = ({
       onLogoutClick();
     } else {
       await logout();
-      navigate("/login");
+      navigate(PATHS.LOGIN);
     }
   };
 
@@ -153,7 +153,7 @@ const Header = ({
     if (onLoginClick) {
       onLoginClick();
     } else {
-      navigate("/login", { state: { from: locationRoute } });
+      navigate(PATHS.LOGIN, { state: { from: locationRoute } });
     }
   };
 
@@ -184,19 +184,19 @@ const Header = ({
       value: "orders",
       label: texts.myOrders || "Mes commandes",
       icon: <ShoppingBag className="w-4 h-4 mr-2" />,
-      onClick: () => navigate("/orders"),
+      onClick: () => navigate(PATHS.ORDERS),
     },
     {
       value: "favorites",
       label: texts.myFavorites || "Mes favoris",
       icon: <Heart className="w-4 h-4 mr-2" />,
-      onClick: () => navigate("/favorites"),
+      onClick: () => navigate(PATHS.FAVORITES),
     },
     {
       value: "settings",
       label: texts.settings || "Paramètres",
       icon: <Settings className="w-4 h-4 mr-2" />,
-      onClick: () => navigate("/settings"),
+      onClick: () => navigate(PATHS.USERSITTINGS),
     },
     {
       value: "logout",

@@ -9,7 +9,7 @@ import { z } from "zod";
 import VStack from "@components/VStack";
 import HStack from "@components/HStack";
 import { Button } from "@/common/components/ui/button";
-import DataTable from "@components/DataTable";
+import DataTable, { type IDataTableProps } from "@components/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Avatar, AvatarImage } from "@/common/components/ui/avatar";
 import { Heading } from "../Heading";
@@ -43,6 +43,7 @@ interface IDealsListProps {
   className?: string;
   showTitle?: boolean;
   title?: string;
+  tableProps?: Partial<IDataTableProps<any, any>>;
 }
 
 /** Debounce hook simple */
@@ -115,6 +116,7 @@ export default function DealsList({
   className,
   showTitle = false,
   title = "Offres",
+  tableProps,
 }: IDealsListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<DealFilters>({
@@ -484,6 +486,7 @@ export default function DealsList({
                     showSelectionCount={true}
                     enableRowNumber={true}
                     pageSizeOptions={[itemsPerPage, 24, 50, 100]}
+                    {...tableProps}
                   />
                   {/* note: DataTable gère sa propre pagination */}
                 </div>

@@ -21,7 +21,7 @@ import Checkbox from "../Checkbox";
 /**
  * Props du DataTable
  */
-interface DataTableProps<TData, TValue> {
+export interface IDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   searchKey?: string | string[]; // une colonne ou un tableau de colonnes pour la recherche OR
@@ -43,7 +43,7 @@ export default function DataTable<TData, TValue>({
   enableRowNumber = true,
   pageSizeOptions = [10, 24, 50, 100],
   actionsRow,
-}: DataTableProps<TData, TValue>) {
+}: IDataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
