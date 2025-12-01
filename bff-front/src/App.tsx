@@ -26,8 +26,8 @@ function App(): JSX.Element {
           <Route element={<MainLayout />}>
             <Route path={PATHS.HOME} element={<Home />} />
             <Route path={PATHS.DEAL_DETAIL()} element={<DealDetail />} />
-            <Route path={PATHS.PROFILE} element={<Profile />} />
             <Route element={<ProtectedRoutes />}>
+              <Route path={PATHS.PROFILE} element={<Profile />} />
               <Route path={PATHS.CHECKOUT()} element={<Checkout />} />
             </Route>
           </Route>

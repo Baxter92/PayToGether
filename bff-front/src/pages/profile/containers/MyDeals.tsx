@@ -17,6 +17,7 @@ export default function MyDeals(): JSX.Element {
         deals={mockDeals}
         cols={{ md: 2, base: 1, lg: 3 }}
         filterPosition="top"
+        viewMode="list"
       />
     </section>
   );
