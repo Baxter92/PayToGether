@@ -11,6 +11,7 @@ import Checkout from "./pages/checkout";
 import Profile from "./pages/profile";
 import { PATHS } from "./common/constants/path";
 import Orders from "./pages/orders";
+import OrderSuccess from "./pages/orderSuccess";
 
 function App(): JSX.Element {
   return (
@@ -31,6 +32,10 @@ function App(): JSX.Element {
               <Route path={PATHS.PROFILE} element={<Profile />} />
               <Route path={PATHS.CHECKOUT()} element={<Checkout />} />
               <Route path={PATHS.ORDERS} element={<Orders />} />
+              <Route
+                path={PATHS.SUCCESS_SUBSCRIPTION()}
+                element={<OrderSuccess />}
+              />
             </Route>
           </Route>
 

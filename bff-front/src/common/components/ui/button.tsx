@@ -4,6 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/common/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
+import { useNavigate, type NavigateOptions } from "react-router-dom";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-sm text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive cursor-pointer",
@@ -283,6 +284,8 @@ export type IButtonProps = React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
     tooltip?: string | null;
+    to?: string;
+    linkOptions?: NavigateOptions;
     title?: string;
     loading?: boolean;
     leftIcon?: React.ReactNode;
@@ -305,12 +308,17 @@ function Button({
   title,
   tooltip,
   loading = false,
+  to,
+  linkOptions,
   leftIcon,
   rightIcon,
   colorScheme = "default",
   ...props
 }: IButtonProps) {
   const Comp: any = asChild ? Slot : "button";
+  const navigate = useNavigate();
+
+  const isExternalLink = to && to.startsWith("http");
 
   // compute disabled state (prop disabled override possible)
   const isDisabled = !!(props.disabled || loading);
@@ -364,6 +372,17 @@ function Button({
       data-slot="button"
       className={cn(buttonVariants({ variant, size, colorScheme, className }))}
       {...props}
+      onClick={(e) => {
+        if (to) {
+          if (isExternalLink) {
+            window.open(to, "_blank");
+          } else {
+            navigate(to, linkOptions);
+          }
+        } else {
+          props.onClick?.(e);
+        }
+      }}
       disabled={isDisabled}
       aria-disabled={isDisabled}
       aria-busy={loading || undefined}
