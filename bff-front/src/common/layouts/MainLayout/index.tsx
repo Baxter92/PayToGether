@@ -10,6 +10,7 @@ import {
 import { Outlet } from "react-router-dom";
 import Header from "../Header";
 import Footer from "../Footer";
+import { categories } from "@/common/constants/data";
 
 export const MainLayout = () => {
   return (
@@ -30,13 +31,7 @@ export const MainLayout = () => {
             </div>
           </HStack>
         }
-        categories={[
-          { name: "Restaurants", icon: Utensils, href: "/deals/restaurants" },
-          { name: "Beauté & Spa", icon: Sparkles, href: "/deals/beauty" },
-          { name: "Sport & Fitness", icon: Dumbbell, href: "/deals/fitness" },
-          { name: "Cadeaux", icon: Gift, href: "/deals/gifts" },
-          { name: "Shopping", icon: ShoppingBag, href: "/deals/shopping" },
-        ]}
+        categories={categories}
         locations={[
           { label: "Douala", value: "Douala" },
           { label: "Yaoundé", value: "Yaoundé" },

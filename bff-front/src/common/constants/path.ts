@@ -10,4 +10,6 @@ export const PATHS = {
   ORDERS: "/orders",
   FAVORITES: "/profile#favorites",
   USERSITTINGS: "/profile#settings",
+  CATEGORIES: (id: string | number = ":id") => `/categories/${id}`,
+  ALL_CATEGORIES: "/categories",
 };

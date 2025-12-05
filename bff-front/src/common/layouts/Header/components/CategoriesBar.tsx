@@ -1,8 +1,10 @@
 import { Store } from "lucide-react";
 import { Link } from "react-router-dom";
-import type { ICategory } from "../types";
 import { Dropdown } from "@components/Dropdown";
 import type { ReactNode } from "react";
+import { PATHS } from "@/common/constants/path";
+import { Button } from "@/common/components/ui/button";
+import type { ICategory } from "@/common/containers/CategoryCard/type";
 
 export interface CategoriesBarProps {
   // Catégories
@@ -115,17 +117,17 @@ const CategoriesBar = ({
   const defaultRenderCategory = (category: ICategory) => {
     const Icon = category.icon;
     return (
-      <Link
+      <Button
         key={category.name}
-        to={category.href}
         onClick={(e) => handleCategoryClick(category, e)}
-        className={`flex items-center space-x-2 text-sm font-medium ${textColor} ${hoverColor} transition-colors ${linkClassName} ${activeClassName}`}
-      >
-        {showCategoryIcons && Icon && (
-          <Icon className={`w-4 h-4 ${iconColor}`} />
-        )}
-        <span>{category.name}</span>
-      </Link>
+        variant={"link"}
+        colorScheme="secondary"
+        title={category.name}
+        leftIcon={
+          showCategoryIcons &&
+          Icon && <Icon className={`w-4 h-4 ${iconColor}`} />
+        }
+      />
     );
   };
 
@@ -175,7 +177,7 @@ const CategoriesBar = ({
         {/* Lien "Voir tout" si catégories masquées */}
         {hasMoreCategories && (
           <Link
-            to="/categories"
+            to={PATHS.ALL_CATEGORIES}
             className={`text-sm font-medium ${textColor} ${hoverColor} transition-colors underline`}
           >
             {texts.viewAll} ({categories.length - maxVisibleCategories!} +)

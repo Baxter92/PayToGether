@@ -9,7 +9,6 @@ import {
   LogOut,
   Settings,
   ShoppingBag,
-  type LucideIcon,
 } from "lucide-react";
 import { Button } from "@components/ui/button";
 import { Badge } from "@components/ui/badge";
@@ -20,6 +19,7 @@ import { Dropdown } from "@components/Dropdown";
 import SearchBar from "./components/SearchBar";
 import { PATHS } from "@/common/constants/path";
 import { toast } from "sonner";
+import type { ICategory } from "@/common/containers/CategoryCard/type";
 
 // Types pour les props du Header
 export interface HeaderProps {
@@ -51,11 +51,7 @@ export interface HeaderProps {
   cartLink?: string;
 
   // Catégories
-  categories?: Array<{
-    name: string;
-    icon: LucideIcon;
-    href: string;
-  }>;
+  categories?: ICategory[];
   showCategoriesBar?: boolean;
 
   // Langue
@@ -377,7 +373,13 @@ const Header = ({
       {/* Categories Bar - Desktop Only */}
       {showCategoriesBar && (
         <div className="hidden lg:block border-t bg-gray-50">
-          <CategoriesBar categories={categories} />
+          <CategoriesBar
+            categories={categories}
+            maxVisibleCategories={5}
+            onCategoryClick={(c) => {
+              navigate(PATHS.CATEGORIES(c.href));
+            }}
+          />
         </div>
       )}
     </header>

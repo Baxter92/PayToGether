@@ -12,6 +12,8 @@ import Profile from "./pages/profile";
 import { PATHS } from "./common/constants/path";
 import Orders from "./pages/orders";
 import OrderSuccess from "./pages/orderSuccess";
+import Category from "./pages/category";
+import Categories from "./pages/categories";
 
 function App(): JSX.Element {
   return (
@@ -36,6 +38,9 @@ function App(): JSX.Element {
                 path={PATHS.SUCCESS_SUBSCRIPTION()}
                 element={<OrderSuccess />}
               />
+              <Route path={PATHS.CATEGORIES()} element={<Category />} />
+              <Route path={PATHS.ALL_CATEGORIES} element={<Categories />} />
+              <Route path="*" element={<Navigate to={PATHS.HOME} replace />} />
             </Route>
           </Route>
 

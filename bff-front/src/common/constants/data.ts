@@ -1,4 +1,26 @@
-import { Clock, Shield, TrendingDown, Users } from "lucide-react";
+import {
+  Clock,
+  Shield,
+  TrendingDown,
+  Users,
+  Utensils,
+  Sparkles,
+  Dumbbell,
+  Gift,
+  ShoppingBag,
+  Hotel,
+  Car,
+  HeartPulse,
+  Plane,
+  Camera,
+  PawPrint,
+  Hammer,
+  GraduationCap,
+  Music,
+  Baby,
+  Trees,
+  Cpu,
+} from "lucide-react";
 
 export const mockDeals = [
   {
@@ -167,5 +189,204 @@ export const slides = [
     gradient: "from-blue-600/50 to-indigo-600/50",
     textColor: "text-white",
     badge: "Aventure",
+  },
+];
+
+export const categories = [
+  {
+    id: 1,
+    name: "Restaurants",
+    icon: Utensils,
+    href: "restaurants",
+    description:
+      "Découvrez des offres exclusives sur les meilleurs restaurants près de chez vous.",
+    count: 124,
+    image:
+      "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=1200",
+    subcategories: ["Cuisine africaine", "Fast-food", "Desserts", "Buffets"],
+  },
+  {
+    id: 2,
+    name: "Beauté & Spa",
+    icon: Sparkles,
+    href: "beauty",
+    description:
+      "Soins du visage, massages, mise en beauté et autres expériences bien-être.",
+    count: 89,
+    image:
+      "https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?q=80&w=1200",
+    subcategories: ["Massages", "Coiffure", "Soins du visage", "Manicure"],
+  },
+  {
+    id: 3,
+    name: "Sport & Fitness",
+    icon: Dumbbell,
+    href: "fitness",
+    description:
+      "Séances de sport, abonnements à des salles et activités de remise en forme.",
+    count: 56,
+    image:
+      "https://images.unsplash.com/photo-1554284126-aa88f22d8b74?q=80&w=1200",
+    subcategories: ["Gym", "Yoga", "Électrostimulation", "Boxe"],
+  },
+  {
+    id: 4,
+    name: "Cadeaux",
+    icon: Gift,
+    href: "gifts",
+    description: "Des idées cadeaux originales pour toutes les occasions.",
+    count: 43,
+    image:
+      "https://images.unsplash.com/photo-1607082349566-18782b1d4852?q=80&w=1200",
+    subcategories: [
+      "Anniversaires",
+      "Couples",
+      "Événements",
+      "Produits personnalisés",
+    ],
+  },
+  {
+    id: 5,
+    name: "Shopping",
+    icon: ShoppingBag,
+    href: "shopping",
+    description: "Mode, accessoires, appareils et autres bons plans shopping.",
+    count: 210,
+    image:
+      "https://images.unsplash.com/photo-1521335629791-ce4aec67dd47?q=80&w=1200",
+    subcategories: ["Mode femme", "Mode homme", "Électronique", "Accessoires"],
+  },
+  {
+    id: 6,
+    name: "Hôtels & Séjours",
+    icon: Hotel,
+    href: "hotels",
+    description: "Nuits d'hôtel, séjours, escapades et voyages en promotion.",
+    count: 32,
+    image:
+      "https://images.unsplash.com/photo-1501117716987-c8e1ecb21078?q=80&w=1200",
+    subcategories: ["Weekend", "Séjours luxe", "Voyages", "Vacances"],
+  },
+  {
+    id: 7,
+    name: "Automobile",
+    icon: Car,
+    href: "auto",
+    description: "Entretien automobile, lavage, réparations et accessoires.",
+    count: 64,
+    image:
+      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=1200",
+    subcategories: ["Lavage", "Vidange", "Accessoires", "Réparation"],
+  },
+  {
+    id: 8,
+    name: "Santé & Bien-être",
+    icon: HeartPulse,
+    href: "health",
+    description: "Consultations, soins médicaux et produits de santé.",
+    count: 28,
+    image:
+      "https://images.unsplash.com/photo-1580281657527-47d715b1a19f?q=80&w=1200",
+    subcategories: ["Nutrition", "Optique", "Consultations", "Fitness santé"],
+  },
+  {
+    id: 9,
+    name: "Voyages & Loisirs",
+    icon: Plane,
+    href: "travel",
+    description: "Billets, activités touristiques, parcs et loisirs.",
+    count: 44,
+    image:
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200",
+    subcategories: ["Activités", "Billets", "Plage", "Aventures"],
+  },
+  {
+    id: 10,
+    name: "Photo & Vidéo",
+    icon: Camera,
+    href: "photo",
+    description: "Shooting photo, services vidéo et impressions.",
+    count: 18,
+    image:
+      "https://images.unsplash.com/photo-1484704849700-f032a568e944?q=80&w=1200",
+    subcategories: ["Studio", "Événements", "Impressions", "Drone"],
+  },
+  {
+    id: 11,
+    name: "Animaux",
+    icon: PawPrint,
+    href: "pets",
+    description:
+      "Produits et services pour animaux : toilettage, alimentation, soins.",
+    count: 22,
+    image:
+      "https://images.unsplash.com/photo-1517849845537-4d257902454a?q=80&w=1200",
+    subcategories: ["Toilettage", "Alimentation", "Santé", "Accessoires"],
+  },
+  {
+    id: 12,
+    name: "Bricolage & Maison",
+    icon: Hammer,
+    href: "home",
+    description: "Outils, décorations, réparations et services maison.",
+    count: 51,
+    image:
+      "https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=1200",
+    subcategories: ["Outils", "Décoration", "Plomberie", "Electricité"],
+  },
+  {
+    id: 13,
+    name: "Éducation & Cours",
+    icon: GraduationCap,
+    href: "education",
+    description: "Formations, cours en ligne et ateliers.",
+    count: 37,
+    image:
+      "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=1200",
+    subcategories: ["Langues", "Développement", "Art", "Entrepreneuriat"],
+  },
+  {
+    id: 14,
+    name: "Événements & Spectacles",
+    icon: Music,
+    href: "events",
+    description: "Concerts, pièces de théâtre, spectacles et soirées.",
+    count: 14,
+    image:
+      "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?q=80&w=1200",
+    subcategories: ["Concerts", "Clubbing", "Théâtre", "Cinéma"],
+  },
+  {
+    id: 15,
+    name: "Bébés & Enfants",
+    icon: Baby,
+    href: "kids",
+    description: "Produits et activités pour bébés et enfants.",
+    count: 47,
+    image:
+      "https://images.unsplash.com/photo-1503457574462-bd27054394c1?q=80&w=1200",
+    subcategories: ["Jouets", "Vêtements", "Éveil", "Activités"],
+  },
+  {
+    id: 16,
+    name: "Nature & Plein air",
+    icon: Trees,
+    href: "outdoors",
+    description: "Randonnée, camping, matériel outdoor et aventures.",
+    count: 29,
+    image:
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200",
+    subcategories: ["Randonnée", "Camping", "Pêche", "Aventures"],
+  },
+  {
+    id: 17,
+    name: "Tech & Électronique",
+    icon: Cpu,
+    href: "tech",
+    description: "Smartphones, accessoires, PC et gadgets high-tech.",
+    count: 76,
+    image:
+      "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=1200",
+    subcategories: ["Smartphones", "Accessoires", "Audio", "Gaming"],
   },
 ];

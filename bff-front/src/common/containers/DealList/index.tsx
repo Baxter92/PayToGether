@@ -42,6 +42,8 @@ interface IDealsListProps {
   onFilterChange?: (filters: DealFilters) => void;
   className?: string;
   showTitle?: boolean;
+  titleClassName?: string;
+  description?: string;
   title?: string;
   tableProps?: Partial<IDataTableProps<any, any>>;
 }
@@ -115,7 +117,9 @@ export default function DealsList({
   onFilterChange,
   className,
   showTitle = false,
+  titleClassName,
   title = "Offres",
+  description,
   tableProps,
 }: IDealsListProps) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -374,12 +378,23 @@ export default function DealsList({
 
   return (
     <section className={cn("", className)}>
-      <VStack spacing={8}>
+      <VStack spacing={20}>
         {/* Header : titre + toggles */}
-        <HStack justify="between">
+        <HStack justify="between" align="end" spacing={10}>
           {showTitle && (
-            <HStack spacing={4} align="center">
-              <Heading level={2} title={title} underline />
+            <HStack
+              spacing={4}
+              align="end"
+              className={cn("w-full", titleClassName)}
+            >
+              <Heading
+                level={2}
+                title={title}
+                underline
+                className="flex-1"
+                descriptionSize="lg"
+                description={description}
+              />
               <span className="text-sm text-muted-foreground">
                 {filteredDeals.length} résultats
               </span>
