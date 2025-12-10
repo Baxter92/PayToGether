@@ -1,76 +1,15 @@
 import React, { useState } from "react";
-import HeaderProfile, { PROFILE_TABS } from "./containers/HeaderProfile";
-import { useAuth } from "@/common/context/AuthContext";
+import HeaderProfile, { type PROFILE_TABS } from "./containers/HeaderProfile";
 import AsideStats from "./containers/AsideStats";
 import Overview from "./containers/Overview";
 import MyDeals from "./containers/MyDeals";
 import MyPurchases from "./containers/MyPurchases";
+import Settings from "./containers/Settings";
 
-export type User = {
-  id: string;
-  name: string;
-  email?: string;
-  role?: "customer" | "merchant" | string;
-  bio?: string;
-  location?: string;
-  avatarUrl?: string | null;
-  savedDeals?: number;
-  vouchers?: number;
-  walletBalance?: number;
-};
-
-const sampleUser: User = {
-  id: "u_1",
-  name: "Ivan Mbella",
-  email: "ivan@example.com",
-  role: "customer",
-  bio: "Fan des bonnes affaires — j'achète local et je partage les bons plans.",
-  location: "Douala, Cameroon",
-  avatarUrl: null,
-  savedDeals: 18,
-  vouchers: 6,
-  walletBalance: 12000,
-};
-
-type Deal = {
-  id: string;
-  title: string;
-  merchant: string;
-  price: string;
-  originalPrice?: string;
-  purchased?: boolean;
-  image?: string | null;
-};
-
-const sampleDeals: Deal[] = [
-  {
-    id: "d1",
-    title: "Dîner 2 personnes - Restaurant La Mer",
-    merchant: "La Mer",
-    price: "₣12,000",
-    originalPrice: "₣20,000",
-  },
-  {
-    id: "d2",
-    title: "Massage relaxant 60min",
-    merchant: "ZenSpa",
-    price: "₣8,000",
-    originalPrice: "₣15,000",
-  },
-  {
-    id: "d3",
-    title: "Cours de cuisine pour 1 personne",
-    merchant: "ChefLab",
-    price: "₣6,500",
-  },
-];
-
-export default function Profile({ user = sampleUser }: { user?: User }) {
+export default function Profile() {
   // const { user } = useAuth();
   const [activeTab, setActiveTab] =
     useState<(typeof PROFILE_TABS)[number]["key"]>("overview");
-
-  const [deals] = useState<Deal[]>(sampleDeals);
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -110,14 +49,7 @@ export default function Profile({ user = sampleUser }: { user?: User }) {
               </section>
             )}
 
-            {activeTab === "settings" && (
-              <section>
-                <h2 className="text-lg font-semibold">Paramètres</h2>
-                <p className="text-sm text-slate-600 mt-2">
-                  Gérer email, mot de passe, notifications et préférences.
-                </p>
-              </section>
-            )}
+            {activeTab === "settings" && <Settings />}
           </div>
 
           {/* Activity / feed */}

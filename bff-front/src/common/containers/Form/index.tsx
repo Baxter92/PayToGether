@@ -78,7 +78,7 @@ export type IFormContainerConfig<T = any> = {
   groups?: IFieldGroup[];
   fields?: IFieldConfig[];
   columns?: number;
-  schema: z.ZodSchema<T>;
+  schema?: z.ZodSchema<T>;
   defaultValues?: Partial<T>;
   onSubmit: (options: IFormSubmitOptions<T>) => void | Promise<void>;
   onReset?: (options: IFormResetOptions<T>) => void | Promise<void>;

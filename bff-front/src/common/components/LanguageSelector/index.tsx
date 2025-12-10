@@ -1,20 +1,18 @@
 import { useI18n, type ILanguages } from "@/common/context/I18nContext";
-import React from "react";
+import { type JSX } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { ChevronDown } from "lucide-react";
 
-export default function LanguageSelector() {
+export default function LanguageSelector(): JSX.Element {
   const { changeLanguage, language, availableLanguages } = useI18n();
 
-  const change = (lng: ILanguages) => {
+  const change = (lng: ILanguages): void => {
     changeLanguage(lng);
   };
 
@@ -29,9 +27,7 @@ export default function LanguageSelector() {
             <ChevronDown className="w-4 h-4 " />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>Changer de langue</DropdownMenuLabel>
-          <DropdownMenuSeparator />
+        <DropdownMenuContent align="end" className="w-10">
           {availableLanguages?.map?.((lng) => (
             <DropdownMenuItem
               key={lng}
