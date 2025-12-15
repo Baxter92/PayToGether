@@ -1,0 +1,28 @@
+additionalArguments:
+  - "--entrypoints.web.address=:80"
+  - "--entrypoints.websecure.address=:443"
+  - "--certificatesresolvers.letsencrypt.acme.email=admin@dealtogether.ca"
+  - "--certificatesresolvers.letsencrypt.acme.storage=/data/acme.json"
+  - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+  - "--certificatesresolvers.letsencrypt.acme.tlschallenge=false"
+  - "--certificatesresolvers.letsencrypt.acme.dnschallenge=false"
+
+
+persistence:
+  enabled: true
+  name: acme-storage
+  accessMode: ReadWriteOnce
+  size: 1Gi
+  path: /data
+
+ports:
+  web:
+    expose:
+      default: true
+  websecure:
+    tls:
+      enabled: true
+
+# Supprimer tout middleware pour HTTP→HTTPS si CRD non installée
+middlewares: {}
+
