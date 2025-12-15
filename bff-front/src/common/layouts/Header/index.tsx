@@ -1,7 +1,7 @@
 import { useState, type JSX, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@context/AuthContext";
-import { useI18n } from "@context/I18nContext";
+import { useI18n } from "@hooks/useI18n";
 import {
   MapPin,
   Heart,

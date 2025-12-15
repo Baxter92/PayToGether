@@ -5,6 +5,10 @@ import Overview from "./containers/Overview";
 import MyDeals from "./containers/MyDeals";
 import MyPurchases from "./containers/MyPurchases";
 import Settings from "./containers/Settings";
+import PaymentsList from "./containers/PaymentsList";
+import OrdersReceivedList from "./containers/OrderReceivedList";
+import { mockOrdersReceived } from "@/common/constants/data";
+import ReviewsList from "./containers/ReviewsList";
 
 export default function Profile() {
   // const { user } = useAuth();
@@ -40,14 +44,15 @@ export default function Profile() {
               </section>
             )}
 
-            {activeTab === "reviews" && (
-              <section>
-                <h2 className="text-lg font-semibold">Mes avis</h2>
-                <p className="text-sm text-slate-600 mt-2">
-                  Historique des avis laissés aux marchands.
-                </p>
-              </section>
+            {activeTab === "reviews" && <ReviewsList />}
+
+            {activeTab === "payouts" && <PaymentsList />}
+
+            {activeTab === "orders-received" && (
+              <OrdersReceivedList data={mockOrdersReceived as any} />
             )}
+
+            {activeTab === "client-reviews" && <ReviewsList />}
 
             {activeTab === "settings" && <Settings />}
           </div>

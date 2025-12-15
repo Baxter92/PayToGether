@@ -120,6 +120,17 @@ const buttonVariants = cva(
         colorScheme: "success",
         class: "border border-green-500 text-green-600 hover:bg-green-50",
       },
+      {
+        variant: "outline",
+        colorScheme: "warning",
+        class: "border border-amber-500 text-amber-600 hover:bg-amber-50",
+      },
+      {
+        variant: "outline",
+        colorScheme: "secondary",
+        class:
+          "border border-secondary-foreground text-secondary-foreground hover:bg-secondary/50",
+      },
 
       // ---- GHOST (regular) ----
       {
@@ -141,6 +152,16 @@ const buttonVariants = cva(
         variant: "ghost",
         colorScheme: "success",
         class: "text-green-600 hover:bg-green-50",
+      },
+      {
+        variant: "ghost",
+        colorScheme: "warning",
+        class: "text-amber-600 hover:bg-amber-50",
+      },
+      {
+        variant: "ghost",
+        colorScheme: "secondary",
+        class: "text-secondary-foreground hover:bg-secondary/50",
       },
 
       // ---- SQUARE (solid) ----
@@ -174,6 +195,12 @@ const buttonVariants = cva(
         class:
           "bg-green-500 text-green-foreground hover:bg-green-500/90  rounded-none",
       },
+      {
+        variant: "square",
+        colorScheme: "secondary",
+        class:
+          "bg-secondary-foreground text-secondary-foreground hover:bg-secondary/90  rounded-none",
+      },
 
       // ---- ROUND-FULL (solid) ----
       {
@@ -206,6 +233,12 @@ const buttonVariants = cva(
         class:
           "bg-green-500 text-green-foreground hover:bg-green-500/90 rounded-full",
       },
+      {
+        variant: "round-full",
+        colorScheme: "secondary",
+        class:
+          "bg-secondary-foreground text-secondary-foreground hover:bg-secondary/90 rounded-full",
+      },
 
       // ---- SQUARE-OUTLINE (nouveau) ----
       {
@@ -231,6 +264,18 @@ const buttonVariants = cva(
         colorScheme: "success",
         class:
           "border border-green-500 text-green-600 hover:bg-green-50 rounded-none",
+      },
+      {
+        variant: "square-outline",
+        colorScheme: "warning",
+        class:
+          "border border-amber-500 text-amber-600 hover:bg-amber-50 rounded-none",
+      },
+      {
+        variant: "square-outline",
+        colorScheme: "secondary",
+        class:
+          "border border-secondary-foreground text-secondary-foreground hover:bg-secondary/50 rounded-none",
       },
 
       // ---- ROUND-FULL-OUTLINE (nouveau) ----
@@ -258,6 +303,18 @@ const buttonVariants = cva(
         class:
           "border border-green-500 text-green-600 hover:bg-green-50 rounded-full",
       },
+      {
+        variant: "round-full-outline",
+        colorScheme: "warning",
+        class:
+          "border border-amber-500 text-amber-600 hover:bg-amber-50 rounded-full",
+      },
+      {
+        variant: "round-full-outline",
+        colorScheme: "secondary",
+        class:
+          "border border-secondary-foreground text-secondary-foreground hover:bg-secondary/50 rounded-full",
+      },
 
       // ---- LINK (solid) ----
       {
@@ -269,6 +326,26 @@ const buttonVariants = cva(
         variant: "link",
         colorScheme: "danger",
         class: "text-destructive underline-offset-4 hover:underline",
+      },
+      {
+        variant: "link",
+        colorScheme: "warning",
+        class: "text-amber-600 underline-offset-4 hover:underline",
+      },
+      {
+        variant: "link",
+        colorScheme: "secondary",
+        class: "text-secondary-foreground underline-offset-4 hover:underline",
+      },
+      {
+        variant: "link",
+        colorScheme: "success",
+        class: "text-green-600 underline-offset-4 hover:underline",
+      },
+      {
+        variant: "link",
+        colorScheme: "info",
+        class: "text-blue-600 underline-offset-4 hover:underline",
       },
     ],
 

@@ -4,15 +4,26 @@ import { Avatar, AvatarFallback } from "@/common/components/ui/avatar";
 import { Button } from "@/common/components/ui/button";
 import { useAuth } from "@/common/context/AuthContext";
 import { AvatarImage } from "@radix-ui/react-avatar";
-import { Gift, Heart, Home, Settings, ShoppingBag, Star } from "lucide-react";
+import {
+  Gift,
+  Heart,
+  Home,
+  Settings,
+  ShoppingBag,
+  Star,
+  Store,
+} from "lucide-react";
 import { type JSX } from "react";
 
 export const PROFILE_TABS = [
   { label: "Overview", key: "overview", icon: Home },
-  { label: "Deals", key: "deals", icon: Gift },
   { label: "Achats", key: "purchases", icon: ShoppingBag },
   { label: "Favoris", key: "favorites", icon: Heart },
   { label: "Avis", key: "reviews", icon: Star },
+  { label: "Mes Deals", key: "deals", icon: Gift },
+  { label: "Commandes recues", key: "orders-received", icon: Store },
+  { label: "Avis Client", key: "client-reviews", icon: Star },
+  { label: "Payments", key: "payouts", icon: ShoppingBag },
   { label: "Paramètres", key: "settings", icon: Settings },
 ] as const;
 

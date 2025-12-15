@@ -1,5 +1,4 @@
-import { useI18n } from "@/common/context/I18nContext";
-import { Button } from "../../components/ui/button";
+import { useI18n } from "@hooks/useI18n";
 import { Facebook, Twitter } from "lucide-react";
 
 const Footer = () => {

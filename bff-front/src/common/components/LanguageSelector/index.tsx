@@ -1,4 +1,4 @@
-import { useI18n, type ILanguages } from "@/common/context/I18nContext";
+import { type ILanguages } from "@/common/context/I18nContext";
 import { type JSX } from "react";
 import {
   DropdownMenu,
@@ -8,6 +8,7 @@ import {
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { ChevronDown } from "lucide-react";
+import { useI18n } from "@hooks/useI18n";
 
 export default function LanguageSelector(): JSX.Element {
   const { changeLanguage, language, availableLanguages } = useI18n();

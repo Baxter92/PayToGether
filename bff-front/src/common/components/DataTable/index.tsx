@@ -1,5 +1,6 @@
 import * as React from "react";
 import {
+  type CellContext,
   type ColumnDef,
   type ColumnFiltersState,
   type SortingState,
@@ -30,7 +31,7 @@ export interface IDataTableProps<TData, TValue> {
   showSelectionCount?: boolean; // afficher le compteur de sélection
   enableRowNumber?: boolean; // colonne numéro
   pageSizeOptions?: number[];
-  actionsRow?: IButtonProps[];
+  actionsRow?: (props: CellContext<TData, TValue>) => IButtonProps[];
 }
 
 export default function DataTable<TData, TValue>({
@@ -249,6 +250,7 @@ export default function DataTable<TData, TValue>({
                   <th
                     key={header.id}
                     className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0"
+                    style={{ width: header.column.getSize() }}
                   >
                     {header.isPlaceholder
                       ? null
@@ -258,9 +260,7 @@ export default function DataTable<TData, TValue>({
                         )}
                   </th>
                 ))}
-                {actionsRow &&
-                Array.isArray(actionsRow) &&
-                actionsRow.length > 0 ? (
+                {actionsRow ? (
                   <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">
                     Actions
                   </th>
@@ -285,6 +285,7 @@ export default function DataTable<TData, TValue>({
                     <td
                       key={cell.id}
                       className="p-4 align-middle [&:has([role=checkbox])]:pr-0"
+                      style={{ width: cell.column.getSize() }}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -292,16 +293,17 @@ export default function DataTable<TData, TValue>({
                       )}
                     </td>
                   ))}
-                  {actionsRow &&
-                  Array.isArray(actionsRow) &&
-                  actionsRow.length > 0 ? (
+                  {actionsRow ? (
                     <td className="">
-                      <HStack spacing={10} wrap>
-                        {actionsRow.map((action, i) => (
+                      <HStack spacing={10}>
+                        {actionsRow({
+                          ...row.getVisibleCells()[0].getContext(),
+                          row,
+                        } as CellContext<TData, TValue>).map((action, i) => (
                           <Button
                             key={i}
                             size="sm"
-                            variant="square-outline"
+                            variant="outline"
                             {...action}
                           />
                         ))}
