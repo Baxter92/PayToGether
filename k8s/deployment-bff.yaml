@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: bff
-          image: registry.entreprise.com/bffpaytogether:latest
+          image: docker.io/14152021/dealtogether:bff-latest
           ports:
             - containerPort: 8080
           # Injecter les secrets en tant que variables d'environnement
@@ -58,4 +58,3 @@ spec:
             items:
               - key: application.yml
                 path: application.yml
-

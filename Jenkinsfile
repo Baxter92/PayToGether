@@ -2,10 +2,14 @@ pipeline {
   agent any
 
   environment {
-    // Utiliser le registry privé nommé dans les instructions du projet
-    REGISTRY = "registry.dealtogether.com"
-    IMAGE_FRONT = "${env.REGISTRY}/frontpaytogether"
-    IMAGE_BACK  = "${env.REGISTRY}/bffpaytogether"
+    // Utiliser Docker Hub repository 14152021/dealtogether
+    REGISTRY = "docker.io"
+    REPOSITORY = "14152021/dealtogether"
+    IMAGE_FRONT = "${REPOSITORY}"
+    IMAGE_BACK  = "${REPOSITORY}"
+    // Noms d'images locales temporaires pour éviter d'écraser les builds
+    LOCAL_IMAGE_FRONT = "frontpaytogether"
+    LOCAL_IMAGE_BACK = "bffpaytogether"
     KUBE_CRED_ID = "pay2gether"    // id du fichier kubeconfig dans Jenkins
     DOCKER_CRED_ID = "pay2gether"  // id des credentials username/password dans Jenkins
   }
@@ -71,9 +75,9 @@ pipeline {
       steps {
         sh '''
           set -e
-          echo "Building docker images"
-          docker build -t ${IMAGE_FRONT}:latest ./bff-front
-          docker build -t ${IMAGE_BACK}:latest ./
+          echo "Building docker images (local names)"
+          docker build -t ${LOCAL_IMAGE_FRONT}:latest ./bff-front
+          docker build -t ${LOCAL_IMAGE_BACK}:latest ./
         '''
       }
     }
@@ -83,29 +87,35 @@ pipeline {
         withCredentials([usernamePassword(credentialsId: "${DOCKER_CRED_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
           sh '''
             set -e
-            echo "Login to ${REGISTRY}"
-            echo "$DOCKER_PASS" | docker login ${REGISTRY} -u "$DOCKER_USER" --password-stdin
+            echo "Login to Docker Hub"
+            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 
-            FRONT_TAG=${IMAGE_FRONT}:${TAG}-${GIT_COMMIT}
-            BACK_TAG=${IMAGE_BACK}:${TAG}-${GIT_COMMIT}
+            FRONT_TAG=${REPOSITORY}:front-${TAG}-${GIT_COMMIT}
+            BACK_TAG=${REPOSITORY}:bff-${TAG}-${GIT_COMMIT}
+            LATEST_FRONT_TAG=${REPOSITORY}:front-latest
+            LATEST_BACK_TAG=${REPOSITORY}:bff-latest
 
-            docker tag ${IMAGE_FRONT}:latest ${FRONT_TAG}
-            docker tag ${IMAGE_BACK}:latest ${BACK_TAG}
+            echo "Tagging images"
+            docker tag ${LOCAL_IMAGE_FRONT}:latest ${FRONT_TAG}
+            docker tag ${LOCAL_IMAGE_BACK}:latest ${BACK_TAG}
 
+            echo "Pushing images to ${REPOSITORY}"
             docker push ${FRONT_TAG}
             docker push ${BACK_TAG}
 
-            # Optionnel: pousser également le tag latest pour environments non prod
+            # Optionnel: pousser également des tags latest pour environnements non prod
             if [ "${TAG}" = "dev" ] || [ "${TAG}" = "hml" ]; then
-              docker push ${IMAGE_FRONT}:latest || true
-              docker push ${IMAGE_BACK}:latest || true
+              docker tag ${LOCAL_IMAGE_FRONT}:latest ${LATEST_FRONT_TAG} || true
+              docker tag ${LOCAL_IMAGE_BACK}:latest ${LATEST_BACK_TAG} || true
+              docker push ${LATEST_FRONT_TAG} || true
+              docker push ${LATEST_BACK_TAG} || true
             fi
 
             echo "Pushed ${FRONT_TAG} and ${BACK_TAG}"
           '''
           script {
-            env.FRONT_TAG = "${IMAGE_FRONT}:${TAG}-${env.GIT_COMMIT}"
-            env.BACK_TAG  = "${IMAGE_BACK}:${TAG}-${env.GIT_COMMIT}"
+            env.FRONT_TAG = "${REPOSITORY}:front-${env.TAG}-${env.GIT_COMMIT}"
+            env.BACK_TAG  = "${REPOSITORY}:bff-${env.TAG}-${env.GIT_COMMIT}"
           }
         }
       }
@@ -116,8 +126,8 @@ pipeline {
         sh '''
           set -e
           echo "Cleaning up local docker images to free space"
-          docker rmi -f ${IMAGE_FRONT}:latest || true
-          docker rmi -f ${IMAGE_BACK}:latest || true
+          docker rmi -f ${LOCAL_IMAGE_FRONT}:latest || true
+          docker rmi -f ${LOCAL_IMAGE_BACK}:latest || true
           docker rmi -f ${FRONT_TAG} || true
           docker rmi -f ${BACK_TAG} || true
           docker image prune -af || true
@@ -149,6 +159,7 @@ pipeline {
           }
         }
       }
+
     }
    post {
        success {
