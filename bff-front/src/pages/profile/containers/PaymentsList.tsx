@@ -153,7 +153,7 @@ export default function PaymentsList(): JSX.Element {
         searchKey={["orderId", "buyer.name", "buyer.email"]}
         searchPlaceholder="Rechercher par commande, acheteur..."
         pageSizeOptions={[10, 25, 50]}
-        enableSelection={true}
+        enableSelection={false}
         showSelectionCount={true}
         enableRowNumber={true}
         actionsRow={({ row }) => {

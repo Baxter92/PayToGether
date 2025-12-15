@@ -1,11 +1,10 @@
-import { DataTable, HStack, StarRating } from "@/common/components";
+import { DataTable, StarRating } from "@/common/components";
 import { Badge } from "@/common/components/ui/badge";
-import { Button } from "@/common/components/ui/button";
 import { mockReviews } from "@/common/constants/data";
 import { Heading } from "@/common/containers/Heading";
 import { timeAgo } from "@/common/utils/date";
 import type { ColumnDef } from "@tanstack/react-table";
-import { EyeIcon, EyeOffIcon, Phone, ReplyIcon } from "lucide-react";
+import { EyeIcon, Phone, ReplyIcon, Trash2Icon } from "lucide-react";
 
 export type ReviewStatus = "published" | "pending" | "hidden";
 
@@ -115,13 +114,17 @@ export default function ReviewsList({
         );
       },
     },
-    {
-      header: "Statut",
-      accessorKey: "status",
-      cell: ({ getValue }) => (
-        <ReviewStatusBadge status={getValue<ReviewStatus>()} />
-      ),
-    },
+    ...(isMyReviews
+      ? [
+          {
+            header: "Statut",
+            accessorKey: "status",
+            cell: ({ getValue }) => (
+              <ReviewStatusBadge status={getValue<ReviewStatus>()} />
+            ),
+          },
+        ]
+      : []),
   ];
   return (
     <section>
@@ -134,11 +137,11 @@ export default function ReviewsList({
 
       <DataTable
         columns={columns}
-        data={mockReviews as Review[]}
+        data={data}
         searchKey={["orderNumber", "buyer.name", "dealTitle", "comment"]}
         searchPlaceholder="Commande, client, offre, commentaire..."
         pageSizeOptions={[10, 25, 50]}
-        enableSelection
+        enableSelection={false}
         showSelectionCount
         enableRowNumber
         actionsRow={({ row }) => [
@@ -146,18 +149,15 @@ export default function ReviewsList({
             tooltip: "Voir",
             leftIcon: <EyeIcon className="w-4 h-4" />,
           },
-          {
-            tooltip: "Publier",
-            leftIcon: <EyeIcon className="w-4 h-4" />,
-            colorScheme: "success",
-            onClick: () => alert(`Publier ${row.original.id}`),
-          },
-          {
-            tooltip: "Masquer",
-            leftIcon: <EyeOffIcon className="w-4 h-4" />,
-            colorScheme: "warning",
-            onClick: () => alert(`Masquer ${row.original.id}`),
-          },
+          ...(isMyReviews
+            ? [
+                {
+                  tooltip: "Supprimer",
+                  leftIcon: <Trash2Icon className="w-4 h-4" />,
+                  colorScheme: "danger",
+                },
+              ]
+            : []),
           {
             tooltip: "Répondre",
             colorScheme: "secondary",

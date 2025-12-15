@@ -1,17 +1,30 @@
+import { HStack } from "@/common/components";
+import { Button } from "@/common/components/ui/button";
 import { mockDeals } from "@/common/constants/data";
 import DealsList from "@/common/containers/DealList";
 import { Heading } from "@/common/containers/Heading";
-import { type JSX } from "react";
+import { Plus } from "lucide-react";
+import { useState, type JSX } from "react";
 
 export default function MyDeals(): JSX.Element {
+  const [addDealModalOpen, setAddDealModalOpen] = useState(false);
   return (
     <section>
-      <Heading
-        level={2}
-        title="Toutes mes offres"
-        description="Parcourez les deals que vous avez créés"
-        underline
-      />
+      <HStack spacing={4} align="center" justify="between" className="py-4">
+        <Heading
+          level={2}
+          title="Toutes mes offres"
+          description="Parcourez les deals que vous avez créés"
+          underline
+        />
+
+        <Button
+          leftIcon={<Plus className="w-4 h-4" />}
+          onClick={() => setAddDealModalOpen(true)}
+        >
+          Ajouter une offre
+        </Button>
+      </HStack>
 
       <DealsList
         deals={mockDeals}

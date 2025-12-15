@@ -28,7 +28,7 @@ export default function ProductDetails({ deal }: { deal: Deal }) {
       )}
 
       <div className="flex items-center gap-4 mt-4">
-        <Badge variant="secondary">{deal.rating} ★</Badge>
+        <Badge>{deal.rating} ★</Badge>
         <div className="text-sm text-gray-600">{deal.reviewsCount} avis</div>
         <div className="text-sm text-gray-500">{deal.location}</div>
         {deal.expiryDate && (

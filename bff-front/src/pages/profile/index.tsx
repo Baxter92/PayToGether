@@ -7,8 +7,8 @@ import MyPurchases from "./containers/MyPurchases";
 import Settings from "./containers/Settings";
 import PaymentsList from "./containers/PaymentsList";
 import OrdersReceivedList from "./containers/OrderReceivedList";
-import { mockOrdersReceived } from "@/common/constants/data";
-import ReviewsList from "./containers/ReviewsList";
+import { mockOrdersReceived, mockReviews } from "@/common/constants/data";
+import ReviewsList, { type Review } from "./containers/ReviewsList";
 
 export default function Profile() {
   // const { user } = useAuth();
@@ -44,7 +44,9 @@ export default function Profile() {
               </section>
             )}
 
-            {activeTab === "reviews" && <ReviewsList />}
+            {activeTab === "reviews" && (
+              <ReviewsList data={mockReviews as Review[]} isMyReviews />
+            )}
 
             {activeTab === "payouts" && <PaymentsList />}
 
@@ -52,7 +54,9 @@ export default function Profile() {
               <OrdersReceivedList data={mockOrdersReceived as any} />
             )}
 
-            {activeTab === "client-reviews" && <ReviewsList />}
+            {activeTab === "client-reviews" && (
+              <ReviewsList data={mockReviews as Review[]} />
+            )}
 
             {activeTab === "settings" && <Settings />}
           </div>

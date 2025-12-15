@@ -2,6 +2,7 @@ import { DataTable, HStack } from "@/common/components";
 import { Dropdown } from "@/common/components/Dropdown";
 import { Badge } from "@/common/components/ui/badge";
 import { Button } from "@/common/components/ui/button";
+import { Heading } from "@/common/containers/Heading";
 import { timeAgo } from "@/common/utils/date";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
@@ -142,7 +143,12 @@ export default function OrdersReceivedList({ data }: { data: Order[] }) {
 
   return (
     <section>
-      <h2 className="text-xl font-semibold mb-4">Commandes reçues</h2>
+      <Heading
+        level={2}
+        title="Mes commandes"
+        description="Parcourez les commandes que vous avez faites"
+        underline
+      />
 
       <DataTable
         columns={columns}
@@ -150,7 +156,7 @@ export default function OrdersReceivedList({ data }: { data: Order[] }) {
         searchKey={["orderNumber", "buyer.name", "dealTitle"]}
         searchPlaceholder="Commande, client, offre..."
         pageSizeOptions={[10, 25, 50]}
-        enableSelection
+        enableSelection={false}
         showSelectionCount
         enableRowNumber
         actionsRow={({ row }) => {
