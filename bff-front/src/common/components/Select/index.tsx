@@ -100,7 +100,6 @@ export default function Select({
 
         <SelectContent className={contentClassName}>
           <div className={cn(maxContentHeight, "overflow-auto")}>
-            <SelectItem disabled>{placeholder}</SelectItem>
             {hasGroups
               ? groups!.map((g) => (
                   <SelectGroup key={g.label}>

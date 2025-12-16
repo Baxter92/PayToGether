@@ -5,6 +5,7 @@ import DealsList from "@/common/containers/DealList";
 import { Heading } from "@/common/containers/Heading";
 import { Plus } from "lucide-react";
 import { useState, type JSX } from "react";
+import { CreateDealModal } from "../components/CreateDealModal";
 
 export default function MyDeals(): JSX.Element {
   const [addDealModalOpen, setAddDealModalOpen] = useState(false);
@@ -31,6 +32,10 @@ export default function MyDeals(): JSX.Element {
         cols={{ md: 2, base: 1, lg: 3 }}
         filterPosition="top"
         viewMode="list"
+      />
+      <CreateDealModal
+        open={addDealModalOpen}
+        onClose={() => setAddDealModalOpen(false)}
       />
     </section>
   );

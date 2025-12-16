@@ -115,7 +115,7 @@ const Form = <T extends Record<string, any>>({
     groups || (fields ? [{ fields, columns }] : []);
 
   const internalForm = useForm<T>({
-    resolver: zodResolver(schema as any),
+    ...(schema ? { resolver: zodResolver(schema as any) } : {}),
     defaultValues: defaultValues as any,
   });
 
