@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: front
-          image: registry.entreprise.com/frontpaytogether:latest
+          image: docker.io/14152021/dealtogether:front-latest
           ports:
             - containerPort: 80
           envFrom:

@@ -3,12 +3,17 @@ kind: Service
 metadata:
   name: registry
   namespace: paytogether
+  labels:
+    app: registry
+    # annotations:
+    # Si vous souhaitez exposer le registry via NodePort, commentez la ligne suivante et adaptez
+    # service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "tcp"
 spec:
+  selector:
+    app: registry
   type: ClusterIP
   ports:
     - port: 5000
       protocol: TCP
       targetPort: 5000
-  selector:
-    app: registry
-
+      protocol: TCP
