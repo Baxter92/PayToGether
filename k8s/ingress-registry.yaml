@@ -1,11 +1,15 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: registry-ingress
+  name: registry
   namespace: paytogether
   annotations:
-    kubernetes.io/ingress.class: "nginx"
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
 spec:
+  tls:
+    - hosts:
+        - registry.dealtogether.ca
   rules:
     - host: registry.dealtogether.ca
       http:
