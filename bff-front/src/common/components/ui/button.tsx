@@ -2,7 +2,7 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from "@/common/lib/utils";
+import { cn } from "@lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 import { useNavigate, type NavigateOptions } from "react-router-dom";
 
@@ -449,7 +449,7 @@ function Button({
       data-slot="button"
       className={cn(buttonVariants({ variant, size, colorScheme, className }))}
       {...props}
-      onClick={(e) => {
+      onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
         if (to) {
           if (isExternalLink) {
             window.open(to, "_blank");

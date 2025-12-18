@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Badge } from "@components/ui/badge";
 import { Separator } from "@components/ui/separator";
 import type { Deal } from "../types";

@@ -113,7 +113,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         email,
         name,
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-        role: "user",
+        role: "client",
       };
 
       setUser(userData);

@@ -108,7 +108,7 @@ export default function CheckboxGroup({
             aria-describedby={describedBy}
             aria-invalid={!!error || undefined}
             // pass group-level error to each checkbox if your Checkbox supports it
-            error={error ? true : undefined}
+            error={error ? String(error) : undefined}
           />
         ))}
       </div>

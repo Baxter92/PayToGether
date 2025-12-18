@@ -1,4 +1,4 @@
-import { useForm, type Path, type UseFormReturn } from "react-hook-form";
+import { useForm, type UseFormReturn, type FieldValues } from "react-hook-form";
 import type * as z from "zod";
 import Select, { type ISelectProps } from "@components/Select";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -39,7 +39,7 @@ export type IFieldConfig = {
   name: string;
   colSpan?: number;
   label: string;
-  render?: (field: IFieldConfig, form: UseFormReturn) => React.ReactNode;
+  render?: (field: IFieldConfig, form: UseFormReturn<any>) => React.ReactNode;
 } & (
   | ({
       type: "text";
@@ -59,29 +59,29 @@ export type IFieldConfig = {
 export interface IFieldGroup {
   title?: string;
   description?: string;
-  columns?: number; // Nombre de colonnes par ligne (1-4)
+  columns?: number;
   fields: IFieldConfig[];
   className?: string;
 }
 
-export interface IFormSubmitOptions<T = any> {
+export interface IFormSubmitOptions<T = FieldValues> {
   data: T;
-  form: UseFormReturn;
+  form: UseFormReturn<any>;
 }
 
-export interface IFormResetOptions<T = any> {
-  form: UseFormReturn;
+export interface IFormResetOptions {
+  form: UseFormReturn<any>;
 }
 
-export type IFormContainerConfig<T = any> = {
-  form?: UseFormReturn<T>; // <--- was UseFormReturn (non-generic)
+export type IFormContainerConfig<T = FieldValues> = {
+  form?: UseFormReturn<any>;
   groups?: IFieldGroup[];
   fields?: IFieldConfig[];
   columns?: number;
-  schema?: z.ZodSchema<T>;
+  schema?: z.ZodSchema<any>;
   defaultValues?: Partial<T>;
   onSubmit: (options: IFormSubmitOptions<T>) => void | Promise<void>;
-  onReset?: (options: IFormResetOptions<T>) => void | Promise<void>;
+  onReset?: (options: IFormResetOptions) => void | Promise<void>;
   submitLabel?: string;
   resetLabel?: string;
   showResetButton?: boolean;
@@ -91,7 +91,7 @@ export type IFormContainerConfig<T = any> = {
   resetBtnProps?: IButtonProps;
 };
 
-const Form = <T extends Record<string, any>>({
+const Form = <T extends FieldValues>({
   form: externalForm,
   groups,
   fields,
@@ -114,8 +114,8 @@ const Form = <T extends Record<string, any>>({
   const normalizedGroups: IFieldGroup[] =
     groups || (fields ? [{ fields, columns }] : []);
 
-  const internalForm = useForm<T>({
-    ...(schema ? { resolver: zodResolver(schema as any) } : {}),
+  const internalForm = useForm<any>({
+    ...(schema ? { resolver: zodResolver(schema as any) as any } : {}),
     defaultValues: defaultValues as any,
   });
 
@@ -170,32 +170,34 @@ const Form = <T extends Record<string, any>>({
 
     const baseInputClass = `w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
       error ? "border-red-500" : "border-gray-300"
-    } ${(field as any)?.disabled ? "bg-gray-100 cursor-not-allowed" : ""}`;
+    } ${(field as InputProps)?.disabled ? "bg-gray-100 cursor-not-allowed" : ""}`;
 
     switch (field.type) {
-      case "textarea":
+      case "textarea": {
+        const { label: _label, type: _type, colSpan: _colSpan, render: _render, name, ...textareaProps } = field as IFieldConfig & { type: "textarea" };
         return (
           <Textarea
-            {...register(field.name as Path<T>)}
-            {...field}
-            placeholder={field?.placeholder}
-            disabled={field.disabled}
+            {...register(name)}
+            placeholder={textareaProps?.placeholder}
+            disabled={textareaProps.disabled}
             className={`${baseInputClass} min-h-[100px]`}
             error={errorMessage}
           />
         );
+      }
 
       case "select": {
-        const { onChange, ...rest } = register(field.name);
+        const { onChange: _onChange, ...rest } = register(field.name);
+        const selectField = field as IFieldConfig & ISelectProps;
         return (
           <Select
             {...rest}
-            disabled={field.disabled}
+            disabled={selectField.disabled}
             triggerClassName={baseInputClass}
-            items={field.items}
-            {...field}
+            items={selectField.items}
+            label={selectField.label}
             onValueChange={(value) =>
-              onChange({ target: { value, name: field.name } })
+              form.setValue(field.name, value)
             }
             error={errorMessage}
           />
@@ -203,14 +205,15 @@ const Form = <T extends Record<string, any>>({
       }
 
       case "radio": {
-        const { onChange, ...rest } = register(field.name);
+        const { onChange: _onChange, ...rest } = register(field.name);
+        const radioField = field as IFieldConfig & IRadioGroupProps;
         return (
           <RadioGroup
             {...rest}
-            disabled={field.disabled}
-            items={field.items}
+            disabled={radioField.disabled}
+            items={radioField.items}
             onChange={(value) =>
-              onChange({ target: { value, name: field.name } })
+              form.setValue(field.name, value)
             }
             error={errorMessage}
           />
@@ -219,40 +222,43 @@ const Form = <T extends Record<string, any>>({
 
       case "checkbox":
         if ((field as ICheckboxGroupProps).items) {
-          const { onChange, ...rest } = register(field.name);
+          const { onChange: _onChange, ...rest } = register(field.name);
+          const checkboxGroupField = field as IFieldConfig & ICheckboxGroupProps;
           return (
             <CheckboxGroup
               {...rest}
-              disabled={field.disabled}
-              items={(field as ICheckboxGroupProps).items}
+              disabled={checkboxGroupField.disabled}
+              items={checkboxGroupField.items}
               onChange={(value) =>
-                onChange({ target: { value, name: field.name } })
+                form.setValue(field.name, value)
               }
               error={errorMessage}
             />
           );
         } else {
           // Single checkbox
+          const checkboxField = field as IFieldConfig & ICheckboxProps;
           return (
             <Checkbox
               {...register(field.name)}
-              disabled={field.disabled}
-              label={(field as ICheckboxProps).label}
+              disabled={checkboxField.disabled}
+              label={checkboxField.label}
               error={errorMessage}
             />
           );
         }
 
       case "date": {
-        const { onChange, ...rest } = register(field.name);
+        const { onChange: _onChange, ...rest } = register(field.name);
+        const dateField = field as IFieldConfig & IDateInputProps;
         return (
           <DateInput
             {...rest}
-            {...field}
-            max={field.max}
-            min={field.min}
+            label={dateField.label}
+            max={dateField.max}
+            min={dateField.min}
             onChange={(date) =>
-              onChange({ target: { value: date, name: field.name } })
+              form.setValue(field.name, date)
             }
             error={errorMessage}
           />
@@ -260,13 +266,14 @@ const Form = <T extends Record<string, any>>({
       }
 
       case "datetime": {
-        const { onChange, ...rest } = register(field.name);
+        const { onChange: _onChange, ...rest } = register(field.name);
+        const datetimeField = field as IFieldConfig & IDateTimeInputProps;
         return (
           <DateTimeInput
             {...rest}
-            {...field}
+            label={datetimeField.label}
             onChange={(date) =>
-              onChange({ target: { value: date, name: field.name } })
+              form.setValue(field.name, date)
             }
             error={errorMessage}
           />
@@ -274,34 +281,40 @@ const Form = <T extends Record<string, any>>({
       }
 
       case "time": {
-        const { onChange, ...rest } = register(field.name);
+        const { onChange: _onChange, ...rest } = register(field.name);
+        const timeField = field as IFieldConfig & ITimeInputProps;
         return (
           <TimeInput
             {...rest}
-            {...field}
+            label={timeField.label}
             onChange={(time) =>
-              onChange({ target: { value: time, name: field.name } })
+              form.setValue(field.name, time)
             }
             error={errorMessage}
           />
         );
       }
-      default:
+      default: {
+        const inputField = field as IFieldConfig & InputProps;
         return (
           <Input
-            {...register(field.name as Path<T>, {
+            {...register(field.name, {
               valueAsNumber: field.type === "number",
             })}
-            {...field}
+            type={field.type}
+            label={inputField.label}
+            placeholder={inputField.placeholder}
+            disabled={inputField.disabled}
             className={baseInputClass}
             error={errorMessage}
           />
         );
+      }
     }
   };
 
-  const handleFormSubmit = async (data: T) => {
-    await onSubmit({ data, form });
+  const handleFormSubmit = async (data: FieldValues) => {
+    await onSubmit({ data: data as T, form });
   };
 
   const handleFormReset = async () => {
@@ -309,7 +322,7 @@ const Form = <T extends Record<string, any>>({
       await onReset({ form });
     } else {
       // Comportement par défaut : réinitialiser aux valeurs par défaut
-      reset(defaultValues as any);
+      reset(defaultValues as FieldValues);
     }
   };
 

@@ -104,7 +104,7 @@ export default function RadioGroup({
             aria-describedby={describedBy}
             aria-invalid={!!error || undefined}
             // pass group-level error to each radio as well, if your Radio supports it
-            error={error ? true : undefined}
+            error={error ? String(error) : undefined}
           />
         ))}
       </div>

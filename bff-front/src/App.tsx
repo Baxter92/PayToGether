@@ -1,7 +1,9 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./common/context/AuthContext";
 import { ProtectedRoutes } from "./routing/ProtectedRoutes";
 import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import ForgotPassword from "./pages/auth/ForgotPassword";
 import Home from "./pages/home";
 import { MainLayout } from "./common/layouts/MainLayout";
 import type { JSX } from "react";
@@ -14,6 +16,8 @@ import Orders from "./pages/orders";
 import OrderSuccess from "./pages/orderSuccess";
 import Category from "./pages/category";
 import Categories from "./pages/categories";
+import SearchPage from "./pages/search";
+import NotFound from "./pages/notFound";
 
 function App(): JSX.Element {
   return (
@@ -21,15 +25,18 @@ function App(): JSX.Element {
       <ScrollToTop />
       <AuthProvider>
         <Routes>
-          {/* Routes publiques avec AuthLayout */}
-          <Route>
-            <Route path={PATHS.LOGIN} element={<Login />} />
-          </Route>
+          {/* Routes publiques Auth */}
+          <Route path={PATHS.LOGIN} element={<Login />} />
+          <Route path={PATHS.REGISTER} element={<Register />} />
+          <Route path={PATHS.FORGOT_PASSWORD} element={<ForgotPassword />} />
 
-          {/* Routes protégées avec MainLayout */}
+          {/* Routes avec MainLayout */}
           <Route element={<MainLayout />}>
             <Route path={PATHS.HOME} element={<Home />} />
             <Route path={PATHS.DEAL_DETAIL()} element={<DealDetail />} />
+            <Route path={PATHS.SEARCH} element={<SearchPage />} />
+
+            {/* Routes protégées */}
             <Route element={<ProtectedRoutes />}>
               <Route path={PATHS.PROFILE} element={<Profile />} />
               <Route path={PATHS.CHECKOUT()} element={<Checkout />} />
@@ -40,12 +47,12 @@ function App(): JSX.Element {
               />
               <Route path={PATHS.CATEGORIES()} element={<Category />} />
               <Route path={PATHS.ALL_CATEGORIES} element={<Categories />} />
-              <Route path="*" element={<Navigate to={PATHS.HOME} replace />} />
             </Route>
           </Route>
 
-          {/* Route par défaut */}
-          <Route path="*" element={<Navigate to={PATHS.HOME} replace />} />
+          {/* Page 404 */}
+          <Route path={PATHS.NOT_FOUND} element={<NotFound />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

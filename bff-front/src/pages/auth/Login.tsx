@@ -1,7 +1,8 @@
 import { useAuth } from "@/common/context/AuthContext";
-import { Eye, EyeOff, Lock, LogIn, Mail, UserCircle } from "lucide-react";
+import { Eye, EyeOff, Lock, LogIn, Mail } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import { PATHS } from "@/common/constants/path";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -111,10 +112,16 @@ export default function Login() {
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+        <div className="mt-4 text-center">
+          <Link to={PATHS.FORGOT_PASSWORD} className="text-sm text-gray-600 hover:text-primary">
+            Mot de passe oublié ?
+          </Link>
+        </div>
+
+        <div className="mt-4 text-center">
+          <Link to={PATHS.REGISTER} className="text-primary hover:text-primary/80 text-sm font-medium">
             Pas de compte ? S'inscrire
-          </button>
+          </Link>
         </div>
 
         <div className="mt-6 pt-6 border-t border-gray-200">

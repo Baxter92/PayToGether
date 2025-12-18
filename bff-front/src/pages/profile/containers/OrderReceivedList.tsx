@@ -1,7 +1,5 @@
-import { DataTable, HStack } from "@/common/components";
-import { Dropdown } from "@/common/components/Dropdown";
+import { DataTable } from "@/common/components";
 import { Badge } from "@/common/components/ui/badge";
-import { Button } from "@/common/components/ui/button";
 import { Heading } from "@/common/containers/Heading";
 import { timeAgo } from "@/common/utils/date";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -177,7 +175,7 @@ export default function OrdersReceivedList({ data }: { data: Order[] }) {
                   {
                     tooltip: "Confirmer",
                     leftIcon: <Check className="w-4 h-4" />,
-                    colorScheme: "success",
+                    colorScheme: "success" as const,
                     onClick: () =>
                       alert(`Confirmer ${row.original.id} (simulation)`),
                   },
@@ -188,7 +186,7 @@ export default function OrdersReceivedList({ data }: { data: Order[] }) {
                   {
                     tooltip: "Marquer utilisée",
                     leftIcon: <CircleCheckBig className="w-4 h-4" />,
-                    colorScheme: "warning",
+                    colorScheme: "warning" as const,
                     onClick: () =>
                       alert(
                         `Marquer ${row.original.id} comme utilisée (simulation)`
@@ -201,7 +199,7 @@ export default function OrdersReceivedList({ data }: { data: Order[] }) {
                   {
                     tooltip: "Annuler",
                     leftIcon: <X className="w-4 h-4" />,
-                    colorScheme: "danger",
+                    colorScheme: "danger" as const,
                     onClick: () =>
                       alert(`Annuler ${row.original.id} (simulation)`),
                   },
@@ -211,13 +209,13 @@ export default function OrdersReceivedList({ data }: { data: Order[] }) {
             {
               tooltip: "Contacter l'acheteur",
               leftIcon: <Phone className="w-4 h-4" />,
-              colorScheme: "danger",
+              colorScheme: "danger" as const,
               onClick: () => alert(`Contacter l'acheteur ${row.original.id}`),
             },
             {
               tooltip: "Télécharger ticket",
               leftIcon: <DownloadIcon className="w-4 h-4" />,
-              colorScheme: "secondary",
+              colorScheme: "secondary" as const,
               onClick: () => alert(`Télécharger ticket ${row.original.id}`),
             },
           ];

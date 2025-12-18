@@ -36,7 +36,7 @@ export function DeliveryForm({
     <Form
       fields={fields}
       schema={deliverySchema}
-      onSubmit={({ data }) => onSubmit(data)}
+      onSubmit={({ data }) => onSubmit(data as DeliveryData)}
       submitLabel={isSubmitting ? "Traitement..." : "Continuer"}
       resetLabel={onBack ? "Retour" : undefined}
       onReset={() => {

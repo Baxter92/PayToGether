@@ -26,4 +26,5 @@ export type PaymentData = {
   cardNumber?: string;
   cardExpiry?: string;
   cardCvv?: string;
+  saveCard?: boolean;
 };
