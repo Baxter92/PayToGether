@@ -11,7 +11,7 @@ metadata:
 spec:
   selector:
     app: registry
-  type: ClusterIP
+  type: LoadBalancer
   ports:
     - port: 5000
       targetPort: 5000

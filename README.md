@@ -124,7 +124,7 @@ Attendu : le service doit avoir des endpoints listés. Si `endpoints` est `<none
 curl -v -H "Host: dev.dealtogether.ca" http://31.97.132.132/
 
 # Si votre DNS est configuré pour pointer dev.dealtogether.ca vers l'IP
-curl -v http://dev.dealtogether.ca/
+
 
 # Vérifier la résolution DNS
 dig +short dev.dealtogether.ca
@@ -167,3 +167,50 @@ Si vous voulez, je peux :
 - proposer des ajustements manuels pour MetalLB / NodePort si vous êtes en environnement bare-metal,
 - ajouter une route `/health` dans le front ou ajuster les probes à `/index.html` si nécessaire ;
 
+## Exposition des services en LoadBalancer (bare-metal)
+
+Sur un cluster bare-metal ou VPS, `Service` de type `LoadBalancer` nécessite un composant réseau qui alloue des IP externes (ex: MetalLB). Ci-dessous les étapes pour installer MetalLB et configurer une plage d'adresses IP.
+
+1) Installer MetalLB (version stable) :
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.12/config/manifests/metallb-native.yaml
+```
+
+2) Créer une ConfigMap MetalLB avec une plage d'adresses disponible dans votre réseau (exemple) :
+
+```bash
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: metallb-system
+  name: config
+data:
+  config: |
+    address-pools:
+    - name: default
+      protocol: layer2
+      addresses:
+      - 31.97.132.240-31.97.132.250
+EOF
+```
+
+3) Vérifier que les Services `LoadBalancer` gagnent une EXTERNAL-IP :
+
+```bash
+kubectl get svc -n paytogether -o wide
+kubectl describe svc front-service -n paytogether
+```
+
+4) Mettre à jour votre DNS (ou /etc/hosts) pour pointer `dev.dealtogether.ca` vers l'IP exposée par MetalLB.
+
+Supprimer Traefik (si présent)
+
+Si vous aviez Traefik installé et que vous voulez le supprimer pour utiliser NGINX Ingress :
+
+```bash
+# exemple si installé via Helm
+helm uninstall traefik -n traefik
+kubectl delete namespace traefik
+```
