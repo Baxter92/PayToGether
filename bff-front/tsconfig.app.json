@@ -9,7 +9,18 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@common/*": ["./src/common/*"],
+      "@components/*": ["./src/common/components/*"],
+      "@layouts/*": ["./src/common/layouts/*"],
+      "@pages/*": ["./src/pages/*"],
+      "@containers/*": ["./src/common/containers/*"],
+      "@context/*": ["./src/common/context/*"],
+      "@hooks/*": ["./src/common/hooks/*"],
+      "@utils/*": ["./src/common/utils/*"],
+      "@assets/*": ["./src/assets/*"],
+      "@lib/*": ["./src/common/lib/*"],
+      "@constants/*": ["./src/common/constants/*"]
     },
 
     /* Bundler mode */
