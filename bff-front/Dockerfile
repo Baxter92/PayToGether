@@ -3,6 +3,7 @@ FROM node:20-alpine AS build
 WORKDIR /app
 # Copier les fichiers de dépendances et installer proprement
 COPY package*.json ./
+RUN npm config set legacy-peer-deps true
 RUN npm ci
 # Copier le code source (éviter de copier node_modules du host)
 COPY . .
