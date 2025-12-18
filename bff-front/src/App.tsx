@@ -1,33 +1,54 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { AuthProvider } from "./common/context/AuthContext";
+import { ProtectedRoutes } from "./routing/ProtectedRoutes";
+import Login from "./pages/auth/Login";
+import Home from "./pages/home";
+import { MainLayout } from "./common/layouts/MainLayout";
+import type { JSX } from "react";
+import DealDetail from "./pages/dealDetail";
+import ScrollToTop from "@/common/utils/ScrollToTop";
+import Checkout from "./pages/checkout";
+import Profile from "./pages/profile";
+import { PATHS } from "./common/constants/path";
+import Orders from "./pages/orders";
+import OrderSuccess from "./pages/orderSuccess";
+import Category from "./pages/category";
+import Categories from "./pages/categories";
 
-function App() {
-  const [count, setCount] = useState(0);
-
+function App(): JSX.Element {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1 className="bg-amber-600">Vite + React</h1>
-      <div className="p-4">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <BrowserRouter>
+      <ScrollToTop />
+      <AuthProvider>
+        <Routes>
+          {/* Routes publiques avec AuthLayout */}
+          <Route>
+            <Route path={PATHS.LOGIN} element={<Login />} />
+          </Route>
+
+          {/* Routes protégées avec MainLayout */}
+          <Route element={<MainLayout />}>
+            <Route path={PATHS.HOME} element={<Home />} />
+            <Route path={PATHS.DEAL_DETAIL()} element={<DealDetail />} />
+            <Route element={<ProtectedRoutes />}>
+              <Route path={PATHS.PROFILE} element={<Profile />} />
+              <Route path={PATHS.CHECKOUT()} element={<Checkout />} />
+              <Route path={PATHS.ORDERS} element={<Orders />} />
+              <Route
+                path={PATHS.SUCCESS_SUBSCRIPTION()}
+                element={<OrderSuccess />}
+              />
+              <Route path={PATHS.CATEGORIES()} element={<Category />} />
+              <Route path={PATHS.ALL_CATEGORIES} element={<Categories />} />
+              <Route path="*" element={<Navigate to={PATHS.HOME} replace />} />
+            </Route>
+          </Route>
+
+          {/* Route par défaut */}
+          <Route path="*" element={<Navigate to={PATHS.HOME} replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 

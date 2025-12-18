@@ -1,0 +1,26 @@
+export type Deal = {
+  id: string;
+  title: string;
+  shortSubtitle?: string;
+  priceOriginal: number;
+  priceDeal?: number;
+  pricePerPart: number;
+  savingsText?: string;
+  rating?: number;
+  reviewsCount?: number;
+  images: string[];
+  description: string;
+  highlights?: string[];
+  whatsIncluded?: string[];
+  location?: string;
+  expiryDate?: string;
+  partsTotal: number;
+  partsSold: number;
+  minRequired: number;
+  partWeightKg?: number;
+  supplier?: any;
+  packaging?: any;
+  nutrition?: any;
+  cookingTips?: string[];
+  shelfLifeDays?: number;
+};
