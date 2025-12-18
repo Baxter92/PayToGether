@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: front-config
+  namespace: paytogether
+  labels:
+    app: front
+data:
+  # Vite requires variables exposées au client avec le préfixe VITE_
+  # On respecte la convention française camelCase pour le nom après le préfixe.
+  VITE_urlBackend: "http://bff-service.paytogether.svc.cluster.local:8080"
+
