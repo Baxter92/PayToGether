@@ -23,10 +23,6 @@ TestResults.xml
 #Node modules
 node_modules/
 dist/
-#Package-lock file
-package-lock.json
-#Yarn lock file
-yarn.lock
 #Target folder
 bff-provider/target/
 bff-wsclient/target/
