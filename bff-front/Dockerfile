@@ -8,8 +8,7 @@ ARG NODE_ENV=production
 RUN npm config set legacy-peer-deps true
 RUN NODE_ENV=development npm ci --include=dev --no-audit --progress=false
 # Installer typescript et vite globalement pour garantir la disponibilité de 'tsc' et 'vite' lors du build
-RUN npm install -g typescript@~5.9.3 vite@^7.1.9 --no-audit --no-progress
-
+RUN npm install -g typescript vite --no-audit --no-progress
 # Copier le code source (éviter de copier node_modules du host)
 COPY . .
 # Build (Vite)
