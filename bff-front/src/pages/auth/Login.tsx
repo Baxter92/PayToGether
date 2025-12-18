@@ -15,7 +15,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const from = (location.state as any)?.from?.pathname || "/dashboard";
+  const from = (location.state as any)?.from?.pathname || "/";
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -113,13 +113,19 @@ export default function Login() {
         </form>
 
         <div className="mt-4 text-center">
-          <Link to={PATHS.FORGOT_PASSWORD} className="text-sm text-gray-600 hover:text-primary">
+          <Link
+            to={PATHS.FORGOT_PASSWORD}
+            className="text-sm text-gray-600 hover:text-primary"
+          >
             Mot de passe oublié ?
           </Link>
         </div>
 
         <div className="mt-4 text-center">
-          <Link to={PATHS.REGISTER} className="text-primary hover:text-primary/80 text-sm font-medium">
+          <Link
+            to={PATHS.REGISTER}
+            className="text-primary hover:text-primary/80 text-sm font-medium"
+          >
             Pas de compte ? S'inscrire
           </Link>
         </div>
