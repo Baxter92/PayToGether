@@ -1,10 +1,15 @@
 # Build stage
 FROM node:20-alpine AS build
 WORKDIR /app
-# Copier les fichiers de dépendances et installer proprement
+# Copier les fichiers de dépendances
 COPY package*.json ./
+# Utiliser NODE_ENV=development uniquement pour l'installation afin de récupérer les devDependencies (tsc, vite)
+ARG NODE_ENV=production
 RUN npm config set legacy-peer-deps true
-RUN npm ci
+RUN NODE_ENV=development npm ci --include=dev --no-audit --progress=false
+# Installer typescript et vite globalement pour garantir la disponibilité de 'tsc' et 'vite' lors du build
+RUN npm install -g typescript@~5.9.3 vite@^7.1.9 --no-audit --no-progress
+
 # Copier le code source (éviter de copier node_modules du host)
 COPY . .
 # Build (Vite)
