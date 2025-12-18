@@ -7,12 +7,16 @@ COPY package*.json ./
 ARG NODE_ENV=production
 RUN npm config set legacy-peer-deps true
 RUN NODE_ENV=development npm ci --include=dev --no-audit --progress=false
-# Installer typescript et vite globalement pour garantir la disponibilité de 'tsc' et 'vite' lors du build
-RUN npm install -g typescript vite --no-audit --no-progress
+# Installer outils système nécessaires pour compiler d'éventuelles dépendances natives et permettre l'installation (si besoin)
+RUN apk add --no-cache python3 build-base libc6-compat \
+    && npm config set unsafe-perm true
+# Ne pas installer typescript/vite globalement (provoque parfois des erreurs).
+# Utiliser les binaires locaux fournis par devDependencies via npx pour la build.
+
 # Copier le code source (éviter de copier node_modules du host)
 COPY . .
-# Build (Vite)
-RUN npm run build
+# Build (utilise les binaires locaux via npx)
+RUN npx -y tsc -b && npx -y vite build
 
 # Production stage
 FROM nginx:alpine
