@@ -46,7 +46,6 @@ const SearchBar = ({
   onSearch,
   onFocus,
   onBlur,
-  onClear,
   icon,
   iconPosition = "left",
   showIcon = true,
@@ -115,22 +114,6 @@ const SearchBar = ({
     setIsSearchFocused(false);
     if (onBlur) {
       onBlur();
-    }
-  };
-
-  const handleClear = () => {
-    const newValue = "";
-
-    if (value === undefined) {
-      setInternalValue(newValue);
-    }
-
-    if (onChange) {
-      onChange(newValue);
-    }
-
-    if (onClear) {
-      onClear();
     }
   };
 

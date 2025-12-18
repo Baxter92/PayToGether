@@ -61,7 +61,7 @@ export default function ShippingForm({
     <Form
       fields={fields}
       schema={shippingSchema}
-      onSubmit={({ data }) => onSubmit(data)}
+      onSubmit={({ data }) => onSubmit(data as ShippingData)}
       submitLabel={isSubmitting ? "Traitement..." : "Continuer"}
       resetLabel={onBack ? "Retour" : undefined}
       onReset={onBack}

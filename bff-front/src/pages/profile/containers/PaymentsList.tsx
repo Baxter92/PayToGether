@@ -1,14 +1,12 @@
-import React, { type JSX } from "react";
+import { type JSX } from "react";
 import { type ColumnDef } from "@tanstack/react-table";
-import { Button } from "@components/ui/button";
-import { DataTable, HStack } from "@/common/components";
+import { DataTable } from "@/common/components";
 import { Badge } from "@/common/components/ui/badge";
 import { formatCurrency } from "@/common/utils/formatCurrency";
 import {
   CheckIcon,
   DownloadIcon,
   EyeIcon,
-  Paperclip,
   Phone,
   Wallet2Icon,
 } from "lucide-react";
@@ -173,7 +171,7 @@ export default function PaymentsList(): JSX.Element {
                   {
                     tooltip: "Marquer payé",
                     leftIcon: <CheckIcon className="w-4 h-4" />,
-                    colorScheme: "success",
+                    colorScheme: "success" as const,
                     onClick: () =>
                       alert(
                         `Marquer ${row.original.id} comme payé (simulation)`
@@ -186,7 +184,7 @@ export default function PaymentsList(): JSX.Element {
                   {
                     tooltip: "Rembourser",
                     leftIcon: <Wallet2Icon className="w-4 h-4" />,
-                    colorScheme: "warning",
+                    colorScheme: "warning" as const,
                     onClick: () =>
                       alert(`Rembourser ${row.original.id} (simulation)`),
                   },
@@ -196,13 +194,13 @@ export default function PaymentsList(): JSX.Element {
             {
               tooltip: "Contacter l'acheteur",
               leftIcon: <Phone className="w-4 h-4" />,
-              colorScheme: "danger",
+              colorScheme: "danger" as const,
               onClick: () => alert(`Contacter l'acheteur ${row.original.id}`),
             },
             {
               tooltip: "Télécharger reçu",
               leftIcon: <DownloadIcon className="w-4 h-4" />,
-              colorScheme: "secondary",
+              colorScheme: "secondary" as const,
               onClick: () => alert(`Télécharger reçu ${row.original.id}`),
             },
           ];

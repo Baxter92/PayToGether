@@ -1,7 +1,6 @@
 import { useState, type JSX, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@context/AuthContext";
-import { useI18n } from "@hooks/useI18n";
 import {
   MapPin,
   Heart,
@@ -106,7 +105,7 @@ const Header = ({
   onSearch,
   showFavorites = true,
   favoritesCount = 0,
-  favoritesLink = "/favorites",
+  favoritesLink = PATHS.FAVORITES,
   showCart = true,
   cartCount = 0,
   cartLink = "/cart",
@@ -132,7 +131,6 @@ const Header = ({
   },
 }: HeaderProps): JSX.Element => {
   const { user, logout } = useAuth();
-  const { t } = useI18n();
   const navigate = useNavigate();
   const locationRoute = useLocation();
   const [location, setLocation] = useState(defaultLocation);
@@ -217,9 +215,9 @@ const Header = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 shrink-0">
+          <Link to="/" className="flex items-center space-x-2 shrink-0 group">
             {appLogo || (
-              <span className="text-xl font-bold bg-linear-to-r from-primary-600 to-primary-900 bg-clip-text text-transparent">
+              <span className="text-2xl font-extrabold font-[family-name:var(--font-heading)] bg-gradient-to-r from-primary-500 to-primary-700 bg-clip-text text-transparent group-hover:from-primary-600 group-hover:to-primary-800 transition-all duration-300">
                 {appName}
               </span>
             )}
@@ -237,7 +235,9 @@ const Header = ({
                 }
                 items={locations}
                 selectedValue={location}
-                onChange={handleLocationChange}
+                onChange={(value) =>
+                  handleLocationChange(Array.isArray(value) ? value[0] : value)
+                }
                 className="px-3"
                 triggerOptions={{
                   variant: "ghost",

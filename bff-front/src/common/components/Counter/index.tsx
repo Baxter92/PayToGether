@@ -38,6 +38,7 @@ export default function Counter({
         variant="outline"
         onClick={() => handleRemove()}
         disabled={qty <= min}
+        role="button-minus"
       >
         -
       </Button>
@@ -46,6 +47,7 @@ export default function Counter({
         variant="outline"
         onClick={() => handleAdd()}
         disabled={qty >= max}
+        role="button-add"
       >
         +
       </Button>

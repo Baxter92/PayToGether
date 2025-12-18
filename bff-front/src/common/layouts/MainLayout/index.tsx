@@ -1,12 +1,5 @@
-import HStack from "@components/Hstack";
-import {
-  Dumbbell,
-  Gift,
-  ShoppingBag,
-  Sparkles,
-  Tag,
-  Utensils,
-} from "lucide-react";
+import HStack from "@/common/components/HStack";
+import { Tag } from "lucide-react";
 import { Outlet } from "react-router-dom";
 import Header from "../Header";
 import Footer from "../Footer";

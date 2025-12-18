@@ -11,14 +11,14 @@ export type VStackProps = React.DetailedHTMLProps<
   wrap?: boolean;
 };
 
-const alignMap: Record<VStackProps["align"], string> = {
+const alignMap: Record<NonNullable<VStackProps["align"]>, string> = {
   start: "items-start",
   center: "items-center",
   end: "items-end",
   stretch: "items-stretch",
 };
 
-const justifyMap: Record<VStackProps["justify"], string> = {
+const justifyMap: Record<NonNullable<VStackProps["justify"]>, string> = {
   start: "justify-start",
   center: "justify-center",
   end: "justify-end",

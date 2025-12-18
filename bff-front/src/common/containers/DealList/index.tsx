@@ -13,7 +13,7 @@ import DataTable, { type IDataTableProps } from "@components/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Avatar, AvatarImage } from "@/common/components/ui/avatar";
 import { Heading } from "../Heading";
-
+import { Progress } from "@/common/components/ui/progress";
 /** Déclare le type de filtre */
 interface DealFilters {
   category?: string;
@@ -147,17 +147,6 @@ export default function DealsList({
       didMountRef.current = true;
     }
   }, [debouncedFilters, onFilterChange]);
-
-  // Reset handler
-  const resetFilters = () =>
-    setFilters({
-      category: "all",
-      priceMin: 0,
-      priceMax: 300,
-      city: "all",
-      status: "all",
-      searchQuery: "",
-    });
 
   // Configuration des champs du formulaire de filtres
   const filterFields: IFieldConfig[] = useMemo(() => {
@@ -323,29 +312,22 @@ export default function DealsList({
     return [
       {
         accessorKey: "image",
-        header: "Image",
+        header: "Produit",
         cell: ({ row }) => {
           const d = row.original;
           return (
-            <Avatar>
-              <AvatarImage src={d.image} alt={d.title} />
-            </Avatar>
-          );
-        },
-      },
-      {
-        accessorKey: "title",
-        header: "Titre",
-        cell: ({ row }) => {
-          const d = row.original;
-          return (
-            <div className="flex flex-col">
-              <span className="font-medium">{d.title}</span>
-              {d.subtitle && (
-                <span className="text-xs text-muted-foreground">
-                  {d.subtitle}
-                </span>
-              )}
+            <div className="flex items-center gap-3">
+              <Avatar className="h-12 w-12 rounded-lg border border-border/50 shadow-sm">
+                <AvatarImage src={d.image} alt={d.title} className="object-cover" />
+              </Avatar>
+              <div className="flex flex-col">
+                <span className="font-semibold text-foreground">{d.title}</span>
+                {d.subtitle && (
+                  <span className="text-xs text-muted-foreground">
+                    {d.subtitle}
+                  </span>
+                )}
+              </div>
             </div>
           );
         },
@@ -354,23 +336,73 @@ export default function DealsList({
         accessorKey: "category",
         header: "Catégorie",
         cell: ({ getValue }) => (
-          <span className="text-sm">{String(getValue() ?? "")}</span>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-secondary/50 text-secondary-foreground">
+            {String(getValue() ?? "")}
+          </span>
         ),
       },
       {
         accessorKey: "groupPrice",
         header: "Prix",
+        cell: ({ row }) => {
+          const d = row.original;
+          return (
+            <div className="flex flex-col">
+              <span className="font-bold text-primary">{d.groupPrice} €</span>
+              {d.originalPrice && d.originalPrice !== d.groupPrice && (
+                <span className="text-xs text-muted-foreground line-through">
+                  {d.originalPrice} €
+                </span>
+              )}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "sold",
+        header: "Parts vendues",
+        cell: ({ row }) => {
+          const d = row.original;
+          const sold = d.sold ?? 0;
+          const total = d.total ?? 100;
+          const percentage = Math.round((sold / total) * 100);
+          
+          return (
+            <div className="flex flex-col gap-1.5 min-w-[120px]">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">{sold}/{total}</span>
+                <span className={cn(
+                  "font-semibold",
+                  percentage >= 80 ? "text-destructive" : percentage >= 50 ? "text-amber-500" : "text-primary"
+                )}>
+                  {percentage}%
+                </span>
+              </div>
+              <Progress 
+                value={percentage} 
+                className={cn(
+                  "h-2",
+                  percentage >= 80 ? "[&>div]:bg-destructive" : percentage >= 50 ? "[&>div]:bg-amber-500" : "[&>div]:bg-primary"
+                )}
+              />
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "deadline",
+        header: "Deadline",
         cell: ({ getValue }) => (
-          <span>
-            {typeof getValue() === "number" ? `${getValue()} €` : getValue()}
-          </span>
+          <span className="text-sm text-muted-foreground">{String(getValue() ?? "")}</span>
         ),
       },
       {
         accessorKey: "city",
         header: "Ville",
         cell: ({ getValue }) => (
-          <span className="text-sm">{String(getValue() ?? "")}</span>
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-muted text-muted-foreground">
+            {String(getValue() ?? "")}
+          </span>
         ),
       },
     ];

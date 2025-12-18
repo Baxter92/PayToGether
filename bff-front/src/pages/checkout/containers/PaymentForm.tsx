@@ -1,11 +1,9 @@
-import React, { useMemo } from "react";
+import { useState, useEffect } from "react";
 import Form, { type IFieldConfig } from "@/common/containers/Form";
 import { formatCurrency } from "@/common/utils/formatCurrency";
-import { useState } from "react";
 import type { PaymentData } from "../types";
 import * as z from "zod";
 import { Card, CardContent } from "@components/ui/card";
-import { Button } from "@components/ui/button";
 import HStack from "@components/HStack";
 import VStack from "@components/VStack";
 import { InfoIcon } from "lucide-react";
@@ -60,7 +58,7 @@ function formatCardNumber(value = "") {
   const digits = value.replace(/\D/g, "");
   // AMEX groups differently: 4-6-5
   if (/^3[47]/.test(digits)) {
-    return digits.replace(/(\d{1,4})(\d{1,6})?(\d{1,5})?/, (m, a, b, c) =>
+    return digits.replace(/(\d{1,4})(\d{1,6})?(\d{1,5})?/, (_match, a, b, c) =>
       [a, b, c].filter(Boolean).join(" ")
     );
   }
@@ -189,13 +187,14 @@ export default function PaymentFormCard({
         const val = watch(field.name) ?? "";
         const formatted = formatCardNumber(val);
         const brand = detectCardBrand(val);
+        
         // update detectedBrand and Luhn check (local state)
-        React.useEffect(() => {
+        useEffect(() => {
           setDetectedBrand(brand);
           const ok =
             val.replace(/\D/g, "").length >= 12 ? luhnValid(val) : null;
           setLuhnOk(ok === null ? null : !!ok);
-        }, [val]);
+        }, [val, brand]);
 
         return (
           <div>

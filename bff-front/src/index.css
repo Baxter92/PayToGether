@@ -3,13 +3,38 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Custom animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px oklch(0.75 0.15 230 / 0.3); }
+  50% { box-shadow: 0 0 40px oklch(0.75 0.15 230 / 0.5); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* <CHANGE> Ajout des variations de couleurs primaires (100-900) */
+  /* Font families */
+  --font-heading: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+
+  /* Primary colors - Cyan/Teal theme */
   --color-primary: oklch(0.75 0.15 230);
   --color-primary-50: oklch(0.97 0.05 230);
   --color-primary-100: oklch(0.94 0.08 230);
@@ -17,13 +42,12 @@
   --color-primary-300: oklch(0.82 0.14 230);
   --color-primary-400: oklch(0.78 0.15 230);
   --color-primary-500: oklch(0.75 0.15 230);
-  /* couleur principale */
   --color-primary-600: oklch(0.70 0.14 230);
   --color-primary-700: oklch(0.64 0.13 230);
   --color-primary-800: oklch(0.57 0.11 230);
   --color-primary-900: oklch(0.48 0.09 230);
 
-  /* <CHANGE> Ajout des variations de couleurs secondaires (100-900) */
+  /* Secondary colors */
   --color-secondary: oklch(0.97 0.01 230);
   --color-secondary-50: oklch(0.99 0.003 230);
   --color-secondary-100: oklch(0.98 0.005 230);
@@ -31,13 +55,12 @@
   --color-secondary-300: oklch(0.95 0.01 230);
   --color-secondary-400: oklch(0.93 0.015 250);
   --color-secondary-500: oklch(0.97 0.01 230);
-  /* couleur principale */
   --color-secondary-600: oklch(0.92 0.012 250);
   --color-secondary-700: oklch(0.85 0.015 250);
   --color-secondary-800: oklch(0.32 0.03 250);
   --color-secondary-900: oklch(0.22 0.03 250);
 
-  /* <CHANGE> Ajout des variations de couleurs accent (100-900) */
+  /* Accent colors - Gold/Yellow */
   --color-accent: oklch(0.85 0.18 85);
   --color-accent-50: oklch(0.98 0.05 85);
   --color-accent-100: oklch(0.97 0.08 85);
@@ -45,13 +68,12 @@
   --color-accent-300: oklch(0.92 0.15 85);
   --color-accent-400: oklch(0.88 0.17 85);
   --color-accent-500: oklch(0.85 0.18 85);
-  /* couleur principale */
   --color-accent-600: oklch(0.80 0.17 85);
   --color-accent-700: oklch(0.74 0.16 85);
   --color-accent-800: oklch(0.65 0.14 85);
   --color-accent-900: oklch(0.52 0.12 85);
 
-  /* <CHANGE> Ajout des variations de couleurs destructives (100-900) */
+  /* Destructive colors */
   --color-destructive: oklch(0.65 0.24 25);
   --color-destructive-50: oklch(0.95 0.08 25);
   --color-destructive-100: oklch(0.92 0.12 25);
@@ -59,13 +81,17 @@
   --color-destructive-300: oklch(0.82 0.20 25);
   --color-destructive-400: oklch(0.74 0.23 25);
   --color-destructive-500: oklch(0.65 0.24 25);
-  /* couleur principale */
   --color-destructive-600: oklch(0.58 0.22 25);
   --color-destructive-700: oklch(0.50 0.20 25);
   --color-destructive-800: oklch(0.42 0.18 25);
   --color-destructive-900: oklch(0.34 0.16 25);
 
-  /* Tokens existants (sans variations numériques) */
+  /* Custom shadows */
+  --shadow-card: 0 4px 6px -1px oklch(0 0 0 / 0.05), 0 2px 4px -2px oklch(0 0 0 / 0.05);
+  --shadow-card-hover: 0 20px 25px -5px oklch(0 0 0 / 0.1), 0 8px 10px -6px oklch(0 0 0 / 0.1);
+  --shadow-glow: 0 0 30px oklch(0.75 0.15 230 / 0.25);
+
+  /* Tokens mapping */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -93,35 +119,38 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Animation tokens */
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
+  --animate-slide-up: slide-up 0.5s ease-out forwards;
 }
 
-/* ---- Sonner Toaster type colors mapping using your theme tokens ---- */
+/* Sonner Toaster colors */
 .toaster {
-  /* conserve tes variables normales déjà définies */
   --normal-bg: var(--popover);
   --normal-text: var(--popover-foreground);
   --normal-border: var(--border);
   --border-radius: var(--radius);
 
-  /* Map types to tes tokens existants (tu peux ajuster les tokens si tu préfères d'autres) */
-  --success-bg: var(--color-accent-600);        /* succès -> accent (ex: vert/jaune selon ton thème) */
+  --success-bg: var(--color-accent-600);
   --success-text: var(--color-accent-50);
   --success-border: var(--color-accent-700);
 
-  --info-bg: var(--color-primary-600);          /* info -> primary */
+  --info-bg: var(--color-primary-600);
   --info-text: var(--color-primary-50);
   --info-border: var(--color-primary-700);
 
-  --warning-bg: var(--color-secondary-600);     /* warning -> secondary */
+  --warning-bg: var(--color-secondary-600);
   --warning-text: var(--color-secondary-50);
   --warning-border: var(--color-secondary-700);
 
-  --error-bg: var(--color-destructive-600);     /* erreur -> destructive */
+  --error-bg: var(--color-destructive-600);
   --error-text: var(--color-destructive-50);
   --error-border: var(--color-destructive-700);
 }
 
-/* Appliquer les variables sur les éléments toast (Sonner utilise data-type) */
 .toaster [data-type="success"] {
   background: var(--success-bg) !important;
   color: var(--success-text) !important;
@@ -146,10 +175,9 @@
   border: 1px solid var(--error-border) !important;
 }
 
-
 :root {
-  --radius: 0.625rem;
-  --background: oklch(0.98 0.01 230);
+  --radius: 0.75rem;
+  --background: oklch(0.985 0.005 230);
   --foreground: oklch(0.18 0.02 240);
   --primary: oklch(0.75 0.15 230);
   --primary-foreground: oklch(1 0 0);
@@ -157,11 +185,11 @@
   --secondary-foreground: oklch(0.22 0.03 250);
   --accent: oklch(0.85 0.18 85);
   --accent-foreground: oklch(0.22 0.03 250);
-  --muted: oklch(0.93 0.02 240);
+  --muted: oklch(0.95 0.015 240);
   --muted-foreground: oklch(0.45 0.04 250);
   --destructive: oklch(0.65 0.24 25);
-  --border: oklch(0.9 0.02 230);
-  --input: oklch(0.9 0.02 230);
+  --border: oklch(0.92 0.015 230);
+  --input: oklch(0.92 0.015 230);
   --ring: oklch(0.7 0.1 230);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -183,34 +211,34 @@
 }
 
 .dark {
-  --background: oklch(0.18 0.02 240);
+  --background: oklch(0.16 0.02 240);
   --foreground: oklch(0.97 0.01 230);
   --primary: oklch(0.75 0.15 230);
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.32 0.03 250);
+  --secondary: oklch(0.25 0.025 250);
   --secondary-foreground: oklch(0.97 0.01 230);
   --accent: oklch(0.85 0.18 85);
   --accent-foreground: oklch(0.15 0.02 250);
-  --muted: oklch(0.45 0.03 240);
-  --muted-foreground: oklch(0.8 0.02 230);
+  --muted: oklch(0.25 0.02 240);
+  --muted-foreground: oklch(0.7 0.02 230);
   --destructive: oklch(0.65 0.24 25);
-  --border: oklch(0.35 0.03 240);
-  --input: oklch(0.35 0.03 240);
+  --border: oklch(0.30 0.025 240);
+  --input: oklch(0.30 0.025 240);
   --ring: oklch(0.6 0.1 230);
-  --card: oklch(0.205 0 0);
+  --card: oklch(0.20 0.015 240);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
+  --popover: oklch(0.20 0.015 240);
   --popover-foreground: oklch(0.985 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
+  --sidebar: oklch(0.18 0.015 240);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent: oklch(0.25 0.02 240);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
@@ -223,5 +251,11 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
   }
 }

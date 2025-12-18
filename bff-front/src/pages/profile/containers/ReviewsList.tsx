@@ -1,6 +1,5 @@
 import { DataTable, StarRating } from "@/common/components";
 import { Badge } from "@/common/components/ui/badge";
-import { mockReviews } from "@/common/constants/data";
 import { Heading } from "@/common/containers/Heading";
 import { timeAgo } from "@/common/utils/date";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -119,8 +118,8 @@ export default function ReviewsList({
           {
             header: "Statut",
             accessorKey: "status",
-            cell: ({ getValue }) => (
-              <ReviewStatusBadge status={getValue<ReviewStatus>()} />
+            cell: ({ getValue }: { getValue: () => ReviewStatus }) => (
+              <ReviewStatusBadge status={getValue()} />
             ),
           },
         ]
@@ -144,7 +143,7 @@ export default function ReviewsList({
         enableSelection={false}
         showSelectionCount
         enableRowNumber
-        actionsRow={({ row }) => [
+        actionsRow={() => [
           {
             tooltip: "Voir",
             leftIcon: <EyeIcon className="w-4 h-4" />,
@@ -154,18 +153,18 @@ export default function ReviewsList({
                 {
                   tooltip: "Supprimer",
                   leftIcon: <Trash2Icon className="w-4 h-4" />,
-                  colorScheme: "danger",
+                  colorScheme: "danger" as const,
                 },
               ]
             : []),
           {
             tooltip: "Répondre",
-            colorScheme: "secondary",
+            colorScheme: "secondary" as const,
             leftIcon: <ReplyIcon className="w-4 h-4" />,
           },
           {
             tooltip: "Contacter le client",
-            colorScheme: "danger",
+            colorScheme: "danger" as const,
             leftIcon: <Phone className="w-4 h-4" />,
           },
         ]}

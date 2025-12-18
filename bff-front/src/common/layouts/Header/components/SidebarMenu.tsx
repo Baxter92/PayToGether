@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@components/ui/sheet";
 import { Button } from "@components/ui/button";
 import {
@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/common/context/AuthContext";
-import type { ICategory } from "../types";
+import type { ICategory } from "@/common/containers/CategoryCard/type";
 import VStack from "@components/VStack";
 import { Dropdown } from "@components/Dropdown";
 import { PATHS } from "@/common/constants/path";
@@ -78,8 +78,6 @@ export interface SidebarMenuProps {
 }
 
 const SidebarMenu = ({
-  favoritesCount = 0,
-  cartCount = 0,
   location = "Douala",
   locations = [
     { label: "Douala", value: "Douala" },
@@ -88,13 +86,8 @@ const SidebarMenu = ({
     { label: "Garoua", value: "Garoua" },
   ],
   showLocationSelector = true,
-  onLocationChange,
   categories = [],
   showCategories = true,
-  profileLink = "/profile",
-  ordersLink = "/orders",
-  favoritesLink = "/favorites",
-  settingsLink = "/settings",
   loginLink = "/login",
   registerLink = "/register",
   userName,
@@ -148,12 +141,6 @@ const SidebarMenu = ({
       onRegisterClick();
     } else {
       navigate(registerLink);
-    }
-  };
-
-  const handleLocationSelect = (newLocation: string) => {
-    if (onLocationChange) {
-      onLocationChange(newLocation);
     }
   };
 
@@ -271,7 +258,7 @@ const SidebarMenu = ({
                       onClick={closeMenu}
                       title={category.name}
                       leftIcon={
-                        <Icon className="w-4 h-4 mr-2 text-primary-600" />
+                        Icon ? <Icon className="w-4 h-4 mr-2 text-primary-600" /> : undefined
                       }
                     />
                   );

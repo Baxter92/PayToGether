@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import HeaderProfile, { type PROFILE_TABS } from "./containers/HeaderProfile";
 import AsideStats from "./containers/AsideStats";
 import Overview from "./containers/Overview";
@@ -9,6 +9,7 @@ import PaymentsList from "./containers/PaymentsList";
 import OrdersReceivedList from "./containers/OrderReceivedList";
 import { mockOrdersReceived, mockReviews } from "@/common/constants/data";
 import ReviewsList, { type Review } from "./containers/ReviewsList";
+import Favorites from "./containers/Favorites";
 
 export default function Profile() {
   // const { user } = useAuth();
@@ -35,14 +36,7 @@ export default function Profile() {
 
             {activeTab === "purchases" && <MyPurchases />}
 
-            {activeTab === "favorites" && (
-              <section>
-                <h2 className="text-lg font-semibold">Offres sauvegardées</h2>
-                <p className="text-sm text-slate-600 mt-2">
-                  Retrouvez les offres que vous avez mises de coté.
-                </p>
-              </section>
-            )}
+            {activeTab === "favorites" && <Favorites />}
 
             {activeTab === "reviews" && (
               <ReviewsList data={mockReviews as Review[]} isMyReviews />
