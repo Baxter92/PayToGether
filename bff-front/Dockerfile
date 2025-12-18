@@ -1,19 +1,20 @@
-# Build stage
-FROM node:20-alpine AS build
+# Build stage (Debian-based to avoid apk issues on some servers)
+FROM node:20-bullseye-slim AS build
 WORKDIR /app
 # Copier les fichiers de dépendances
 COPY package*.json ./
-# Utiliser NODE_ENV=development uniquement pour l'installation afin de récupérer les devDependencies (tsc, vite)
+# Ajouter les outils système nécessaires et config npm
 ARG NODE_ENV=production
-RUN npm config set legacy-peer-deps true
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+    && apt-get install -y -qq --no-install-recommends python3 build-essential ca-certificates \
+    && npm config set legacy-peer-deps true \
+    && npm config set unsafe-perm true \
+    && rm -rf /var/lib/apt/lists/*
+# Installer les dépendances (inclure dev pour tsc/vite)
 RUN NODE_ENV=development npm ci --include=dev --no-audit --progress=false
-# Installer outils système nécessaires pour compiler d'éventuelles dépendances natives et permettre l'installation (si besoin)
-RUN apk add --no-cache python3 build-base libc6-compat \
-    && npm config set unsafe-perm true
-# Ne pas installer typescript/vite globalement (provoque parfois des erreurs).
-# Utiliser les binaires locaux fournis par devDependencies via npx pour la build.
 
-# Copier le code source (éviter de copier node_modules du host)
+# Copier le code source
 COPY . .
 # Build (utilise les binaires locaux via npx)
 RUN npx -y tsc -b && npx -y vite build
