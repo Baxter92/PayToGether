@@ -6,11 +6,10 @@ metadata:
   labels:
     app: front
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: front
   ports:
     - protocol: TCP
-      port: 80
+      port: 9000
       targetPort: 80
-
