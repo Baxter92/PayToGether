@@ -16,6 +16,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
 
   const from = (location.state as any)?.from?.pathname || "/";
+  console.log(from.trim("/checkout"));
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -24,7 +25,11 @@ export default function Login() {
 
     try {
       await login(email, password);
-      navigate(from, { replace: true });
+      if (from.includes("/checkout")) {
+        navigate(from.replace(/\/checkout$/, ""), { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur de connexion");
     } finally {

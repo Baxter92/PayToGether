@@ -14,6 +14,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Avatar, AvatarImage } from "@/common/components/ui/avatar";
 import { Heading } from "../Heading";
 import { Progress } from "@/common/components/ui/progress";
+
 /** Déclare le type de filtre */
 interface DealFilters {
   category?: string;
@@ -58,7 +59,7 @@ function useDebounced<T>(value: T, delay = 350) {
   return v;
 }
 
-/** Mobile bottom sheet component (inchangé) */
+/** Mobile bottom sheet component */
 function MobileFilterSheet({
   open,
   onClose,
@@ -126,7 +127,7 @@ export default function DealsList({
   const [filters, setFilters] = useState<DealFilters>({
     category: "all",
     priceMin: 0,
-    priceMax: 300,
+    priceMax: 200000,
     city: "all",
     status: "all",
     searchQuery: "",
@@ -148,6 +149,23 @@ export default function DealsList({
     }
   }, [debouncedFilters, onFilterChange]);
 
+  // Extraire les catégories et villes uniques dynamiquement
+  const uniqueCategories = useMemo(() => {
+    const cats = new Set(deals.map((d) => d.category).filter(Boolean));
+    return Array.from(cats).map((cat) => ({
+      value: cat,
+      label: cat.charAt(0).toUpperCase() + cat.slice(1),
+    }));
+  }, [deals]);
+
+  const uniqueCities = useMemo(() => {
+    const cities = new Set(deals.map((d) => d.city).filter(Boolean));
+    return Array.from(cities).map((city) => ({
+      value: city,
+      label: city,
+    }));
+  }, [deals]);
+
   // Configuration des champs du formulaire de filtres
   const filterFields: IFieldConfig[] = useMemo(() => {
     const fields: IFieldConfig[] = [];
@@ -168,8 +186,7 @@ export default function DealsList({
         type: "select",
         items: [
           { value: "all", label: "Toutes les catégories" },
-          { value: "clim", label: "Climatiseurs" },
-          { value: "ventilo", label: "Ventilateurs" },
+          ...uniqueCategories,
         ],
       });
     }
@@ -179,11 +196,7 @@ export default function DealsList({
         name: "city",
         label: "Ville",
         type: "select",
-        items: [
-          { value: "all", label: "Toutes les villes" },
-          { value: "yaounde", label: "Yaoundé" },
-          { value: "douala", label: "Douala" },
-        ],
+        items: [{ value: "all", label: "Toutes les villes" }, ...uniqueCities],
       });
     }
 
@@ -204,21 +217,21 @@ export default function DealsList({
       fields.push(
         {
           name: "priceMin",
-          label: "Prix minimum (€)",
+          label: "Prix minimum (FCFA)",
           type: "number",
           placeholder: "0",
         },
         {
           name: "priceMax",
-          label: "Prix maximum (€)",
+          label: "Prix maximum (FCFA)",
           type: "number",
-          placeholder: "300",
+          placeholder: "200000",
         }
       );
     }
 
     return fields;
-  }, [availableFilters]);
+  }, [availableFilters, uniqueCategories, uniqueCities]);
 
   // Schéma de validation pour les filtres
   const filterSchema = z.object({
@@ -237,9 +250,7 @@ export default function DealsList({
     setCurrentPage(1);
   };
 
-  // -------------------------
   // Filtering (WITHOUT pagination) -> used for LIST view (DataTable)
-  // -------------------------
   const filteredDeals = useMemo(() => {
     let dataset = [...deals];
 
@@ -273,9 +284,7 @@ export default function DealsList({
     return dataset;
   }, [deals, filters]);
 
-  // -------------------------
-  // Grid dataset: apply pagination slice (kept as before)
-  // -------------------------
+  // Grid dataset: apply pagination slice
   const _totalPages = useMemo(() => {
     return totalPages > 0
       ? totalPages
@@ -305,9 +314,7 @@ export default function DealsList({
     </VStack>
   );
 
-  // -------------------------
   // Columns for DataTable (LIST view)
-  // -------------------------
   const tableColumns = useMemo<ColumnDef<any, any>[]>(() => {
     return [
       {
@@ -318,7 +325,11 @@ export default function DealsList({
           return (
             <div className="flex items-center gap-3">
               <Avatar className="h-12 w-12 rounded-lg border border-border/50 shadow-sm">
-                <AvatarImage src={d.image} alt={d.title} className="object-cover" />
+                <AvatarImage
+                  src={d.image}
+                  alt={d.title}
+                  className="object-cover"
+                />
               </Avatar>
               <div className="flex flex-col">
                 <span className="font-semibold text-foreground">{d.title}</span>
@@ -336,7 +347,7 @@ export default function DealsList({
         accessorKey: "category",
         header: "Catégorie",
         cell: ({ getValue }) => (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-secondary/50 text-secondary-foreground">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-secondary/50 text-secondary-foreground capitalize">
             {String(getValue() ?? "")}
           </span>
         ),
@@ -348,10 +359,12 @@ export default function DealsList({
           const d = row.original;
           return (
             <div className="flex flex-col">
-              <span className="font-bold text-primary">{d.groupPrice} €</span>
+              <span className="font-bold text-primary">
+                {d.groupPrice.toLocaleString()} FCFA
+              </span>
               {d.originalPrice && d.originalPrice !== d.groupPrice && (
                 <span className="text-xs text-muted-foreground line-through">
-                  {d.originalPrice} €
+                  {d.originalPrice.toLocaleString()} FCFA
                 </span>
               )}
             </div>
@@ -366,23 +379,35 @@ export default function DealsList({
           const sold = d.sold ?? 0;
           const total = d.total ?? 100;
           const percentage = Math.round((sold / total) * 100);
-          
+
           return (
             <div className="flex flex-col gap-1.5 min-w-[120px]">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">{sold}/{total}</span>
-                <span className={cn(
-                  "font-semibold",
-                  percentage >= 80 ? "text-destructive" : percentage >= 50 ? "text-amber-500" : "text-primary"
-                )}>
+                <span className="text-muted-foreground">
+                  {sold}/{total}
+                </span>
+                <span
+                  className={cn(
+                    "font-semibold",
+                    percentage >= 80
+                      ? "text-destructive"
+                      : percentage >= 50
+                      ? "text-amber-500"
+                      : "text-primary"
+                  )}
+                >
                   {percentage}%
                 </span>
               </div>
-              <Progress 
-                value={percentage} 
+              <Progress
+                value={percentage}
                 className={cn(
                   "h-2",
-                  percentage >= 80 ? "[&>div]:bg-destructive" : percentage >= 50 ? "[&>div]:bg-amber-500" : "[&>div]:bg-primary"
+                  percentage >= 80
+                    ? "[&>div]:bg-destructive"
+                    : percentage >= 50
+                    ? "[&>div]:bg-amber-500"
+                    : "[&>div]:bg-primary"
                 )}
               />
             </div>
@@ -393,7 +418,9 @@ export default function DealsList({
         accessorKey: "deadline",
         header: "Deadline",
         cell: ({ getValue }) => (
-          <span className="text-sm text-muted-foreground">{String(getValue() ?? "")}</span>
+          <span className="text-sm text-muted-foreground">
+            {String(getValue() ?? "")}
+          </span>
         ),
       },
       {
@@ -529,13 +556,11 @@ export default function DealsList({
                     data={filteredDeals}
                     searchKey={["title", "category", "city", "status"]}
                     searchPlaceholder="Rechercher dans la liste..."
-                    // enableSelection={false}
                     showSelectionCount={true}
                     enableRowNumber={true}
                     pageSizeOptions={[itemsPerPage, 24, 50, 100]}
                     {...tableProps}
                   />
-                  {/* note: DataTable gère sa propre pagination */}
                 </div>
               )}
             </VStack>

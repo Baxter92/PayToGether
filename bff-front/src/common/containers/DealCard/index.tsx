@@ -11,6 +11,7 @@ import { Button } from "@components/ui/button";
 import { Progress } from "@components/ui/progress";
 import type { JSX } from "react";
 import { Link } from "react-router-dom";
+import { formatCurrency } from "@/common/utils/formatCurrency";
 
 export default function DealCard({ deal }: IDealCardProps): JSX.Element {
   const percentage = (deal.sold / deal.total) * 100;
@@ -30,25 +31,22 @@ export default function DealCard({ deal }: IDealCardProps): JSX.Element {
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>
-          
+
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-2">
-            {isHot && (
+            {deal.popular && (
               <span className="inline-flex items-center gap-1 bg-accent text-accent-foreground px-2.5 py-1 rounded-full text-xs font-semibold shadow-lg">
                 <TrendingUp className="w-3 h-3" />
                 Populaire
               </span>
             )}
           </div>
-          
-          {/* Discount Badge */}
-          <div className="absolute top-3 right-3 bg-primary text-primary-foreground px-3 py-1.5 rounded-xl text-sm font-bold shadow-lg backdrop-blur-sm">
-            -{deal.discount}%
-          </div>
-          
+
           {/* Quick view on hover */}
           <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-            <span className="text-white text-sm font-medium drop-shadow-lg">Voir les détails →</span>
+            <span className="text-white text-sm font-medium drop-shadow-lg">
+              Voir les détails →
+            </span>
           </div>
         </CardHeader>
 
@@ -63,13 +61,12 @@ export default function DealCard({ deal }: IDealCardProps): JSX.Element {
             <div className="mb-4">
               <div className="flex items-baseline gap-3 mb-1">
                 <span className="text-3xl font-extrabold bg-gradient-to-r from-primary to-primary-600 bg-clip-text text-transparent">
-                  {deal.groupPrice.toFixed(0)}€
-                </span>
-                <span className="text-base text-muted-foreground line-through decoration-destructive/50">
-                  {deal.originalPrice}€
+                  {formatCurrency(deal.groupPrice)}
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground">par {deal.unit}</p>
+              <p className="text-xs text-muted-foreground">
+                {formatCurrency(deal.originalPrice)}
+              </p>
             </div>
 
             {/* Progress */}
@@ -78,13 +75,21 @@ export default function DealCard({ deal }: IDealCardProps): JSX.Element {
                 <span className="text-xs text-foreground font-semibold">
                   {deal.sold}/{deal.total} vendus
                 </span>
-                <span className={`text-xs font-bold ${isHot ? 'text-accent' : 'text-primary'}`}>
+                <span
+                  className={`text-xs font-bold ${
+                    isHot ? "text-accent" : "text-primary"
+                  }`}
+                >
                   {Math.round(percentage)}%
                 </span>
               </div>
-              <Progress 
-                value={percentage} 
-                className={`h-2.5 rounded-full ${isHot ? '[&>div]:bg-gradient-to-r [&>div]:from-accent [&>div]:to-accent-600' : ''}`}
+              <Progress
+                value={percentage}
+                className={`h-2.5 rounded-full ${
+                  isHot
+                    ? "[&>div]:bg-gradient-to-r [&>div]:from-accent [&>div]:to-accent-600"
+                    : ""
+                }`}
               />
             </div>
 

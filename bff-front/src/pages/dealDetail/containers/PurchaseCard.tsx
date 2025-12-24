@@ -39,10 +39,6 @@ export default function PurchaseCard({ deal }: { deal: Deal }) {
               (~{deal.partWeightKg} kg/part)
             </div>
           </div>
-
-          <div className="ml-auto text-sm text-green-600 font-semibold">
-            {deal.savingsText}
-          </div>
         </div>
 
         <div className="mt-4">
@@ -67,17 +63,17 @@ export default function PurchaseCard({ deal }: { deal: Deal }) {
         </div>
 
         <div className="mt-4">
-          {!activated ? (
+          {/* {!activated ? (
             <div className="text-sm text-yellow-700">
               En attente : l'offre s'activera si au moins {deal.minRequired}{" "}
               parts sont vendues avant{" "}
               {new Date(deal.expiryDate ?? "").toLocaleDateString()}.
             </div>
-          ) : (
-            <div className="text-sm text-green-700">
-              Offre activée — Vous recevrez votre part.
-            </div>
-          )}
+          ) : ( */}
+          <div className="text-sm text-green-700">
+            Offre activée — Vous recevrez votre part.
+          </div>
+          {/* )} */}
         </div>
 
         <Button className="mt-4 w-full" onClick={handleAdd} disabled={!canBuy}>

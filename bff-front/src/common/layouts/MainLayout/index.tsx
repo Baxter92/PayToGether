@@ -9,7 +9,7 @@ export const MainLayout = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header
-        appName="PayToGether"
+        appName="DealToGether"
         topBanner={
           <HStack
             className={

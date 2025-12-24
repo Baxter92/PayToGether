@@ -82,26 +82,6 @@ export default function ProductDetails({ deal }: { deal: Deal }) {
           </ul>
         </div>
       </div>
-
-      <Separator className="my-4" />
-
-      <div>
-        <h4 className="font-medium">Fournisseur & packaging</h4>
-        <div className="mt-2 text-sm text-gray-700">
-          {deal.supplier?.name} • {deal.packaging?.method}
-        </div>
-      </div>
-
-      <Separator className="my-4" />
-
-      <div>
-        <h4 className="font-medium">Conseils de cuisson</h4>
-        <ul className="mt-2 list-disc list-inside text-gray-700">
-          {deal.cookingTips?.map((t) => (
-            <li key={t}>{t}</li>
-          ))}
-        </ul>
-      </div>
     </section>
   );
 }

@@ -1,21 +1,21 @@
-import { categories, mockDeals, slides } from "@/common/constants/data";
+import { mockDeals, popularDeals, slides } from "@/common/constants/data";
 
-import Features from "./containers/Features";
 import Hero from "@containers/Hero";
 import type { JSX } from "react";
 import DealsList from "@/common/containers/DealList";
 import { Heading } from "@/common/containers/Heading";
 import { VStack } from "@/common/components";
-import CategoriesList from "@/common/containers/CategoriesList";
 import { Button } from "@/common/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 export default function Home(): JSX.Element {
+  console.log(mockDeals);
+
   return (
     <div className="mx-auto">
       <Hero slides={slides} />
-      <Features />
-      
+      {/* <Features /> */}
+
       {/* Promotional Deals Section */}
       <section className="py-16 bg-background">
         <VStack spacing={10} className="max-w-7xl mx-auto px-4">
@@ -29,7 +29,10 @@ export default function Home(): JSX.Element {
               underlineStyle="bar"
               underlineWidth="w-16"
             />
-            <Button variant="ghost" className="text-primary hover:text-primary-600 font-semibold gap-2 group">
+            <Button
+              variant="ghost"
+              className="text-primary hover:text-primary-600 font-semibold gap-2 group"
+            >
               Voir toutes les offres
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>
@@ -53,7 +56,7 @@ export default function Home(): JSX.Element {
                 <Sparkles className="w-6 h-6 text-accent" />
               </div>
               <Heading
-                title="Populaire sur PayToGether"
+                title="Populaire sur DealToGether"
                 level={2}
                 spacing={8}
                 description="Ce que nos clients adorent"
@@ -62,13 +65,16 @@ export default function Home(): JSX.Element {
                 underlineWidth="w-16"
               />
             </div>
-            <Button variant="ghost" className="text-primary hover:text-primary-600 font-semibold gap-2 group">
+            <Button
+              variant="ghost"
+              className="text-primary hover:text-primary-600 font-semibold gap-2 group"
+            >
               Explorer tout
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>
           <DealsList
-            deals={mockDeals}
+            deals={popularDeals}
             showFilters={false}
             showPagination={false}
             itemsPerPage={4}
@@ -77,7 +83,7 @@ export default function Home(): JSX.Element {
       </section>
 
       {/* Categories Section */}
-      <section className="py-16 bg-background">
+      {/* <section className="py-16 bg-background">
         <VStack spacing={10} className="max-w-7xl mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 w-full">
             <Heading
@@ -89,7 +95,10 @@ export default function Home(): JSX.Element {
               underlineStyle="bar"
               underlineWidth="w-16"
             />
-            <Button variant="ghost" className="text-primary hover:text-primary-600 font-semibold gap-2 group">
+            <Button
+              variant="ghost"
+              className="text-primary hover:text-primary-600 font-semibold gap-2 group"
+            >
               Toutes les catégories
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>
@@ -102,23 +111,32 @@ export default function Home(): JSX.Element {
             itemsPerPage={4}
           />
         </VStack>
-      </section>
+      </section> */}
 
       {/* All Deals Section */}
       <section className="py-16 bg-gradient-to-b from-muted/30 to-background">
         <VStack spacing={10} className="max-w-7xl mx-auto px-4">
-          <div className="text-center max-w-2xl mx-auto">
-            <Heading
-              title="Tellement d'économies..."
-              level={2}
-              spacing={8}
-              description="Parcourez toutes nos offres et trouvez celle qui vous convient"
-              align="center"
-              underline
-              underlineStyle="bar"
-              underlineWidth="w-20"
-            />
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 w-full">
+            <div className="flex items-start gap-3">
+              <Heading
+                title="Tellement d'économies..."
+                level={2}
+                spacing={8}
+                description="Parcourez toutes nos offres et trouvez celle qui vous convient"
+                underline
+                underlineStyle="bar"
+                underlineWidth="w-20"
+              />
+            </div>
+            <Button
+              variant="ghost"
+              className="text-primary hover:text-primary-600 font-semibold gap-2 group"
+            >
+              Explorer tout
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Button>
           </div>
+
           <DealsList deals={mockDeals} showFilters={false} />
         </VStack>
       </section>

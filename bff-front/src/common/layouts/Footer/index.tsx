@@ -1,5 +1,12 @@
 import { useI18n } from "@hooks/useI18n";
-import { Facebook, Twitter, Instagram, Mail, MapPin, Phone } from "lucide-react";
+import {
+  Facebook,
+  Twitter,
+  Instagram,
+  Mail,
+  MapPin,
+  Phone,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -10,36 +17,36 @@ const Footer = () => {
     <footer className="bg-gradient-to-b from-secondary-800 to-secondary-900 text-white relative overflow-hidden">
       {/* Decorative top border */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary" />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand Section */}
           <div className="lg:col-span-1">
             <Link to="/" className="inline-block mb-6">
               <span className="text-2xl font-extrabold font-[family-name:var(--font-heading)] bg-gradient-to-r from-primary-300 to-accent-400 bg-clip-text text-transparent">
-                PayToGether
+                DealToGether
               </span>
             </Link>
             <p className="text-secondary-300 text-sm leading-relaxed mb-6">
               {t("footer.description")}
             </p>
             <div className="flex gap-3">
-              <a 
-                href="#" 
+              <a
+                href="#"
                 className="p-2.5 bg-white/10 rounded-xl hover:bg-primary hover:scale-110 transition-all duration-300"
                 aria-label="Facebook"
               >
                 <Facebook className="w-5 h-5" />
               </a>
-              <a 
-                href="#" 
+              <a
+                href="#"
                 className="p-2.5 bg-white/10 rounded-xl hover:bg-primary hover:scale-110 transition-all duration-300"
                 aria-label="Twitter"
               >
                 <Twitter className="w-5 h-5" />
               </a>
-              <a 
-                href="#" 
+              <a
+                href="#"
                 className="p-2.5 bg-white/10 rounded-xl hover:bg-primary hover:scale-110 transition-all duration-300"
                 aria-label="Instagram"
               >
@@ -79,7 +86,13 @@ const Footer = () => {
               Catégories
             </h3>
             <ul className="space-y-3">
-              {["Restaurants", "Beauté & Spa", "Sport & Fitness", "Shopping", "Voyages"].map((cat, i) => (
+              {[
+                "Restaurants",
+                "Beauté & Spa",
+                "Sport & Fitness",
+                "Shopping",
+                "Voyages",
+              ].map((cat, i) => (
                 <li key={i}>
                   <a
                     href="#"
@@ -109,7 +122,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-3 text-secondary-300 text-sm">
                 <Mail className="w-5 h-5 text-primary-400 shrink-0" />
-                <span>contact@paytogether.cm</span>
+                <span>contact@DealToGether.cm</span>
               </li>
             </ul>
           </div>
@@ -122,10 +135,16 @@ const Footer = () => {
               &copy; {currentYear} {t("app.name")}. {t("footer.rights")}
             </p>
             <div className="flex items-center gap-6">
-              <a href="#" className="text-secondary-400 hover:text-primary-300 text-sm transition-colors duration-300">
+              <a
+                href="#"
+                className="text-secondary-400 hover:text-primary-300 text-sm transition-colors duration-300"
+              >
                 Politique de confidentialité
               </a>
-              <a href="#" className="text-secondary-400 hover:text-primary-300 text-sm transition-colors duration-300">
+              <a
+                href="#"
+                className="text-secondary-400 hover:text-primary-300 text-sm transition-colors duration-300"
+              >
                 Mentions légales
               </a>
             </div>

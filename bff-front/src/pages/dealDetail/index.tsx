@@ -38,7 +38,7 @@ const mockDeal: Deal = {
   location: "Douala, Cameroon (livraison disponible dans les grandes villes)",
   expiryDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 10).toISOString(),
   partsTotal: 50,
-  partsSold: 18,
+  partsSold: 19,
   minRequired: 20,
   partWeightKg: 0.5,
   supplier: { name: "Ferme" },

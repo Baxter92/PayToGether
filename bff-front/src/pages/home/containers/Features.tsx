@@ -8,14 +8,14 @@ const Features = () => {
       {/* Decorative elements */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
-      
+
       <div className="max-w-7xl mx-auto px-4 relative z-10">
         <Heading
           title="Comment ça marche ?"
           align="center"
           level={1}
           spacing={16}
-          description="PayToGether révolutionne le shopping en groupe. Voici ce qui rend notre plateforme unique."
+          description="DealToGether révolutionne le shopping en groupe. Voici ce qui rend notre plateforme unique."
           className="mb-16"
         />
 
@@ -23,8 +23,8 @@ const Features = () => {
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className="group text-center p-6 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/50 hover:border-primary/30 hover:bg-card hover:shadow-[var(--shadow-card-hover)] transition-all duration-500 hover:-translate-y-2"
                 style={{ animationDelay: `${index * 100}ms` }}
               >

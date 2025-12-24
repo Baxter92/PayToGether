@@ -93,7 +93,7 @@ export interface HeaderProps {
 
 const Header = ({
   // Valeurs par défaut
-  appName = "PayToGether",
+  appName = "DealToGether",
   appLogo,
   topBanner,
   showLocationSelector = true,

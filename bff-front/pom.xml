@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.ulr.paytogether</groupId>
+        <groupId>com.ulr.DealToGether</groupId>
         <artifactId>bff</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>

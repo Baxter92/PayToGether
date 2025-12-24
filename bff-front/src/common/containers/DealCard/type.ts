@@ -5,10 +5,11 @@ export interface IDealCardProps {
     image: string;
     originalPrice: number;
     groupPrice: number;
-    unit: string;
+    unit: number;
     sold: number;
     total: number;
     deadline: string;
     discount: number;
+    popular: boolean;
   };
 }
