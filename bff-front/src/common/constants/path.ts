@@ -15,4 +15,5 @@ export const PATHS = {
   CATEGORIES: (id: string | number = ":id") => `/categories/${id}`,
   ALL_CATEGORIES: "/categories",
   NOT_FOUND: "/404",
+  DEALS: "/deals",
 };

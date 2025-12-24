@@ -18,6 +18,7 @@ import Category from "./pages/category";
 import Categories from "./pages/categories";
 import SearchPage from "./pages/search";
 import NotFound from "./pages/notFound";
+import Deals from "./pages/deals";
 
 function App(): JSX.Element {
   return (
@@ -47,6 +48,7 @@ function App(): JSX.Element {
               />
               <Route path={PATHS.CATEGORIES()} element={<Category />} />
               <Route path={PATHS.ALL_CATEGORIES} element={<Categories />} />
+              <Route path={PATHS.DEALS} element={<Deals />} />
             </Route>
           </Route>
 

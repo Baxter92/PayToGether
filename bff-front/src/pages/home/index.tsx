@@ -7,6 +7,7 @@ import { Heading } from "@/common/containers/Heading";
 import { VStack } from "@/common/components";
 import { Button } from "@/common/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
+import { PATHS } from "@/common/constants/path";
 
 export default function Home(): JSX.Element {
   console.log(mockDeals);
@@ -30,6 +31,7 @@ export default function Home(): JSX.Element {
               underlineWidth="w-16"
             />
             <Button
+              to={PATHS.DEALS}
               variant="ghost"
               className="text-primary hover:text-primary-600 font-semibold gap-2 group"
             >
@@ -66,6 +68,7 @@ export default function Home(): JSX.Element {
               />
             </div>
             <Button
+              to={PATHS.DEALS}
               variant="ghost"
               className="text-primary hover:text-primary-600 font-semibold gap-2 group"
             >
@@ -129,6 +132,7 @@ export default function Home(): JSX.Element {
               />
             </div>
             <Button
+              to={PATHS.DEALS}
               variant="ghost"
               className="text-primary hover:text-primary-600 font-semibold gap-2 group"
             >
