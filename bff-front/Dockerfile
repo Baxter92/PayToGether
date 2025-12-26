@@ -2,10 +2,8 @@
 FROM node:lts-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci
-COPY src src
-COPY public public
-COPY webpack.config.cjs ./
+RUN npm install
+COPY . .
 RUN npm run build
 
 # Production stage
