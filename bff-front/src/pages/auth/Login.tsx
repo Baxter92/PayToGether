@@ -16,7 +16,6 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
 
   const from = (location.state as any)?.from?.pathname || "/";
-  console.log(from.trim("/checkout"));
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import HeaderProfile, { type PROFILE_TABS } from "./containers/HeaderProfile";
 import AsideStats from "./containers/AsideStats";
 import Overview from "./containers/Overview";
@@ -10,12 +10,14 @@ import OrdersReceivedList from "./containers/OrderReceivedList";
 import { mockOrdersReceived, mockReviews } from "@/common/constants/data";
 import ReviewsList, { type Review } from "./containers/ReviewsList";
 import Favorites from "./containers/Favorites";
+import { useAuth } from "@/common/context/AuthContext";
 
 export default function Profile() {
-  // const { user } = useAuth();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] =
     useState<(typeof PROFILE_TABS)[number]["key"]>("overview");
 
+  const isMerchant = useMemo(() => user?.role === "marchand", [user]);
   return (
     <div className="max-w-6xl mx-auto p-6">
       {/* Header */}
@@ -32,7 +34,7 @@ export default function Profile() {
           <div className="bg-white dark:bg-slate-900 rounded-lg p-6 shadow-sm">
             {activeTab === "overview" && <Overview />}
 
-            {activeTab === "deals" && <MyDeals />}
+            {activeTab === "deals" && isMerchant && <MyDeals />}
 
             {activeTab === "purchases" && <MyPurchases />}
 
@@ -42,13 +44,13 @@ export default function Profile() {
               <ReviewsList data={mockReviews as Review[]} isMyReviews />
             )}
 
-            {activeTab === "payouts" && <PaymentsList />}
+            {activeTab === "payouts" && isMerchant && <PaymentsList />}
 
-            {activeTab === "orders-received" && (
+            {activeTab === "orders-received" && isMerchant && (
               <OrdersReceivedList data={mockOrdersReceived as any} />
             )}
 
-            {activeTab === "client-reviews" && (
+            {activeTab === "client-reviews" && isMerchant && (
               <ReviewsList data={mockReviews as Review[]} />
             )}
 

@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         email,
         name: email.split("@")[0],
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-        role: "client",
+        role: email.split("@")[0] === "merchant" ? "marchand" : "client",
         location: "Douala, Cameroon",
       };
 
