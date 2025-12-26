@@ -15,6 +15,7 @@ export const mockDeals = [
     category: "bovins",
     city: "Douala",
     discount: 38,
+    popular: true,
   },
   {
     id: 2,
@@ -30,6 +31,7 @@ export const mockDeals = [
     category: "poissons",
     city: "Douala",
     discount: 33,
+    popular: false,
   },
   {
     id: 3,
@@ -45,6 +47,7 @@ export const mockDeals = [
     category: "bovins",
     city: "Yaoundé",
     discount: 38,
+    popular: false,
   },
   {
     id: 4,
@@ -60,6 +63,7 @@ export const mockDeals = [
     category: "poissons",
     city: "Douala",
     discount: 35,
+    popular: false,
   },
   {
     id: 5,
@@ -75,6 +79,7 @@ export const mockDeals = [
     category: "bovins",
     city: "Douala",
     discount: 39,
+    popular: false,
   },
   {
     id: 6,
@@ -90,6 +95,7 @@ export const mockDeals = [
     category: "poissons",
     city: "Kribi",
     discount: 40,
+    popular: true,
   },
   {
     id: 7,
@@ -105,6 +111,7 @@ export const mockDeals = [
     category: "bovins",
     city: "Yaoundé",
     discount: 37,
+    popular: false,
   },
   {
     id: 8,
@@ -120,6 +127,7 @@ export const mockDeals = [
     category: "poissons",
     city: "Douala",
     discount: 39,
+    popular: false,
   },
 ];
 export const features = [
