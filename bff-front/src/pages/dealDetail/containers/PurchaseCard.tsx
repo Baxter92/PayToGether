@@ -7,6 +7,7 @@ import Counter from "@/common/components/Counter";
 import { HStack } from "@/common/components";
 import { Heart, Share } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { formatCurrency } from "@/common/utils/formatCurrency";
 
 export default function PurchaseCard({ deal }: { deal: Deal }) {
   const [qty, setQty] = useState(1);
@@ -34,9 +35,11 @@ export default function PurchaseCard({ deal }: { deal: Deal }) {
         <div className="flex items-baseline gap-3">
           <div>
             <div className="text-sm text-gray-500">Prix par part</div>
-            <div className="text-2xl font-bold">{deal.pricePerPart}</div>
+            <div className="text-2xl font-bold">
+              {formatCurrency(deal.priceDeal ?? 0)}
+            </div>
             <div className="text-sm text-gray-500">
-              (~{deal.partWeightKg} kg/part)
+              ({formatCurrency(deal.priceOriginal)})
             </div>
           </div>
         </div>
@@ -53,13 +56,15 @@ export default function PurchaseCard({ deal }: { deal: Deal }) {
             className="mt-3"
           />
           <div className="mt-2 text-sm text-gray-600">
-            {partsRemaining} part(s) disponibles
+            {partsRemaining - qty} part(s) disponibles
           </div>
         </div>
 
         <div className="mt-4">
           <div className="text-sm text-gray-600">Total</div>
-          <div className="text-xl font-semibold">{totalPrice}</div>
+          <div className="text-xl font-semibold">
+            {formatCurrency(totalPrice)}
+          </div>
         </div>
 
         <div className="mt-4">

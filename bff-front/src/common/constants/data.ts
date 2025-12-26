@@ -5,7 +5,7 @@ export const mockDeals = [
     id: 1,
     title: "Bœuf Charolais Premium - 5kg",
     image:
-      "https://images.unsplash.com/photo-1588347818036-c86ca9896bb5?w=400&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
     originalPrice: 120000,
     groupPrice: 75,
     unit: 150,
@@ -53,7 +53,7 @@ export const mockDeals = [
     id: 4,
     title: "Saumon Frais - 2kg",
     image:
-      "https://images.unsplash.com/photo-1611171711681-d452e2a6608c?w=400&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop",
     originalPrice: 65000,
     groupPrice: 42,
     unit: 150,
@@ -69,7 +69,7 @@ export const mockDeals = [
     id: 5,
     title: "Côtes de Bœuf Grillades - 4kg",
     image:
-      "https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=400&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?w=400&h=300&fit=crop",
     originalPrice: 95000,
     groupPrice: 58,
     unit: 150,
@@ -101,7 +101,7 @@ export const mockDeals = [
     id: 7,
     title: "Entrecôte de Bœuf Premium - 3kg",
     image:
-      "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=400&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=300&fit=crop",
     originalPrice: 78000,
     groupPrice: 49,
     unit: 150,
