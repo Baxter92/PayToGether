@@ -52,7 +52,7 @@ export default function DealCard({ deal }: IDealCardProps): JSX.Element {
 
         {/* Content */}
         <CardContent className="p-5 flex-1 flex flex-col">
-          <CardTitle className="font-semibold text-foreground line-clamp-2 mb-3 text-lg group-hover:text-primary transition-colors duration-300">
+          <CardTitle className="font-semibold text-foreground line-clamp-1 mb-3 text-lg group-hover:text-primary transition-colors duration-300">
             {deal.title}
           </CardTitle>
 

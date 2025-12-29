@@ -16,15 +16,20 @@ import {
 import { type JSX } from "react";
 
 export const PROFILE_TABS = [
-  { label: "Overview", key: "overview", icon: Home },
-  { label: "Achats", key: "purchases", icon: ShoppingBag },
-  { label: "Favoris", key: "favorites", icon: Heart },
-  { label: "Avis", key: "reviews", icon: Star },
-  { label: "Mes Deals", key: "deals", icon: Gift },
-  { label: "Commandes recues", key: "orders-received", icon: Store },
-  { label: "Avis Client", key: "client-reviews", icon: Star },
-  { label: "Payments", key: "payouts", icon: ShoppingBag },
-  { label: "Paramètres", key: "settings", icon: Settings },
+  { label: "Overview", key: "overview", icon: Home, merchant: false },
+  { label: "Achats", key: "purchases", icon: ShoppingBag, merchant: false },
+  { label: "Favoris", key: "favorites", icon: Heart, merchant: false },
+  { label: "Avis", key: "reviews", icon: Star, merchant: false },
+  { label: "Mes Deals", key: "deals", icon: Gift, merchant: true },
+  {
+    label: "Commandes recues",
+    key: "orders-received",
+    icon: Store,
+    merchant: true,
+  },
+  { label: "Avis Client", key: "client-reviews", icon: Star, merchant: true },
+  { label: "Payments", key: "payouts", icon: ShoppingBag, merchant: true },
+  { label: "Paramètres", key: "settings", icon: Settings, merchant: false },
 ] as const;
 
 export default function HeaderProfile({
@@ -90,16 +95,33 @@ export default function HeaderProfile({
       </div>
 
       <HStack spacing={8} wrap>
-        {PROFILE_TABS.map(({ label, key, icon: Icon }) => (
-          <Button
-            key={key}
-            leftIcon={<Icon className="w-4 h-4" />}
-            variant={activeTab === key ? "default" : "secondary"}
-            onClick={() => handleTabClick(key)}
-          >
-            {label}
-          </Button>
-        ))}
+        {PROFILE_TABS.map(({ label, key, icon: Icon, merchant }) => {
+          if (merchant && user?.role === "marchand") {
+            return (
+              <Button
+                key={key}
+                leftIcon={<Icon className="w-4 h-4" />}
+                variant={activeTab === key ? "default" : "secondary"}
+                onClick={() => handleTabClick(key)}
+              >
+                {label}
+              </Button>
+            );
+          } else if (!merchant) {
+            return (
+              <Button
+                key={key}
+                leftIcon={<Icon className="w-4 h-4" />}
+                variant={activeTab === key ? "default" : "secondary"}
+                onClick={() => handleTabClick(key)}
+              >
+                {label}
+              </Button>
+            );
+          } else {
+            return <></>;
+          }
+        })}
       </HStack>
     </div>
   );

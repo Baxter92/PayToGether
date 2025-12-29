@@ -219,9 +219,11 @@ export const categories = [
     name: "Poissons",
     icon: Fish,
     href: "poissons",
+    slug: "poissons",
     description:
       "Découvrez des offres exclusives sur les meilleurs poissons près de chez vous.",
     count: 124,
+    isActive: true,
     image:
       "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=1200",
     subcategories: ["Cuisine africaine", "Fast-food", "Desserts", "Buffets"],
@@ -231,6 +233,8 @@ export const categories = [
     name: "Bovins",
     icon: Beef,
     href: "bovins",
+    slug: "bovins",
+    isActive: true,
     description:
       "Découvrez des offres exclusives sur les meilleurs bovins près de chez vous.",
     count: 89,
