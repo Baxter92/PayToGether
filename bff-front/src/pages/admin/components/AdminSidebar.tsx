@@ -5,7 +5,6 @@ import {
   Tag,
   Users,
   ShoppingCart,
-  Settings,
   LogOut,
   Home,
   Store,
