@@ -23,9 +23,12 @@ export default function Login() {
     setLoading(true);
 
     try {
-      await login(email, password);
+      const user = await login(email, password);
+
       if (from.includes("/checkout")) {
         navigate(from.replace(/\/checkout$/, ""), { replace: true });
+      } else if (user?.role === "admin") {
+        navigate("/admin", { replace: true });
       } else {
         navigate(from, { replace: true });
       }

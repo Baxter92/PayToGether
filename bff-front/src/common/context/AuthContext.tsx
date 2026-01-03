@@ -11,14 +11,14 @@ export interface IUser {
   email: string;
   name: string;
   avatar?: string;
-  role?: "client" | "marchand";
+  role?: "client" | "marchand" | "admin";
   location?: string;
 }
 
 export interface IAuthContextType {
   user: IUser | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<IUser>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
 }
@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const login = async (email: string, password: string): Promise<void> => {
+  const login = async (email: string, password: string): Promise<IUser> => {
     try {
       // Simulation - Remplacer par votre appel API
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -79,11 +79,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         email,
         name: email.split("@")[0],
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-        role: email.split("@")[0] === "merchant" ? "marchand" : "client",
+        role:
+          email.split("@")[0] === "merchant"
+            ? "marchand"
+            : email.split("@")[0] === "admin"
+            ? "admin"
+            : "client",
         location: "Douala, Cameroon",
       };
 
       setUser(userData);
+      return userData;
     } catch (error) {
       throw error;
     }

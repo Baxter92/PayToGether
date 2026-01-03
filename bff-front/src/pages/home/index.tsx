@@ -10,8 +10,6 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { PATHS } from "@/common/constants/path";
 
 export default function Home(): JSX.Element {
-  console.log(mockDeals);
-
   return (
     <div className="mx-auto">
       <Hero slides={slides} />
