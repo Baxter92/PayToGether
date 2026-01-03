@@ -9,4 +9,5 @@ export const ADMIN_PATHS = {
   CATEGORIES: "/admin/categories",
   REPORTS: "/admin/reports",
   SETTINGS: "/admin/settings",
+  HERO: "/admin/hero",
 };

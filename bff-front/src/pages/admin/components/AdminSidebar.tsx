@@ -12,6 +12,7 @@ import {
   CreditCard,
   FolderTree,
   BarChart3,
+  Image,
 } from "lucide-react";
 import {
   Sidebar,
@@ -31,26 +32,21 @@ import { cn } from "@/common/lib/utils";
 import { ADMIN_PATHS } from "../constants/adminPaths";
 import { toast } from "sonner";
 
-const mainNavItems = [
+// Groupe Principal
+const dashboardItems = [
   {
     title: "Dashboard",
     url: ADMIN_PATHS.DASHBOARD,
     icon: LayoutDashboard,
   },
+];
+
+// Groupe Commerce
+const commerceItems = [
   {
     title: "Deals",
     url: ADMIN_PATHS.DEALS,
     icon: Tag,
-  },
-  {
-    title: "Marchands",
-    url: ADMIN_PATHS.MERCHANTS,
-    icon: Store,
-  },
-  {
-    title: "Utilisateurs",
-    url: ADMIN_PATHS.USERS,
-    icon: Users,
   },
   {
     title: "Commandes",
@@ -67,14 +63,38 @@ const mainNavItems = [
     url: ADMIN_PATHS.CATEGORIES,
     icon: FolderTree,
   },
+];
+
+// Groupe Utilisateurs
+const usersItems = [
+  {
+    title: "Utilisateurs",
+    url: ADMIN_PATHS.USERS,
+    icon: Users,
+  },
+  {
+    title: "Marchands",
+    url: ADMIN_PATHS.MERCHANTS,
+    icon: Store,
+  },
+];
+
+// Groupe Contenu
+const contentItems = [
+  {
+    title: "Hero",
+    url: ADMIN_PATHS.HERO,
+    icon: Image,
+  },
+];
+
+// Groupe Configuration
+const configItems = [
   {
     title: "Rapports",
     url: ADMIN_PATHS.REPORTS,
     icon: BarChart3,
   },
-];
-
-const settingsNavItems = [
   {
     title: "Paramètres",
     url: ADMIN_PATHS.SETTINGS,
@@ -112,11 +132,12 @@ export function AdminSidebar(): ReactElement {
       </SidebarHeader>
 
       <SidebarContent>
+        {/* Dashboard */}
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>Principal</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainNavItems.map((item) => (
+              {dashboardItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
@@ -134,11 +155,81 @@ export function AdminSidebar(): ReactElement {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {/* Commerce */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Commerce</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {commerceItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.url)}
+                    tooltip={item.title}
+                  >
+                    <Link to={item.url}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Utilisateurs */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Utilisateurs</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {usersItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.url)}
+                    tooltip={item.title}
+                  >
+                    <Link to={item.url}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Contenu */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Contenu</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {contentItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.url)}
+                    tooltip={item.title}
+                  >
+                    <Link to={item.url}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Configuration */}
         <SidebarGroup>
           <SidebarGroupLabel>Configuration</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {settingsNavItems.map((item) => (
+              {configItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild

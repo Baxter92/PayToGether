@@ -31,6 +31,7 @@ import AdminMerchants from "./pages/admin/merchants";
 import AdminPayments from "./pages/admin/payments";
 import AdminCategories from "./pages/admin/categories";
 import AdminReports from "./pages/admin/reports";
+import AdminHero from "./pages/admin/hero";
 
 function App(): JSX.Element {
   return (
@@ -57,6 +58,7 @@ function App(): JSX.Element {
             <Route path="categories" element={<AdminCategories />} />
             <Route path="reports" element={<AdminReports />} />
             <Route path="settings" element={<AdminSettings />} />
+            <Route path="hero" element={<AdminHero />} />
           </Route>
 
           {/* Routes avec MainLayout */}

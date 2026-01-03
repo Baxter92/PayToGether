@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useId } from "react";
 import { cn } from "@/common/lib/utils";
 
 type Size = "sm" | "md" | "lg";
@@ -111,7 +111,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       (el: HTMLInputElement | null) => {
         if (!el) return;
         const userInput = el.value ?? "";
-        const raw = computeRaw(userInput);
+        const raw = format ? computeRaw(userInput) : userInput;
         const formatted = format ? format(raw) : userInput;
 
         // créer un "event" synthétique proche de ton eventCopy
@@ -189,34 +189,30 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const debounceTimer = React.useRef<number | null>(null);
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const userInput = e.target.value ?? "";
-      const raw = computeRaw(userInput);
+
+      const raw = format ? computeRaw(userInput) : userInput;
       const formatted = format ? format(raw) : userInput;
 
       const eventCopy = {
         ...e,
         target: { ...e.target, value: raw, rawValue: formatted },
-      } as unknown as React.ChangeEvent<HTMLInputElement>;
+      } as React.ChangeEvent<HTMLInputElement>;
 
-      if (onValueChange) {
-        try {
-          onValueChange({ formatted, raw, event: eventCopy });
-        } catch {}
-      }
+      onValueChange?.({ formatted, raw, event: eventCopy });
 
       if (!debounce || !onChange) {
-        return onChange?.(eventCopy);
+        onChange?.(eventCopy);
+        return;
       }
 
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
       debounceTimer.current = window.setTimeout(() => {
         onChange(eventCopy);
       }, debounce);
     };
 
     // reste du rendu : passer name & autoComplete (très importants pour autofill)
-    const inputId = id ?? React.useId();
+    const inputId = id ?? useId();
     const helperId = helperText ? `${inputId}-helper` : undefined;
     const errorId = error ? `${inputId}-error` : undefined;
     const describedBy =
