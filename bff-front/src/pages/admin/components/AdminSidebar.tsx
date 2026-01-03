@@ -95,11 +95,11 @@ const configItems = [
     url: ADMIN_PATHS.REPORTS,
     icon: BarChart3,
   },
-  {
-    title: "Paramètres",
-    url: ADMIN_PATHS.SETTINGS,
-    icon: Settings,
-  },
+  // {
+  //   title: "Paramètres",
+  //   url: ADMIN_PATHS.SETTINGS,
+  //   icon: Settings,
+  // },
 ];
 
 export function AdminSidebar(): ReactElement {
