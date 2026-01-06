@@ -18,6 +18,7 @@ import {
   CardTitle,
 } from "@/common/components/ui/card";
 import Select from "@/common/components/Select";
+import { formatCurrency } from "@/common/utils/formatCurrency";
 
 interface StatCard {
   title: string;
@@ -29,7 +30,7 @@ interface StatCard {
 const statsCards: StatCard[] = [
   {
     title: "Revenus totaux",
-    value: "2,450,000 FCFA",
+    value: formatCurrency(2450000),
     change: 12.5,
     icon: DollarSign,
   },
@@ -152,7 +153,7 @@ export default function AdminReports(): ReactElement {
                   </div>
                   <div className="text-right">
                     <p className="font-medium">
-                      {deal.revenue.toLocaleString()} FCFA
+                      {formatCurrency(deal.revenue)}
                     </p>
                   </div>
                 </div>
@@ -183,7 +184,7 @@ export default function AdminReports(): ReactElement {
                   </div>
                   <div className="text-right">
                     <p className="font-medium">
-                      {merchant.revenue.toLocaleString()} FCFA
+                      {formatCurrency(merchant.revenue)}
                     </p>
                   </div>
                 </div>

@@ -2,7 +2,7 @@ import { createContext, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction, i18n as I18nType } from "i18next";
 
-export type ILanguages = "fr" | "en";
+export type ILanguages = "fr-CA" | "en-CA";
 
 export type I18nContextProps = {
   t: TFunction;
@@ -21,14 +21,14 @@ const defaultT: TFunction = ((k: string) => k) as TFunction;
 export const I18nContext = createContext<I18nContextProps>({
   t: defaultT,
   i18n: {} as unknown as I18nType,
-  language: "fr",
+  language: "fr-CA",
   changeLanguage: () => {},
   availableLanguages: [],
 });
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const { t, i18n } = useTranslation();
-  const language = (i18n.language ?? "fr") as ILanguages;
+  const language = (i18n.language ?? "fr-CA") as ILanguages;
   const changeLanguage = (lng: ILanguages) => {
     i18n.changeLanguage(lng);
   };

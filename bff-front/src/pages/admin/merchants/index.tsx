@@ -19,6 +19,7 @@ import {
 } from "@/common/components/ui/dropdown-menu";
 import DataTable from "@/common/components/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
+import { formatCurrency } from "@/common/utils/formatCurrency";
 
 interface Merchant {
   id: string;
@@ -112,9 +113,7 @@ export default function AdminMerchants(): ReactElement {
     {
       accessorKey: "totalSales",
       header: "Ventes totales",
-      cell: ({ row }) => (
-        <span>{row.original.totalSales.toLocaleString()} FCFA</span>
-      ),
+      cell: ({ row }) => <span>{formatCurrency(row.original.totalSales)}</span>,
     },
     {
       accessorKey: "status",
@@ -140,15 +139,22 @@ export default function AdminMerchants(): ReactElement {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => console.log("View", row.original.id)}>
+            <DropdownMenuItem
+              onClick={() => console.log("View", row.original.id)}
+            >
               <Eye className="mr-2 h-4 w-4" />
               Voir détails
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => console.log("Approve", row.original.id)}>
+            <DropdownMenuItem
+              onClick={() => console.log("Approve", row.original.id)}
+            >
               <Check className="mr-2 h-4 w-4" />
               Approuver
             </DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive" onClick={() => console.log("Suspend", row.original.id)}>
+            <DropdownMenuItem
+              className="text-destructive"
+              onClick={() => console.log("Suspend", row.original.id)}
+            >
               <Ban className="mr-2 h-4 w-4" />
               Suspendre
             </DropdownMenuItem>

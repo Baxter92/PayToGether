@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/common/components/ui/card";
+import { formatCurrency } from "@/common/utils/formatCurrency";
 
 interface StatCardProps {
   title: string;
@@ -59,7 +60,7 @@ function StatCard({
 const stats = [
   {
     title: "Revenus totaux",
-    value: "45 231€",
+    value: formatCurrency(45231),
     change: 20.1,
     icon: DollarSign,
   },

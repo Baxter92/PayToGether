@@ -20,6 +20,8 @@ import {
 import Select from "@/common/components/Select";
 import DataTable from "@/common/components/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
+import { formatCurrency } from "@/common/utils/formatCurrency";
+import { VStack } from "@/common/components";
 
 interface Payment {
   id: string;
@@ -139,7 +141,7 @@ export default function AdminPayments(): ReactElement {
       header: "Montant",
       cell: ({ row }) => (
         <span className="font-medium">
-          {row.original.amount.toLocaleString()} FCFA
+          {formatCurrency(row.original.amount)}
         </span>
       ),
     },
@@ -148,7 +150,7 @@ export default function AdminPayments(): ReactElement {
       header: "Commission",
       cell: ({ row }) => (
         <span className="text-muted-foreground">
-          {row.original.commission.toLocaleString()} FCFA
+          {formatCurrency(row.original.commission)}
         </span>
       ),
     },
@@ -188,7 +190,7 @@ export default function AdminPayments(): ReactElement {
     .reduce((acc, p) => acc + p.commission, 0);
 
   return (
-    <div className="space-y-6">
+    <VStack>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-heading font-bold flex items-center gap-2">
@@ -216,7 +218,7 @@ export default function AdminPayments(): ReactElement {
             <CardDescription>Revenus totaux</CardDescription>
             <CardTitle className="text-2xl flex items-center gap-1">
               <ArrowUpRight className="h-5 w-5 text-green-600" />
-              {totalRevenue.toLocaleString()} FCFA
+              {formatCurrency(totalRevenue)}
             </CardTitle>
           </CardHeader>
         </Card>
@@ -224,7 +226,7 @@ export default function AdminPayments(): ReactElement {
           <CardHeader className="pb-2">
             <CardDescription>Commissions</CardDescription>
             <CardTitle className="text-2xl">
-              {totalCommission.toLocaleString()} FCFA
+              {formatCurrency(totalCommission)}
             </CardTitle>
           </CardHeader>
         </Card>
@@ -273,6 +275,6 @@ export default function AdminPayments(): ReactElement {
           <DataTable columns={columns} data={filteredPayments} />
         </CardContent>
       </Card>
-    </div>
+    </VStack>
   );
 }

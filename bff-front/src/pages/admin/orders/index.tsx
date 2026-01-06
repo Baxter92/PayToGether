@@ -14,15 +14,65 @@ import {
 } from "@/common/components/ui/table";
 import { Badge } from "@/common/components/ui/badge";
 import Select from "@/common/components/Select";
+import { formatCurrency } from "@/common/utils/formatCurrency";
 
 const mockOrders = [
-  { id: "ORD-001", customer: "Jean Dupont", deal: "Spa relaxant 1h", date: "2024-01-15", amount: 89, status: "completed" },
-  { id: "ORD-002", customer: "Marie Martin", deal: "Restaurant gastronomique", date: "2024-01-14", amount: 120, status: "pending" },
-  { id: "ORD-003", customer: "Pierre Bernard", deal: "Séance photo pro", date: "2024-01-14", amount: 75, status: "completed" },
-  { id: "ORD-004", customer: "Sophie Laurent", deal: "Cours de cuisine", date: "2024-01-13", amount: 55, status: "refunded" },
-  { id: "ORD-005", customer: "Lucas Petit", deal: "Escape game", date: "2024-01-13", amount: 35, status: "completed" },
-  { id: "ORD-006", customer: "Emma Dubois", deal: "Massage duo", date: "2024-01-12", amount: 149, status: "pending" },
-  { id: "ORD-007", customer: "Thomas Moreau", deal: "Karting session", date: "2024-01-12", amount: 45, status: "cancelled" },
+  {
+    id: "ORD-001",
+    customer: "Jean Dupont",
+    deal: "Spa relaxant 1h",
+    date: "2024-01-15",
+    amount: 89,
+    status: "completed",
+  },
+  {
+    id: "ORD-002",
+    customer: "Marie Martin",
+    deal: "Restaurant gastronomique",
+    date: "2024-01-14",
+    amount: 120,
+    status: "pending",
+  },
+  {
+    id: "ORD-003",
+    customer: "Pierre Bernard",
+    deal: "Séance photo pro",
+    date: "2024-01-14",
+    amount: 75,
+    status: "completed",
+  },
+  {
+    id: "ORD-004",
+    customer: "Sophie Laurent",
+    deal: "Cours de cuisine",
+    date: "2024-01-13",
+    amount: 55,
+    status: "refunded",
+  },
+  {
+    id: "ORD-005",
+    customer: "Lucas Petit",
+    deal: "Escape game",
+    date: "2024-01-13",
+    amount: 35,
+    status: "completed",
+  },
+  {
+    id: "ORD-006",
+    customer: "Emma Dubois",
+    deal: "Massage duo",
+    date: "2024-01-12",
+    amount: 149,
+    status: "pending",
+  },
+  {
+    id: "ORD-007",
+    customer: "Thomas Moreau",
+    deal: "Karting session",
+    date: "2024-01-12",
+    amount: 45,
+    status: "cancelled",
+  },
 ];
 
 export default function AdminOrders(): ReactElement {
@@ -34,20 +84,37 @@ export default function AdminOrders(): ReactElement {
       order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.deal.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || order.status === statusFilter;
+    const matchesStatus =
+      statusFilter === "all" || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const getStatusBadge = (status: string): ReactElement => {
     switch (status) {
       case "completed":
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Complété</Badge>;
+        return (
+          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+            Complété
+          </Badge>
+        );
       case "pending":
-        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">En attente</Badge>;
+        return (
+          <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
+            En attente
+          </Badge>
+        );
       case "refunded":
-        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Remboursé</Badge>;
+        return (
+          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+            Remboursé
+          </Badge>
+        );
       case "cancelled":
-        return <Badge className="bg-destructive/10 text-destructive hover:bg-destructive/10">Annulé</Badge>;
+        return (
+          <Badge className="bg-destructive/10 text-destructive hover:bg-destructive/10">
+            Annulé
+          </Badge>
+        );
       default:
         return <Badge>{status}</Badge>;
     }
@@ -55,16 +122,27 @@ export default function AdminOrders(): ReactElement {
 
   const stats = [
     { label: "Total commandes", value: mockOrders.length },
-    { label: "Complétées", value: mockOrders.filter((o) => o.status === "completed").length },
-    { label: "En attente", value: mockOrders.filter((o) => o.status === "pending").length },
-    { label: "Remboursées", value: mockOrders.filter((o) => o.status === "refunded").length },
+    {
+      label: "Complétées",
+      value: mockOrders.filter((o) => o.status === "completed").length,
+    },
+    {
+      label: "En attente",
+      value: mockOrders.filter((o) => o.status === "pending").length,
+    },
+    {
+      label: "Remboursées",
+      value: mockOrders.filter((o) => o.status === "refunded").length,
+    },
   ];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold font-heading">Gestion des Commandes</h1>
+          <h1 className="text-3xl font-bold font-heading">
+            Gestion des Commandes
+          </h1>
           <p className="text-muted-foreground">
             Suivez et gérez toutes les commandes
           </p>
@@ -130,11 +208,17 @@ export default function AdminOrders(): ReactElement {
             <TableBody>
               {filteredOrders.map((order) => (
                 <TableRow key={order.id}>
-                  <TableCell className="font-mono text-sm">{order.id}</TableCell>
-                  <TableCell className="font-medium">{order.customer}</TableCell>
+                  <TableCell className="font-mono text-sm">
+                    {order.id}
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    {order.customer}
+                  </TableCell>
                   <TableCell>{order.deal}</TableCell>
                   <TableCell>{order.date}</TableCell>
-                  <TableCell className="text-right">{order.amount}€</TableCell>
+                  <TableCell className="text-right">
+                    {formatCurrency(order.amount)}
+                  </TableCell>
                   <TableCell>{getStatusBadge(order.status)}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon">
