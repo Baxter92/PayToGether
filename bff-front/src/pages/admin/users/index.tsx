@@ -13,20 +13,70 @@ import {
   TableRow,
 } from "@/common/components/ui/table";
 import { Badge } from "@/common/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/common/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/common/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/common/components/ui/dropdown-menu";
+import { formatCurrency } from "@/common/utils/formatCurrency";
 
 const mockUsers = [
-  { id: 1, name: "Jean Dupont", email: "jean.dupont@email.com", avatar: "", orders: 12, spent: 450, role: "user", status: "active" },
-  { id: 2, name: "Marie Martin", email: "marie.martin@email.com", avatar: "", orders: 8, spent: 320, role: "user", status: "active" },
-  { id: 3, name: "Pierre Bernard", email: "pierre.bernard@email.com", avatar: "", orders: 25, spent: 890, role: "admin", status: "active" },
-  { id: 4, name: "Sophie Laurent", email: "sophie.laurent@email.com", avatar: "", orders: 3, spent: 120, role: "user", status: "banned" },
-  { id: 5, name: "Lucas Petit", email: "lucas.petit@email.com", avatar: "", orders: 15, spent: 560, role: "user", status: "active" },
+  {
+    id: 1,
+    name: "Jean Dupont",
+    email: "jean.dupont@email.com",
+    avatar: "",
+    orders: 12,
+    spent: 450,
+    role: "user",
+    status: "active",
+  },
+  {
+    id: 2,
+    name: "Marie Martin",
+    email: "marie.martin@email.com",
+    avatar: "",
+    orders: 8,
+    spent: 320,
+    role: "user",
+    status: "active",
+  },
+  {
+    id: 3,
+    name: "Pierre Bernard",
+    email: "pierre.bernard@email.com",
+    avatar: "",
+    orders: 25,
+    spent: 890,
+    role: "admin",
+    status: "active",
+  },
+  {
+    id: 4,
+    name: "Sophie Laurent",
+    email: "sophie.laurent@email.com",
+    avatar: "",
+    orders: 3,
+    spent: 120,
+    role: "user",
+    status: "banned",
+  },
+  {
+    id: 5,
+    name: "Lucas Petit",
+    email: "lucas.petit@email.com",
+    avatar: "",
+    orders: 15,
+    spent: 560,
+    role: "user",
+    status: "active",
+  },
 ];
 
 export default function AdminUsers(): ReactElement {
@@ -41,9 +91,17 @@ export default function AdminUsers(): ReactElement {
   const getStatusBadge = (status: string): ReactElement => {
     switch (status) {
       case "active":
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Actif</Badge>;
+        return (
+          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+            Actif
+          </Badge>
+        );
       case "banned":
-        return <Badge className="bg-destructive/10 text-destructive hover:bg-destructive/10">Banni</Badge>;
+        return (
+          <Badge className="bg-destructive/10 text-destructive hover:bg-destructive/10">
+            Banni
+          </Badge>
+        );
       default:
         return <Badge>{status}</Badge>;
     }
@@ -52,7 +110,11 @@ export default function AdminUsers(): ReactElement {
   const getRoleBadge = (role: string): ReactElement => {
     switch (role) {
       case "admin":
-        return <Badge className="bg-primary/10 text-primary hover:bg-primary/10">Admin</Badge>;
+        return (
+          <Badge className="bg-primary/10 text-primary hover:bg-primary/10">
+            Admin
+          </Badge>
+        );
       default:
         return <Badge variant="outline">Utilisateur</Badge>;
     }
@@ -61,7 +123,9 @@ export default function AdminUsers(): ReactElement {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold font-heading">Gestion des Utilisateurs</h1>
+        <h1 className="text-3xl font-bold font-heading">
+          Gestion des Utilisateurs
+        </h1>
         <p className="text-muted-foreground">
           Gérez les comptes utilisateurs et leurs permissions
         </p>
@@ -101,18 +165,25 @@ export default function AdminUsers(): ReactElement {
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={user.avatar} />
                         <AvatarFallback>
-                          {user.name.split(" ").map((n) => n[0]).join("")}
+                          {user.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium">{user.name}</p>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {user.email}
+                        </p>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>{getRoleBadge(user.role)}</TableCell>
                   <TableCell className="text-right">{user.orders}</TableCell>
-                  <TableCell className="text-right">{user.spent}€</TableCell>
+                  <TableCell className="text-right">
+                    {formatCurrency(user.spent)}
+                  </TableCell>
                   <TableCell>{getStatusBadge(user.status)}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>

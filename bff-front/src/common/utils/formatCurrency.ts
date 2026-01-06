@@ -1,9 +1,11 @@
+import { getLocale } from "./i18nLocale";
+
 export function formatCurrency(
   amount: number,
-  currency: string = "EUR",
-  locale: string = "fr-FR"
+  currency: string = "CAD",
+  locale?: string
 ): string {
-  return new Intl.NumberFormat(locale, {
+  return new Intl.NumberFormat(locale ?? getLocale(), {
     style: "currency",
     currency,
   }).format(amount);

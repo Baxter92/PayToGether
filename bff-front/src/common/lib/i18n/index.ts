@@ -2,6 +2,7 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import HttpBackend from "i18next-http-backend";
 import LanguageDetector from "i18next-browser-languagedetector";
+import { setLocale } from "@/common/utils/i18nLocale";
 
 i18n
   // charge les fichiers de traduction depuis /locales/{{lng}}/{{ns}}.json
@@ -10,8 +11,8 @@ i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    fallbackLng: "fr",
-    supportedLngs: ["fr", "en"],
+    fallbackLng: "fr-CA",
+    supportedLngs: ["fr-CA", "en-CA"],
     ns: ["common"],
     defaultNS: "common",
     debug: false,
@@ -25,5 +26,9 @@ i18n
       useSuspense: true,
     },
   });
+
+i18n.on("languageChanged", (lng) => {
+  setLocale(lng);
+});
 
 export default i18n;

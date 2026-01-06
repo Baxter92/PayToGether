@@ -14,6 +14,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Avatar, AvatarImage } from "@/common/components/ui/avatar";
 import { Heading } from "../Heading";
 import { Progress } from "@/common/components/ui/progress";
+import { formatCurrency } from "@/common/utils/formatCurrency";
 
 /** Déclare le type de filtre */
 interface DealFilters {
@@ -360,11 +361,11 @@ export default function DealsList({
           return (
             <div className="flex flex-col">
               <span className="font-bold text-primary">
-                {d.groupPrice.toLocaleString()} FCFA
+                {formatCurrency(d.groupPrice)}
               </span>
               {d.originalPrice && d.originalPrice !== d.groupPrice && (
                 <span className="text-xs text-muted-foreground line-through">
-                  {d.originalPrice.toLocaleString()} FCFA
+                  {formatCurrency(d.originalPrice)}
                 </span>
               )}
             </div>
