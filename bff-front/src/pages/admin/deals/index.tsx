@@ -1,10 +1,12 @@
-import type { ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/common/components/ui/button";
 import DealsList from "@/common/containers/DealList";
 import { mockDeals } from "@/common/constants/data";
+import { CreateDealModal } from "@/pages/profile/components/CreateDealModal";
 
 export default function AdminDeals(): ReactElement {
+  const [open, setOpen] = useState(false);
   return (
     <section className="space-y-6">
       <header className="flex items-center justify-between">
@@ -14,7 +16,10 @@ export default function AdminDeals(): ReactElement {
             Créez et gérez vos offres promotionnelles
           </p>
         </div>
-        <Button leftIcon={<Plus className="h-4 w-4" />}>
+        <Button
+          leftIcon={<Plus className="h-4 w-4" />}
+          onClick={() => setOpen(true)}
+        >
           Nouveau Deal
         </Button>
       </header>
@@ -29,6 +34,8 @@ export default function AdminDeals(): ReactElement {
         showPagination
         itemsPerPage={10}
       />
+
+      <CreateDealModal open={open} onClose={() => setOpen(false)} />
     </section>
   );
 }

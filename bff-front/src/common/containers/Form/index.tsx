@@ -84,6 +84,7 @@ export type IFormContainerConfig<T = FieldValues> = {
   onReset?: (options: IFormResetOptions) => void | Promise<void>;
   submitLabel?: string;
   resetLabel?: string;
+  showSubmitButton?: boolean;
   showResetButton?: boolean;
   titleClassName?: string;
   descriptionClassName?: string;
@@ -102,6 +103,7 @@ const Form = <T extends FieldValues>({
   onReset,
   submitLabel = "Soumettre",
   resetLabel = "Réinitialiser",
+  showSubmitButton = true,
   showResetButton = true,
   titleClassName,
   descriptionClassName,
@@ -170,11 +172,20 @@ const Form = <T extends FieldValues>({
 
     const baseInputClass = `w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
       error ? "border-red-500" : "border-gray-300"
-    } ${(field as InputProps)?.disabled ? "bg-gray-100 cursor-not-allowed" : ""}`;
+    } ${
+      (field as InputProps)?.disabled ? "bg-gray-100 cursor-not-allowed" : ""
+    }`;
 
     switch (field.type) {
       case "textarea": {
-        const { label: _label, type: _type, colSpan: _colSpan, render: _render, name, ...textareaProps } = field as IFieldConfig & { type: "textarea" };
+        const {
+          label: _label,
+          type: _type,
+          colSpan: _colSpan,
+          render: _render,
+          name,
+          ...textareaProps
+        } = field as IFieldConfig & { type: "textarea" };
         return (
           <Textarea
             {...register(name)}
@@ -196,9 +207,7 @@ const Form = <T extends FieldValues>({
             triggerClassName={baseInputClass}
             items={selectField.items}
             label={selectField.label}
-            onValueChange={(value) =>
-              form.setValue(field.name, value)
-            }
+            onValueChange={(value) => form.setValue(field.name, value)}
             error={errorMessage}
           />
         );
@@ -212,9 +221,7 @@ const Form = <T extends FieldValues>({
             {...rest}
             disabled={radioField.disabled}
             items={radioField.items}
-            onChange={(value) =>
-              form.setValue(field.name, value)
-            }
+            onChange={(value) => form.setValue(field.name, value)}
             error={errorMessage}
           />
         );
@@ -223,15 +230,14 @@ const Form = <T extends FieldValues>({
       case "checkbox":
         if ((field as ICheckboxGroupProps).items) {
           const { onChange: _onChange, ...rest } = register(field.name);
-          const checkboxGroupField = field as IFieldConfig & ICheckboxGroupProps;
+          const checkboxGroupField = field as IFieldConfig &
+            ICheckboxGroupProps;
           return (
             <CheckboxGroup
               {...rest}
               disabled={checkboxGroupField.disabled}
               items={checkboxGroupField.items}
-              onChange={(value) =>
-                form.setValue(field.name, value)
-              }
+              onChange={(value) => form.setValue(field.name, value)}
               error={errorMessage}
             />
           );
@@ -257,9 +263,7 @@ const Form = <T extends FieldValues>({
             label={dateField.label}
             max={dateField.max}
             min={dateField.min}
-            onChange={(date) =>
-              form.setValue(field.name, date)
-            }
+            onChange={(date) => form.setValue(field.name, date)}
             error={errorMessage}
           />
         );
@@ -272,9 +276,7 @@ const Form = <T extends FieldValues>({
           <DateTimeInput
             {...rest}
             label={datetimeField.label}
-            onChange={(date) =>
-              form.setValue(field.name, date)
-            }
+            onChange={(date) => form.setValue(field.name, date)}
             error={errorMessage}
           />
         );
@@ -287,9 +289,7 @@ const Form = <T extends FieldValues>({
           <TimeInput
             {...rest}
             label={timeField.label}
-            onChange={(time) =>
-              form.setValue(field.name, time)
-            }
+            onChange={(time) => form.setValue(field.name, time)}
             error={errorMessage}
           />
         );
@@ -331,7 +331,11 @@ const Form = <T extends FieldValues>({
       {normalizedGroups.map((group, groupIdx) => (
         <div
           key={groupIdx}
-          className={cn(group.className, groupIdx > 0 && "mt-6")}
+          className={cn(
+            group.className,
+            groups ? "bg-gray-50 border border-gray-200 rounded-md p-4" : "",
+            groupIdx > 0 && "mt-6"
+          )}
         >
           {group.title && (
             <h3
@@ -350,7 +354,6 @@ const Form = <T extends FieldValues>({
               {group.description}
             </p>
           )}
-
           <div className={`grid ${getColClass(group.columns)} gap-4`}>
             {group.fields.map((field, fieldIdx) => (
               <div
@@ -365,14 +368,16 @@ const Form = <T extends FieldValues>({
       ))}
 
       <HStack spacing={5} className="mt-6" wrap>
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          loading={isSubmitting}
-          {...submitBtnProps}
-        >
-          {isSubmitting ? "En cours..." : submitLabel}
-        </Button>
+        {showSubmitButton && (
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            loading={isSubmitting}
+            {...submitBtnProps}
+          >
+            {isSubmitting ? "En cours..." : submitLabel}
+          </Button>
+        )}
         {showResetButton && (
           <Button
             type="button"

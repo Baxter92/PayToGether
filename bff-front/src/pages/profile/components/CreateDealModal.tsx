@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { categories } from "@/common/constants/data";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 // ==============================
 // Types
@@ -231,9 +232,9 @@ export function CreateDealModal({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent size="xl" className="p-0 h-[90vh] overflow-hidden">
-        <DialogHeader className="px-6 py-4 border-b">
-          <h2 className="text-xl font-semibold">Ajouter un nouveau deal</h2>
-        </DialogHeader>
+        <DialogTitle className="px-6 py-4 border-b font-semibold">
+          Ajouter un nouveau deal
+        </DialogTitle>
 
         <div className="h-[calc(90vh-72px)] overflow-y-auto px-6 py-4">
           <Form<CreateDealInput>

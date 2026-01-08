@@ -15,6 +15,8 @@ import {
 import { Badge } from "@/common/components/ui/badge";
 import Select from "@/common/components/Select";
 import { formatCurrency } from "@/common/utils/formatCurrency";
+import { DataTable } from "@/common/components";
+import ViewDetailsModal from "./components/ViewDetailsModal";
 
 const mockOrders = [
   {
@@ -78,6 +80,43 @@ const mockOrders = [
 export default function AdminOrders(): ReactElement {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [openViewDetails, setOpenViewDetails] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+
+  const columns = [
+    {
+      id: "id",
+      header: "ID",
+      accessorKey: "id",
+    },
+    {
+      id: "customer",
+      header: "Client",
+      accessorKey: "customer",
+    },
+    {
+      id: "deal",
+      header: "Deal",
+      accessorKey: "deal",
+    },
+    {
+      id: "date",
+      header: "Date",
+      accessorKey: "date",
+    },
+    {
+      id: "amount",
+      header: "Montant",
+      accessorKey: "amount",
+      cell: ({ row }) => formatCurrency(row.original.amount),
+    },
+    {
+      id: "status",
+      header: "Statut",
+      accessorKey: "status",
+      cell: ({ row }) => getStatusBadge(row.original.status),
+    },
+  ];
 
   const filteredOrders = mockOrders.filter((order) => {
     const matchesSearch =
@@ -193,42 +232,24 @@ export default function AdminOrders(): ReactElement {
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Client</TableHead>
-                <TableHead>Deal</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Montant</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredOrders.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-mono text-sm">
-                    {order.id}
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {order.customer}
-                  </TableCell>
-                  <TableCell>{order.deal}</TableCell>
-                  <TableCell>{order.date}</TableCell>
-                  <TableCell className="text-right">
-                    {formatCurrency(order.amount)}
-                  </TableCell>
-                  <TableCell>{getStatusBadge(order.status)}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon">
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={columns}
+            data={mockOrders}
+            actionsRow={({ row }) => [
+              {
+                leftIcon: <Eye />,
+                onClick: () => {
+                  setSelectedOrder(row.original);
+                  setOpenViewDetails(true);
+                },
+              },
+            ]}
+          />
+          <ViewDetailsModal
+            open={openViewDetails}
+            onClose={() => setOpenViewDetails(false)}
+            order={selectedOrder}
+          />
         </CardContent>
       </Card>
     </div>
