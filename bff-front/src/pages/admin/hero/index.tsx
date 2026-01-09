@@ -7,7 +7,11 @@ import {
   useSensors,
   type DragEndEvent,
 } from "@dnd-kit/core";
-import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { HStack, VStack } from "@/common/components";
 import { Button } from "@/common/components/ui/button";
 import { Card, CardContent } from "@/common/components/ui/card";
@@ -140,7 +144,7 @@ export default function AdminHero(): JSX.Element {
     <main className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <Heading
-          title="Gestion du Hero"
+          title="Gestion des Pub"
           description="Configurez le carrousel de la page d'accueil"
           level={2}
           underline
@@ -158,7 +162,7 @@ export default function AdminHero(): JSX.Element {
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <Label htmlFor="hero-toggle" className="text-base font-medium">
-                Activer le Hero
+                Activer la Pub
               </Label>
               <p className="text-sm text-muted-foreground">
                 Afficher le carrousel sur la page d'accueil

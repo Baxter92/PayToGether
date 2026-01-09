@@ -308,7 +308,7 @@ export default function AdminReports(): ReactElement {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, value }) => `${name} (${value}%)`}
+                  label={({ name, value }: { name?: string; value?: number }) => `${name || ""} (${value || 0}%)`}
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
@@ -321,7 +321,7 @@ export default function AdminReports(): ReactElement {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value) => `${value}%`}
+                  formatter={(value) => `${value ?? 0}%`}
                   contentStyle={{
                     backgroundColor: "var(--background)",
                     border: "1px solid var(--border)",
@@ -350,7 +350,7 @@ export default function AdminReports(): ReactElement {
                 <XAxis dataKey="name" stroke="var(--muted-foreground)" />
                 <YAxis stroke="var(--muted-foreground)" />
                 <Tooltip
-                  formatter={(value) => formatCurrency(value as any)}
+                  formatter={(value) => formatCurrency(Number(value ?? 0))}
                   contentStyle={{
                     backgroundColor: "var(--background)",
                     border: "1px solid var(--border)",

@@ -22,6 +22,8 @@ import DataTable from "@/common/components/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatCurrency } from "@/common/utils/formatCurrency";
 import { VStack } from "@/common/components";
+import ViewOrderDetailsModal from "../orders/components/ViewOrderDetailsModal";
+import { mockOrders } from "../orders";
 
 interface Payment {
   id: string;
@@ -109,6 +111,8 @@ const methodLabels = {
 export default function AdminPayments(): ReactElement {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedPayment, setSelectedPayment] = useState<any>(null);
+  const [openOrderDetails, setOpenOrderDetails] = useState(false);
 
   const filteredPayments = mockPayments.filter((payment) => {
     const matchesSearch =
@@ -131,6 +135,22 @@ export default function AdminPayments(): ReactElement {
     {
       accessorKey: "customer",
       header: "Client",
+    },
+    {
+      accessorKey: "orderId",
+      header: "Commande",
+      cell: ({ row }) => (
+        <Button
+          variant="link"
+          size="sm"
+          onClick={() => {
+            setSelectedPayment(row.original);
+            setOpenOrderDetails(true);
+          }}
+        >
+          {row.original.orderId}
+        </Button>
+      ),
     },
     {
       accessorKey: "merchant",
@@ -272,9 +292,25 @@ export default function AdminPayments(): ReactElement {
           </div>
         </CardHeader>
         <CardContent>
-          <DataTable columns={columns} data={filteredPayments} />
+          <DataTable
+            columns={columns}
+            data={filteredPayments}
+            columnFiltersConfig={[
+              {
+                id: "orderId",
+                label: "Commande",
+                type: "select",
+                options: mockOrders.map((o) => ({ label: o.id, value: o.id })),
+              },
+            ]}
+          />
         </CardContent>
       </Card>
+      <ViewOrderDetailsModal
+        open={openOrderDetails}
+        onClose={() => setOpenOrderDetails(false)}
+        order={mockOrders.find((o) => o.id === selectedPayment?.orderId) as any}
+      />
     </VStack>
   );
 }

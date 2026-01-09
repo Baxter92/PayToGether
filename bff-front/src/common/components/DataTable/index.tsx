@@ -69,6 +69,12 @@ export interface IDataTableProps<TData, TValue> {
   onExport?: (data: TData[]) => void;
   /** Callback lors du refresh */
   onRefresh?: () => void;
+
+  onFilter?: (params: {
+    globalFilter: string;
+    columnFilters: ColumnFiltersState;
+    activeFilters: Record<string, any>;
+  }) => void;
 }
 
 export default function DataTable<TData, TValue>({
@@ -86,6 +92,7 @@ export default function DataTable<TData, TValue>({
   enableSorting = true,
   onExport,
   onRefresh,
+  onFilter,
 }: IDataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -99,6 +106,14 @@ export default function DataTable<TData, TValue>({
   const [activeFilters, setActiveFilters] = React.useState<Record<string, any>>(
     {}
   );
+
+  React.useEffect(() => {
+    onFilter?.({
+      globalFilter,
+      columnFilters,
+      activeFilters,
+    });
+  }, [globalFilter, columnFilters, activeFilters]);
 
   // Construire colonnes (rowNumber + select + user columns)
   const cols = React.useMemo(() => {
@@ -239,7 +254,7 @@ export default function DataTable<TData, TValue>({
     }));
 
     const column = table.getColumn(filterId);
-    if (column) {
+    if (column && column.getCanFilter() && !onFilter) {
       column.setFilterValue(
         value === "all" || value === "" ? undefined : value
       );
