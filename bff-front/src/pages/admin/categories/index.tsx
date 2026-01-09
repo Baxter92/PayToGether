@@ -112,7 +112,7 @@ export default function AdminCategories(): ReactElement {
             </DialogHeader>
             <Form<CategoryFormData>
               schema={categorySchema}
-              defaultValues={{ name: "", icon: "" }}
+              defaultValues={{ name: "", slug: "" }}
               onSubmit={handleCreateCategory}
               submitLabel="Créer"
               resetLabel="Annuler"

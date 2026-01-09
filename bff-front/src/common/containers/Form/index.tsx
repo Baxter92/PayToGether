@@ -169,7 +169,7 @@ const Form = <T extends FieldValues>({
       return (
         <Textarea
           {...register(field.name)}
-          {...field}
+          {...(field as any)}
           disabled={isDisabled}
           error={error}
         />
@@ -188,7 +188,6 @@ const Form = <T extends FieldValues>({
               value={f.value}
               onValueChange={f.onChange}
               disabled={isDisabled}
-              className="w-full"
               triggerClassName="w-full"
               error={error}
             />
@@ -313,7 +312,7 @@ const Form = <T extends FieldValues>({
 
   return (
     <form
-      onSubmit={handleSubmit((data) => onSubmit({ data, form }))}
+      onSubmit={handleSubmit((data) => onSubmit?.({ data, form }))}
       {...props}
     >
       {normalizedGroups.map((group, idx) => (

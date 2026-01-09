@@ -100,7 +100,7 @@ export default function AdminOrders(): ReactElement {
       id: "deal",
       header: "Deal",
       accessorKey: "deal",
-      cell: ({ row }) => (
+      cell: ({ row }: { row: any }) => (
         <Button
           variant="link"
           size="sm"
@@ -122,25 +122,25 @@ export default function AdminOrders(): ReactElement {
       id: "amount",
       header: "Montant",
       accessorKey: "amount",
-      cell: ({ row }) => formatCurrency(row.original.amount),
+      cell: ({ row }: { row: any }) => formatCurrency(row.original.amount),
     },
     {
       id: "status",
       header: "Statut",
       accessorKey: "status",
-      cell: ({ row }) => getStatusBadge(row.original.status),
+      cell: ({ row }: { row: any }) => getStatusBadge(row.original.status),
     },
   ];
 
-  const filteredOrders = mockOrders.filter((order) => {
-    const matchesSearch =
-      order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.deal.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || order.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  // const filteredOrders = mockOrders.filter((order) => {
+  //   const matchesSearch =
+  //     order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     order.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     order.deal.toLowerCase().includes(searchQuery.toLowerCase());
+  //   const matchesStatus =
+  //     statusFilter === "all" || order.status === statusFilter;
+  //   return matchesSearch && matchesStatus;
+  // });
 
   const getStatusBadge = (status: string): ReactElement => {
     switch (status) {
