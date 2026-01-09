@@ -6,6 +6,7 @@ export const ADMIN_PATHS = {
   ORDERS: "/admin/orders",
   MERCHANTS: "/admin/merchants",
   PAYMENTS: "/admin/payments",
+  PAYOUTS: "/admin/payouts",
   CATEGORIES: "/admin/categories",
   REPORTS: "/admin/reports",
   SETTINGS: "/admin/settings",

@@ -29,6 +29,7 @@ import AdminSettings from "./pages/admin/settings";
 import AdminLogin from "./pages/admin/login";
 import AdminMerchants from "./pages/admin/merchants";
 import AdminPayments from "./pages/admin/payments";
+import AdminPayouts from "./pages/admin/payouts";
 import AdminCategories from "./pages/admin/categories";
 import AdminReports from "./pages/admin/reports";
 import AdminHero from "./pages/admin/hero";
@@ -55,6 +56,7 @@ function App(): JSX.Element {
             <Route path="orders" element={<AdminOrders />} />
             <Route path="merchants" element={<AdminMerchants />} />
             <Route path="payments" element={<AdminPayments />} />
+            <Route path="payouts" element={<AdminPayouts />} />
             <Route path="categories" element={<AdminCategories />} />
             <Route path="reports" element={<AdminReports />} />
             <Route path="settings" element={<AdminSettings />} />

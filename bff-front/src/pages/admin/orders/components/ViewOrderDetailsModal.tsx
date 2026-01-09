@@ -43,7 +43,7 @@ interface ViewDetailsModalProps {
   order: OrderDetailsInput | null;
 }
 
-export default function ViewDetailsModal({
+export default function ViewOrderDetailsModal({
   open,
   onClose,
   order,

@@ -8,7 +8,7 @@ import { Badge } from "@/common/components/ui/badge";
 import Select from "@/common/components/Select";
 import { formatCurrency } from "@/common/utils/formatCurrency";
 import { DataTable } from "@/common/components";
-import ViewDetailsModal from "./components/ViewDetailsModal";
+import ViewOrderDetailsModal from "./components/ViewOrderDetailsModal";
 import { ViewDetailDealModal } from "../deals/containers/ViewDetailDealModal";
 import { mockDeals } from "@/common/constants/data";
 
@@ -259,7 +259,7 @@ export default function AdminOrders(): ReactElement {
               },
             ]}
           />
-          <ViewDetailsModal
+          <ViewOrderDetailsModal
             open={openViewDetails}
             onClose={() => setOpenViewDetails(false)}
             order={selectedOrder}

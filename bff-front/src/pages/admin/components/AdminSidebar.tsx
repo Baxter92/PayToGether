@@ -12,6 +12,7 @@ import {
   FolderTree,
   BarChart3,
   Image,
+  Wallet,
 } from "lucide-react";
 import {
   Sidebar,
@@ -56,6 +57,11 @@ const commerceItems = [
     title: "Paiements",
     url: ADMIN_PATHS.PAYMENTS,
     icon: CreditCard,
+  },
+  {
+    title: "Payouts",
+    url: ADMIN_PATHS.PAYOUTS,
+    icon: Wallet,
   },
   {
     title: "Catégories",
