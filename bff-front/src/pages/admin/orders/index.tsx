@@ -4,25 +4,20 @@ import { Search, Eye, Download } from "lucide-react";
 import { Button } from "@/common/components/ui/button";
 import { Input } from "@/common/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/common/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/common/components/ui/table";
 import { Badge } from "@/common/components/ui/badge";
 import Select from "@/common/components/Select";
 import { formatCurrency } from "@/common/utils/formatCurrency";
 import { DataTable } from "@/common/components";
 import ViewDetailsModal from "./components/ViewDetailsModal";
+import { ViewDetailDealModal } from "../deals/containers/ViewDetailDealModal";
+import { mockDeals } from "@/common/constants/data";
 
-const mockOrders = [
+export const mockOrders = [
   {
     id: "ORD-001",
     customer: "Jean Dupont",
-    deal: "Spa relaxant 1h",
+    deal: "Bœuf Charolais Premium - 5kg",
+    dealId: 1,
     date: "2024-01-15",
     amount: 89,
     status: "completed",
@@ -30,7 +25,8 @@ const mockOrders = [
   {
     id: "ORD-002",
     customer: "Marie Martin",
-    deal: "Restaurant gastronomique",
+    deal: "Tilapia Frais du Wouri - 3kg",
+    dealId: 2,
     date: "2024-01-14",
     amount: 120,
     status: "pending",
@@ -38,7 +34,8 @@ const mockOrders = [
   {
     id: "ORD-003",
     customer: "Pierre Bernard",
-    deal: "Séance photo pro",
+    deal: "Viande de Bœuf Hachée - 2kg",
+    dealId: 3,
     date: "2024-01-14",
     amount: 75,
     status: "completed",
@@ -46,7 +43,8 @@ const mockOrders = [
   {
     id: "ORD-004",
     customer: "Sophie Laurent",
-    deal: "Cours de cuisine",
+    deal: "Saumon Frais - 2kg",
+    dealId: 4,
     date: "2024-01-13",
     amount: 55,
     status: "refunded",
@@ -54,7 +52,8 @@ const mockOrders = [
   {
     id: "ORD-005",
     customer: "Lucas Petit",
-    deal: "Escape game",
+    deal: "Côtes de Bœuf Grillades - 4kg",
+    dealId: 5,
     date: "2024-01-13",
     amount: 35,
     status: "completed",
@@ -62,7 +61,8 @@ const mockOrders = [
   {
     id: "ORD-006",
     customer: "Emma Dubois",
-    deal: "Massage duo",
+    deal: "Crevettes Géantes - 1.5kg",
+    dealId: 6,
     date: "2024-01-12",
     amount: 149,
     status: "pending",
@@ -70,7 +70,8 @@ const mockOrders = [
   {
     id: "ORD-007",
     customer: "Thomas Moreau",
-    deal: "Karting session",
+    dealId: 7,
+    deal: "Entrecôte de Bœuf Premium - 3kg",
     date: "2024-01-12",
     amount: 45,
     status: "cancelled",
@@ -82,6 +83,7 @@ export default function AdminOrders(): ReactElement {
   const [statusFilter, setStatusFilter] = useState("all");
   const [openViewDetails, setOpenViewDetails] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [openDealDetails, setOpenDealDetails] = useState(false);
 
   const columns = [
     {
@@ -98,6 +100,18 @@ export default function AdminOrders(): ReactElement {
       id: "deal",
       header: "Deal",
       accessorKey: "deal",
+      cell: ({ row }) => (
+        <Button
+          variant="link"
+          size="sm"
+          onClick={() => {
+            setSelectedOrder(row.original);
+            setOpenDealDetails(true);
+          }}
+        >
+          {row.original.deal}
+        </Button>
+      ),
     },
     {
       id: "date",
@@ -249,6 +263,11 @@ export default function AdminOrders(): ReactElement {
             open={openViewDetails}
             onClose={() => setOpenViewDetails(false)}
             order={selectedOrder}
+          />
+          <ViewDetailDealModal
+            open={openDealDetails}
+            onClose={() => setOpenDealDetails(false)}
+            deal={mockDeals.find((d) => d.id === selectedOrder?.dealId)}
           />
         </CardContent>
       </Card>

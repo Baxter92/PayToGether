@@ -5,10 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/common/components/ui/dialog";
-import Form, {
-  type IFieldConfig,
-  type IFieldGroup,
-} from "@/common/containers/Form";
+import Form, { type IFieldConfig } from "@/common/containers/Form";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";

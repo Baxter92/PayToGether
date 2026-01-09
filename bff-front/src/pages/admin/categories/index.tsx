@@ -6,7 +6,6 @@ import {
   MoreHorizontal,
   Pencil,
   Trash2,
-  GripVertical,
   X,
 } from "lucide-react";
 import { Button } from "@/common/components/ui/button";
@@ -34,18 +33,28 @@ import {
 } from "@/common/components/ui/dialog";
 import Form from "@/common/containers/Form";
 import { z } from "zod";
-import { toast } from "sonner";
 import { categories } from "@/common/constants/data";
+import { toast } from "sonner";
 
 const categorySchema = z.object({
   name: z.string().min(1, "Nom requis").max(50, "Nom trop long"),
-  icon: z.string().min(1, "Icône requise").max(4, "Icône invalide"),
+  slug: z.string().min(1, "Slug requis").max(50, "Slug trop long"),
 });
 
 type CategoryFormData = z.infer<typeof categorySchema>;
+type Category = {
+  id: string;
+  name: string;
+  icon: any;
+  slug: string;
+  count: number;
+  isActive: boolean;
+};
 
 export default function AdminCategories(): ReactElement {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editCategory, setEditCategory] = useState<Category | null>(null);
+  const [deleteCategory, setDeleteCategory] = useState<Category | null>(null);
 
   const handleCreateCategory = async ({ data }: { data: CategoryFormData }) => {
     console.log("New category:", data);
@@ -53,6 +62,26 @@ export default function AdminCategories(): ReactElement {
       description: `La catégorie "${data.name}" a été créée`,
     });
     setIsDialogOpen(false);
+  };
+
+  const handleUpdateCategory = async ({ data }: { data: CategoryFormData }) => {
+    if (!editCategory) return;
+
+    toast.success("Catégorie modifiée", {
+      description: `La catégorie "${data.name}" a été mise à jour`,
+    });
+
+    setEditCategory(null);
+  };
+
+  const handleDeleteCategory = async () => {
+    if (!deleteCategory) return;
+
+    toast.success("Catégorie supprimée", {
+      description: `La catégorie "${deleteCategory.name}" a été supprimée`,
+    });
+
+    setDeleteCategory(null);
   };
 
   return (
@@ -141,9 +170,6 @@ export default function AdminCategories(): ReactElement {
       <Card>
         <CardHeader>
           <CardTitle>Liste des catégories</CardTitle>
-          <CardDescription>
-            Glissez-déposez pour réorganiser l'ordre d'affichage
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
@@ -154,8 +180,6 @@ export default function AdminCategories(): ReactElement {
                   key={category.id}
                   className="flex items-center gap-4 p-4 border rounded-lg bg-card hover:bg-muted/50 transition-colors"
                 >
-                  <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab" />
-
                   <span className="text-2xl">
                     <Icon />
                   </span>
@@ -186,11 +210,16 @@ export default function AdminCategories(): ReactElement {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setEditCategory(category)}
+                      >
                         <Pencil className="mr-2 h-4 w-4" />
                         Modifier
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        onClick={() => setDeleteCategory(category)}
+                      >
                         <Trash2 className="mr-2 h-4 w-4" />
                         Supprimer
                       </DropdownMenuItem>
@@ -202,6 +231,82 @@ export default function AdminCategories(): ReactElement {
           </div>
         </CardContent>
       </Card>
+      <Dialog open={!!editCategory} onOpenChange={() => setEditCategory(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier la catégorie</DialogTitle>
+            <DialogDescription>
+              Modifiez les informations de la catégorie.
+            </DialogDescription>
+          </DialogHeader>
+
+          {editCategory && (
+            <Form<CategoryFormData>
+              schema={categorySchema}
+              defaultValues={{
+                name: editCategory.name,
+                slug: editCategory.slug,
+              }}
+              onSubmit={handleUpdateCategory}
+              submitLabel="Enregistrer"
+              resetLabel="Annuler"
+              submitBtnProps={{
+                leftIcon: <Pencil className="h-4 w-4" />,
+              }}
+              resetBtnProps={{
+                leftIcon: <X className="h-4 w-4" />,
+                onClick: () => setEditCategory(null),
+              }}
+              columns={1}
+              fields={[
+                {
+                  name: "name",
+                  label: "Nom de la catégorie",
+                  type: "text",
+                },
+                {
+                  name: "slug",
+                  label: "Slug",
+                  type: "text",
+                },
+              ]}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={!!deleteCategory}
+        onOpenChange={() => setDeleteCategory(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Supprimer la catégorie</DialogTitle>
+            <DialogDescription>
+              Cette action est irréversible. Voulez-vous vraiment supprimer la
+              catégorie{" "}
+              <span className="font-semibold">{deleteCategory?.name}</span>?
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex justify-end gap-2 mt-6">
+            <Button
+              colorScheme="secondary"
+              onClick={() => setDeleteCategory(null)}
+              leftIcon={<X className="h-4 w-4" />}
+            >
+              Annuler
+            </Button>
+            <Button
+              colorScheme="danger"
+              onClick={handleDeleteCategory}
+              leftIcon={<Trash2 className="h-4 w-4" />}
+            >
+              Supprimer
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
