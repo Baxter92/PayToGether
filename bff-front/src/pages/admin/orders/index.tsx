@@ -4,23 +4,20 @@ import { Search, Eye, Download } from "lucide-react";
 import { Button } from "@/common/components/ui/button";
 import { Input } from "@/common/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/common/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/common/components/ui/table";
 import { Badge } from "@/common/components/ui/badge";
 import Select from "@/common/components/Select";
 import { formatCurrency } from "@/common/utils/formatCurrency";
+import { DataTable } from "@/common/components";
+import ViewDetailsModal from "./components/ViewDetailsModal";
+import { ViewDetailDealModal } from "../deals/containers/ViewDetailDealModal";
+import { mockDeals } from "@/common/constants/data";
 
-const mockOrders = [
+export const mockOrders = [
   {
     id: "ORD-001",
     customer: "Jean Dupont",
-    deal: "Spa relaxant 1h",
+    deal: "Bœuf Charolais Premium - 5kg",
+    dealId: 1,
     date: "2024-01-15",
     amount: 89,
     status: "completed",
@@ -28,7 +25,8 @@ const mockOrders = [
   {
     id: "ORD-002",
     customer: "Marie Martin",
-    deal: "Restaurant gastronomique",
+    deal: "Tilapia Frais du Wouri - 3kg",
+    dealId: 2,
     date: "2024-01-14",
     amount: 120,
     status: "pending",
@@ -36,7 +34,8 @@ const mockOrders = [
   {
     id: "ORD-003",
     customer: "Pierre Bernard",
-    deal: "Séance photo pro",
+    deal: "Viande de Bœuf Hachée - 2kg",
+    dealId: 3,
     date: "2024-01-14",
     amount: 75,
     status: "completed",
@@ -44,7 +43,8 @@ const mockOrders = [
   {
     id: "ORD-004",
     customer: "Sophie Laurent",
-    deal: "Cours de cuisine",
+    deal: "Saumon Frais - 2kg",
+    dealId: 4,
     date: "2024-01-13",
     amount: 55,
     status: "refunded",
@@ -52,7 +52,8 @@ const mockOrders = [
   {
     id: "ORD-005",
     customer: "Lucas Petit",
-    deal: "Escape game",
+    deal: "Côtes de Bœuf Grillades - 4kg",
+    dealId: 5,
     date: "2024-01-13",
     amount: 35,
     status: "completed",
@@ -60,7 +61,8 @@ const mockOrders = [
   {
     id: "ORD-006",
     customer: "Emma Dubois",
-    deal: "Massage duo",
+    deal: "Crevettes Géantes - 1.5kg",
+    dealId: 6,
     date: "2024-01-12",
     amount: 149,
     status: "pending",
@@ -68,7 +70,8 @@ const mockOrders = [
   {
     id: "ORD-007",
     customer: "Thomas Moreau",
-    deal: "Karting session",
+    dealId: 7,
+    deal: "Entrecôte de Bœuf Premium - 3kg",
     date: "2024-01-12",
     amount: 45,
     status: "cancelled",
@@ -78,16 +81,66 @@ const mockOrders = [
 export default function AdminOrders(): ReactElement {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [openViewDetails, setOpenViewDetails] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [openDealDetails, setOpenDealDetails] = useState(false);
 
-  const filteredOrders = mockOrders.filter((order) => {
-    const matchesSearch =
-      order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.deal.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || order.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const columns = [
+    {
+      id: "id",
+      header: "ID",
+      accessorKey: "id",
+    },
+    {
+      id: "customer",
+      header: "Client",
+      accessorKey: "customer",
+    },
+    {
+      id: "deal",
+      header: "Deal",
+      accessorKey: "deal",
+      cell: ({ row }: { row: any }) => (
+        <Button
+          variant="link"
+          size="sm"
+          onClick={() => {
+            setSelectedOrder(row.original);
+            setOpenDealDetails(true);
+          }}
+        >
+          {row.original.deal}
+        </Button>
+      ),
+    },
+    {
+      id: "date",
+      header: "Date",
+      accessorKey: "date",
+    },
+    {
+      id: "amount",
+      header: "Montant",
+      accessorKey: "amount",
+      cell: ({ row }: { row: any }) => formatCurrency(row.original.amount),
+    },
+    {
+      id: "status",
+      header: "Statut",
+      accessorKey: "status",
+      cell: ({ row }: { row: any }) => getStatusBadge(row.original.status),
+    },
+  ];
+
+  // const filteredOrders = mockOrders.filter((order) => {
+  //   const matchesSearch =
+  //     order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     order.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     order.deal.toLowerCase().includes(searchQuery.toLowerCase());
+  //   const matchesStatus =
+  //     statusFilter === "all" || order.status === statusFilter;
+  //   return matchesSearch && matchesStatus;
+  // });
 
   const getStatusBadge = (status: string): ReactElement => {
     switch (status) {
@@ -193,42 +246,29 @@ export default function AdminOrders(): ReactElement {
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Client</TableHead>
-                <TableHead>Deal</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Montant</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredOrders.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-mono text-sm">
-                    {order.id}
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {order.customer}
-                  </TableCell>
-                  <TableCell>{order.deal}</TableCell>
-                  <TableCell>{order.date}</TableCell>
-                  <TableCell className="text-right">
-                    {formatCurrency(order.amount)}
-                  </TableCell>
-                  <TableCell>{getStatusBadge(order.status)}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon">
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={columns}
+            data={mockOrders}
+            actionsRow={({ row }) => [
+              {
+                leftIcon: <Eye />,
+                onClick: () => {
+                  setSelectedOrder(row.original);
+                  setOpenViewDetails(true);
+                },
+              },
+            ]}
+          />
+          <ViewDetailsModal
+            open={openViewDetails}
+            onClose={() => setOpenViewDetails(false)}
+            order={selectedOrder}
+          />
+          <ViewDetailDealModal
+            open={openDealDetails}
+            onClose={() => setOpenDealDetails(false)}
+            deal={mockDeals.find((d) => d.id === selectedOrder?.dealId)}
+          />
         </CardContent>
       </Card>
     </div>

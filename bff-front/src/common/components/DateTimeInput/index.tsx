@@ -10,6 +10,7 @@ export type IDateTimeInputProps = {
   label?: React.ReactNode;
   helperText?: React.ReactNode;
   error?: React.ReactNode;
+  disabled?: boolean;
 };
 
 function toDate(value?: Date | string | null) {
@@ -25,6 +26,7 @@ const DateTimeInput: React.FC<IDateTimeInputProps> = ({
   timeProps,
   label,
   helperText,
+  disabled,
   error,
 }) => {
   const dt = toDate(value);
@@ -73,6 +75,7 @@ const DateTimeInput: React.FC<IDateTimeInputProps> = ({
           <DateInput
             {...(dateProps as any)}
             value={localDate}
+            disabled={disabled || dateProps?.disabled}
             onChange={(d) => {
               setLocalDate(d);
               emitChange(d, localTime);
@@ -83,6 +86,7 @@ const DateTimeInput: React.FC<IDateTimeInputProps> = ({
           <TimeInput
             {...(timeProps as any)}
             value={localTime}
+            disabled={disabled || timeProps?.disabled}
             onChange={(t) => {
               setLocalTime(t);
               emitChange(localDate, t);

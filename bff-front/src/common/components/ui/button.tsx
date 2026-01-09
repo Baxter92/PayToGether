@@ -393,6 +393,10 @@ function Button({
   ...props
 }: IButtonProps) {
   const Comp: any = asChild ? Slot : "button";
+  const isFragment =
+    asChild &&
+    React.isValidElement(children) &&
+    children.type === React.Fragment;
   const navigate = useNavigate();
 
   const isExternalLink = to && to.startsWith("http");
@@ -446,8 +450,11 @@ function Button({
 
   const buttonElement = (
     <Comp
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, colorScheme, className }))}
+      {...(!isFragment && {
+        className: cn(
+          buttonVariants({ variant, size, colorScheme, className })
+        ),
+      })}
       {...props}
       onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
         if (to) {
