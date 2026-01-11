@@ -144,7 +144,7 @@ export default function AdminHero(): JSX.Element {
     <main className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <Heading
-          title="Gestion des Pub"
+          title="Gestion du Hero"
           description="Configurez le carrousel de la page d'accueil"
           level={2}
           underline
@@ -162,7 +162,7 @@ export default function AdminHero(): JSX.Element {
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <Label htmlFor="hero-toggle" className="text-base font-medium">
-                Activer la Pub
+                Activer le Hero
               </Label>
               <p className="text-sm text-muted-foreground">
                 Afficher le carrousel sur la page d'accueil

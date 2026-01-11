@@ -59,7 +59,7 @@ function StatCard({
 
 const stats = [
   {
-    title: "Revenus totaux",
+    title: "Total des commissions",
     value: formatCurrency(45231),
     change: 20.1,
     icon: DollarSign,

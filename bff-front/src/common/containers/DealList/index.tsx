@@ -9,7 +9,6 @@ import {
   LayoutGrid,
   Edit2,
   Trash2,
-  DraftingCompass,
   FileEdit,
   Globe,
 } from "lucide-react";
@@ -587,18 +586,20 @@ export default function DealsList({
                     showSelectionCount={true}
                     enableRowNumber={true}
                     pageSizeOptions={[itemsPerPage, 24, 50, 100]}
+                    {...tableProps}
                     {...(isAdmin
                       ? {
-                          actionsRow: ({ row }: { row: any }) => [
+                          actionsRow: (props: any) => [
+                            ...(tableProps?.actionsRow?.(props) || []),
                             {
                               leftIcon:
-                                row.original.status === "published" ? (
+                                props.row.original.status === "published" ? (
                                   <FileEdit />
                                 ) : (
                                   <Globe />
                                 ),
                               tooltip:
-                                row.original.status === "published"
+                                props.row.original.status === "published"
                                   ? "Mettre en brouillon"
                                   : "Publier",
                             },
@@ -613,13 +614,12 @@ export default function DealsList({
                               colorScheme: "danger",
                               tooltip: "Supprimer",
                               onClick: () => {
-                                console.log(row);
+                                console.log(props.row);
                               },
                             },
                           ],
                         }
                       : {})}
-                    {...tableProps}
                   />
                 </div>
               )}

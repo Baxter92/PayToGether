@@ -15,6 +15,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/common/components/ui/badge";
 import { Star, MapPin, Phone, Calendar } from "lucide-react";
 import { DataTable } from "@/common/components";
+import { formatCurrency } from "@/common/utils/formatCurrency";
 
 // Define CreateDealInput type
 type CreateDealInput = {
@@ -64,17 +65,33 @@ const participantsMock: ParticipantRow[] = [
     id: "1",
     name: "Participant 1",
     phone: "123456789",
+    email: "participant1@example.com",
     parts: 2,
     amount: 100000,
     status: "confirmé",
+    shippingAddress: {
+      street: "123 Rue Sainte-Catherine Ouest",
+      city: "Montréal",
+      province: "QC",
+      postalCode: "H3B 1E3",
+      country: "Canada",
+    },
   },
   {
     id: "2",
     name: "Participant 2",
     phone: "987654321",
+    email: "participant2@example.com",
     parts: 1,
     amount: 50000,
     status: "en attente",
+    shippingAddress: {
+      street: "456 King Street West",
+      city: "Toronto",
+      province: "ON",
+      postalCode: "M5V 1L7",
+      country: "Canada",
+    },
   },
 ];
 
@@ -108,9 +125,17 @@ type ParticipantRow = {
   id: string;
   name: string;
   phone: string;
+  email: string;
   parts: number;
   amount: number;
   status: "confirmé" | "en attente";
+  shippingAddress: {
+    street: string;
+    city: string;
+    province: string;
+    postalCode: string;
+    country: string;
+  };
 };
 
 type ReviewRow = {
@@ -151,6 +176,31 @@ export function ViewDetailDealModal({
         ),
       },
       {
+        accessorKey: "email",
+        header: "Email",
+        cell: ({ row }) => (
+          <span className="font-medium text-foreground">
+            {row.original.email}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "shippingAddress",
+        header: "Adresse de livraison",
+        cell: ({ row }) => {
+          const address = row.original.shippingAddress;
+
+          if (!address) return <span className="text-muted-foreground">—</span>;
+
+          return (
+            <span className="font-semibold text-center block">
+              {address.street}, {address.city}, {address.province}{" "}
+              {address.postalCode}, {address.country}
+            </span>
+          );
+        },
+      },
+      {
         accessorKey: "parts",
         header: "Nombre de parts",
         cell: ({ row }) => (
@@ -164,7 +214,7 @@ export function ViewDetailDealModal({
         header: "Montant",
         cell: ({ row }) => (
           <span className="font-semibold text-primary">
-            {row.original.amount.toLocaleString()} FCFA
+            {formatCurrency(row.original.amount)}
           </span>
         ),
       },
@@ -267,7 +317,7 @@ export function ViewDetailDealModal({
       location: raw.city ?? "",
       categoryId: raw.category ?? "",
       highlights: raw.discount ? `Remise de ${raw.discount}%` : undefined,
-      whatsIncluded: `• ${raw.unit} FCFA par part\n• Produit : ${raw.title}`,
+      whatsIncluded: `• ${raw.unit} ${raw.currency} par part\n• Produit : ${raw.title}`,
       images: [],
       status: "published",
       supplierName: undefined,
@@ -319,18 +369,18 @@ export function ViewDetailDealModal({
         {
           type: "number",
           name: "price",
-          label: "Prix promo",
+          label: "Prix de la part (USD)",
         },
         {
           type: "number",
           name: "originalPrice",
-          label: "Prix initial",
+          label: "Prix initial (USD)",
         },
         {
           type: "select",
           name: "currency",
           label: "Devise",
-          items: [{ label: "FCFA (XAF)", value: "XAF" }],
+          items: [{ label: "Dollar", value: "USD" }],
         },
       ],
     },

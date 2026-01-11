@@ -320,12 +320,19 @@ const Form = <T extends FieldValues>({
       {...props}
     >
       {normalizedGroups.map((group, idx) => (
-        <div key={idx} className={cn("mb-6", group.className)}>
+        <div
+          key={idx}
+          className={cn(
+            "mb-6",
+            groups && "shadow p-4 rounded-md",
+            group.className
+          )}
+        >
           {group.title && (
             <h3 className="text-lg font-semibold mb-2">{group.title}</h3>
           )}
           {group.description && (
-            <p className="text-sm text-muted mb-4">{group.description}</p>
+            <p className="text-sm mb-4">{group.description}</p>
           )}
 
           <div className={cn("grid gap-4", getColClass(group.columns))}>
