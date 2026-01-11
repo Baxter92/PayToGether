@@ -1,14 +1,11 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/common/components/ui/dialog";
-import Form, {
-  type IFieldConfig,
-  type IFieldGroup,
-} from "@/common/containers/Form";
+import Form, { type IFieldConfig } from "@/common/containers/Form";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -46,7 +43,7 @@ interface ViewDetailsModalProps {
   order: OrderDetailsInput | null;
 }
 
-export default function ViewDetailsModal({
+export default function ViewOrderDetailsModal({
   open,
   onClose,
   order,

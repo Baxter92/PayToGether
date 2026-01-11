@@ -57,9 +57,11 @@ export function SortableSlideCard({
   onSlideChange,
   onToggleSlide,
   onDeleteSlide,
-  onImageUpload,
+  onImageUpload: _onImageUpload,
 }: SortableSlideCardProps): JSX.Element {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [showCropper, setShowCropper] = useState(false);
+  const [tempImageSrc, setTempImageSrc] = useState<string>("");
 
   // Crop states
   const [cropSrc, setCropSrc] = useState<string | null>(null);
