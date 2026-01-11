@@ -33,7 +33,8 @@ export type FieldType =
   | "password"
   | "date"
   | "time"
-  | "datetime";
+  | "datetime"
+  | "file";
 
 export type IFieldConfig = {
   name: string;
@@ -54,6 +55,9 @@ export type IFieldConfig = {
   | ({ type: "date" } & IDateInputProps)
   | ({ type: "time" } & ITimeInputProps)
   | ({ type: "datetime" } & IDateTimeInputProps)
+  | ({ type: "file" } & InputProps & {
+        maxFiles?: number;
+      })
 );
 
 export interface IFieldGroup {
@@ -283,7 +287,7 @@ const Form = <T extends FieldValues>({
       }
 
       case "time": {
-        const { onChange: _onChange, ...rest } = register(field.name);
+        const { ...rest } = register(field.name);
         const timeField = field as IFieldConfig & ITimeInputProps;
         return (
           <TimeInput
@@ -291,6 +295,32 @@ const Form = <T extends FieldValues>({
             label={timeField.label}
             onChange={(time) => form.setValue(field.name, time)}
             error={errorMessage}
+          />
+        );
+      }
+
+      case "file": {
+        return (
+          <Input
+            type="file"
+            multiple
+            accept="image/*"
+            {...register(field.name)}
+            onChange={(e) => {
+              const files = Array.from(e.target.files ?? []);
+              if (field.maxFiles && files.length > field.maxFiles) {
+                form.setError(field.name, {
+                  type: "manual",
+                  message: `Maximum ${field.maxFiles} images autorisées`,
+                });
+                return;
+              }
+
+              form.setValue(field.name, files, {
+                shouldDirty: true,
+                shouldValidate: true,
+              });
+            }}
           />
         );
       }

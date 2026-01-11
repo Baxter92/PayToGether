@@ -97,7 +97,7 @@ export default function ViewDetailsModal({
     {
       type: "number",
       name: "amount",
-      label: "Montant (FCFA)",
+      label: "Montant",
       disabled: true,
     },
     {

@@ -30,17 +30,29 @@ const notificationSettingsSchema = z.object({
 });
 
 export default function AdminSettings(): ReactElement {
-  const handleGeneralSubmit = async ({ data }: { data: z.infer<typeof generalSettingsSchema> }) => {
+  const handleGeneralSubmit = async ({
+    data,
+  }: {
+    data: z.infer<typeof generalSettingsSchema>;
+  }) => {
     console.log("General settings:", data);
     toast.success("Paramètres généraux enregistrés");
   };
 
-  const handleCommissionSubmit = async ({ data }: { data: z.infer<typeof commissionSettingsSchema> }) => {
+  const handleCommissionSubmit = async ({
+    data,
+  }: {
+    data: z.infer<typeof commissionSettingsSchema>;
+  }) => {
     console.log("Commission settings:", data);
     toast.success("Commissions enregistrées");
   };
 
-  const handleNotificationSubmit = async ({ data }: { data: z.infer<typeof notificationSettingsSchema> }) => {
+  const handleNotificationSubmit = async ({
+    data,
+  }: {
+    data: z.infer<typeof notificationSettingsSchema>;
+  }) => {
     console.log("Notification settings:", data);
     toast.success("Paramètres de notification enregistrés");
   };
@@ -132,7 +144,7 @@ export default function AdminSettings(): ReactElement {
                 },
                 {
                   name: "minCommission",
-                  label: "Commission minimum (FCFA)",
+                  label: "Commission minimum",
                   type: "number",
                   placeholder: "1",
                 },

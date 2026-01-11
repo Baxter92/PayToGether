@@ -27,12 +27,13 @@ export default function AdminDeals(): ReactElement {
       <DealsList
         deals={mockDeals}
         viewMode="list"
-        viewModeToggleable
+        viewModeToggleable={false}
         showFilters
         filterPosition="top"
         availableFilters={["search", "category", "status"]}
         showPagination
         itemsPerPage={10}
+        isAdmin
       />
 
       <CreateDealModal open={open} onClose={() => setOpen(false)} />

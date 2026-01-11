@@ -2,7 +2,17 @@ import React, { useEffect, useMemo, useState, useRef } from "react";
 import Grid, { type IColsProp } from "@components/Grid";
 import DealCard from "../DealCard";
 import Pagination from "@components/Pagination";
-import { X, Sliders, List, LayoutGrid } from "lucide-react";
+import {
+  X,
+  Sliders,
+  List,
+  LayoutGrid,
+  Edit2,
+  Trash2,
+  DraftingCompass,
+  FileEdit,
+  Globe,
+} from "lucide-react";
 import { cn } from "@lib/utils";
 import Form, { type IFieldConfig } from "@containers/Form";
 import { z } from "zod";
@@ -15,6 +25,8 @@ import { Avatar, AvatarImage } from "@/common/components/ui/avatar";
 import { Heading } from "../Heading";
 import { Progress } from "@/common/components/ui/progress";
 import { formatCurrency } from "@/common/utils/formatCurrency";
+import { Badge } from "@/common/components/ui/badge";
+import { CreateDealModal } from "@/pages/profile/components/CreateDealModal";
 
 /** Déclare le type de filtre */
 interface DealFilters {
@@ -48,6 +60,7 @@ interface IDealsListProps {
   description?: string;
   title?: string;
   tableProps?: Partial<IDataTableProps<any, any>>;
+  isAdmin?: boolean;
 }
 
 /** Debounce hook simple */
@@ -123,6 +136,7 @@ export default function DealsList({
   title = "Offres",
   description,
   tableProps,
+  isAdmin = false,
 }: IDealsListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<DealFilters>({
@@ -135,6 +149,7 @@ export default function DealsList({
   });
 
   const [view, setView] = useState<"grid" | "list">(viewMode);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   // Mobile sheet state
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -218,13 +233,13 @@ export default function DealsList({
       fields.push(
         {
           name: "priceMin",
-          label: "Prix minimum (FCFA)",
+          label: "Prix minimum",
           type: "number",
           placeholder: "0",
         },
         {
           name: "priceMax",
-          label: "Prix maximum (FCFA)",
+          label: "Prix maximum",
           type: "number",
           placeholder: "200000",
         }
@@ -433,6 +448,18 @@ export default function DealsList({
           </span>
         ),
       },
+      {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ getValue }) => (
+          <Badge
+            size="sm"
+            colorScheme={getValue() === "published" ? "success" : "secondary"}
+          >
+            {String(getValue() ?? "")}
+          </Badge>
+        ),
+      },
     ];
   }, []);
 
@@ -560,6 +587,38 @@ export default function DealsList({
                     showSelectionCount={true}
                     enableRowNumber={true}
                     pageSizeOptions={[itemsPerPage, 24, 50, 100]}
+                    {...(isAdmin
+                      ? {
+                          actionsRow: ({ row }: { row: any }) => [
+                            {
+                              leftIcon:
+                                row.original.status === "published" ? (
+                                  <FileEdit />
+                                ) : (
+                                  <Globe />
+                                ),
+                              tooltip:
+                                row.original.status === "published"
+                                  ? "Mettre en brouillon"
+                                  : "Publier",
+                            },
+                            {
+                              leftIcon: <Edit2 className="w-4 h-4" />,
+                              onClick: () => {
+                                setCreateModalOpen(true);
+                              },
+                            },
+                            {
+                              leftIcon: <Trash2 className="w-4 h-4" />,
+                              colorScheme: "danger",
+                              tooltip: "Supprimer",
+                              onClick: () => {
+                                console.log(row);
+                              },
+                            },
+                          ],
+                        }
+                      : {})}
                     {...tableProps}
                   />
                 </div>
@@ -567,6 +626,10 @@ export default function DealsList({
             </VStack>
           </div>
         </div>
+        <CreateDealModal
+          open={createModalOpen}
+          onClose={() => setCreateModalOpen(false)}
+        />
       </VStack>
 
       {/* Mobile bottom sheet for filters */}

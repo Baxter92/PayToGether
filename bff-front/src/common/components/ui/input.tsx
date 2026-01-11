@@ -96,8 +96,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         return String(display).replace(/[^0-9A-Za-z]/g, "");
       }
     };
-
-    const controlled = value !== undefined;
+    const isFileInput = rest?.type === "file";
+    const controlled = !isFileInput && value !== undefined;
 
     const displayValue = controlled
       ? (() => {
@@ -149,6 +149,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     // Détection de l'autofill : input/change + animationstart + check initial
     React.useEffect(() => {
+      if (isFileInput) return;
+
       const el = internalRef.current;
       if (!el) return;
 
@@ -187,7 +189,14 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     // ton handleChange original (pour saisie utilisateur via React)
     const debounceTimer = React.useRef<number | null>(null);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (isFileInput) {
+        // Pour les fichiers, on laisse passer l'event brut
+        onChange?.(e);
+        return;
+      }
+
       const userInput = e.target.value ?? "";
 
       const raw = format ? computeRaw(userInput) : userInput;

@@ -1,14 +1,16 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-} from "@/common/components/ui/dialog";
+import { Dialog, DialogContent } from "@/common/components/ui/dialog";
 import Form, { type IFieldGroup } from "@/common/containers/Form";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { categories } from "@/common/constants/data";
+import { categories, mockMerchants } from "@/common/constants/data";
 import { DialogTitle } from "@radix-ui/react-dialog";
+import { useLocation } from "react-router-dom";
+import { useCallback, useMemo, useState } from "react";
+import { Button } from "@/common/components/ui/button";
+import { getCroppedImg } from "@/common/utils/image";
+import Cropper from "react-easy-crop";
+import { Crop, ImageIcon, Upload, X } from "lucide-react";
 
 // ==============================
 // Types
@@ -20,7 +22,7 @@ export type CreateDealInput = {
 
   price: number;
   originalPrice?: number;
-  currency: "XAF";
+  currency: "USD";
 
   partsTotal: number;
   minRequired: number;
@@ -49,7 +51,7 @@ export const createDealFormSchema = z.object({
 
   price: z.number().min(0),
   originalPrice: z.number().optional(),
-  currency: z.enum(["XAF"]),
+  currency: z.enum(["USD"]),
 
   partsTotal: z.number().min(1),
   minRequired: z.number().min(1),
@@ -61,11 +63,14 @@ export const createDealFormSchema = z.object({
   highlights: z.string().optional(),
   whatsIncluded: z.string().optional(),
 
-  images: z.any(), // upload géré côté UI
   status: z.enum(["draft", "published"]),
 
   supplierName: z.string().optional(),
   packagingMethod: z.string().optional(),
+  images: z
+    .array(z.instanceof(File))
+    .min(1, "Au moins une image est requise")
+    .max(5, "Maximum 5 images"),
 });
 
 // ==============================
@@ -78,16 +83,283 @@ export function CreateDealModal({
   open: boolean;
   onClose: () => void;
 }) {
+  const location = useLocation();
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [cropIndex, setCropIndex] = useState<number | null>(null);
+  const [croppedArea, setCroppedArea] = useState<any>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+
+  const onCropComplete = useCallback((_area: any, pixels: any) => {
+    setCroppedArea(pixels);
+  }, []);
+
+  const isAdmin = useMemo(
+    () => location.pathname.includes("/admin"),
+    [location]
+  );
+
   const form = useForm<CreateDealInput>({
     defaultValues: {
-      currency: "XAF",
+      currency: "USD",
       status: "draft",
       images: [],
     },
     resolver: zodResolver(createDealFormSchema),
   });
+  const renderImagesField = (field: any, form: any) => {
+    const images = (form.watch(field.name) as File[]) ?? [];
 
+    const openCrop = (file: File, index: number) => {
+      setCropIndex(index);
+      setCropSrc(URL.createObjectURL(file));
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+    };
+
+    const applyCrop = async () => {
+      if (cropSrc == null || cropIndex == null || !croppedArea) return;
+
+      const newFile = await getCroppedImg(
+        cropSrc,
+        croppedArea,
+        images[cropIndex]
+      );
+
+      const updated = [...images];
+      updated[cropIndex] = newFile;
+
+      form.setValue(field.name, updated, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+
+      setCropSrc(null);
+      setCropIndex(null);
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files ?? []);
+      const next = [...images, ...files].slice(0, field.maxFiles ?? 5);
+
+      form.setValue(field.name, next, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+
+      // Reset input
+      e.target.value = "";
+    };
+
+    const removeImage = (idx: number) => {
+      const next = images.filter((_, i) => i !== idx);
+      form.setValue(field.name, next, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    };
+
+    const maxFiles = field.maxFiles ?? 5;
+    const canAddMore = images.length < maxFiles;
+
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <label className="text-sm font-medium block mb-1">
+              {field.label}
+            </label>
+            <p className="text-xs text-muted-foreground">
+              Maximum {maxFiles} images • Format: JPG, PNG, WEBP
+            </p>
+          </div>
+          <div className="text-xs text-muted-foreground font-medium">
+            {images.length} / {maxFiles}
+          </div>
+        </div>
+
+        {/* Zone d'upload */}
+        {canAddMore && (
+          <label className="relative block">
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFileChange}
+              className="sr-only"
+            />
+            <div className="border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors cursor-pointer group">
+              <div className="flex flex-col items-center justify-center py-8 px-4">
+                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3 group-hover:bg-gray-200 transition-colors">
+                  <Upload className="w-5 h-5 text-gray-600" />
+                </div>
+                <p className="text-sm font-medium text-gray-700 mb-1">
+                  Cliquez pour télécharger
+                </p>
+                <p className="text-xs text-gray-500">
+                  PNG, JPG ou WEBP (max. 5MB par image)
+                </p>
+              </div>
+            </div>
+          </label>
+        )}
+
+        {/* Grille d'images */}
+        {images.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {images.map((file, idx) => (
+              <div
+                key={idx}
+                className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 group bg-gray-50"
+              >
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt={`Upload ${idx + 1}`}
+                  className="w-full h-full object-cover"
+                />
+
+                {/* Overlay avec actions */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute bottom-0 left-0 right-0 p-3 flex items-center justify-between">
+                    <span className="text-white text-xs font-medium truncate mr-2">
+                      Image {idx + 1}
+                    </span>
+                    <div className="flex gap-1.5">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="secondary"
+                        className="h-8 w-8 p-0"
+                        onClick={() => openCrop(file, idx)}
+                      >
+                        <Crop className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        colorScheme="danger"
+                        className="h-8 w-8 p-0"
+                        onClick={() => removeImage(idx)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Badge principale */}
+                  {idx === 0 && (
+                    <div className="absolute top-2 left-2">
+                      <span className="bg-blue-600 text-white text-xs font-medium px-2 py-1 rounded">
+                        Principale
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* État vide */}
+        {images.length === 0 && !canAddMore && (
+          <div className="border border-gray-200 rounded-lg py-12">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                <ImageIcon className="w-8 h-8 text-gray-400" />
+              </div>
+              <p className="text-sm text-gray-600 font-medium">
+                Aucune image ajoutée
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Ajoutez au moins une image pour continuer
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de crop */}
+        <Dialog open={!!cropSrc} onOpenChange={() => setCropSrc(null)}>
+          <DialogContent className="max-w-3xl">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold">Recadrer l'image</h3>
+                <p className="text-sm text-muted-foreground">
+                  Ajustez le cadrage et le zoom de votre image
+                </p>
+              </div>
+
+              {cropSrc && (
+                <>
+                  <div className="relative h-[400px] bg-gray-900 rounded-lg overflow-hidden">
+                    <Cropper
+                      image={cropSrc}
+                      crop={crop}
+                      zoom={zoom}
+                      aspect={4 / 3}
+                      onCropChange={setCrop}
+                      onCropComplete={onCropComplete}
+                      onZoomChange={setZoom}
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">
+                        Zoom: {Math.round(zoom * 100)}%
+                      </label>
+                      <input
+                        type="range"
+                        min={1}
+                        max={3}
+                        step={0.1}
+                        value={zoom}
+                        onChange={(e) => setZoom(Number(e.target.value))}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-4 border-t">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setCropSrc(null)}
+                    >
+                      Annuler
+                    </Button>
+                    <Button type="button" onClick={applyCrop}>
+                      Appliquer le recadrage
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  };
   const createDealFormGroups: IFieldGroup[] = [
+    ...(isAdmin
+      ? [
+          {
+            title: "Marchant",
+            description:
+              "Sélectionner le marchant pour qui vous ajoutez ce deal",
+            fields: [
+              {
+                type: "select" as const,
+                name: "merchantId",
+                label: "Marchant",
+                items: mockMerchants.map((merchant) => ({
+                  label: merchant.name,
+                  value: merchant.id,
+                })),
+              },
+            ],
+          },
+        ]
+      : []),
     {
       title: "Informations générales",
       description: "Informations visibles par les clients",
@@ -98,12 +370,7 @@ export function CreateDealModal({
           name: "title",
           label: "Titre du deal",
           placeholder: "Ex : Dîner romantique pour 2 personnes",
-        },
-        {
-          type: "text",
-          name: "shortSubtitle",
-          label: "Sous-titre",
-          placeholder: "Restaurant chic au centre-ville",
+          colSpan: 2,
         },
         {
           type: "textarea",
@@ -140,7 +407,7 @@ export function CreateDealModal({
         {
           type: "number",
           name: "price",
-          label: "Prix promo (FCFA)",
+          label: "Prix promo",
         },
         {
           type: "number",
@@ -151,7 +418,7 @@ export function CreateDealModal({
           type: "select",
           name: "currency",
           label: "Devise",
-          items: [{ label: "FCFA (XAF)", value: "XAF" }],
+          items: [{ label: "Dollar", value: "USD" }],
         },
       ],
     },
@@ -224,6 +491,19 @@ export function CreateDealModal({
           name: "packagingMethod",
           label: "Méthode de packaging",
           placeholder: "Sur place / À emporter",
+        },
+      ],
+    },
+    {
+      title: "Images du deal",
+      description: "Ajoutez des images attractives",
+      fields: [
+        {
+          type: "file" as const,
+          name: "images",
+          label: "Images",
+          maxFiles: 5,
+          render: renderImagesField,
         },
       ],
     },

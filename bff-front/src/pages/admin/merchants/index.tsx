@@ -20,6 +20,7 @@ import {
 import DataTable from "@/common/components/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatCurrency } from "@/common/utils/formatCurrency";
+import { mockMerchants } from "@/common/constants/data";
 
 interface Merchant {
   id: string;
@@ -31,49 +32,6 @@ interface Merchant {
   status: "active" | "pending" | "suspended";
   createdAt: string;
 }
-
-const mockMerchants: Merchant[] = [
-  {
-    id: "1",
-    name: "Restaurant Le Gourmet",
-    email: "contact@legourmet.cm",
-    phone: "+237 6 90 00 00 01",
-    totalDeals: 12,
-    totalSales: 450000,
-    status: "active",
-    createdAt: "2024-01-15",
-  },
-  {
-    id: "2",
-    name: "Spa Wellness",
-    email: "info@spawellness.cm",
-    phone: "+237 6 90 00 00 02",
-    totalDeals: 8,
-    totalSales: 280000,
-    status: "active",
-    createdAt: "2024-02-20",
-  },
-  {
-    id: "3",
-    name: "Boutique Mode",
-    email: "contact@boutiquemode.cm",
-    phone: "+237 6 90 00 00 03",
-    totalDeals: 5,
-    totalSales: 150000,
-    status: "pending",
-    createdAt: "2024-03-10",
-  },
-  {
-    id: "4",
-    name: "Auto Service Pro",
-    email: "service@autopro.cm",
-    phone: "+237 6 90 00 00 04",
-    totalDeals: 3,
-    totalSales: 95000,
-    status: "suspended",
-    createdAt: "2024-03-25",
-  },
-];
 
 const statusConfig = {
   active: { label: "Actif", colorScheme: "success" as const },

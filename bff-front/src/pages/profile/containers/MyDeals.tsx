@@ -67,6 +67,7 @@ export default function MyDeals(): JSX.Element {
           enableExport: true,
           enableSorting: true,
         }}
+        isAdmin
       />
       <CreateDealModal
         open={addDealModalOpen}
