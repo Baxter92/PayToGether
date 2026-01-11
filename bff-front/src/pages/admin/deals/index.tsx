@@ -36,6 +36,7 @@ export default function AdminDeals(): ReactElement {
         availableFilters={["search", "category", "status"]}
         showPagination
         itemsPerPage={10}
+        isAdmin
         tableProps={{
           actionsRow: ({ row }) => [
             {

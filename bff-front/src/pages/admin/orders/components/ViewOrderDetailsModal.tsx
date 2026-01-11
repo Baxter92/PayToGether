@@ -94,7 +94,7 @@ export default function ViewOrderDetailsModal({
     {
       type: "number",
       name: "amount",
-      label: "Montant (FCFA)",
+      label: "Montant",
       disabled: true,
     },
     {
