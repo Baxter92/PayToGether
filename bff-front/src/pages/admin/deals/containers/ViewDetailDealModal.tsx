@@ -310,7 +310,7 @@ export function ViewDetailDealModal({
       description: "",
       price: Number(raw.groupPrice) * Number(raw.unit),
       originalPrice: Number(raw.originalPrice),
-      currency: "XAF",
+      currency: "USD",
       partsTotal: Number(raw.total),
       minRequired: 1,
       expiryDate: undefined,

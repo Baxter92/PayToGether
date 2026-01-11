@@ -277,7 +277,7 @@ export default function AdminReports(): ReactElement {
                 stroke="#3b82f6"
                 strokeWidth={2}
                 dot={{ fill: "#3b82f6" }}
-                name="Revenus (XAF)"
+                name="Revenus (USD)"
               />
               <Line
                 type="monotone"
@@ -308,7 +308,9 @@ export default function AdminReports(): ReactElement {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, value }: { name?: string; value?: number }) => `${name || ""} (${value || 0}%)`}
+                  label={({ name, value }: { name?: string; value?: number }) =>
+                    `${name || ""} (${value || 0}%)`
+                  }
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
@@ -357,7 +359,7 @@ export default function AdminReports(): ReactElement {
                     borderRadius: "8px",
                   }}
                 />
-                <Bar dataKey="revenue" fill="#3b82f6" name="Revenus (XAF)" />
+                <Bar dataKey="revenue" fill="#3b82f6" name="Commission (USD)" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
