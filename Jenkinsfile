@@ -40,8 +40,8 @@ pipeline {
             env.TARGET_ENV = 'prod'
             env.TAG = "prod"
           } else {
-            env.TARGET_ENV = 'dev'
-            env.TAG = "dev"
+            env.TARGET_ENV = 'main'
+            env.TAG = "main"
           }
           echo "Branch=${env.BRANCH_NAME} -> TARGET_ENV=${env.TARGET_ENV} TAG=${env.TAG}"
         }
