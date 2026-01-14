@@ -1,3 +1,4 @@
+import { useI18n } from "@hooks/useI18n";
 import type { IFieldConfig } from "@/common/containers/Form";
 import Form from "@/common/containers/Form";
 import * as z from "zod";
@@ -10,48 +11,50 @@ export interface IShippingFormProps {
   isSubmitting?: boolean;
 }
 
-const shippingSchema = z.object({
-  fullName: z.string().min(2, "Nom requis"),
-  phone: z.string().min(6, "Téléphone invalide"),
-  address: z.string().min(5, "Adresse trop courte"),
-  city: z.string().min(2, "Ville requise"),
-  postalCode: z.string().optional(),
-});
-
 export default function ShippingForm({
   defaultValues,
   onSubmit,
   onBack,
   isSubmitting,
 }: IShippingFormProps) {
+  const { t } = useI18n("checkout");
+
+  const shippingSchema = z.object({
+    fullName: z.string().min(2, t("checkout.nameRequired")),
+    phone: z.string().min(6, t("checkout.phoneInvalid")),
+    address: z.string().min(5, t("checkout.addressTooShort")),
+    city: z.string().min(2, t("checkout.cityRequired")),
+    postalCode: z.string().optional(),
+  });
+
   const fields: IFieldConfig[] = [
     {
       name: "fullName",
-      label: "Nom complet",
+      label: t("checkout.fullName"),
       type: "text",
-      placeholder: defaultValues?.fullName || "Votre nom complet",
+      placeholder: defaultValues?.fullName || t("checkout.fullNamePlaceholder"),
     },
     {
       name: "phone",
-      label: "Téléphone",
+      label: t("checkout.phone"),
       type: "text",
       placeholder: defaultValues?.phone || "+237 6XX XXX XXX",
     },
     {
       name: "address",
-      label: "Adresse",
+      label: t("checkout.address"),
       type: "text",
-      placeholder: "Rue, quartier, n°",
+      placeholder: t("checkout.addressPlaceholder"),
     },
     {
       name: "city",
-      label: "Ville",
+      label: t("checkout.city"),
       type: "text",
-      placeholder: "Douala, Yaoundé...",
+      placeholder: t("checkout.cityPlaceholder"),
     },
     {
       name: "postalCode",
-      label: "Code postal (optionnel)",
+      label: t("checkout.postalCodeOptional"),
       type: "text",
       placeholder: "67000",
     },
@@ -62,8 +65,10 @@ export default function ShippingForm({
       fields={fields}
       schema={shippingSchema}
       onSubmit={({ data }) => onSubmit(data as ShippingData)}
-      submitLabel={isSubmitting ? "Traitement..." : "Continuer"}
-      resetLabel={onBack ? "Retour" : undefined}
+      submitLabel={
+        isSubmitting ? t("checkout.processing") : t("checkout.continue")
+      }
+      resetLabel={onBack ? t("checkout.back") : undefined}
       onReset={onBack}
     />
   );

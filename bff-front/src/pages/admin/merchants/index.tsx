@@ -20,6 +20,7 @@ import {
 import DataTable from "@/common/components/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatCurrency } from "@/common/utils/formatCurrency";
+import { useI18n } from "@/common/hooks/useI18n";
 
 interface Merchant {
   id: string;
@@ -76,13 +77,15 @@ const mockMerchants: Merchant[] = [
 ];
 
 const statusConfig = {
-  active: { label: "Actif", colorScheme: "success" as const },
-  pending: { label: "En attente", colorScheme: "warning" as const },
-  suspended: { label: "Suspendu", colorScheme: "danger" as const },
+  active: { colorScheme: "success" as const },
+  pending: { colorScheme: "warning" as const },
+  suspended: { colorScheme: "danger" as const },
 };
 
 export default function AdminMerchants(): ReactElement {
   const [searchQuery, setSearchQuery] = useState("");
+  const { t: tAdmin } = useI18n("admin");
+  const { t: tStatus } = useI18n("status");
 
   const filteredMerchants = mockMerchants.filter(
     (merchant) =>
@@ -93,7 +96,7 @@ export default function AdminMerchants(): ReactElement {
   const columns: ColumnDef<Merchant>[] = [
     {
       accessorKey: "name",
-      header: "Marchand",
+      header: tAdmin("merchants.name"),
       cell: ({ row }) => (
         <div>
           <p className="font-medium">{row.original.name}</p>
@@ -103,29 +106,33 @@ export default function AdminMerchants(): ReactElement {
     },
     {
       accessorKey: "phone",
-      header: "Téléphone",
+      header: tAdmin("merchants.phone"),
     },
     {
       accessorKey: "totalDeals",
-      header: "Deals",
+      header: tAdmin("merchants.dealsCount"),
       cell: ({ row }) => <span>{row.original.totalDeals}</span>,
     },
     {
       accessorKey: "totalSales",
-      header: "Ventes totales",
+      header: tAdmin("merchants.totalSales"),
       cell: ({ row }) => <span>{formatCurrency(row.original.totalSales)}</span>,
     },
     {
       accessorKey: "status",
-      header: "Statut",
+      header: tAdmin("merchants.status"),
       cell: ({ row }) => {
         const config = statusConfig[row.original.status];
-        return <Badge colorScheme={config.colorScheme}>{config.label}</Badge>;
+        return (
+          <Badge colorScheme={config.colorScheme}>
+            {tStatus(row.original.status)}
+          </Badge>
+        );
       },
     },
     {
       accessorKey: "createdAt",
-      header: "Inscrit le",
+      header: tAdmin("merchants.joinedAt"),
       cell: ({ row }) =>
         new Date(row.original.createdAt).toLocaleDateString("fr-FR"),
     },
@@ -143,20 +150,20 @@ export default function AdminMerchants(): ReactElement {
               onClick={() => console.log("View", row.original.id)}
             >
               <Eye className="mr-2 h-4 w-4" />
-              Voir détails
+              {tAdmin("merchants.viewDetails")}
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => console.log("Approve", row.original.id)}
             >
               <Check className="mr-2 h-4 w-4" />
-              Approuver
+              {tAdmin("merchants.approve")}
             </DropdownMenuItem>
             <DropdownMenuItem
               className="text-destructive"
               onClick={() => console.log("Suspend", row.original.id)}
             >
               <Ban className="mr-2 h-4 w-4" />
-              Suspendre
+              {tAdmin("merchants.suspend")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -175,23 +182,23 @@ export default function AdminMerchants(): ReactElement {
       <div>
         <h1 className="text-3xl font-heading font-bold flex items-center gap-2">
           <Store className="h-8 w-8" />
-          Marchands
+          {tAdmin("merchants.title")}
         </h1>
         <p className="text-muted-foreground mt-1">
-          Gérez les marchands de la plateforme
+          {tAdmin("merchants.description")}
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total marchands</CardDescription>
+            <CardDescription>{tAdmin("merchants.total")}</CardDescription>
             <CardTitle className="text-2xl">{stats.total}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Actifs</CardDescription>
+            <CardDescription>{tStatus("active")}</CardDescription>
             <CardTitle className="text-2xl text-green-600">
               {stats.active}
             </CardTitle>
@@ -199,7 +206,7 @@ export default function AdminMerchants(): ReactElement {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>En attente</CardDescription>
+            <CardDescription>{tStatus("pending")}</CardDescription>
             <CardTitle className="text-2xl text-yellow-600">
               {stats.pending}
             </CardTitle>
@@ -210,11 +217,11 @@ export default function AdminMerchants(): ReactElement {
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <CardTitle>Liste des marchands</CardTitle>
+            <CardTitle>{tAdmin("merchants.listTitle")}</CardTitle>
             <div className="relative w-full sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Rechercher..."
+                placeholder={tAdmin("merchants.search")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"

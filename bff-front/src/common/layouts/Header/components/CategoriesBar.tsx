@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { PATHS } from "@/common/constants/path";
 import { Button } from "@/common/components/ui/button";
 import type { ICategory } from "@/common/containers/CategoryCard/type";
+import { useI18n } from "@/common/hooks/useI18n";
 
 export interface CategoriesBarProps {
   // Catégories
@@ -68,12 +69,11 @@ const CategoriesBar = ({
   textColor = "text-gray-700",
   hoverColor = "hover:text-primary-600",
   hideOnMobile = false,
-  texts = {
-    allCategories: "Toutes les catégories",
-    viewAll: "Voir tout",
-  },
+  texts,
   renderCategory,
 }: CategoriesBarProps) => {
+  const { t } = useI18n("header");
+
   // Déterminer les catégories visibles
   const visibleCategories = maxVisibleCategories
     ? categories.slice(0, maxVisibleCategories)
@@ -155,7 +155,7 @@ const CategoriesBar = ({
         {/* Dropdown "Toutes les catégories" */}
         {showDropdown && (
           <Dropdown
-            label={dropdownLabel || texts.allCategories}
+            label={dropdownLabel || texts?.allCategories || t("allCategories")}
             triggerOptions={{
               leftIcon: dropdownIcon || defaultDropdownIcon,
             }}
@@ -178,7 +178,8 @@ const CategoriesBar = ({
             to={PATHS.ALL_CATEGORIES}
             className={`text-sm font-medium ${textColor} ${hoverColor} transition-colors underline`}
           >
-            {texts.viewAll} ({categories.length - maxVisibleCategories!} +)
+            {texts?.viewAll || t("viewAll")} (
+            {categories.length - maxVisibleCategories!} +)
           </Link>
         )}
       </nav>

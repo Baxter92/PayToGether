@@ -1,0 +1,12 @@
+{
+  "title": "Mes commandes",
+  "description": "Historique de vos achats",
+  "orderId": "Commande",
+  "date": "Date",
+  "status": "Statut",
+  "amount": "Montant",
+  "actions": "Actions",
+  "viewDetails": "Voir détails",
+  "refund": "Rembourser",
+  "cancel": "Annuler"
+}

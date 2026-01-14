@@ -1,0 +1,18 @@
+{
+  "title": "Commande confirmée !",
+  "subtitle": "Merci pour votre achat",
+  "orderNumber": "Numéro de commande :",
+  "orderSummary": "Résumé de votre commande",
+  "quantity": "Quantité:",
+  "subtotal": "Sous-total",
+  "delivery": "Livraison",
+  "taxes": "Taxes",
+  "total": "Total",
+  "shippingAddress": "Adresse de livraison",
+  "billingAddress": "Adresse de facturation",
+  "trackOrder": "Suivi de commande",
+  "backToShop": "Retour à la boutique",
+  "emailConfirmation": "Un email de confirmation a été envoyé à",
+  "checkSpam": "Vérifiez votre dossier de courrier indésirable si vous ne le recevez pas dans quelques minutes",
+  "questions": "Questions ? Contactez notre support à"
+}

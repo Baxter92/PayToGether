@@ -1,3 +1,4 @@
+import { useI18n } from "@hooks/useI18n";
 import { HStack } from "@/common/components";
 import { Button } from "@/common/components/ui/button";
 import { Card, CardContent } from "@/common/components/ui/card";
@@ -12,12 +13,16 @@ export default function HelpSection({
   onBack,
   onHome,
 }: IHelpSectionProps): JSX.Element {
+  const { t } = useI18n("checkout");
+
   return (
     <Card className="border-border bg-card">
       <CardContent className="pt-6">
-        <h4 className="font-semibold text-foreground mb-2">Besoin d'aide ?</h4>
+        <h4 className="font-semibold text-foreground mb-2">
+          {t("checkout.needHelp")}
+        </h4>
         <p className="text-sm text-muted-foreground mb-4">
-          Notre équipe de support est disponible pour répondre à vos questions.
+          {t("checkout.helpText")}
         </p>
         <HStack spacing={2}>
           <Button
@@ -26,10 +31,10 @@ export default function HelpSection({
             onClick={onBack}
             className="flex-1"
           >
-            Retour
+            {t("checkout.back")}
           </Button>
           <Button variant="ghost" size="sm" onClick={onHome} className="flex-1">
-            Accueil
+            {t("nav.home")}
           </Button>
         </HStack>
       </CardContent>

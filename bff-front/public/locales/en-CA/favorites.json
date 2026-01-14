@@ -1,0 +1,12 @@
+{
+  "title": "My Favorites",
+  "count": "{{count}} offer saved",
+  "countPlural": "{{count}} offers saved",
+  "removeAll": "Remove all",
+  "removeFromFavorites": "Remove from favorites",
+  "noFavorites": "No favorites yet",
+  "noFavoritesHint": "Browse our offers and click the heart to save your favorite deals.",
+  "discoverOffers": "Discover offers",
+  "tip": "Tip",
+  "tipMessage": "Offers are limited time! Don't wait too long to enjoy your favorites."
+}

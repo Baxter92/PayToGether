@@ -1,0 +1,17 @@
+{
+  "title": "Filters",
+  "search": "Search",
+  "category": "Category",
+  "city": "City",
+  "state": "State",
+  "priceMin": "Min price",
+  "priceMax": "Max price",
+  "allCategories": "All categories",
+  "allCities": "All cities",
+  "all": "All",
+  "active": "Active",
+  "soldout": "Sold out",
+  "apply": "Apply",
+  "filter": "Filter",
+  "reset": "Reset"
+}

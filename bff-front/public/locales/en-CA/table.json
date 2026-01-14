@@ -1,0 +1,9 @@
+{
+  "product": "Product",
+  "category": "Category",
+  "price": "Price",
+  "partsSold": "Parts sold",
+  "deadline": "Deadline",
+  "city": "City",
+  "status": "Status"
+}

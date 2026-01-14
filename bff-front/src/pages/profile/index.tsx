@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useI18n } from "@hooks/useI18n";
 import HeaderProfile, { type PROFILE_TABS } from "./containers/HeaderProfile";
 import AsideStats from "./containers/AsideStats";
 import Overview from "./containers/Overview";
@@ -13,6 +14,7 @@ import Favorites from "./containers/Favorites";
 import { useAuth } from "@/common/context/AuthContext";
 
 export default function Profile() {
+  const { t } = useI18n("profile");
   const { user } = useAuth();
   const [activeTab, setActiveTab] =
     useState<(typeof PROFILE_TABS)[number]["key"]>("overview");
@@ -59,11 +61,21 @@ export default function Profile() {
 
           {/* Activity / feed */}
           <div className="bg-white dark:bg-slate-900 rounded-lg p-6 shadow-sm">
-            <h3 className="text-md font-semibold mb-3">Activité récente</h3>
+            <h3 className="text-md font-semibold mb-3">
+              {t("profile.recentActivity")}
+            </h3>
             <ul className="space-y-2 text-sm text-slate-600">
-              <li>• Tu as acheté "Dîner 2 personnes" — 2 jours</li>
-              <li>• Tu as laissé un avis pour "ZenSpa" — 5 jours</li>
-              <li>• Tu as sauvegardé 3 nouvelles offres — 7 jours</li>
+              <li>
+                •{" "}
+                {t("profile.boughtDeal", {
+                  deal: "Dîner 2 personnes",
+                  days: 2,
+                })}
+              </li>
+              <li>
+                • {t("profile.leftReview", { merchant: "ZenSpa", days: 5 })}
+              </li>
+              <li>• {t("profile.savedOffers", { count: 3, days: 7 })}</li>
             </ul>
           </div>
         </main>

@@ -11,16 +11,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/common/components/ui/select";
+import { useI18n } from "@hooks/useI18n";
 
 const locations = ["Douala", "Yaoundé", "Bafoussam", "Garoua"];
-const sortOptions = [
-  { value: "popular", label: "Popularité" },
-  { value: "price-asc", label: "Prix croissant" },
-  { value: "price-desc", label: "Prix décroissant" },
-  { value: "discount", label: "Meilleure réduction" },
-];
 
 export default function SearchPage() {
+  const { t } = useI18n("search");
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
   const categoryParam = searchParams.get("category") || "";
@@ -31,6 +27,13 @@ export default function SearchPage() {
   const [selectedLocation, setSelectedLocation] = useState(locationParam);
   const [sortBy, setSortBy] = useState("popular");
   const [showFilters, setShowFilters] = useState(false);
+
+  const sortOptions = [
+    { value: "popular", label: t("popularity") },
+    { value: "price-asc", label: t("priceAsc") },
+    { value: "price-desc", label: t("priceDesc") },
+    { value: "discount", label: t("bestDiscount") },
+  ];
 
   const filteredDeals = useMemo(() => {
     let results = [...mockDeals];
@@ -96,7 +99,7 @@ export default function SearchPage() {
       {/* Search Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground mb-4">
-          {query ? `Résultats pour "${query}"` : "Recherche"}
+          {query ? `${t("resultsFor")} "${query}"` : t("title")}
         </h1>
 
         <form onSubmit={handleSearch} className="flex gap-3">
@@ -106,12 +109,12 @@ export default function SearchPage() {
               type="text"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Rechercher des deals, restaurants, activités..."
+              placeholder={t("placeholder")}
               className="w-full pl-11 pr-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition bg-background"
             />
           </div>
           <Button type="submit" className="px-6">
-            Rechercher
+            {t("searchButton")}
           </Button>
           <Button
             type="button"
@@ -120,7 +123,7 @@ export default function SearchPage() {
             className="flex items-center gap-2"
           >
             <SlidersHorizontal className="w-4 h-4" />
-            Filtres
+            {t("filters")}
             {hasActiveFilters && (
               <span className="bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">
                 {[selectedCategory, selectedLocation].filter(Boolean).length}
@@ -136,14 +139,17 @@ export default function SearchPage() {
           <div className="flex flex-wrap gap-4 items-end">
             <div className="flex-1 min-w-[200px]">
               <label className="block text-sm font-medium text-foreground mb-2">
-                Catégorie
+                {t("category")}
               </label>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Toutes les catégories" />
+                  <SelectValue placeholder={t("allCategories")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Toutes les catégories</SelectItem>
+                  <SelectItem value="">{t("allCategories")}</SelectItem>
                   {categories.map((cat) => (
                     <SelectItem key={cat.id} value={cat.name}>
                       {cat.name}
@@ -155,14 +161,17 @@ export default function SearchPage() {
 
             <div className="flex-1 min-w-[200px]">
               <label className="block text-sm font-medium text-foreground mb-2">
-                Localisation
+                {t("location")}
               </label>
-              <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+              <Select
+                value={selectedLocation}
+                onValueChange={setSelectedLocation}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Toutes les villes" />
+                  <SelectValue placeholder={t("allCities")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Toutes les villes</SelectItem>
+                  <SelectItem value="">{t("allCities")}</SelectItem>
                   {locations.map((loc) => (
                     <SelectItem key={loc} value={loc}>
                       <span className="flex items-center gap-2">
@@ -177,7 +186,7 @@ export default function SearchPage() {
 
             <div className="flex-1 min-w-[200px]">
               <label className="block text-sm font-medium text-foreground mb-2">
-                Trier par
+                {t("sortBy")}
               </label>
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger>
@@ -194,9 +203,13 @@ export default function SearchPage() {
             </div>
 
             {hasActiveFilters && (
-              <Button variant="ghost" onClick={clearFilters} className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                onClick={clearFilters}
+                className="flex items-center gap-2"
+              >
                 <X className="w-4 h-4" />
-                Effacer les filtres
+                {t("clearFilters")}
               </Button>
             )}
           </div>
@@ -205,8 +218,9 @@ export default function SearchPage() {
 
       {/* Results Count */}
       <p className="text-muted-foreground mb-6">
-        {filteredDeals.length} résultat{filteredDeals.length !== 1 ? "s" : ""} trouvé
-        {filteredDeals.length !== 1 ? "s" : ""}
+        {filteredDeals.length}{" "}
+        {filteredDeals.length !== 1 ? t("resultsPlural") : t("results")}{" "}
+        {filteredDeals.length !== 1 ? t("foundPlural") : t("found")}
       </p>
 
       {/* Results Grid */}
@@ -220,13 +234,11 @@ export default function SearchPage() {
         <div className="text-center py-16">
           <Search className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-foreground mb-2">
-            Aucun résultat trouvé
+            {t("noResults")}
           </h2>
-          <p className="text-muted-foreground mb-6">
-            Essayez de modifier vos critères de recherche ou explorez nos catégories.
-          </p>
+          <p className="text-muted-foreground mb-6">{t("noResultsHint")}</p>
           <Button onClick={clearFilters} variant="outline">
-            Réinitialiser la recherche
+            {t("resetSearch")}
           </Button>
         </div>
       )}

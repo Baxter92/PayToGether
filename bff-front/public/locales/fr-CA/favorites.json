@@ -1,0 +1,12 @@
+{
+  "title": "Mes Favoris",
+  "count": "{{count}} offre sauvegardée",
+  "countPlural": "{{count}} offres sauvegardées",
+  "removeAll": "Tout supprimer",
+  "removeFromFavorites": "Retirer des favoris",
+  "noFavorites": "Aucun favori pour le moment",
+  "noFavoritesHint": "Parcourez nos offres et cliquez sur le cœur pour sauvegarder vos deals préférés.",
+  "discoverOffers": "Découvrir les offres",
+  "tip": "Astuce",
+  "tipMessage": "Les offres sont à durée limitée ! N'attendez pas trop longtemps pour profiter de vos favoris."
+}

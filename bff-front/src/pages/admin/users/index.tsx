@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/common/components/ui/dropdown-menu";
 import { formatCurrency } from "@/common/utils/formatCurrency";
+import { useI18n } from "@/common/hooks/useI18n";
 
 const mockUsers = [
   {
@@ -81,6 +82,9 @@ const mockUsers = [
 
 export default function AdminUsers(): ReactElement {
   const [searchQuery, setSearchQuery] = useState("");
+  const { t: tAdmin } = useI18n("admin");
+  const { t: tRoles } = useI18n("roles");
+  const { t: tStatus } = useI18n("status");
 
   const filteredUsers = mockUsers.filter(
     (user) =>
@@ -93,17 +97,17 @@ export default function AdminUsers(): ReactElement {
       case "active":
         return (
           <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-            Actif
+            {tStatus("active")}
           </Badge>
         );
       case "banned":
         return (
           <Badge className="bg-destructive/10 text-destructive hover:bg-destructive/10">
-            Banni
+            {tStatus("banned")}
           </Badge>
         );
       default:
-        return <Badge>{status}</Badge>;
+        return <Badge>{tStatus(status)}</Badge>;
     }
   };
 
@@ -112,11 +116,11 @@ export default function AdminUsers(): ReactElement {
       case "admin":
         return (
           <Badge className="bg-primary/10 text-primary hover:bg-primary/10">
-            Admin
+            {tRoles("admin")}
           </Badge>
         );
       default:
-        return <Badge variant="outline">Utilisateur</Badge>;
+        return <Badge variant="outline">{tRoles("user")}</Badge>;
     }
   };
 
@@ -124,11 +128,9 @@ export default function AdminUsers(): ReactElement {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold font-heading">
-          Gestion des Utilisateurs
+          {tAdmin("users.title")}
         </h1>
-        <p className="text-muted-foreground">
-          Gérez les comptes utilisateurs et leurs permissions
-        </p>
+        <p className="text-muted-foreground">{tAdmin("users.description")}</p>
       </div>
 
       <Card>
@@ -137,7 +139,7 @@ export default function AdminUsers(): ReactElement {
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Rechercher un utilisateur..."
+                placeholder={tAdmin("users.search")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
@@ -149,12 +151,18 @@ export default function AdminUsers(): ReactElement {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Utilisateur</TableHead>
-                <TableHead>Rôle</TableHead>
-                <TableHead className="text-right">Commandes</TableHead>
-                <TableHead className="text-right">Total dépensé</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{tAdmin("users.name")}</TableHead>
+                <TableHead>{tAdmin("users.role")}</TableHead>
+                <TableHead className="text-right">
+                  {tAdmin("users.orders")}
+                </TableHead>
+                <TableHead className="text-right">
+                  {tAdmin("users.spent")}
+                </TableHead>
+                <TableHead>{tAdmin("users.status")}</TableHead>
+                <TableHead className="text-right">
+                  {tAdmin("users.actions")}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -195,15 +203,15 @@ export default function AdminUsers(): ReactElement {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem>
                           <Mail className="h-4 w-4 mr-2" />
-                          Envoyer un email
+                          {tAdmin("users.sendEmail")}
                         </DropdownMenuItem>
                         <DropdownMenuItem>
                           <Shield className="h-4 w-4 mr-2" />
-                          Changer le rôle
+                          {tAdmin("users.makeAdmin")}
                         </DropdownMenuItem>
                         <DropdownMenuItem className="text-destructive">
                           <Ban className="h-4 w-4 mr-2" />
-                          Bannir l'utilisateur
+                          {tAdmin("users.banUser")}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

@@ -1,0 +1,16 @@
+{
+  "completed": "Completed",
+  "pending": "Pending",
+  "refunded": "Refunded",
+  "cancelled": "Cancelled",
+  "active": "Active",
+  "inactive": "Inactive",
+  "banned": "Banned",
+  "approved": "Approved",
+  "rejected": "Rejected",
+  "paid": "Paid",
+  "processing": "Processing",
+  "failed": "Failed",
+  "published": "Published",
+  "draft": "Draft"
+}

@@ -1,0 +1,6 @@
+{
+  "required": "Ce champ est requis",
+  "invalidEmail": "Email invalide",
+  "minLength": "Minimum {{count}} caractères",
+  "maxLength": "Maximum {{count}} caractères"
+}

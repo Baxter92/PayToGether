@@ -1,5 +1,5 @@
 import { mockDeals, popularDeals, slides } from "@/common/constants/data";
-
+import { useI18n } from "@hooks/useI18n";
 import Hero from "@containers/Hero";
 import type { JSX } from "react";
 import DealsList from "@/common/containers/DealList";
@@ -10,20 +10,21 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { PATHS } from "@/common/constants/path";
 
 export default function Home(): JSX.Element {
+  const { t } = useI18n("home");
+
   return (
     <div className="mx-auto">
       <Hero slides={slides} />
-      {/* <Features /> */}
 
       {/* Promotional Deals Section */}
       <section className="py-16 bg-background">
         <VStack spacing={10} className="max-w-7xl mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 w-full">
             <Heading
-              title="Offres Promotionnelles"
+              title={t("promoTitle")}
               level={2}
               spacing={8}
-              description="Les meilleures réductions du moment"
+              description={t("promoDescription")}
               underline
               underlineStyle="bar"
               underlineWidth="w-16"
@@ -33,7 +34,7 @@ export default function Home(): JSX.Element {
               variant="ghost"
               className="text-primary hover:text-primary-600 font-semibold gap-2 group"
             >
-              Voir toutes les offres
+              {t("viewAllDeals")}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>
@@ -56,10 +57,10 @@ export default function Home(): JSX.Element {
                 <Sparkles className="w-6 h-6 text-accent" />
               </div>
               <Heading
-                title="Populaire sur DealToGether"
+                title={t("popularTitle")}
                 level={2}
                 spacing={8}
-                description="Ce que nos clients adorent"
+                description={t("popularDescription")}
                 underline
                 underlineStyle="bar"
                 underlineWidth="w-16"
@@ -70,7 +71,7 @@ export default function Home(): JSX.Element {
               variant="ghost"
               className="text-primary hover:text-primary-600 font-semibold gap-2 group"
             >
-              Explorer tout
+              {t("exploreAll")}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>
@@ -83,47 +84,16 @@ export default function Home(): JSX.Element {
         </VStack>
       </section>
 
-      {/* Categories Section */}
-      {/* <section className="py-16 bg-background">
-        <VStack spacing={10} className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 w-full">
-            <Heading
-              title="Meilleures Catégories"
-              level={2}
-              spacing={8}
-              description="Explorez par domaine d'intérêt"
-              underline
-              underlineStyle="bar"
-              underlineWidth="w-16"
-            />
-            <Button
-              variant="ghost"
-              className="text-primary hover:text-primary-600 font-semibold gap-2 group"
-            >
-              Toutes les catégories
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </div>
-          <CategoriesList
-            categories={categories}
-            showPagination={false}
-            showTitle={false}
-            cols={{ base: 1, md: 2 }}
-            itemsPerPage={4}
-          />
-        </VStack>
-      </section> */}
-
       {/* All Deals Section */}
       <section className="py-16 bg-gradient-to-b from-muted/30 to-background">
         <VStack spacing={10} className="max-w-7xl mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 w-full">
             <div className="flex items-start gap-3">
               <Heading
-                title="Tellement d'économies..."
+                title={t("savingsTitle")}
                 level={2}
                 spacing={8}
-                description="Parcourez toutes nos offres et trouvez celle qui vous convient"
+                description={t("savingsDescription")}
                 underline
                 underlineStyle="bar"
                 underlineWidth="w-20"
@@ -134,7 +104,7 @@ export default function Home(): JSX.Element {
               variant="ghost"
               className="text-primary hover:text-primary-600 font-semibold gap-2 group"
             >
-              Explorer tout
+              {t("exploreAll")}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>

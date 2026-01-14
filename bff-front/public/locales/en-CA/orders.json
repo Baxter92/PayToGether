@@ -1,0 +1,12 @@
+{
+  "title": "My Orders",
+  "description": "Your purchase history",
+  "orderId": "Order",
+  "date": "Date",
+  "status": "Status",
+  "amount": "Amount",
+  "actions": "Actions",
+  "viewDetails": "View details",
+  "refund": "Refund",
+  "cancel": "Cancel"
+}

@@ -31,83 +31,10 @@ import {
 import { cn } from "@/common/lib/utils";
 import { ADMIN_PATHS } from "../constants/adminPaths";
 import { toast } from "sonner";
-
-// Groupe Principal
-const dashboardItems = [
-  {
-    title: "Dashboard",
-    url: ADMIN_PATHS.DASHBOARD,
-    icon: LayoutDashboard,
-  },
-];
-
-// Groupe Commerce
-const commerceItems = [
-  {
-    title: "Deals",
-    url: ADMIN_PATHS.DEALS,
-    icon: Tag,
-  },
-  {
-    title: "Commandes",
-    url: ADMIN_PATHS.ORDERS,
-    icon: ShoppingCart,
-  },
-  {
-    title: "Paiements",
-    url: ADMIN_PATHS.PAYMENTS,
-    icon: CreditCard,
-  },
-  {
-    title: "Payouts",
-    url: ADMIN_PATHS.PAYOUTS,
-    icon: Wallet,
-  },
-  {
-    title: "Catégories",
-    url: ADMIN_PATHS.CATEGORIES,
-    icon: FolderTree,
-  },
-];
-
-// Groupe Utilisateurs
-const usersItems = [
-  {
-    title: "Utilisateurs",
-    url: ADMIN_PATHS.USERS,
-    icon: Users,
-  },
-  {
-    title: "Marchands",
-    url: ADMIN_PATHS.MERCHANTS,
-    icon: Store,
-  },
-];
-
-// Groupe Contenu
-const contentItems = [
-  {
-    title: "Hero",
-    url: ADMIN_PATHS.HERO,
-    icon: Image,
-  },
-];
-
-// Groupe Configuration
-const configItems = [
-  {
-    title: "Rapports",
-    url: ADMIN_PATHS.REPORTS,
-    icon: BarChart3,
-  },
-  // {
-  //   title: "Paramètres",
-  //   url: ADMIN_PATHS.SETTINGS,
-  //   icon: Settings,
-  // },
-];
+import { useI18n } from "@/common/hooks/useI18n";
 
 export function AdminSidebar(): ReactElement {
+  const { t } = useI18n("admin");
   const location = useLocation();
   const navigate = useNavigate();
   const { state } = useSidebar();
@@ -117,10 +44,59 @@ export function AdminSidebar(): ReactElement {
 
   const handleLogout = () => {
     sessionStorage.removeItem("adminAuthenticated");
-    toast.success("Déconnexion", {
-      description: "Vous avez été déconnecté",
+    toast.success(t("sidebar.logout"), {
+      description: t("sidebar.logoutMessage"),
     });
     navigate(ADMIN_PATHS.LOGIN);
+  };
+
+  const sidebarItems = {
+    dashboard: [
+      {
+        titleKey: "sidebar.dashboard",
+        url: ADMIN_PATHS.DASHBOARD,
+        icon: LayoutDashboard,
+      },
+    ],
+    commerce: [
+      { titleKey: "sidebar.deals", url: ADMIN_PATHS.DEALS, icon: Tag },
+      {
+        titleKey: "sidebar.orders",
+        url: ADMIN_PATHS.ORDERS,
+        icon: ShoppingCart,
+      },
+      {
+        titleKey: "sidebar.payments",
+        url: ADMIN_PATHS.PAYMENTS,
+        icon: CreditCard,
+      },
+      {
+        titleKey: "sidebar.payouts",
+        url: ADMIN_PATHS.PAYOUTS,
+        icon: Wallet,
+      },
+      {
+        titleKey: "sidebar.categories",
+        url: ADMIN_PATHS.CATEGORIES,
+        icon: FolderTree,
+      },
+    ],
+    users: [
+      { titleKey: "sidebar.users", url: ADMIN_PATHS.USERS, icon: Users },
+      {
+        titleKey: "sidebar.merchants",
+        url: ADMIN_PATHS.MERCHANTS,
+        icon: Store,
+      },
+    ],
+    content: [{ titleKey: "sidebar.hero", url: ADMIN_PATHS.HERO, icon: Image }],
+    config: [
+      {
+        titleKey: "sidebar.reports",
+        url: ADMIN_PATHS.REPORTS,
+        icon: BarChart3,
+      },
+    ],
   };
 
   return (
@@ -131,7 +107,9 @@ export function AdminSidebar(): ReactElement {
             <LayoutDashboard className="h-4 w-4" />
           </div>
           {!isCollapsed && (
-            <span className="font-heading font-semibold text-lg">Admin</span>
+            <span className="font-heading font-semibold text-lg">
+              {t("title")}
+            </span>
           )}
         </div>
       </SidebarHeader>
@@ -139,19 +117,19 @@ export function AdminSidebar(): ReactElement {
       <SidebarContent>
         {/* Dashboard */}
         <SidebarGroup>
-          <SidebarGroupLabel>Principal</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("sidebar.main")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {dashboardItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+              {sidebarItems.dashboard.map((item) => (
+                <SidebarMenuItem key={item.titleKey}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.url)}
-                    tooltip={item.title}
+                    tooltip={t(item.titleKey)}
                   >
                     <Link to={item.url}>
                       <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <span>{t(item.titleKey)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -162,19 +140,19 @@ export function AdminSidebar(): ReactElement {
 
         {/* Commerce */}
         <SidebarGroup>
-          <SidebarGroupLabel>Commerce</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("sidebar.commerce")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {commerceItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+              {sidebarItems.commerce.map((item) => (
+                <SidebarMenuItem key={item.titleKey}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.url)}
-                    tooltip={item.title}
+                    tooltip={t(item.titleKey)}
                   >
                     <Link to={item.url}>
                       <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <span>{t(item.titleKey)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -185,19 +163,19 @@ export function AdminSidebar(): ReactElement {
 
         {/* Utilisateurs */}
         <SidebarGroup>
-          <SidebarGroupLabel>Utilisateurs</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("sidebar.users")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {usersItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+              {sidebarItems.users.map((item) => (
+                <SidebarMenuItem key={item.titleKey}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.url)}
-                    tooltip={item.title}
+                    tooltip={t(item.titleKey)}
                   >
                     <Link to={item.url}>
                       <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <span>{t(item.titleKey)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -208,19 +186,19 @@ export function AdminSidebar(): ReactElement {
 
         {/* Contenu */}
         <SidebarGroup>
-          <SidebarGroupLabel>Contenu</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("sidebar.content")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {contentItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+              {sidebarItems.content.map((item) => (
+                <SidebarMenuItem key={item.titleKey}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.url)}
-                    tooltip={item.title}
+                    tooltip={t(item.titleKey)}
                   >
                     <Link to={item.url}>
                       <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <span>{t(item.titleKey)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -231,19 +209,19 @@ export function AdminSidebar(): ReactElement {
 
         {/* Configuration */}
         <SidebarGroup>
-          <SidebarGroupLabel>Configuration</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("sidebar.config")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {configItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+              {sidebarItems.config.map((item) => (
+                <SidebarMenuItem key={item.titleKey}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.url)}
-                    tooltip={item.title}
+                    tooltip={t(item.titleKey)}
                   >
                     <Link to={item.url}>
                       <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <span>{t(item.titleKey)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -256,10 +234,10 @@ export function AdminSidebar(): ReactElement {
       <SidebarFooter className="border-t">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Retour au site">
+            <SidebarMenuButton asChild tooltip={t("sidebar.backToSite")}>
               <Link to="/">
                 <Home className="h-4 w-4" />
-                <span>Retour au site</span>
+                <span>{t("sidebar.backToSite")}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -269,10 +247,10 @@ export function AdminSidebar(): ReactElement {
               className={cn(
                 "text-destructive hover:bg-destructive/10 hover:text-destructive"
               )}
-              tooltip="Déconnexion"
+              tooltip={t("sidebar.logout")}
             >
               <LogOut className="h-4 w-4" />
-              <span>Déconnexion</span>
+              <span>{t("sidebar.logout")}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

@@ -1,49 +1,53 @@
+import { useI18n } from "@hooks/useI18n";
 import Form, { type IFieldConfig } from "@/common/containers/Form";
 import { Heading } from "@/common/containers/Heading";
 import { useAuth } from "@/common/context/AuthContext";
 import * as z from "zod";
 
 export default function Settings() {
+  const { t } = useI18n("profile");
   const { user } = useAuth();
+
   const fields: IFieldConfig[] = [
     {
       name: "email",
-      label: "Adresse e-mail",
+      label: t("profile.emailLabel"),
       type: "email",
       placeholder: "Email",
       readOnly: true,
     },
     {
       name: "firstName",
-      label: "Prénom",
+      label: t("profile.firstNameLabel"),
       type: "text",
-      placeholder: "Prénom",
+      placeholder: t("profile.firstNameLabel"),
     },
     {
       name: "lastName",
-      label: "Nom",
+      label: t("profile.lastNameLabel"),
       type: "text",
-      placeholder: "Nom",
+      placeholder: t("profile.lastNameLabel"),
     },
     {
       name: "phone",
-      label: "Téléphone",
+      label: t("profile.phoneLabel"),
       type: "text",
-      placeholder: "Téléphone",
+      placeholder: t("profile.phoneLabel"),
     },
     {
       name: "password",
-      label: "Modifier le mot de passe",
+      label: t("profile.changePassword"),
       type: "password",
-      placeholder: "Mot de passe",
+      placeholder: t("auth.password"),
     },
   ];
+
   return (
     <section>
       <Heading
         level={2}
-        title="Paramètres"
-        description="Gérez vos paramètres de compte."
+        title={t("profile.settingsTitle")}
+        description={t("profile.settingsDescription")}
         underline
       />
       <Form

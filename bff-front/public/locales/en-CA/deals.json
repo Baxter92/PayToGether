@@ -1,0 +1,19 @@
+{
+  "popular": "Popular",
+  "viewDetails": "View details",
+  "viewDeal": "View deal",
+  "sold": "sold",
+  "deadline": "Expires on",
+  "participants": "participants",
+  "remaining": "remaining",
+  "addToCart": "Add to cart",
+  "buyNow": "Buy now",
+  "originalPrice": "Original price",
+  "groupPrice": "Group price",
+  "discount": "off",
+  "hot": "Hot deal",
+  "partsSold": "Parts sold",
+  "location": "Location",
+  "mapPlaceholder": "Map (placeholder)",
+  "similarProducts": "Similar products"
+}

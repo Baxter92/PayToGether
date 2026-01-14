@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useI18n } from "@hooks/useI18n";
 import { HStack } from "@/common/components";
 import { Avatar, AvatarFallback } from "@/common/components/ui/avatar";
 import { Button } from "@/common/components/ui/button";
@@ -16,20 +17,50 @@ import {
 import { type JSX } from "react";
 
 export const PROFILE_TABS = [
-  { label: "Overview", key: "overview", icon: Home, merchant: false },
-  { label: "Achats", key: "purchases", icon: ShoppingBag, merchant: false },
-  { label: "Favoris", key: "favorites", icon: Heart, merchant: false },
-  { label: "Avis", key: "reviews", icon: Star, merchant: false },
-  { label: "Mes Deals", key: "deals", icon: Gift, merchant: true },
   {
-    label: "Commandes recues",
+    labelKey: "profile.overviewTab",
+    key: "overview",
+    icon: Home,
+    merchant: false,
+  },
+  {
+    labelKey: "profile.purchases",
+    key: "purchases",
+    icon: ShoppingBag,
+    merchant: false,
+  },
+  {
+    labelKey: "profile.favorites",
+    key: "favorites",
+    icon: Heart,
+    merchant: false,
+  },
+  { labelKey: "profile.reviews", key: "reviews", icon: Star, merchant: false },
+  { labelKey: "profile.deals", key: "deals", icon: Gift, merchant: true },
+  {
+    labelKey: "profile.ordersReceived",
     key: "orders-received",
     icon: Store,
     merchant: true,
   },
-  { label: "Avis Client", key: "client-reviews", icon: Star, merchant: true },
-  { label: "Payments", key: "payouts", icon: ShoppingBag, merchant: true },
-  { label: "Paramètres", key: "settings", icon: Settings, merchant: false },
+  {
+    labelKey: "profile.clientReviews",
+    key: "client-reviews",
+    icon: Star,
+    merchant: true,
+  },
+  {
+    labelKey: "profile.payouts",
+    key: "payouts",
+    icon: ShoppingBag,
+    merchant: true,
+  },
+  {
+    labelKey: "profile.settings",
+    key: "settings",
+    icon: Settings,
+    merchant: false,
+  },
 ] as const;
 
 export default function HeaderProfile({
@@ -39,6 +70,7 @@ export default function HeaderProfile({
   activeTab?: (typeof PROFILE_TABS)[number]["key"];
   onTabChange?: (key: (typeof PROFILE_TABS)[number]["key"]) => void;
 }): JSX.Element {
+  const { t } = useI18n("profile");
   const { user } = useAuth();
 
   useEffect(() => {
@@ -46,7 +78,7 @@ export default function HeaderProfile({
     const hash = window.location.hash.replace("#", "");
 
     if (hash) {
-      const exists = PROFILE_TABS.some((t) => t.key === hash);
+      const exists = PROFILE_TABS.some((tab) => tab.key === hash);
       if (exists) {
         onTabChange?.(hash as any);
       }
@@ -55,7 +87,7 @@ export default function HeaderProfile({
     // 2. Ecoute les changements manuels du hash
     const handleHashChange = () => {
       const newHash = window.location.hash.replace("#", "");
-      const exists = PROFILE_TABS.some((t) => t.key === newHash);
+      const exists = PROFILE_TABS.some((tab) => tab.key === newHash);
       if (exists) {
         onTabChange?.(newHash as any);
       }
@@ -66,9 +98,9 @@ export default function HeaderProfile({
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, [onTabChange]);
 
-  // 3. Mettre à jour l’URL quand un onglet est cliqué
+  // 3. Mettre à jour l'URL quand un onglet est cliqué
   const handleTabClick = (key: string) => {
-    window.location.hash = key; // met à jour l’URL
+    window.location.hash = key; // met à jour l'URL
     onTabChange?.(key as any);
   };
 
@@ -85,8 +117,10 @@ export default function HeaderProfile({
             {user?.name?.capitalizeWords?.()}
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-300">
-            {user?.role === "marchand" ? "Marchand" : "Client"} •{" "}
-            {user?.location}
+            {user?.role === "marchand"
+              ? t("profile.merchant")
+              : t("profile.client")}{" "}
+            • {user?.location}
           </p>
           <p className="text-sm text-slate-500 dark:text-slate-300 mt-1">
             {user?.email}
@@ -95,7 +129,7 @@ export default function HeaderProfile({
       </div>
 
       <HStack spacing={8} wrap>
-        {PROFILE_TABS.map(({ label, key, icon: Icon, merchant }) => {
+        {PROFILE_TABS.map(({ labelKey, key, icon: Icon, merchant }) => {
           if (merchant && user?.role === "marchand") {
             return (
               <Button
@@ -104,7 +138,7 @@ export default function HeaderProfile({
                 variant={activeTab === key ? "default" : "secondary"}
                 onClick={() => handleTabClick(key)}
               >
-                {label}
+                {t(labelKey)}
               </Button>
             );
           } else if (!merchant) {
@@ -115,7 +149,7 @@ export default function HeaderProfile({
                 variant={activeTab === key ? "default" : "secondary"}
                 onClick={() => handleTabClick(key)}
               >
-                {label}
+                {t(labelKey)}
               </Button>
             );
           } else {

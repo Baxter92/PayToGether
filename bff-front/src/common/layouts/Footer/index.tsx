@@ -1,3 +1,4 @@
+import { categories } from "@/common/constants/data";
 import { useI18n } from "@hooks/useI18n";
 import {
   Facebook,
@@ -10,7 +11,8 @@ import {
 import { Link } from "react-router-dom";
 
 const Footer = () => {
-  const { t } = useI18n();
+  const { t: tFooter } = useI18n("footer");
+  const { t: tApp } = useI18n("app");
   const currentYear = new Date().getFullYear();
 
   return (
@@ -28,7 +30,7 @@ const Footer = () => {
               </span>
             </Link>
             <p className="text-secondary-300 text-sm leading-relaxed mb-6">
-              {t("footer.description")}
+              {tFooter("description")}
             </p>
             <div className="flex gap-3">
               <a
@@ -58,13 +60,13 @@ const Footer = () => {
           {/* Quick Links */}
           <div>
             <h3 className="text-lg font-bold font-[family-name:var(--font-heading)] mb-6 text-white">
-              {t("footer.links")}
+              {tFooter("links")}
             </h3>
             <ul className="space-y-3">
               {[
-                { label: t("footer.privacy"), href: "#" },
-                { label: t("footer.terms"), href: "#" },
-                { label: t("footer.contact"), href: "#" },
+                { label: tFooter("privacy"), href: "#" },
+                { label: tFooter("terms"), href: "#" },
+                { label: tFooter("contact"), href: "#" },
                 { label: "FAQ", href: "#" },
               ].map((link, i) => (
                 <li key={i}>
@@ -83,23 +85,17 @@ const Footer = () => {
           {/* Categories */}
           <div>
             <h3 className="text-lg font-bold font-[family-name:var(--font-heading)] mb-6 text-white">
-              Catégories
+              {tFooter("categories")}
             </h3>
             <ul className="space-y-3">
-              {[
-                "Restaurants",
-                "Beauté & Spa",
-                "Sport & Fitness",
-                "Shopping",
-                "Voyages",
-              ].map((cat, i) => (
+              {categories.map((cat, i) => (
                 <li key={i}>
                   <a
                     href="#"
                     className="text-secondary-300 hover:text-primary-300 transition-colors duration-300 text-sm inline-flex items-center gap-2 group"
                   >
                     <span className="w-1.5 h-1.5 bg-primary/50 rounded-full group-hover:bg-primary transition-colors duration-300" />
-                    {cat}
+                    {cat.name}
                   </a>
                 </li>
               ))}
@@ -109,7 +105,7 @@ const Footer = () => {
           {/* Contact */}
           <div>
             <h3 className="text-lg font-bold font-[family-name:var(--font-heading)] mb-6 text-white">
-              Contact
+              {tFooter("contactTitle")}
             </h3>
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-secondary-300 text-sm">
@@ -132,20 +128,20 @@ const Footer = () => {
         <div className="border-t border-white/10 mt-12 pt-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-secondary-400 text-sm">
-              &copy; {currentYear} {t("app.name")}. {t("footer.rights")}
+              &copy; {currentYear} {tApp("name")}. {tFooter("rights")}
             </p>
             <div className="flex items-center gap-6">
               <a
                 href="#"
                 className="text-secondary-400 hover:text-primary-300 text-sm transition-colors duration-300"
               >
-                Politique de confidentialité
+                {tFooter("privacyPolicy")}
               </a>
               <a
                 href="#"
                 className="text-secondary-400 hover:text-primary-300 text-sm transition-colors duration-300"
               >
-                Mentions légales
+                {tFooter("legalNotice")}
               </a>
             </div>
           </div>

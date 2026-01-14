@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState, useCallback } from "react";
 import { I18nContext } from "../context/I18nContext";
 import type { TFunction } from "i18next";
 
@@ -76,4 +76,50 @@ export function useI18n(namespace?: string) {
   }) as TFunction;
 
   return { t: tNs, ...rest };
+}
+
+/**
+ * useLanguageRefresh
+ * 
+ * Hook that forces a re-render when the language changes.
+ * Use this in components that depend on locale-sensitive formatting
+ * (like formatCurrency) to ensure they update when language changes.
+ */
+export function useLanguageRefresh(): number {
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      setRefreshKey((prev) => prev + 1);
+    };
+
+    window.addEventListener("languageChanged", handleLanguageChange);
+    return () => {
+      window.removeEventListener("languageChanged", handleLanguageChange);
+    };
+  }, []);
+
+  return refreshKey;
+}
+
+/**
+ * useFormattedCurrency
+ * 
+ * Hook that returns a memoized currency formatter that updates when language changes.
+ */
+export function useFormattedCurrency() {
+  const { language } = useI18n();
+  useLanguageRefresh();
+
+  const formatCurrency = useCallback(
+    (amount: number, currency: string = "XAF"): string => {
+      return new Intl.NumberFormat(language, {
+        style: "currency",
+        currency,
+      }).format(amount);
+    },
+    [language]
+  );
+
+  return formatCurrency;
 }

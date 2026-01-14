@@ -1,0 +1,11 @@
+{
+  "title": "404",
+  "heading": "Page introuvable",
+  "message": "Oups ! La page que vous recherchez n'existe pas ou a été déplacée.",
+  "backToHome": "Retour à l'accueil",
+  "previousPage": "Page précédente",
+  "suggestions": "Suggestions :",
+  "checkUrl": "Vérifiez l'URL dans la barre d'adresse",
+  "browseCategories": "Parcourir nos catégories",
+  "discoverBestOffers": "Découvrir les meilleures offres"
+}

@@ -1,0 +1,16 @@
+{
+  "completed": "Complété",
+  "pending": "En attente",
+  "refunded": "Remboursé",
+  "cancelled": "Annulé",
+  "active": "Actif",
+  "inactive": "Inactif",
+  "banned": "Banni",
+  "approved": "Approuvé",
+  "rejected": "Rejeté",
+  "paid": "Payé",
+  "processing": "En cours",
+  "failed": "Échoué",
+  "published": "Publié",
+  "draft": "Brouillon"
+}

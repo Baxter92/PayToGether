@@ -37,6 +37,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/common/components/ui/popover";
+import { useI18n } from "@/common/hooks/useI18n";
 
 /** Configuration d'un filtre de colonne */
 export interface IColumnFilter {
@@ -94,6 +95,7 @@ export default function DataTable<TData, TValue>({
   onRefresh,
   onFilter,
 }: IDataTableProps<TData, TValue>) {
+  const { t } = useI18n();
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -417,7 +419,7 @@ export default function DataTable<TData, TValue>({
                 className="gap-2"
               >
                 <Download className="h-4 w-4" />
-                <span className="hidden sm:inline">Exporter</span>
+                <span className="hidden sm:inline">{t("export")}</span>
               </Button>
             )}
 
@@ -426,7 +428,7 @@ export default function DataTable<TData, TValue>({
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-2">
                   <SlidersHorizontal className="h-4 w-4" />
-                  <span className="hidden sm:inline">Colonnes</span>
+                  <span className="hidden sm:inline">{t("columns")}</span>
                   <ChevronDown className="h-3 w-3" />
                 </Button>
               </PopoverTrigger>
@@ -707,11 +709,13 @@ export default function DataTable<TData, TValue>({
               <span className="font-medium text-foreground">
                 {table.getFilteredSelectedRowModel().rows.length}
               </span>{" "}
-              sur{" "}
+              {t("on")}{" "}
               <span className="font-medium text-foreground">
                 {table.getFilteredRowModel().rows.length}
               </span>{" "}
-              ligne(s) sélectionnée(s)
+              {table.getFilteredSelectedRowModel().rows.length <= 1
+                ? t("selectedLigne")
+                : t("selectedLignes")}
             </div>
           )}
           {!showSelectionCount && (

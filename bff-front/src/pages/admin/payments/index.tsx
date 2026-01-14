@@ -21,6 +21,7 @@ import Select from "@/common/components/Select";
 import DataTable from "@/common/components/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatCurrency } from "@/common/utils/formatCurrency";
+import { useI18n } from "@/common/hooks/useI18n";
 import { VStack } from "@/common/components";
 import ViewOrderDetailsModal from "../orders/components/ViewOrderDetailsModal";
 import { mockOrders } from "../orders";
@@ -96,16 +97,16 @@ const mockPayments: Payment[] = [
 ];
 
 const statusConfig = {
-  completed: { label: "Complété", colorScheme: "success" as const },
-  pending: { label: "En attente", colorScheme: "warning" as const },
-  failed: { label: "Échoué", colorScheme: "danger" as const },
-  refunded: { label: "Remboursé", colorScheme: "info" as const },
+  completed: { colorScheme: "success" as const },
+  pending: { colorScheme: "warning" as const },
+  failed: { colorScheme: "danger" as const },
+  refunded: { colorScheme: "info" as const },
 };
 
 const methodLabels = {
-  mobile_money: "Mobile Money",
-  card: "Carte bancaire",
-  bank_transfer: "Virement",
+  mobile_money: "methodMobileMoney",
+  card: "methodCard",
+  bank_transfer: "methodBankTransfer",
 };
 
 export default function AdminPayments(): ReactElement {
@@ -113,6 +114,8 @@ export default function AdminPayments(): ReactElement {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedPayment, setSelectedPayment] = useState<any>(null);
   const [openOrderDetails, setOpenOrderDetails] = useState(false);
+  const { t: tAdmin } = useI18n("admin");
+  const { t: tStatus } = useI18n("status");
 
   const filteredPayments = mockPayments.filter((payment) => {
     const matchesSearch =
@@ -127,18 +130,18 @@ export default function AdminPayments(): ReactElement {
   const columns: ColumnDef<Payment>[] = [
     {
       accessorKey: "id",
-      header: "ID Paiement",
+      header: tAdmin("payments.paymentId"),
       cell: ({ row }) => (
         <span className="font-mono text-sm">{row.original.id}</span>
       ),
     },
     {
       accessorKey: "customer",
-      header: "Client",
+      header: tAdmin("payments.customer"),
     },
     {
       accessorKey: "orderId",
-      header: "Commande",
+      header: tAdmin("payments.order"),
       cell: ({ row }) => (
         <Button
           variant="link"
@@ -154,11 +157,11 @@ export default function AdminPayments(): ReactElement {
     },
     {
       accessorKey: "merchant",
-      header: "Marchand",
+      header: tAdmin("payments.merchant"),
     },
     {
       accessorKey: "amount",
-      header: "Montant",
+      header: tAdmin("payments.amount"),
       cell: ({ row }) => (
         <span className="font-medium">
           {formatCurrency(row.original.amount)}
@@ -167,7 +170,7 @@ export default function AdminPayments(): ReactElement {
     },
     {
       accessorKey: "commission",
-      header: "Commission",
+      header: tAdmin("payments.commission"),
       cell: ({ row }) => (
         <span className="text-muted-foreground">
           {formatCurrency(row.original.commission)}
@@ -176,20 +179,24 @@ export default function AdminPayments(): ReactElement {
     },
     {
       accessorKey: "method",
-      header: "Méthode",
-      cell: ({ row }) => methodLabels[row.original.method],
+      header: tAdmin("payments.method"),
+      cell: ({ row }) => tAdmin(methodLabels[row.original.method]),
     },
     {
       accessorKey: "status",
-      header: "Statut",
+      header: tAdmin("payments.status"),
       cell: ({ row }) => {
         const config = statusConfig[row.original.status];
-        return <Badge colorScheme={config.colorScheme}>{config.label}</Badge>;
+        return (
+          <Badge colorScheme={config.colorScheme}>
+            {tStatus(row.original.status)}
+          </Badge>
+        );
       },
     },
     {
       accessorKey: "createdAt",
-      header: "Date",
+      header: tAdmin("payments.date"),
       cell: ({ row }) =>
         new Date(row.original.createdAt).toLocaleDateString("fr-FR", {
           day: "2-digit",
@@ -215,27 +222,29 @@ export default function AdminPayments(): ReactElement {
         <div>
           <h1 className="text-3xl font-heading font-bold flex items-center gap-2">
             <CreditCard className="h-8 w-8" />
-            Paiements
+            {tAdmin("payments.title")}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Suivi des transactions et paiements
+            {tAdmin("payments.description")}
           </p>
         </div>
         <Button variant="outline" leftIcon={<Download className="h-4 w-4" />}>
-          Exporter
+          {tAdmin("payments.export")}
         </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total transactions</CardDescription>
+            <CardDescription>
+              {tAdmin("payments.totalTransactions")}
+            </CardDescription>
             <CardTitle className="text-2xl">{mockPayments.length}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Revenus totaux</CardDescription>
+            <CardDescription>{tAdmin("payments.totalRevenue")}</CardDescription>
             <CardTitle className="text-2xl flex items-center gap-1">
               <ArrowUpRight className="h-5 w-5 text-green-600" />
               {formatCurrency(totalRevenue)}
@@ -244,7 +253,7 @@ export default function AdminPayments(): ReactElement {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Commissions</CardDescription>
+            <CardDescription>{tAdmin("payments.commissions")}</CardDescription>
             <CardTitle className="text-2xl">
               {formatCurrency(totalCommission)}
             </CardTitle>
@@ -252,7 +261,7 @@ export default function AdminPayments(): ReactElement {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Échoués</CardDescription>
+            <CardDescription>{tAdmin("payments.failed")}</CardDescription>
             <CardTitle className="text-2xl flex items-center gap-1 text-destructive">
               <ArrowDownRight className="h-5 w-5" />
               {mockPayments.filter((p) => p.status === "failed").length}
@@ -264,12 +273,12 @@ export default function AdminPayments(): ReactElement {
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <CardTitle>Historique des paiements</CardTitle>
+            <CardTitle>{tAdmin("payments.paymentHistory")}</CardTitle>
             <div className="flex flex-col sm:flex-row gap-2">
               <div className="relative w-full sm:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Rechercher..."
+                  placeholder={tAdmin("payments.search")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -278,14 +287,14 @@ export default function AdminPayments(): ReactElement {
               <Select
                 value={statusFilter}
                 onValueChange={setStatusFilter}
-                placeholder="Statut"
+                placeholder={tAdmin("payments.status")}
                 triggerClassName="w-full sm:w-40"
                 items={[
-                  { value: "all", label: "Tous" },
-                  { value: "completed", label: "Complétés" },
-                  { value: "pending", label: "En attente" },
-                  { value: "failed", label: "Échoués" },
-                  { value: "refunded", label: "Remboursés" },
+                  { value: "all", label: tAdmin("payments.filter.all") },
+                  { value: "completed", label: tStatus("completed") },
+                  { value: "pending", label: tStatus("pending") },
+                  { value: "failed", label: tStatus("failed") },
+                  { value: "refunded", label: tStatus("refunded") },
                 ]}
               />
             </div>
