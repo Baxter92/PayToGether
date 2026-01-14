@@ -128,7 +128,26 @@ const categoryData = [
   },
 ];
 
-const COLORS = ["#3b82f6", "#10b981"];
+const marchandData = [
+  {
+    name: "Jean Dupont",
+    value: 45,
+  },
+  {
+    name: "Marie Martin",
+    value: 32,
+  },
+  {
+    name: "Pierre Kamga",
+    value: 18,
+  },
+  {
+    name: "Sophie Nkomo",
+    value: 42,
+  },
+];
+
+const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
 
 const monthlySalesData = [
   { month: "Jan", revenue: 800000, orders: 120, sold: 450 },
@@ -292,7 +311,7 @@ export default function AdminReports(): ReactElement {
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Distribution par catégorie</CardTitle>
@@ -316,6 +335,47 @@ export default function AdminReports(): ReactElement {
                   dataKey="value"
                 >
                   {categoryData.map((_, index: number) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value) => `${value ?? 0}%`}
+                  contentStyle={{
+                    backgroundColor: "var(--background)",
+                    border: "1px solid var(--border)",
+                    borderRadius: "8px",
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Ventes par marchand</CardTitle>
+            <CardDescription>
+              Répartition des ventes par marchand
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={marchandData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, value }: { name?: string; value?: number }) =>
+                    `${name || ""} (${value || 0}%)`
+                  }
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {marchandData.map((_, index: number) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS[index % COLORS.length]}

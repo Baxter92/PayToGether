@@ -146,7 +146,7 @@ export default function AdminPayouts(): ReactElement {
     },
     {
       accessorKey: "dealId",
-      header: "Deal",
+      header: "Commande",
       cell: ({ row }) => (
         <Button
           variant="link"
