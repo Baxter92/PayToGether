@@ -8,6 +8,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { useI18n } from "@/common/hooks/useI18n";
 import { Button } from "@/common/components/ui/button";
 import { Badge } from "@/common/components/ui/badge";
 import {
@@ -55,6 +56,7 @@ export default function AdminCategories(): ReactElement {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editCategory, setEditCategory] = useState<Category | null>(null);
   const [deleteCategory, setDeleteCategory] = useState<Category | null>(null);
+  const { t: tAdmin } = useI18n("admin");
 
   const handleCreateCategory = async ({ data }: { data: CategoryFormData }) => {
     console.log("New category:", data);
@@ -90,24 +92,24 @@ export default function AdminCategories(): ReactElement {
         <div>
           <h1 className="text-3xl font-heading font-bold flex items-center gap-2">
             <FolderTree className="h-8 w-8" />
-            Catégories
+            {tAdmin("categories.title")}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Gérez les catégories de deals
+            {tAdmin("categories.description")}
           </p>
         </div>
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button leftIcon={<Plus className="h-4 w-4" />}>
-              Nouvelle catégorie
+              {tAdmin("categories.newCategory")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Créer une catégorie</DialogTitle>
+              <DialogTitle>{tAdmin("categories.createTitle")}</DialogTitle>
               <DialogDescription>
-                Ajoutez une nouvelle catégorie pour organiser vos deals.
+                {tAdmin("categories.createDescription")}
               </DialogDescription>
             </DialogHeader>
             <Form<CategoryFormData>
@@ -214,14 +216,14 @@ export default function AdminCategories(): ReactElement {
                         onClick={() => setEditCategory(category)}
                       >
                         <Pencil className="mr-2 h-4 w-4" />
-                        Modifier
+                        {tAdmin("categories.edit")}
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive"
                         onClick={() => setDeleteCategory(category)}
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
-                        Supprimer
+                        {tAdmin("categories.delete")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

@@ -1,4 +1,5 @@
 import { useState, type JSX } from "react";
+import { useI18n } from "@/common/hooks/useI18n";
 import {
   DndContext,
   closestCenter,
@@ -42,6 +43,7 @@ export default function AdminHero(): JSX.Element {
     initialSlides.map((slide) => ({ ...slide, isActive: true }))
   );
   const [heroEnabled, setHeroEnabled] = useState(true);
+  const { t: tAdmin } = useI18n("admin");
 
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -59,12 +61,12 @@ export default function AdminHero(): JSX.Element {
 
   const handleImageUpload = (id: number, file: File) => {
     if (!file.type.startsWith("image/")) {
-      toast.error("Veuillez sélectionner une image valide");
+      toast.error(tAdmin("hero.invalidImage"));
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("L'image ne doit pas dépasser 5 Mo");
+      toast.error(tAdmin("hero.imageTooLarge"));
       return;
     }
 
@@ -72,10 +74,10 @@ export default function AdminHero(): JSX.Element {
     reader.onload = (e) => {
       const base64 = e.target?.result as string;
       handleSlideChange(id, "image", base64);
-      toast.success("Image uploadée");
+      toast.success(tAdmin("hero.imageUploaded"));
     };
     reader.onerror = () => {
-      toast.error("Erreur lors du chargement de l'image");
+      toast.error(tAdmin("hero.uploadError"));
     };
     reader.readAsDataURL(file);
   };
@@ -90,11 +92,11 @@ export default function AdminHero(): JSX.Element {
 
   const handleDeleteSlide = (id: number) => {
     if (slides.length <= 1) {
-      toast.error("Vous devez garder au moins un slide");
+      toast.error(tAdmin("hero.keepAtLeastOne"));
       return;
     }
     setSlides((prev) => prev.filter((slide) => slide.id !== id));
-    toast.success("Slide supprimé");
+    toast.success(tAdmin("hero.slideDeleted"));
   };
 
   const handleAddSlide = () => {
@@ -105,20 +107,20 @@ export default function AdminHero(): JSX.Element {
       ...prev,
       {
         id: newId,
-        title: "Nouveau slide",
-        subtitle: "Sous-titre",
-        description: "Description du slide",
-        buttonText: "Découvrir",
+        title: tAdmin("hero.newSlideTitle"),
+        subtitle: tAdmin("hero.newSlideSubtitle"),
+        description: tAdmin("hero.newSlideDescription"),
+        buttonText: tAdmin("hero.newSlideButtonText"),
         buttonLink: "/deals",
         image:
           "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80",
         gradient: "from-blue-600/50 to-indigo-600/50",
         textColor: "text-white",
-        badge: "Nouveau",
+        badge: tAdmin("hero.newBadge"),
         isActive: true,
       },
     ]);
-    toast.success("Nouveau slide ajouté");
+    toast.success(tAdmin("hero.slideAdded"));
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -130,13 +132,13 @@ export default function AdminHero(): JSX.Element {
         const newIndex = items.findIndex((item) => item.id === over.id);
         return arrayMove(items, oldIndex, newIndex);
       });
-      toast.success("Ordre des slides mis à jour");
+      toast.success(tAdmin("hero.orderUpdated"));
     }
   };
 
   const handleSave = () => {
-    toast.success("Modifications enregistrées", {
-      description: "Les changements seront visibles sur la page d'accueil",
+    toast.success(tAdmin("hero.saved"), {
+      description: tAdmin("hero.saveDescription"),
     });
   };
 
@@ -144,14 +146,14 @@ export default function AdminHero(): JSX.Element {
     <main className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <Heading
-          title="Gestion du Hero"
-          description="Configurez le carrousel de la page d'accueil"
+          title={tAdmin("hero.title")}
+          description={tAdmin("hero.description")}
           level={2}
           underline
         />
         <HStack spacing={3}>
           <Button onClick={handleSave} leftIcon={<Save className="h-4 w-4" />}>
-            Enregistrer
+            {tAdmin("hero.save")}
           </Button>
         </HStack>
       </div>
@@ -162,10 +164,10 @@ export default function AdminHero(): JSX.Element {
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <Label htmlFor="hero-toggle" className="text-base font-medium">
-                Activer le Hero
+                {tAdmin("hero.enableHero")}
               </Label>
               <p className="text-sm text-muted-foreground">
-                Afficher le carrousel sur la page d'accueil
+                {tAdmin("hero.enableHeroDescription")}
               </p>
             </div>
             <Switch
@@ -181,8 +183,8 @@ export default function AdminHero(): JSX.Element {
       <VStack spacing={4}>
         <HStack justify="between">
           <h3 className="font-semibold text-lg">
-            Slides ({slides.filter((s) => s.isActive).length} actifs sur{" "}
-            {slides.length})
+            {tAdmin("hero.slides")} ({slides.filter((s) => s.isActive).length}{" "}
+            {tAdmin("hero.active")} {tAdmin("hero.of")} {slides.length})
           </h3>
           <Button
             variant="outline"
@@ -190,7 +192,7 @@ export default function AdminHero(): JSX.Element {
             onClick={handleAddSlide}
             leftIcon={<Plus className="h-4 w-4" />}
           >
-            Ajouter un slide
+            {tAdmin("hero.addSlide")}
           </Button>
         </HStack>
 

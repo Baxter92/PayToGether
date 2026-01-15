@@ -1,6 +1,7 @@
 import { useRef, type JSX } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useI18n } from "@/common/hooks/useI18n";
 import { HStack, VStack } from "@/common/components";
 import { Button } from "@/common/components/ui/button";
 import {
@@ -56,6 +57,7 @@ export function SortableSlideCard({
   onImageUpload,
 }: SortableSlideCardProps): JSX.Element {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const { t: tAdmin } = useI18n("admin");
 
   const {
     attributes,
@@ -92,10 +94,12 @@ export function SortableSlideCard({
             >
               <GripVertical className="h-5 w-5 text-muted-foreground" />
             </button>
-            <CardTitle className="text-base">Slide {index + 1}</CardTitle>
+            <CardTitle className="text-base">
+              {tAdmin("hero.slide")} {index + 1}
+            </CardTitle>
             {!slide.isActive && (
               <span className="text-xs bg-muted px-2 py-1 rounded">
-                Désactivé
+                {tAdmin("hero.disabled")}
               </span>
             )}
           </HStack>
@@ -104,7 +108,9 @@ export function SortableSlideCard({
               variant="ghost"
               size="icon"
               onClick={() => onToggleSlide(slide.id)}
-              title={slide.isActive ? "Désactiver" : "Activer"}
+              title={
+                slide.isActive ? tAdmin("hero.disable") : tAdmin("hero.enable")
+              }
             >
               {slide.isActive ? (
                 <Eye className="h-4 w-4" />
@@ -127,7 +133,7 @@ export function SortableSlideCard({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Preview image */}
           <div className="space-y-2">
-            <Label>Image de fond</Label>
+            <Label>{tAdmin("hero.backgroundImage")}</Label>
             <div className="relative aspect-video rounded-lg overflow-hidden bg-muted group">
               <img
                 src={slide.image}
@@ -140,7 +146,9 @@ export function SortableSlideCard({
               >
                 <VStack spacing={2} className="text-white" align="center">
                   <Upload className="h-8 w-8" />
-                  <span className="text-sm font-medium">Changer l'image</span>
+                  <span className="text-sm font-medium">
+                    {tAdmin("hero.changeImage")}
+                  </span>
                 </VStack>
               </div>
               <input
@@ -163,7 +171,7 @@ export function SortableSlideCard({
                 className="flex-1"
               >
                 <ImageIcon className="h-4 w-4 mr-2" />
-                Uploader une image
+                {tAdmin("hero.uploadImage")}
               </Button>
             </HStack>
           </div>
@@ -171,19 +179,19 @@ export function SortableSlideCard({
           {/* Form fields */}
           <VStack spacing={10} className="items-stretch">
             <Input
-              label="Titre"
+              label={tAdmin("hero.title")}
               value={slide.title}
               onChange={(e) => onSlideChange(slide.id, "title", e.target.value)}
             />
             <Input
-              label="Sous-titre"
+              label={tAdmin("hero.subtitle")}
               value={slide.subtitle}
               onChange={(e) =>
                 onSlideChange(slide.id, "subtitle", e.target.value)
               }
             />
             <Input
-              label="Description"
+              label={tAdmin("hero.description")}
               value={slide.description}
               onChange={(e) =>
                 onSlideChange(slide.id, "description", e.target.value)
@@ -191,14 +199,14 @@ export function SortableSlideCard({
             />
             <div className="grid grid-cols-2 gap-3">
               <Input
-                label="Texte du bouton"
+                label={tAdmin("hero.buttonText")}
                 value={slide.buttonText}
                 onChange={(e) =>
                   onSlideChange(slide.id, "buttonText", e.target.value)
                 }
               />
               <Input
-                label="Lien du bouton"
+                label={tAdmin("hero.buttonLink")}
                 value={slide.buttonLink}
                 onChange={(e) =>
                   onSlideChange(slide.id, "buttonLink", e.target.value)
@@ -206,10 +214,10 @@ export function SortableSlideCard({
               />
             </div>
             <Input
-              label="Badge (optionnel)"
+              label={tAdmin("hero.badge")}
               value={slide.badge || ""}
               onChange={(e) => onSlideChange(slide.id, "badge", e.target.value)}
-              placeholder="Ex: Nouveau, Populaire..."
+              placeholder={tAdmin("hero.badgePlaceholder")}
             />
           </VStack>
         </div>

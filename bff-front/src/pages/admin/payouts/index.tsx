@@ -1,4 +1,5 @@
 import { useState, type ReactElement } from "react";
+import { useI18n } from "@/common/hooks/useI18n";
 import DataTable from "@/common/components/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Heading } from "@/common/containers/Heading";
@@ -117,6 +118,7 @@ export default function AdminPayouts(): ReactElement {
   const [selectedPayout, setSelectedPayout] = useState<any>();
   const [openDealDetails, setOpenDealDetails] = useState(false);
   const [openMerchantDetails, setOpenMerchantDetails] = useState(false);
+  const { t: tAdmin } = useI18n("admin");
 
   const columns: ColumnDef<Payout>[] = [
     {
@@ -227,8 +229,8 @@ export default function AdminPayouts(): ReactElement {
   return (
     <main className="space-y-6">
       <Heading
-        title="Paiements aux Marchands"
-        description="Gérez les paiements à effectuer aux créateurs de deals"
+        title={tAdmin("payouts.title")}
+        description={tAdmin("payouts.description")}
         level={2}
         underline
       />

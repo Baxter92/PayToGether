@@ -1,6 +1,7 @@
 {
   "title": "Filters",
   "search": "Search",
+  "searchPlaceholder": "Search for a product...",
   "category": "Category",
   "city": "City",
   "state": "State",
@@ -13,5 +14,8 @@
   "soldout": "Sold out",
   "apply": "Apply",
   "filter": "Filter",
-  "reset": "Reset"
+  "reset": "Reset",
+  "close": "Close",
+  "gridView": "Grid view",
+  "listView": "List view"
 }

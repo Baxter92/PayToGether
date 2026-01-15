@@ -5,5 +5,17 @@
   "partsSold": "Parts sold",
   "deadline": "Deadline",
   "city": "City",
-  "status": "Status"
+  "status": "Status",
+  "refresh": "Refresh",
+  "export": "Export",
+  "columns": "Columns",
+  "advancedFilters": "Advanced filters",
+  "reset": "Reset",
+  "filterPlaceholder": "Filter...",
+  "noResults": "No results found",
+  "resetFilters": "Reset filters",
+  "showColumns": "Show columns",
+  "sortAscending": "Sort ascending",
+  "sortDescending": "Sort descending",
+  "hideColumn": "Hide column"
 }

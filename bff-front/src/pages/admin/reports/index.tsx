@@ -1,5 +1,6 @@
 import type React from "react";
 import { useState, type ReactElement } from "react";
+import { useI18n } from "@/common/hooks/useI18n";
 import {
   BarChart3,
   TrendingUp,
@@ -164,6 +165,7 @@ export default function AdminReports(): ReactElement {
     "all"
   );
   const [selectedCity, setSelectedCity] = useState<string | string[]>("all");
+  const { t: tAdmin } = useI18n("admin");
 
   const cities = [...new Set(mockDeals.map((d) => d.city))];
 
@@ -191,10 +193,10 @@ export default function AdminReports(): ReactElement {
         <div>
           <h1 className="text-3xl font-heading font-bold flex items-center gap-2">
             <BarChart3 className="h-8 w-8" />
-            Rapports
+            {tAdmin("reports.title")}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Analytics et statistiques détaillées
+            {tAdmin("reports.description")}
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -232,7 +234,7 @@ export default function AdminReports(): ReactElement {
             variant="outline"
             leftIcon={<Download className="h-4 w-4 bg-transparent" />}
           >
-            Exporter
+            {tAdmin("reports.export")}
           </Button>
         </div>
       </div>

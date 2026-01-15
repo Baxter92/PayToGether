@@ -1,6 +1,7 @@
 {
   "title": "Filtres",
   "search": "Rechercher",
+  "searchPlaceholder": "Chercher un produit...",
   "category": "Catégorie",
   "city": "Ville",
   "state": "État",
@@ -13,5 +14,8 @@
   "soldout": "Épuisé",
   "apply": "Appliquer",
   "filter": "Filtrer",
-  "reset": "Réinitialiser"
+  "reset": "Réinitialiser",
+  "close": "Fermer",
+  "gridView": "Vue grille",
+  "listView": "Vue liste"
 }
