@@ -1,0 +1,21 @@
+{
+  "product": "Produit",
+  "category": "Catégorie",
+  "price": "Prix",
+  "partsSold": "Parts vendues",
+  "deadline": "Deadline",
+  "city": "Ville",
+  "status": "Statut",
+  "refresh": "Actualiser",
+  "export": "Exporter",
+  "columns": "Colonnes",
+  "advancedFilters": "Filtres avancés",
+  "reset": "Réinitialiser",
+  "filterPlaceholder": "Filtrer...",
+  "noResults": "Aucun résultat trouvé",
+  "resetFilters": "Réinitialiser les filtres",
+  "showColumns": "Afficher les colonnes",
+  "sortAscending": "Trier en ordre croissant",
+  "sortDescending": "Trier en ordre décroissant",
+  "hideColumn": "Masquer la colonne"
+}

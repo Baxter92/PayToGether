@@ -1,6 +1,7 @@
 import { useState, type JSX, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@context/AuthContext";
+import { useI18n } from "@hooks/useI18n";
 import {
   MapPin,
   Heart,
@@ -22,49 +23,29 @@ import type { ICategory } from "@/common/containers/CategoryCard/type";
 
 // Types pour les props du Header
 export interface HeaderProps {
-  // Configuration de base
   appName?: string;
   appLogo?: ReactNode;
-
-  // Bannière promo
   topBanner?: ReactNode;
-
-  // Localisation
   showLocationSelector?: boolean;
   defaultLocation?: string;
   locations?: Array<{ label: string; value: string }>;
   onLocationChange?: (location: string) => void;
-
-  // Recherche
   showSearchBar?: boolean;
   searchPlaceholder?: string;
   onSearch?: (query: string) => void;
-
-  // Navigation
   showFavorites?: boolean;
   favoritesCount?: number;
   favoritesLink?: string;
-
   showCart?: boolean;
   cartCount?: number;
   cartLink?: string;
-
-  // Catégories
   categories?: ICategory[];
   showCategoriesBar?: boolean;
-
-  // Langue
   showLanguageSelector?: boolean;
-
-  // Comportement sticky
   sticky?: boolean;
-
-  // Styles personnalisés
   className?: string;
   headerBgColor?: string;
   primaryColor?: string;
-
-  // Menu utilisateur personnalisé
   customUserMenuItems?: Array<{
     value: string;
     label: string;
@@ -72,13 +53,9 @@ export interface HeaderProps {
     onClick?: () => void;
     href?: string;
   }>;
-
-  // Callbacks
   onLoginClick?: () => void;
   onRegisterClick?: () => void;
   onLogoutClick?: () => void;
-
-  // Textes personnalisables (i18n)
   texts?: {
     login?: string;
     register?: string;
@@ -92,7 +69,6 @@ export interface HeaderProps {
 }
 
 const Header = ({
-  // Valeurs par défaut
   appName = "DealToGether",
   appLogo,
   topBanner,
@@ -119,21 +95,26 @@ const Header = ({
   onLoginClick,
   onRegisterClick,
   onLogoutClick,
-  texts = {
-    login: "Se connecter",
-    register: "S'inscrire",
-    myAccount: "Mon compte",
-    myProfile: "Mon profil",
-    myOrders: "Mes commandes",
-    myFavorites: "Mes favoris",
-    settings: "Paramètres",
-    logout: "Se déconnecter",
-  },
+  texts = {},
 }: HeaderProps): JSX.Element => {
+  const { t: tNav } = useI18n("nav");
+  const { t: tHeader } = useI18n("header");
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const locationRoute = useLocation();
   const [location, setLocation] = useState(defaultLocation);
+
+  // Merge default texts with i18n translations
+  const mergedTexts = {
+    login: texts.login || tNav("login"),
+    register: texts.register || tNav("register"),
+    myAccount: texts.myAccount || tNav("myAccount"),
+    myProfile: texts.myProfile || tNav("myProfile"),
+    myOrders: texts.myOrders || tNav("myOrders"),
+    myFavorites: texts.myFavorites || tNav("myFavorites"),
+    settings: texts.settings || tNav("settings"),
+    logout: texts.logout || tNav("logout"),
+  };
 
   const handleLogout = async (): Promise<void> => {
     if (onLogoutClick) {
@@ -142,7 +123,7 @@ const Header = ({
       await logout();
       navigate(PATHS.LOGIN);
     }
-    toast.success("Vous êtes déconnecté");
+    toast.success(tHeader("logoutSuccess"));
   };
 
   const handleLogin = (): void => {
@@ -172,31 +153,31 @@ const Header = ({
   const userMenuItems = customUserMenuItems || [
     {
       value: "profile",
-      label: texts.myProfile || "Mon profil",
+      label: mergedTexts.myProfile,
       icon: <User className="w-4 h-4 mr-2" />,
       onClick: () => navigate(PATHS.PROFILE),
     },
     {
       value: "orders",
-      label: texts.myOrders || "Mes commandes",
+      label: mergedTexts.myOrders,
       icon: <ShoppingBag className="w-4 h-4 mr-2" />,
       onClick: () => navigate(PATHS.ORDERS),
     },
     {
       value: "favorites",
-      label: texts.myFavorites || "Mes favoris",
+      label: mergedTexts.myFavorites,
       icon: <Heart className="w-4 h-4 mr-2" />,
       onClick: () => navigate(PATHS.FAVORITES),
     },
     {
       value: "settings",
-      label: texts.settings || "Paramètres",
+      label: mergedTexts.settings,
       icon: <Settings className="w-4 h-4 mr-2" />,
       onClick: () => navigate(PATHS.USERSITTINGS),
     },
     {
       value: "logout",
-      label: texts.logout || "Se déconnecter",
+      label: mergedTexts.logout,
       icon: <LogOut className="w-4 h-4 mr-2" />,
       onClick: handleLogout,
     },
@@ -296,7 +277,7 @@ const Header = ({
                   <>
                     <User className="w-5 h-5 mr-2" />
                     <span className="hidden xl:inline">
-                      {texts.myAccount || "Mon compte"}
+                      {mergedTexts.myAccount}
                     </span>
                   </>
                 }
@@ -309,14 +290,14 @@ const Header = ({
             ) : (
               <div className="flex items-center space-x-2 ml-2">
                 <Button variant="ghost" size="sm" onClick={handleLogin}>
-                  {texts.login || "Se connecter"}
+                  {mergedTexts.login}
                 </Button>
                 <Button
                   size="sm"
                   className="bg-primary-600 hover:bg-primary-700"
                   onClick={handleRegister}
                 >
-                  {texts.register || "S'inscrire"}
+                  {mergedTexts.register}
                 </Button>
               </div>
             )}
@@ -357,7 +338,7 @@ const Header = ({
           {/* Language Selector - Desktop Only */}
           {showLanguageSelector && (
             <div className="hidden lg:flex ml-4">
-              <LanguageSelector />
+              <LanguageSelector variant="icon" />
             </div>
           )}
         </div>

@@ -1,6 +1,7 @@
 import type { JSX } from "react";
 import React, { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useI18n } from "@hooks/useI18n";
 import { useAuth } from "@/common/context/AuthContext";
 import { Card, CardContent } from "@components/ui/card";
 import VStack from "@components/VStack";
@@ -19,6 +20,7 @@ import HelpSection from "./containers/HelpSection";
 import TrustIndicators from "./containers/TrustIndicators";
 
 export default function CheckoutPage(): JSX.Element {
+  const { t } = useI18n("checkout");
   const { state } = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -85,7 +87,7 @@ export default function CheckoutPage(): JSX.Element {
       });
     } catch (err: any) {
       console.error(err);
-      setApiError("Erreur lors de la création de la commande. Réessayez.");
+      setApiError(t("checkout.orderError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -93,16 +95,16 @@ export default function CheckoutPage(): JSX.Element {
 
   const steps = [
     {
-      title: "Adresse de livraison",
-      description: "Où souhaitez-vous recevoir votre commande ?",
+      title: t("checkout.shippingTitle"),
+      description: t("checkout.shippingDescription"),
     },
     {
-      title: "Mode de livraison",
-      description: "Choisissez comment recevoir votre commande",
+      title: t("checkout.deliveryTitle"),
+      description: t("checkout.deliveryDescription"),
     },
     {
-      title: "Paiement",
-      description: "Finalisez votre commande en toute sécurité",
+      title: t("checkout.paymentTitle"),
+      description: t("checkout.paymentDescription"),
     },
   ];
 
@@ -112,11 +114,9 @@ export default function CheckoutPage(): JSX.Element {
       <div className="border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <h1 className="text-3xl font-bold text-foreground">
-            Finaliser votre commande
+            {t("checkout.title")}
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Complétez les informations ci-dessous pour confirmer votre achat
-          </p>
+          <p className="text-muted-foreground mt-1">{t("checkout.subtitle")}</p>
         </div>
       </div>
 

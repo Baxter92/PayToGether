@@ -1,5 +1,6 @@
 import type React from "react";
 import { useState, type ReactElement } from "react";
+import { useI18n } from "@/common/hooks/useI18n";
 import {
   BarChart3,
   TrendingUp,
@@ -128,7 +129,26 @@ const categoryData = [
   },
 ];
 
-const COLORS = ["#3b82f6", "#10b981"];
+const marchandData = [
+  {
+    name: "Jean Dupont",
+    value: 45,
+  },
+  {
+    name: "Marie Martin",
+    value: 32,
+  },
+  {
+    name: "Pierre Kamga",
+    value: 18,
+  },
+  {
+    name: "Sophie Nkomo",
+    value: 42,
+  },
+];
+
+const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
 
 const monthlySalesData = [
   { month: "Jan", revenue: 800000, orders: 120, sold: 450 },
@@ -145,6 +165,7 @@ export default function AdminReports(): ReactElement {
     "all"
   );
   const [selectedCity, setSelectedCity] = useState<string | string[]>("all");
+  const { t: tAdmin } = useI18n("admin");
 
   const cities = [...new Set(mockDeals.map((d) => d.city))];
 
@@ -172,10 +193,10 @@ export default function AdminReports(): ReactElement {
         <div>
           <h1 className="text-3xl font-heading font-bold flex items-center gap-2">
             <BarChart3 className="h-8 w-8" />
-            Rapports
+            {tAdmin("reports.title")}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Analytics et statistiques détaillées
+            {tAdmin("reports.description")}
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -213,7 +234,7 @@ export default function AdminReports(): ReactElement {
             variant="outline"
             leftIcon={<Download className="h-4 w-4 bg-transparent" />}
           >
-            Exporter
+            {tAdmin("reports.export")}
           </Button>
         </div>
       </div>
@@ -292,7 +313,7 @@ export default function AdminReports(): ReactElement {
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Distribution par catégorie</CardTitle>
@@ -316,6 +337,47 @@ export default function AdminReports(): ReactElement {
                   dataKey="value"
                 >
                   {categoryData.map((_, index: number) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value) => `${value ?? 0}%`}
+                  contentStyle={{
+                    backgroundColor: "var(--background)",
+                    border: "1px solid var(--border)",
+                    borderRadius: "8px",
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Ventes par marchand</CardTitle>
+            <CardDescription>
+              Répartition des ventes par marchand
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={marchandData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, value }: { name?: string; value?: number }) =>
+                    `${name || ""} (${value || 0}%)`
+                  }
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {marchandData.map((_, index: number) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS[index % COLORS.length]}

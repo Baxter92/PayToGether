@@ -1,0 +1,21 @@
+{
+  "title": "Filters",
+  "search": "Search",
+  "searchPlaceholder": "Search for a product...",
+  "category": "Category",
+  "city": "City",
+  "state": "State",
+  "priceMin": "Min price",
+  "priceMax": "Max price",
+  "allCategories": "All categories",
+  "allCities": "All cities",
+  "all": "All",
+  "active": "Active",
+  "soldout": "Sold out",
+  "apply": "Apply",
+  "filter": "Filter",
+  "reset": "Reset",
+  "close": "Close",
+  "gridView": "Grid view",
+  "listView": "List view"
+}

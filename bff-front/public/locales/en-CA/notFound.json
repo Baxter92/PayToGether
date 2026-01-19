@@ -1,0 +1,11 @@
+{
+  "title": "404",
+  "heading": "Page not found",
+  "message": "Oops! The page you're looking for doesn't exist or has been moved.",
+  "backToHome": "Back to home",
+  "previousPage": "Previous page",
+  "suggestions": "Suggestions:",
+  "checkUrl": "Check the URL in the address bar",
+  "browseCategories": "Browse our categories",
+  "discoverBestOffers": "Discover the best offers"
+}

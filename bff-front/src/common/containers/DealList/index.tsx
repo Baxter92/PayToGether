@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
+import { useI18n } from "@/common/hooks/useI18n";
 import Grid, { type IColsProp } from "@components/Grid";
 import DealCard from "../DealCard";
 import Pagination from "@components/Pagination";
@@ -137,6 +138,8 @@ export default function DealsList({
   tableProps,
   isAdmin = false,
 }: IDealsListProps) {
+  const { t: tFilters } = useI18n("filters");
+  const { t: tTable } = useI18n("table");
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<DealFilters>({
     category: "all",
@@ -323,8 +326,8 @@ export default function DealsList({
         columns={inSheet ? 1 : 1}
         schema={filterSchema}
         onSubmit={handleFilterSubmit}
-        submitLabel={inSheet ? "Appliquer" : "Filtrer"}
-        resetLabel="Réinitialiser"
+        submitLabel={inSheet ? tFilters("apply") : tFilters("filter")}
+        resetLabel={tFilters("reset")}
       />
     </VStack>
   );
@@ -334,7 +337,7 @@ export default function DealsList({
     return [
       {
         accessorKey: "image",
-        header: "Produit",
+        header: tTable("product"),
         cell: ({ row }) => {
           const d = row.original;
           return (
@@ -360,7 +363,7 @@ export default function DealsList({
       },
       {
         accessorKey: "category",
-        header: "Catégorie",
+        header: tFilters("category"),
         cell: ({ getValue }) => (
           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-secondary/50 text-secondary-foreground capitalize">
             {String(getValue() ?? "")}
@@ -369,7 +372,7 @@ export default function DealsList({
       },
       {
         accessorKey: "groupPrice",
-        header: "Prix",
+        header: tTable("price"),
         cell: ({ row }) => {
           const d = row.original;
           return (
@@ -388,7 +391,7 @@ export default function DealsList({
       },
       {
         accessorKey: "sold",
-        header: "Parts vendues",
+        header: tTable("partsSold"),
         cell: ({ row }) => {
           const d = row.original;
           const sold = d.sold ?? 0;
@@ -431,7 +434,7 @@ export default function DealsList({
       },
       {
         accessorKey: "deadline",
-        header: "Deadline",
+        header: tTable("deadline"),
         cell: ({ getValue }) => (
           <span className="text-sm text-muted-foreground">
             {String(getValue() ?? "")}
@@ -440,7 +443,7 @@ export default function DealsList({
       },
       {
         accessorKey: "city",
-        header: "Ville",
+        header: tFilters("city"),
         cell: ({ getValue }) => (
           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-muted text-muted-foreground">
             {String(getValue() ?? "")}
@@ -449,7 +452,7 @@ export default function DealsList({
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: tTable("status"),
         cell: ({ getValue }) => (
           <Badge
             size="sm"
@@ -493,7 +496,7 @@ export default function DealsList({
               <Button
                 variant="outline"
                 leftIcon={<Sliders className="w-4 h-4" />}
-                title="Filtres"
+                title={tFilters("title")}
                 onClick={() => setMobileOpen(true)}
               />
             </div>
@@ -505,7 +508,7 @@ export default function DealsList({
                   variant={view === "grid" ? "default" : "outline"}
                   size="icon-sm"
                   onClick={() => setView("grid")}
-                  title="Vue grille"
+                  title={tFilters("gridView")}
                 >
                   <LayoutGrid className="w-4 h-4" />
                 </Button>
@@ -514,7 +517,7 @@ export default function DealsList({
                   variant={view === "list" ? "default" : "outline"}
                   size="icon-sm"
                   onClick={() => setView("list")}
-                  title="Vue liste"
+                  title={tFilters("listView")}
                 >
                   <List className="w-4 h-4" />
                 </Button>

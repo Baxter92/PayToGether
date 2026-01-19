@@ -1,4 +1,4 @@
-import { type JSX } from "react";
+import { useState, type JSX } from "react";
 import type { Deal } from "./types";
 import Gallery from "./containers/Gallery";
 import ProductDetails from "./containers/ProductDetails";
@@ -9,6 +9,8 @@ import { VStack } from "@/common/components";
 import { Heading } from "@/common/containers/Heading";
 import DealsList from "@/common/containers/DealList";
 import { mockDeals } from "@/common/constants/data";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/common/components/ui/button";
 
 const mockDeal: Deal = {
   id: "deal-003",
@@ -22,9 +24,9 @@ const mockDeal: Deal = {
   rating: 4.8,
   reviewsCount: 342,
   images: [
-    "https://images.unsplash.com/photo-1551782450-a2132b4ba21d?q=80&w=1600&auto=format&fit=crop&ixlib=rb-4.0.3&s=beef1",
-    "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=beef2",
-    "https://images.unsplash.com/photo-1551218808-94e220e084d2?q=80&w=1200&auto=format&fit=crop&ixlib=rb-4.0.3&s=beef3",
+    "/images/FAMILOV_1762258046.jpeg",
+    "/images/images.jpg",
+    "/images/filet-de-boeuf-entier-15-25kg.jpg",
   ],
   description:
     "Achetez des parts individuelles (0.5 kg) d'une caisse de bœuf premium. Chaque part est emballée sous vide, prête à être conservée au réfrigérateur ou congelée. L'offre s'active uniquement si suffisamment de parts sont vendues avant la date d'expiration.",
@@ -55,6 +57,24 @@ export default function DealDetail({
 }: {
   deal?: Deal;
 }): JSX.Element {
+  const navigate = useNavigate();
+
+  const [qty, setQty] = useState(1);
+  const [partsSold, setPartsSold] = useState(deal.partsSold);
+
+  const partsRemaining = deal.partsTotal - partsSold;
+  const canBuy = qty <= partsRemaining && qty >= 1;
+  const willReachMin = partsSold + qty >= deal.minRequired;
+  const activated = partsSold >= deal.minRequired;
+  const totalPrice = qty * deal.pricePerPart;
+
+  function handleBuy() {
+    if (!canBuy) return;
+    setPartsSold((s) => s + qty);
+    navigate(`/deals/${deal.id}/checkout`, {
+      state: { deal, qty, total: totalPrice },
+    });
+  }
   return (
     <div className=" bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -68,7 +88,17 @@ export default function DealDetail({
           <aside className="w-full lg:w-[360px]">
             <div className="sticky top-20 space-y-4">
               <div>
-                <PurchaseCard deal={deal} />
+                <PurchaseCard
+                  deal={deal}
+                  onBuy={handleBuy}
+                  qty={qty}
+                  setQty={setQty}
+                  partsRemaining={partsRemaining}
+                  totalPrice={totalPrice}
+                  canBuy={canBuy}
+                  activated={activated}
+                  willReachMin={willReachMin}
+                />
               </div>
 
               <Card>
@@ -97,6 +127,19 @@ export default function DealDetail({
             showPagination={false}
           />
         </VStack>
+      </div>
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t p-4 sm:hidden">
+        <Button
+          className="w-full h-12 text-base"
+          onClick={handleBuy}
+          disabled={!canBuy}
+        >
+          {canBuy
+            ? activated || willReachMin
+              ? "Acheter maintenant"
+              : "Réserver (en attente d'activation)"
+            : "Quantité non disponible"}
+        </Button>
       </div>
     </div>
   );

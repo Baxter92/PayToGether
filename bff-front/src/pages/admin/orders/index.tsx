@@ -11,6 +11,7 @@ import { DataTable } from "@/common/components";
 import ViewOrderDetailsModal from "./components/ViewOrderDetailsModal";
 import { ViewDetailDealModal } from "../deals/containers/ViewDetailDealModal";
 import { mockDeals } from "@/common/constants/data";
+import { useI18n } from "@/common/hooks/useI18n";
 
 export const mockOrders = [
   {
@@ -84,21 +85,23 @@ export default function AdminOrders(): ReactElement {
   const [openViewDetails, setOpenViewDetails] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [openDealDetails, setOpenDealDetails] = useState(false);
+  const { t: tAdmin } = useI18n("admin");
+  const { t: tStatus } = useI18n("status");
 
   const columns = [
     {
       id: "id",
-      header: "ID",
+      header: tAdmin("orders.id"),
       accessorKey: "id",
     },
     {
       id: "customer",
-      header: "Client",
+      header: tAdmin("orders.customer"),
       accessorKey: "customer",
     },
     {
       id: "deal",
-      header: "Deal",
+      header: tAdmin("orders.deal"),
       accessorKey: "deal",
       cell: ({ row }: { row: any }) => (
         <Button
@@ -115,18 +118,18 @@ export default function AdminOrders(): ReactElement {
     },
     {
       id: "date",
-      header: "Date",
+      header: tAdmin("orders.date"),
       accessorKey: "date",
     },
     {
       id: "amount",
-      header: "Montant",
+      header: tAdmin("orders.amount"),
       accessorKey: "amount",
       cell: ({ row }: { row: any }) => formatCurrency(row.original.amount),
     },
     {
       id: "status",
-      header: "Statut",
+      header: tAdmin("orders.status"),
       accessorKey: "status",
       cell: ({ row }: { row: any }) => getStatusBadge(row.original.status),
     },
@@ -147,44 +150,44 @@ export default function AdminOrders(): ReactElement {
       case "completed":
         return (
           <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-            Complété
+            {tStatus("completed")}
           </Badge>
         );
       case "pending":
         return (
           <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-            En attente
+            {tStatus("pending")}
           </Badge>
         );
       case "refunded":
         return (
           <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-            Remboursé
+            {tStatus("refunded")}
           </Badge>
         );
       case "cancelled":
         return (
           <Badge className="bg-destructive/10 text-destructive hover:bg-destructive/10">
-            Annulé
+            {tStatus("cancelled")}
           </Badge>
         );
       default:
-        return <Badge>{status}</Badge>;
+        return <Badge>{tStatus(status)}</Badge>;
     }
   };
 
   const stats = [
-    { label: "Total commandes", value: mockOrders.length },
+    { label: tAdmin("orders.stats.totalOrders"), value: mockOrders.length },
     {
-      label: "Complétées",
+      label: tAdmin("orders.stats.completed"),
       value: mockOrders.filter((o) => o.status === "completed").length,
     },
     {
-      label: "En attente",
+      label: tAdmin("orders.stats.pending"),
       value: mockOrders.filter((o) => o.status === "pending").length,
     },
     {
-      label: "Remboursées",
+      label: tAdmin("orders.stats.refunded"),
       value: mockOrders.filter((o) => o.status === "refunded").length,
     },
   ];
@@ -194,15 +197,15 @@ export default function AdminOrders(): ReactElement {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold font-heading">
-            Gestion des Commandes
+            {tAdmin("orders.title")}
           </h1>
           <p className="text-muted-foreground">
-            Suivez et gérez toutes les commandes
+            {tAdmin("orders.description")}
           </p>
         </div>
         <Button variant="outline">
           <Download className="h-4 w-4 mr-2" />
-          Exporter
+          {tAdmin("orders.export")}
         </Button>
       </div>
 
@@ -224,7 +227,7 @@ export default function AdminOrders(): ReactElement {
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Rechercher une commande..."
+                placeholder={tAdmin("orders.search")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9"
@@ -233,14 +236,14 @@ export default function AdminOrders(): ReactElement {
             <Select
               value={statusFilter}
               onValueChange={setStatusFilter}
-              placeholder="Filtrer par statut"
+              placeholder={tAdmin("orders.filterByStatus")}
               triggerClassName="w-[180px]"
               items={[
-                { value: "all", label: "Tous les statuts" },
-                { value: "completed", label: "Complété" },
-                { value: "pending", label: "En attente" },
-                { value: "refunded", label: "Remboursé" },
-                { value: "cancelled", label: "Annulé" },
+                { value: "all", label: tAdmin("orders.filter.all") },
+                { value: "completed", label: tStatus("completed") },
+                { value: "pending", label: tStatus("pending") },
+                { value: "refunded", label: tStatus("refunded") },
+                { value: "cancelled", label: tStatus("cancelled") },
               ]}
             />
           </div>

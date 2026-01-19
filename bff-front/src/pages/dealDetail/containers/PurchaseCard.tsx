@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Card, CardContent } from "@components/ui/card";
 import { Button } from "@components/ui/button";
 import { Separator } from "@components/ui/separator";
@@ -6,29 +5,32 @@ import type { Deal } from "../types";
 import Counter from "@/common/components/Counter";
 import { HStack } from "@/common/components";
 import { Heart, Share } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { formatCurrency } from "@/common/utils/formatCurrency";
+type PurchaseCardProps = {
+  deal: Deal;
+  showAction?: boolean;
+  onBuy?: () => void;
+  canBuy?: boolean;
+  activated?: boolean;
+  willReachMin?: boolean;
+  qty: number;
+  setQty: (qty: number) => void;
+  partsRemaining: number;
+  totalPrice: number;
+};
 
-export default function PurchaseCard({ deal }: { deal: Deal }) {
-  const [qty, setQty] = useState(1);
-  const [partsSold, setPartsSold] = useState(deal.partsSold);
-
-  const navigate = useNavigate();
-
-  const partsRemaining = deal.partsTotal - partsSold;
-  const canBuy = qty <= partsRemaining && qty >= 1;
-  const willReachMin = partsSold + qty >= deal.minRequired;
-  const activated = partsSold >= deal.minRequired;
-  const totalPrice = qty * deal.pricePerPart;
-
-  function handleAdd() {
-    if (!canBuy) return;
-    setPartsSold((s) => s + qty);
-    navigate(`/deals/${deal.id}/checkout`, {
-      state: { deal, qty, total: totalPrice },
-    });
-  }
-
+export default function PurchaseCard({
+  deal,
+  showAction = true,
+  onBuy,
+  canBuy,
+  activated,
+  willReachMin,
+  qty,
+  setQty,
+  partsRemaining,
+  totalPrice,
+}: PurchaseCardProps) {
   return (
     <Card>
       <CardContent>
@@ -81,13 +83,15 @@ export default function PurchaseCard({ deal }: { deal: Deal }) {
           {/* )} */}
         </div>
 
-        <Button className="mt-4 w-full" onClick={handleAdd} disabled={!canBuy}>
-          {canBuy
-            ? activated || willReachMin
-              ? "Acheter maintenant"
-              : "Réserver (en attente d'activation)"
-            : "Quantité non disponible"}
-        </Button>
+        {showAction && (
+          <Button className="mt-4 w-full" onClick={onBuy} disabled={!canBuy}>
+            {canBuy
+              ? activated || willReachMin
+                ? "Acheter maintenant"
+                : "Réserver (en attente d'activation)"
+              : "Quantité non disponible"}
+          </Button>
+        )}
 
         <Separator className="my-3" />
 

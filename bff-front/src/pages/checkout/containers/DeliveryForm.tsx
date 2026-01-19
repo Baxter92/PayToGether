@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { IFieldConfig } from "@/common/containers/Form";
 import Form from "@/common/containers/Form";
 import type { DeliveryData } from "../types";
@@ -20,14 +21,16 @@ export function DeliveryForm({
   onBack,
   isSubmitting,
 }: IDeliveryFormProps): JSX.Element {
+  const { t } = useTranslation();
+
   const fields: IFieldConfig[] = [
     {
       name: "deliveryMethod",
-      label: "Méthode de livraison",
+      label: t("checkout.deliveryTitle"),
       type: "radio",
       items: [
-        { label: "📍 Livraison à domicile (+3.50€)", value: "home" },
-        { label: "📦 Retrait au point relais (Gratuit)", value: "pickup" },
+        { label: `${t("checkout.homeDelivery")} (+3.50€)`, value: "home" },
+        { label: t("checkout.pickupDelivery"), value: "pickup" },
       ],
     },
   ];
@@ -37,10 +40,9 @@ export function DeliveryForm({
       fields={fields}
       schema={deliverySchema}
       onSubmit={({ data }) => onSubmit(data as DeliveryData)}
-      submitLabel={isSubmitting ? "Traitement..." : "Continuer"}
-      resetLabel={onBack ? "Retour" : undefined}
+      submitLabel={isSubmitting ? t("checkout.processing") : t("checkout.continue")}
+      resetLabel={onBack ? t("checkout.back") : undefined}
       onReset={() => {
-        console.log("rr");
         onBack?.();
       }}
     />

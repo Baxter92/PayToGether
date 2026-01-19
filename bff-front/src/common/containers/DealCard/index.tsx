@@ -12,8 +12,11 @@ import { Progress } from "@components/ui/progress";
 import type { JSX } from "react";
 import { Link } from "react-router-dom";
 import { formatCurrency } from "@/common/utils/formatCurrency";
+import { useI18n } from "@hooks/useI18n";
 
 export default function DealCard({ deal }: IDealCardProps): JSX.Element {
+  const { t } = useI18n();
+  const { t: tDeals } = useI18n("deals");
   const percentage = (deal.sold / deal.total) * 100;
   const isHot = percentage > 70;
 
@@ -37,7 +40,7 @@ export default function DealCard({ deal }: IDealCardProps): JSX.Element {
             {deal.popular && (
               <span className="inline-flex items-center gap-1 bg-accent text-accent-foreground px-2.5 py-1 rounded-full text-xs font-semibold shadow-lg">
                 <TrendingUp className="w-3 h-3" />
-                Populaire
+                {tDeals("popular")}
               </span>
             )}
           </div>
@@ -45,7 +48,7 @@ export default function DealCard({ deal }: IDealCardProps): JSX.Element {
           {/* Quick view on hover */}
           <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
             <span className="text-white text-sm font-medium drop-shadow-lg">
-              Voir les détails →
+              {tDeals("viewDetails")} →
             </span>
           </div>
         </CardHeader>
@@ -64,16 +67,13 @@ export default function DealCard({ deal }: IDealCardProps): JSX.Element {
                   {formatCurrency(deal.groupPrice)}
                 </span>
               </div>
-              {/* <p className="text-sm text-muted-foreground">
-                {formatCurrency(deal.originalPrice)}
-              </p> */}
             </div>
 
             {/* Progress */}
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs text-foreground font-semibold">
-                  {deal.sold}/{deal.total} vendus
+                  {deal.sold}/{deal.total} {tDeals("sold")}
                 </span>
                 <span
                   className={`text-xs font-bold ${
@@ -97,7 +97,9 @@ export default function DealCard({ deal }: IDealCardProps): JSX.Element {
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1.5 rounded-lg">
                 <Clock className="w-3.5 h-3.5 text-primary" />
-                <span className="font-medium">{deal.deadline}</span>
+                <span className="font-medium">
+                  {deal.deadline} {t("days")}
+                </span>
               </div>
               <div className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1.5 rounded-lg">
                 <Users className="w-3.5 h-3.5 text-primary" />
@@ -108,7 +110,7 @@ export default function DealCard({ deal }: IDealCardProps): JSX.Element {
 
           {/* CTA Button */}
           <Button className="w-full mt-4 bg-primary hover:bg-primary-600 text-primary-foreground font-semibold rounded-xl h-11 shadow-md hover:shadow-lg transition-all duration-300 group-hover:scale-[1.02]">
-            Voir le deal
+            {tDeals("viewDeal")}
           </Button>
         </CardContent>
       </Card>

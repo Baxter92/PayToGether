@@ -1,0 +1,16 @@
+{
+  "home": "Accueil",
+  "deals": "Deals",
+  "categories": "Catégories",
+  "search": "Rechercher",
+  "favorites": "Favoris",
+  "cart": "Panier",
+  "login": "Se connecter",
+  "register": "S'inscrire",
+  "logout": "Se déconnecter",
+  "myAccount": "Mon compte",
+  "myProfile": "Mon profil",
+  "myOrders": "Mes commandes",
+  "myFavorites": "Mes favoris",
+  "settings": "Paramètres"
+}

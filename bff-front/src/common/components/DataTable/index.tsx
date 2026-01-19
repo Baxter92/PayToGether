@@ -37,6 +37,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/common/components/ui/popover";
+import { useI18n } from "@/common/hooks/useI18n";
 
 /** Configuration d'un filtre de colonne */
 export interface IColumnFilter {
@@ -94,6 +95,9 @@ export default function DataTable<TData, TValue>({
   onRefresh,
   onFilter,
 }: IDataTableProps<TData, TValue>) {
+  const { t } = useI18n();
+  const { t: tTable } = useI18n("table");
+  const { t: tFilters } = useI18n("filters");
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -401,7 +405,7 @@ export default function DataTable<TData, TValue>({
                 variant="outline"
                 size="icon-sm"
                 onClick={onRefresh}
-                title="Actualiser"
+                title={tTable("refresh")}
                 className="h-9 w-9"
               >
                 <RefreshCw className="h-4 w-4" />
@@ -417,7 +421,7 @@ export default function DataTable<TData, TValue>({
                 className="gap-2"
               >
                 <Download className="h-4 w-4" />
-                <span className="hidden sm:inline">Exporter</span>
+                <span className="hidden sm:inline">{t("export")}</span>
               </Button>
             )}
 
@@ -426,7 +430,7 @@ export default function DataTable<TData, TValue>({
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-2">
                   <SlidersHorizontal className="h-4 w-4" />
-                  <span className="hidden sm:inline">Colonnes</span>
+                  <span className="hidden sm:inline">{tTable("columns")}</span>
                   <ChevronDown className="h-3 w-3" />
                 </Button>
               </PopoverTrigger>
@@ -476,7 +480,7 @@ export default function DataTable<TData, TValue>({
             <div className="flex items-center justify-between mb-4">
               <h4 className="font-semibold text-sm text-foreground flex items-center gap-2">
                 <Filter className="h-4 w-4" />
-                Filtres avancés
+                {tTable("advancedFilters")}
               </h4>
               {activeFilterCount > 0 && (
                 <Button
@@ -486,7 +490,7 @@ export default function DataTable<TData, TValue>({
                   className="text-muted-foreground hover:text-foreground gap-1"
                 >
                   <X className="h-3 w-3" />
-                  Réinitialiser
+                  {tTable("reset")}
                 </Button>
               )}
             </div>
@@ -502,11 +506,11 @@ export default function DataTable<TData, TValue>({
                         activeFilters[filter.id]
                           ? filter.options.find(
                               (o) => o.value === activeFilters[filter.id]
-                            )?.label || "Tous"
-                          : "Tous"
+                            )?.label || tFilters("all")
+                          : tFilters("all")
                       }
                       items={[
-                        { label: "Tous", value: "all" },
+                        { label: tFilters("all"), value: "all" },
                         ...filter.options,
                       ]}
                       selectedValue={activeFilters[filter.id] || "all"}
@@ -516,7 +520,7 @@ export default function DataTable<TData, TValue>({
                   ) : filter.type === "number" ? (
                     <Input
                       type="number"
-                      placeholder="Filtrer..."
+                      placeholder={tTable("filterPlaceholder")}
                       value={activeFilters[filter.id] || ""}
                       onChange={(e) =>
                         handleColumnFilter(filter.id, e.target.value)
@@ -525,7 +529,7 @@ export default function DataTable<TData, TValue>({
                     />
                   ) : (
                     <Input
-                      placeholder="Filtrer..."
+                      placeholder={tTable("filterPlaceholder")}
                       value={activeFilters[filter.id] || ""}
                       onChange={(e) =>
                         handleColumnFilter(filter.id, e.target.value)
@@ -680,14 +684,14 @@ export default function DataTable<TData, TValue>({
                   >
                     <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                       <span className="text-4xl">📭</span>
-                      <span>Aucun résultat trouvé</span>
+                      <span>{tTable("noResults")}</span>
                       {activeFilterCount > 0 && (
                         <Button
                           variant="link"
                           size="sm"
                           onClick={clearAllFilters}
                         >
-                          Réinitialiser les filtres
+                          {tTable("resetFilters")}
                         </Button>
                       )}
                     </div>
@@ -707,11 +711,13 @@ export default function DataTable<TData, TValue>({
               <span className="font-medium text-foreground">
                 {table.getFilteredSelectedRowModel().rows.length}
               </span>{" "}
-              sur{" "}
+              {t("on")}{" "}
               <span className="font-medium text-foreground">
                 {table.getFilteredRowModel().rows.length}
               </span>{" "}
-              ligne(s) sélectionnée(s)
+              {table.getFilteredSelectedRowModel().rows.length <= 1
+                ? t("selectedLigne")
+                : t("selectedLignes")}
             </div>
           )}
           {!showSelectionCount && (

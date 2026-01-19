@@ -1,0 +1,16 @@
+{
+  "home": "Home",
+  "deals": "Deals",
+  "categories": "Categories",
+  "search": "Search",
+  "favorites": "Favorites",
+  "cart": "Cart",
+  "login": "Login",
+  "register": "Sign up",
+  "logout": "Logout",
+  "myAccount": "My Account",
+  "myProfile": "My Profile",
+  "myOrders": "My Orders",
+  "myFavorites": "My Favorites",
+  "settings": "Settings"
+}
