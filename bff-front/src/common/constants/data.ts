@@ -4,8 +4,7 @@ export const mockDeals = [
   {
     id: 1,
     title: "Bœuf Charolais Premium - 5kg",
-    image:
-      "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=400&h=300&fit=crop",
+    image: "/images/images.jpg",
     originalPrice: 120000,
     groupPrice: 75,
     unit: 150,
@@ -21,8 +20,7 @@ export const mockDeals = [
   {
     id: 2,
     title: "Tilapia Frais du Wouri - 3kg",
-    image:
-      "https://images.unsplash.com/photo-1534043464124-3be32fe000c9?w=400&h=300&fit=crop",
+    image: "/images/350141.jpg",
     originalPrice: 18000,
     groupPrice: 12,
     unit: 150,
@@ -37,9 +35,8 @@ export const mockDeals = [
   },
   {
     id: 3,
-    title: "Viande de Bœuf Hachée - 2kg",
-    image:
-      "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=400&h=300&fit=crop",
+    title: "Viande de Bœuf - 2kg",
+    image: "/images/viande.jpg",
     originalPrice: 45000,
     groupPrice: 28,
     unit: 150,
@@ -55,8 +52,7 @@ export const mockDeals = [
   {
     id: 4,
     title: "Saumon Frais - 2kg",
-    image:
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop",
+    image: "/images/Sardines2.jpg",
     originalPrice: 65000,
     groupPrice: 42,
     unit: 150,
@@ -123,8 +119,7 @@ export const mockDeals = [
   {
     id: 8,
     title: "Bar Sauvage Entier - 2.5kg",
-    image:
-      "https://images.unsplash.com/photo-1544943910-4c1dc44aab44?w=400&h=300&fit=crop",
+    image: "/images/appolo.jpg",
     originalPrice: 38000,
     groupPrice: 23,
     unit: 150,
@@ -548,7 +543,7 @@ export const popularDeals = [
   {
     id: 2,
     title: "Tilapia Frais du Wouri - 3kg",
-    image: "https://images.unsplash.com/photo-1534043464124-3be32fe000c9?w=400",
+    image: "/images/tilapia.jpg",
     originalPrice: 18000,
     groupPrice: 12,
     unit: 150,
@@ -593,7 +588,7 @@ export const popularDeals = [
   {
     id: 8,
     title: "Bar Sauvage Entier - 2.5kg",
-    image: "https://images.unsplash.com/photo-1544943910-4c1dc44aab44?w=400",
+    image: "/images/appolo.jpg",
     originalPrice: 38000,
     groupPrice: 23,
     unit: 150,
