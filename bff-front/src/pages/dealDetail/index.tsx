@@ -26,7 +26,7 @@ const mockDeal: Deal = {
   images: [
     "/images/FAMILOV_1762258046.jpeg",
     "/images/images.jpg",
-    "/images/filet-de-boeuf-entier-15-25kg.jpg",
+    "/images/filet-de-boeuf-entier-15-25kg.jpg"
   ],
   description:
     "Achetez des parts individuelles (0.5 kg) d'une caisse de bœuf premium. Chaque part est emballée sous vide, prête à être conservée au réfrigérateur ou congelée. L'offre s'active uniquement si suffisamment de parts sont vendues avant la date d'expiration.",
@@ -34,7 +34,7 @@ const mockDeal: Deal = {
     "Part 0.5 kg",
     "Élevage local certifié",
     "Emballage sous vide",
-    "Livraison réfrigérée",
+    "Livraison réfrigérée"
   ],
   whatsIncluded: ["Part 0.5 kg emballée sous vide"],
   location: "Douala, Cameroon (livraison disponible dans les grandes villes)",

@@ -57,7 +57,7 @@ export default function ShippingForm({
       label: t("checkout.postalCodeOptional"),
       type: "text",
       placeholder: "67000",
-    },
+    }
   ];
 
   return (

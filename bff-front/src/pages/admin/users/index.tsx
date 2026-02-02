@@ -77,7 +77,7 @@ const mockUsers = [
     spent: 560,
     role: "user",
     status: "active",
-  },
+  }
 ];
 
 export default function AdminUsers(): ReactElement {

@@ -43,10 +43,10 @@ export default function Reviews({
       reply:
         i === 1
           ? {
-              author: "merchant",
-              message: "Merci pour votre retour, au plaisir de vous revoir !",
-              createdAt: new Date(Date.now() - 3600000).toISOString(),
-            }
+            author: "merchant",
+            message: "Merci pour votre retour, au plaisir de vous revoir !",
+            createdAt: new Date(Date.now() - 3600000).toISOString(),
+          }
           : undefined,
     }));
 
@@ -70,7 +70,7 @@ export default function Reviews({
         comment: newComment,
         createdAt: new Date().toISOString(),
       },
-      ...prev,
+      ...prev
     ]);
     setNewComment("");
     setNewRating(0);
@@ -81,13 +81,13 @@ export default function Reviews({
       prev.map((r) =>
         r.id === reviewId
           ? {
-              ...r,
-              reply: {
-                author: "merchant",
-                message: replyText,
-                createdAt: new Date().toISOString(),
-              },
-            }
+            ...r,
+            reply: {
+              author: "merchant",
+              message: replyText,
+              createdAt: new Date().toISOString(),
+            },
+          }
           : r
       )
     );

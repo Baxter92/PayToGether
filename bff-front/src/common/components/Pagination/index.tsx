@@ -60,8 +60,8 @@ export default function Pagination({
         align === "center"
           ? "md:items-center"
           : align === "right"
-          ? "md:items-end"
-          : "md:items-start"
+            ? "md:items-end"
+            : "md:items-start"
       )}
     >
       <ShadcnPagination
@@ -69,8 +69,8 @@ export default function Pagination({
           align === "center"
             ? "md:justify-center"
             : align === "right"
-            ? "md:justify-end"
-            : "md:justify-start",
+              ? "md:justify-end"
+              : "md:justify-start",
           className
         )}
       >

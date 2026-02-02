@@ -76,7 +76,7 @@ export const mockOrders = [
     date: "2024-01-12",
     amount: 45,
     status: "cancelled",
-  },
+  }
 ];
 
 export default function AdminOrders(): ReactElement {
@@ -132,7 +132,7 @@ export default function AdminOrders(): ReactElement {
       header: tAdmin("orders.status"),
       accessorKey: "status",
       cell: ({ row }: { row: any }) => getStatusBadge(row.original.status),
-    },
+    }
   ];
 
   // const filteredOrders = mockOrders.filter((order) => {
@@ -189,7 +189,7 @@ export default function AdminOrders(): ReactElement {
     {
       label: tAdmin("orders.stats.refunded"),
       value: mockOrders.filter((o) => o.status === "refunded").length,
-    },
+    }
   ];
 
   return (
@@ -243,7 +243,7 @@ export default function AdminOrders(): ReactElement {
                 { value: "completed", label: tStatus("completed") },
                 { value: "pending", label: tStatus("pending") },
                 { value: "refunded", label: tStatus("refunded") },
-                { value: "cancelled", label: tStatus("cancelled") },
+                { value: "cancelled", label: tStatus("cancelled") }
               ]}
             />
           </div>
@@ -259,7 +259,7 @@ export default function AdminOrders(): ReactElement {
                   setSelectedOrder(row.original);
                   setOpenViewDetails(true);
                 },
-              },
+              }
             ]}
           />
           <ViewOrderDetailsModal

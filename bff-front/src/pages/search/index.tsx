@@ -32,7 +32,7 @@ export default function SearchPage() {
     { value: "popular", label: t("popularity") },
     { value: "price-asc", label: t("priceAsc") },
     { value: "price-desc", label: t("priceDesc") },
-    { value: "discount", label: t("bestDiscount") },
+    { value: "discount", label: t("bestDiscount") }
   ];
 
   const filteredDeals = useMemo(() => {

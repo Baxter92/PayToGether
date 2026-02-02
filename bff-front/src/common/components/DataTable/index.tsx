@@ -188,9 +188,9 @@ export default function DataTable<TData, TValue>({
     // Ajouter le tri aux colonnes utilisateur si enableSorting
     const userColumns = enableSorting
       ? columns.map((col) => ({
-          ...col,
-          enableSorting: col.enableSorting !== false,
-        }))
+        ...col,
+        enableSorting: col.enableSorting !== false,
+      }))
       : columns;
 
     return [...head, ...userColumns];
@@ -203,8 +203,8 @@ export default function DataTable<TData, TValue>({
       const keys = Array.isArray(searchKey)
         ? searchKey
         : searchKey
-        ? [searchKey]
-        : [];
+          ? [searchKey]
+          : [];
 
       const searchLower = String(filterValue).toLowerCase();
 
@@ -297,7 +297,7 @@ export default function DataTable<TData, TValue>({
         headers.join(","),
         ...filteredData.map((row) =>
           headers.map((h) => JSON.stringify((row as any)[h] ?? "")).join(",")
-        ),
+        )
       ].join("\n");
 
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -505,13 +505,13 @@ export default function DataTable<TData, TValue>({
                       label={
                         activeFilters[filter.id]
                           ? filter.options.find(
-                              (o) => o.value === activeFilters[filter.id]
-                            )?.label || tFilters("all")
+                            (o) => o.value === activeFilters[filter.id]
+                          )?.label || tFilters("all")
                           : tFilters("all")
                       }
                       items={[
                         { label: tFilters("all"), value: "all" },
-                        ...filter.options,
+                        ...filter.options
                       ]}
                       selectedValue={activeFilters[filter.id] || "all"}
                       onChange={(value) => handleColumnFilter(filter.id, value)}
@@ -608,13 +608,13 @@ export default function DataTable<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : header.column.getCanSort()
-                        ? renderSortableHeader(
+                          ? renderSortableHeader(
                             header.column,
                             typeof header.column.columnDef.header === "string"
                               ? header.column.columnDef.header
                               : header.column.id
                           )
-                        : flexRender(
+                          : flexRender(
                             header.column.columnDef.header,
                             header.getContext()
                           )}

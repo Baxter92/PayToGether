@@ -87,7 +87,7 @@ const statsCards: StatCard[] = [
     value: [...new Set(mockDeals.map((d) => d.city))].length.toString(),
     change: 5.0,
     icon: Users,
-  },
+  }
 ];
 
 const topDeals = mockDeals
@@ -126,7 +126,7 @@ const categoryData = [
     name: "Poissons",
     value: Math.round((poissonRevenue / totalRevenue) * 100),
     revenue: poissonRevenue,
-  },
+  }
 ];
 
 const marchandData = [
@@ -145,7 +145,7 @@ const marchandData = [
   {
     name: "Sophie Nkomo",
     value: 42,
-  },
+  }
 ];
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
@@ -156,7 +156,7 @@ const monthlySalesData = [
   { month: "Mar", revenue: 1100000, orders: 160, sold: 580 },
   { month: "Avr", revenue: 1250000, orders: 175, sold: 620 },
   { month: "Mai", revenue: 1180000, models: 168, sold: 610 },
-  { month: "Juin", revenue: totalRevenue, orders: totalSold, sold: totalSold },
+  { month: "Juin", revenue: totalRevenue, orders: totalSold, sold: totalSold }
 ];
 
 export default function AdminReports(): ReactElement {
@@ -173,18 +173,18 @@ export default function AdminReports(): ReactElement {
     { label: "7 derniers jours", value: "7d" },
     { label: "30 derniers jours", value: "30d" },
     { label: "90 derniers jours", value: "90d" },
-    { label: "Cette année", value: "1y" },
+    { label: "Cette année", value: "1y" }
   ];
 
   const categoryItems = [
     { label: "Tous", value: "all" },
     { label: "Bovins", value: "bovins" },
-    { label: "Poissons", value: "poissons" },
+    { label: "Poissons", value: "poissons" }
   ];
 
   const cityItems = [
     { label: "Toutes les villes", value: "all" },
-    ...cities.map((city) => ({ label: city, value: city })),
+    ...cities.map((city) => ({ label: city, value: city }))
   ];
 
   return (

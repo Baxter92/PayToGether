@@ -118,7 +118,7 @@ export default function AdminHero(): JSX.Element {
         textColor: "text-white",
         badge: tAdmin("hero.newBadge"),
         isActive: true,
-      },
+      }
     ]);
     toast.success(tAdmin("hero.slideAdded"));
   };

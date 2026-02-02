@@ -60,8 +60,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       size === "sm"
         ? "text-sm p-2"
         : size === "lg"
-        ? "text-base p-4"
-        : "text-sm p-3"; // md
+          ? "text-base p-4"
+          : "text-sm p-3"; // md
 
     // --- Debounce logic ---
     const debounceTimer = React.useRef<number | null>(null);

@@ -162,24 +162,24 @@ export default function Grid({
   const content =
     items && renderItem
       ? items.map((it, index) => {
-          const itemContent = renderItem(it, index);
-          return itemWrapperClassName ? (
-            <div key={index} className={itemWrapperClassName}>
-              {itemContent}
-            </div>
-          ) : (
-            <React.Fragment key={index}>{itemContent}</React.Fragment>
-          );
-        })
+        const itemContent = renderItem(it, index);
+        return itemWrapperClassName ? (
+          <div key={index} className={itemWrapperClassName}>
+            {itemContent}
+          </div>
+        ) : (
+          <React.Fragment key={index}>{itemContent}</React.Fragment>
+        );
+      })
       : itemWrapperClassName
-      ? React.Children.map(children, (child, idx) =>
+        ? React.Children.map(children, (child, idx) =>
           child ? (
             <div key={idx} className={itemWrapperClassName}>
               {child}
             </div>
           ) : null
         )
-      : children;
+        : children;
 
   return (
     <Element className={twClasses} style={inlineStyle} {...rest}>

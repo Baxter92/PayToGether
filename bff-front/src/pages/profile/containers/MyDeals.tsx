@@ -20,7 +20,7 @@ export default function MyDeals(): JSX.Element {
       options: [
         { label: "Climatiseurs", value: "clim" },
         { label: "Ventilateurs", value: "ventilo" },
-        { label: "Électroménager", value: "electromenager" },
+        { label: "Électroménager", value: "electromenager" }
       ],
     },
     {
@@ -29,14 +29,14 @@ export default function MyDeals(): JSX.Element {
       type: "select",
       options: [
         { label: "Yaoundé", value: "yaounde" },
-        { label: "Douala", value: "douala" },
+        { label: "Douala", value: "douala" }
       ],
     },
     {
       id: "groupPrice",
       label: "Prix max",
       type: "number",
-    },
+    }
   ];
 
   return (

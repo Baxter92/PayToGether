@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const login = async (email: string, password: string): Promise<IUser> => {
-    try {
+    try{
       // Simulation - Remplacer par votre appel API
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -83,8 +83,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           email.split("@")[0] === "merchant"
             ? "marchand"
             : email.split("@")[0] === "admin"
-            ? "admin"
-            : "client",
+              ? "admin"
+              : "client",
         location: "Douala, Cameroon",
       };
 

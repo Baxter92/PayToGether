@@ -48,7 +48,7 @@ export default function AdminDeals(): ReactElement {
                 setOpenDetail(true);
               },
               tooltip: tAdmin("deals.viewDetail"),
-            },
+            }
           ],
         }}
       />

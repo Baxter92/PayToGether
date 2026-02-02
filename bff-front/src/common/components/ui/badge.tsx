@@ -113,7 +113,7 @@ const badgeVariants = cva(
         variant: "subtle",
         colorScheme: "secondary",
         className: "bg-secondary/20 text-secondary-foreground",
-      },
+      }
     ],
     defaultVariants: {
       variant: "subtle",

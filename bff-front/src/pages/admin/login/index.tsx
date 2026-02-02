@@ -92,7 +92,7 @@ export default function AdminLogin(): ReactElement {
                 label: "Mot de passe",
                 type: "password",
                 placeholder: "••••••••",
-              },
+              }
             ]}
           />
 

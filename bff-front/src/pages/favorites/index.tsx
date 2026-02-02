@@ -32,7 +32,7 @@ export default function Favorites() {
             {t("favorites.title")}
           </h1>
           <p className="text-muted-foreground mt-2">
-            {favoriteDeals.length === 1 
+            {favoriteDeals.length === 1
               ? t("favorites.count", { count: favoriteDeals.length })
               : t("favorites.countPlural", { count: favoriteDeals.length })}
           </p>

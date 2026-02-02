@@ -479,9 +479,9 @@ export function CreateDealModal({
           label: "Statut du deal",
           items: [
             { label: "Brouillon", value: "draft" },
-            { label: "Publié", value: "published" },
+            { label: "Publié", value: "published" }
           ],
-        },
+        }
       ],
     },
 
@@ -504,7 +504,7 @@ export function CreateDealModal({
           name: "currency",
           label: "Devise",
           items: [{ label: "Dollar", value: "USD" }],
-        },
+        }
       ],
     },
 
@@ -526,7 +526,7 @@ export function CreateDealModal({
           type: "date",
           name: "expiryDate",
           label: "Date d’expiration",
-        },
+        }
       ],
     },
 
@@ -539,7 +539,7 @@ export function CreateDealModal({
           name: "location",
           label: "Lieu",
           placeholder: "Douala – Bonapriso",
-        },
+        }
       ],
     },
 
@@ -552,7 +552,7 @@ export function CreateDealModal({
           name: "highlights",
           label: "Points forts",
           render: renderHighlightsField,
-        },
+        }
       ],
     },
 
@@ -575,9 +575,9 @@ export function CreateDealModal({
           label: "Méthode de packaging",
           items: [
             { label: "Sur place", value: "on-site" },
-            { label: "À emporter", value: "takeaway" },
+            { label: "À emporter", value: "takeaway" }
           ],
-        },
+        }
       ],
     },
     {
@@ -590,9 +590,9 @@ export function CreateDealModal({
           label: "Images",
           maxFiles: 5,
           render: renderImagesField,
-        },
+        }
       ],
-    },
+    }
   ];
 
   return (
