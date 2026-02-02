@@ -30,5 +30,6 @@ bff-core/target/
 bff-configuration/target/
 bff-front/node_modules/
 bff-front/node/
+bff-api/target/
 #Compiled JavaScript map files
 *.js.map

@@ -3,6 +3,7 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/bff-api/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/bff-configuration/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bff-configuration/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/bff-core/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/bff-front/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/bff-provider/src/main/java" charset="UTF-8" />
