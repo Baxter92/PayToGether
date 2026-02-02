@@ -1,0 +1,50 @@
+package com.ulr.paytogether.core.provider;
+
+import com.ulr.paytogether.core.modele.UtilisateurModele;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+/**
+ * Port (interface) pour les opérations sur les utilisateurs
+ * Cette interface définit le contrat que l'adaptateur (provider) doit implémenter
+ * Architecture Hexagonale : c'est un port de sortie (driven port)
+ */
+public interface UtilisateurProvider {
+
+    /**
+     * Sauvegarder un utilisateur
+     */
+    UtilisateurModele sauvegarder(UtilisateurModele utilisateur);
+
+    /**
+     * Trouver un utilisateur par son UUID
+     */
+    Optional<UtilisateurModele> trouverParUuid(UUID uuid);
+
+    /**
+     * Trouver un utilisateur par son email
+     */
+    Optional<UtilisateurModele> trouverParEmail(String email);
+
+    /**
+     * Trouver tous les utilisateurs
+     */
+    List<UtilisateurModele> trouverTous();
+
+    /**
+     * Mettre à jour un utilisateur
+     */
+    UtilisateurModele mettreAJour(UUID uuid, UtilisateurModele utilisateur);
+
+    /**
+     * Supprimer un utilisateur par son UUID
+     */
+    void supprimerParUuid(UUID uuid);
+
+    /**
+     * Vérifier si un email existe
+     */
+    boolean existeParEmail(String email);
+}

@@ -1,0 +1,42 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/ORG/paytogether-frontend:${{ github.sha }}
+            ghcr.io/ORG/paytogether-frontend:latest
+
+      - name: Deploy to Kubernetes
+        uses: azure/k8s-deploy@v5
+        with:
+          manifests: |
+            k8s/deployment.yaml
+          images: |
+            ghcr.io/ORG/paytogether-frontend:${{ github.sha }}
+          kubeconfig: ${{ secrets.KUBECONFIG }}

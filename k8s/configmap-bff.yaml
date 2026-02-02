@@ -6,13 +6,11 @@ metadata:
   labels:
     app: bff
 data:
-  # Fichier application.yml monté dans le conteneur sous /config/application.yml
-  application.yml: |
-    spring:
-      profiles:
-        active: prod
+  # Fichier application.properties monté dans le conteneur sous /config/application.properties
+  application.properties: |
+    # Profil actif
+    spring.profiles.active=prod
+    
     # Propriétés métier/techniques non sensibles
-    app:
-      backend-url: http://bfb.prod.svc.cluster.local
-      nomApplication: bff-paytogether
-
+    spring.app.backend-url=http://bfb.prod.svc.cluster.local
+    spring.application.name=bff-paytogether
