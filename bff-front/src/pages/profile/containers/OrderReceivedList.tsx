@@ -136,7 +136,7 @@ export default function OrdersReceivedList({ data }: { data: Order[] }) {
       cell: ({ getValue }) => (
         <OrderStatusBadge status={getValue<OrderStatus>()} />
       ),
-    },
+    }
   ];
 
   return (
@@ -172,38 +172,38 @@ export default function OrdersReceivedList({ data }: { data: Order[] }) {
             },
             ...(canConfirm
               ? [
-                  {
-                    tooltip: "Confirmer",
-                    leftIcon: <Check className="w-4 h-4" />,
-                    colorScheme: "success" as const,
-                    onClick: () =>
-                      alert(`Confirmer ${row.original.id} (simulation)`),
-                  },
-                ]
+                {
+                  tooltip: "Confirmer",
+                  leftIcon: <Check className="w-4 h-4" />,
+                  colorScheme: "success" as const,
+                  onClick: () =>
+                    alert(`Confirmer ${row.original.id} (simulation)`),
+                }
+              ]
               : []),
             ...(canUse
               ? [
-                  {
-                    tooltip: "Marquer utilisée",
-                    leftIcon: <CircleCheckBig className="w-4 h-4" />,
-                    colorScheme: "warning" as const,
-                    onClick: () =>
-                      alert(
-                        `Marquer ${row.original.id} comme utilisée (simulation)`
-                      ),
-                  },
-                ]
+                {
+                  tooltip: "Marquer utilisée",
+                  leftIcon: <CircleCheckBig className="w-4 h-4" />,
+                  colorScheme: "warning" as const,
+                  onClick: () =>
+                    alert(
+                      `Marquer ${row.original.id} comme utilisée (simulation)`
+                    ),
+                }
+              ]
               : []),
             ...(canCancel
               ? [
-                  {
-                    tooltip: "Annuler",
-                    leftIcon: <X className="w-4 h-4" />,
-                    colorScheme: "danger" as const,
-                    onClick: () =>
-                      alert(`Annuler ${row.original.id} (simulation)`),
-                  },
-                ]
+                {
+                  tooltip: "Annuler",
+                  leftIcon: <X className="w-4 h-4" />,
+                  colorScheme: "danger" as const,
+                  onClick: () =>
+                    alert(`Annuler ${row.original.id} (simulation)`),
+                }
+              ]
               : []),
 
             {
@@ -217,7 +217,7 @@ export default function OrdersReceivedList({ data }: { data: Order[] }) {
               leftIcon: <DownloadIcon className="w-4 h-4" />,
               colorScheme: "secondary" as const,
               onClick: () => alert(`Télécharger ticket ${row.original.id}`),
-            },
+            }
           ];
         }}
       />

@@ -30,9 +30,9 @@ export function DeliveryForm({
       type: "radio",
       items: [
         { label: `${t("checkout.homeDelivery")} (+3.50€)`, value: "home" },
-        { label: t("checkout.pickupDelivery"), value: "pickup" },
+        { label: t("checkout.pickupDelivery"), value: "pickup" }
       ],
-    },
+    }
   ];
 
   return (

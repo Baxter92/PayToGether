@@ -35,7 +35,7 @@ i18n
       "form",
       "validation",
       "filters",
-      "table",
+      "table"
     ],
     defaultNS: "common",
     debug: false,

@@ -92,7 +92,7 @@ const participantsMock: ParticipantRow[] = [
       postalCode: "M5V 1L7",
       country: "Canada",
     },
-  },
+  }
 ];
 
 const reviewsMock: ReviewRow[] = [
@@ -109,7 +109,7 @@ const reviewsMock: ReviewRow[] = [
     rating: 5,
     comment: "Excellent!",
     date: "2023-10-02",
-  },
+  }
 ];
 
 const supplierMock = {
@@ -237,7 +237,7 @@ export function ViewDetailDealModal({
               : "⏳ En attente"}
           </Badge>
         ),
-      },
+      }
     ],
     []
   );
@@ -289,7 +289,7 @@ export function ViewDetailDealModal({
             {row.original.date}
           </span>
         ),
-      },
+      }
     ],
     []
   );
@@ -357,9 +357,9 @@ export function ViewDetailDealModal({
           label: "Statut",
           items: [
             { label: "Publié", value: "published" },
-            { label: "Brouillon", value: "draft" },
+            { label: "Brouillon", value: "draft" }
           ],
-        },
+        }
       ],
     },
     {
@@ -381,7 +381,7 @@ export function ViewDetailDealModal({
           name: "currency",
           label: "Devise",
           items: [{ label: "Dollar", value: "USD" }],
-        },
+        }
       ],
     },
     {
@@ -402,9 +402,9 @@ export function ViewDetailDealModal({
           type: "date",
           name: "expiryDate",
           label: "Date d’expiration",
-        },
+        }
       ],
-    },
+    }
   ];
 
   return (

@@ -62,8 +62,8 @@ export default function CheckboxGroup({
     checkboxSize === "sm"
       ? "h-4 w-4"
       : checkboxSize === "lg"
-      ? "h-6 w-6"
-      : "h-5 w-5";
+        ? "h-6 w-6"
+        : "h-5 w-5";
 
   const handleSelect = (v: string) => {
     if (value === undefined) setInternal(v);

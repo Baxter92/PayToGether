@@ -115,15 +115,15 @@ export default function ReviewsList({
     },
     ...(isMyReviews
       ? [
-          {
-            header: "Statut",
-            accessorKey: "status",
-            cell: ({ getValue }: { getValue: () => ReviewStatus }) => (
-              <ReviewStatusBadge status={getValue()} />
-            ),
-          },
-        ]
-      : []),
+        {
+          header: "Statut",
+          accessorKey: "status",
+          cell: ({ getValue }: { getValue: () => ReviewStatus }) => (
+            <ReviewStatusBadge status={getValue()} />
+          ),
+        }
+      ]
+      : [])
   ];
   return (
     <section>
@@ -150,12 +150,12 @@ export default function ReviewsList({
           },
           ...(isMyReviews
             ? [
-                {
-                  tooltip: "Supprimer",
-                  leftIcon: <Trash2Icon className="w-4 h-4" />,
-                  colorScheme: "danger" as const,
-                },
-              ]
+              {
+                tooltip: "Supprimer",
+                leftIcon: <Trash2Icon className="w-4 h-4" />,
+                colorScheme: "danger" as const,
+              }
+            ]
             : []),
           {
             tooltip: "Répondre",
@@ -166,7 +166,7 @@ export default function ReviewsList({
             tooltip: "Contacter le client",
             colorScheme: "danger" as const,
             leftIcon: <Phone className="w-4 h-4" />,
-          },
+          }
         ]}
       />
     </section>

@@ -73,7 +73,7 @@ const mockMerchants: Merchant[] = [
     totalSales: 95000,
     status: "suspended",
     createdAt: "2024-03-25",
-  },
+  }
 ];
 
 const statusConfig = {
@@ -168,7 +168,7 @@ export default function AdminMerchants(): ReactElement {
           </DropdownMenuContent>
         </DropdownMenu>
       ),
-    },
+    }
   ];
 
   const stats = {

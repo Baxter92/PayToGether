@@ -80,7 +80,7 @@ export function useI18n(namespace?: string) {
 
 /**
  * useLanguageRefresh
- * 
+ *
  * Hook that forces a re-render when the language changes.
  * Use this in components that depend on locale-sensitive formatting
  * (like formatCurrency) to ensure they update when language changes.
@@ -104,7 +104,7 @@ export function useLanguageRefresh(): number {
 
 /**
  * useFormattedCurrency
- * 
+ *
  * Hook that returns a memoized currency formatter that updates when language changes.
  */
 export function useFormattedCurrency() {

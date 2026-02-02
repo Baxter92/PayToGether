@@ -60,7 +60,7 @@ export const PROFILE_TABS = [
     key: "settings",
     icon: Settings,
     merchant: false,
-  },
+  }
 ] as const;
 
 export default function HeaderProfile({

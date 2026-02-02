@@ -94,7 +94,7 @@ const Hero = ({
   const defaultStats: HeroStats[] = [
     { value: "5000+", label: "Offres disponibles" },
     { value: "98%", label: "Clients satisfaits" },
-    { value: "24/7", label: "Support client" },
+    { value: "24/7", label: "Support client" }
   ];
   const displayStats = stats || defaultStats;
 
@@ -117,7 +117,7 @@ const Hero = ({
     pauseOnHover,
     slides.length,
     autoPlayInterval,
-    onSlideChange,
+    onSlideChange
   ]);
 
   const goToSlide = (index: number) => {
@@ -156,8 +156,8 @@ const Hero = ({
     contentAlignment === "center"
       ? "items-center text-center"
       : contentAlignment === "right"
-      ? "items-end text-right"
-      : "items-start text-left";
+        ? "items-end text-right"
+        : "items-start text-left";
 
   const getArrowsContainerClass = () => {
     switch (arrowsPosition) {
@@ -237,8 +237,8 @@ const Hero = ({
                             contentAlignment === "center"
                               ? "mx-auto"
                               : contentAlignment === "right"
-                              ? "ml-auto"
-                              : ""
+                                ? "ml-auto"
+                                : ""
                           }`}
                         >
                           <Sparkles className="w-4 h-4" />
@@ -271,8 +271,8 @@ const Hero = ({
                           contentAlignment === "center"
                             ? "flex justify-center"
                             : contentAlignment === "right"
-                            ? "flex justify-end"
-                            : ""
+                              ? "flex justify-end"
+                              : ""
                         }
                       >
                         <Button
@@ -303,8 +303,8 @@ const Hero = ({
                             contentAlignment === "center"
                               ? "justify-center"
                               : contentAlignment === "right"
-                              ? "justify-end"
-                              : ""
+                                ? "justify-end"
+                                : ""
                           }`}
                         >
                           {displayStats.map((stat, idx) => (
@@ -382,8 +382,8 @@ const Hero = ({
                         contentAlignment === "center"
                           ? "flex justify-center"
                           : contentAlignment === "right"
-                          ? "flex justify-end"
-                          : ""
+                            ? "flex justify-end"
+                            : ""
                       }
                     >
                       <Button
@@ -413,8 +413,8 @@ const Hero = ({
                           contentAlignment === "center"
                             ? "justify-center"
                             : contentAlignment === "right"
-                            ? "justify-end"
-                            : ""
+                              ? "justify-end"
+                              : ""
                         }`}
                       >
                         {displayStats.map((stat, idx) => (
@@ -445,56 +445,56 @@ const Hero = ({
         <div className={getArrowsContainerClass()}>
           {arrowsPosition === "center-sides" ||
           arrowsPosition === "bottom-sides" ? (
-            <>
-              <button
-                onClick={prevSlide}
-                className="pointer-events-auto p-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
-                aria-label="Slide précédent"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-              <button
-                onClick={nextSlide}
-                className="pointer-events-auto p-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
-                aria-label="Slide suivant"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-            </>
-          ) : (
-            <HStack className="gap-2">
-              <button
-                onClick={prevSlide}
-                className="p-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
-                aria-label="Slide précédent"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={nextSlide}
-                className="p-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
-                aria-label="Slide suivant"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-              {showPlayPause && (
+              <>
                 <button
-                  onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-                  className="p-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
-                  aria-label={isAutoPlaying ? "Pause" : "Play"}
+                  onClick={prevSlide}
+                  className="pointer-events-auto p-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
+                  aria-label="Slide précédent"
                 >
-                  {isAutoPlaying ? (
-                    <div className="w-5 h-5 flex items-center justify-center">
-                      <div className="w-1 h-4 bg-white rounded mr-1" />
-                      <div className="w-1 h-4 bg-white rounded" />
-                    </div>
-                  ) : (
-                    <Play className="w-5 h-5 fill-current" />
-                  )}
+                  <ChevronLeft className="w-6 h-6" />
                 </button>
-              )}
-            </HStack>
-          )}
+                <button
+                  onClick={nextSlide}
+                  className="pointer-events-auto p-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
+                  aria-label="Slide suivant"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              </>
+            ) : (
+              <HStack className="gap-2">
+                <button
+                  onClick={prevSlide}
+                  className="p-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
+                  aria-label="Slide précédent"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={nextSlide}
+                  className="p-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
+                  aria-label="Slide suivant"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+                {showPlayPause && (
+                  <button
+                    onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+                    className="p-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
+                    aria-label={isAutoPlaying ? "Pause" : "Play"}
+                  >
+                    {isAutoPlaying ? (
+                      <div className="w-5 h-5 flex items-center justify-center">
+                        <div className="w-1 h-4 bg-white rounded mr-1" />
+                        <div className="w-1 h-4 bg-white rounded" />
+                      </div>
+                    ) : (
+                      <Play className="w-5 h-5 fill-current" />
+                    )}
+                  </button>
+                )}
+              </HStack>
+            )}
         </div>
       )}
 

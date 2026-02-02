@@ -97,7 +97,7 @@ const mockPayouts: Payout[] = [
     requestedAt: "2024-01-16",
     paymentMethod: "Virement bancaire",
     bankAccount: "****4532",
-  },
+  }
 ];
 
 const statusConfig: Record<
@@ -213,7 +213,7 @@ export default function AdminPayouts(): ReactElement {
       header: "Demandé le",
       cell: ({ row }) =>
         new Date(row.original.requestedAt).toLocaleDateString("fr-FR"),
-    },
+    }
   ];
 
   const totalPending = payouts

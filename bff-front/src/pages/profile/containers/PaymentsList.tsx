@@ -169,7 +169,7 @@ const columns: ColumnDef<Payment, any>[] = [
     header: "Statut",
     accessorKey: "status",
     cell: ({ getValue }) => <StatusBadge status={getValue<PaymentStatus>()} />,
-  },
+  }
 ];
 
 export default function PaymentsList(): JSX.Element {
@@ -205,27 +205,27 @@ export default function PaymentsList(): JSX.Element {
             },
             ...(canMarkPaid
               ? [
-                  {
-                    tooltip: "Marquer payé",
-                    leftIcon: <CheckIcon className="w-4 h-4" />,
-                    colorScheme: "success" as const,
-                    onClick: () =>
-                      alert(
-                        `Marquer ${row.original.id} comme payé (simulation)`
-                      ),
-                  },
-                ]
+                {
+                  tooltip: "Marquer payé",
+                  leftIcon: <CheckIcon className="w-4 h-4" />,
+                  colorScheme: "success" as const,
+                  onClick: () =>
+                    alert(
+                      `Marquer ${row.original.id} comme payé (simulation)`
+                    ),
+                }
+              ]
               : []),
             ...(canRefund
               ? [
-                  {
-                    tooltip: "Rembourser",
-                    leftIcon: <Wallet2Icon className="w-4 h-4" />,
-                    colorScheme: "warning" as const,
-                    onClick: () =>
-                      alert(`Rembourser ${row.original.id} (simulation)`),
-                  },
-                ]
+                {
+                  tooltip: "Rembourser",
+                  leftIcon: <Wallet2Icon className="w-4 h-4" />,
+                  colorScheme: "warning" as const,
+                  onClick: () =>
+                    alert(`Rembourser ${row.original.id} (simulation)`),
+                }
+              ]
               : []),
 
             {
@@ -239,7 +239,7 @@ export default function PaymentsList(): JSX.Element {
               leftIcon: <DownloadIcon className="w-4 h-4" />,
               colorScheme: "secondary" as const,
               onClick: () => alert(`Télécharger reçu ${row.original.id}`),
-            },
+            }
           ];
         }}
       />

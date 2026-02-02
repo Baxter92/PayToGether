@@ -107,7 +107,7 @@ export default function AdminSettings(): ReactElement {
                   label: "Email de contact",
                   type: "email",
                   placeholder: "contact@example.com",
-                },
+                }
               ]}
             />
           </CardContent>
@@ -147,7 +147,7 @@ export default function AdminSettings(): ReactElement {
                   label: "Commission minimum",
                   type: "number",
                   placeholder: "1",
-                },
+                }
               ]}
             />
           </CardContent>
@@ -194,7 +194,7 @@ export default function AdminSettings(): ReactElement {
                   label: "Utilisateur",
                   type: "text",
                   placeholder: "user@example.com",
-                },
+                }
               ]}
             />
           </CardContent>

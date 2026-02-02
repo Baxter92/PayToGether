@@ -1,9 +1,9 @@
 package com.ulr.paytogether.core.domaine.impl;
 
-import com.ulr.paytogether.core.domaine.enumeration.RoleUtilisateur;
-import com.ulr.paytogether.core.domaine.enumeration.StatutUtilisateur;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
 import com.ulr.paytogether.core.provider.UtilisateurProvider;
+import com.ulr.paytogether.provider.adapter.entity.enumeration.RoleUtilisateur;
+import com.ulr.paytogether.provider.adapter.entity.enumeration.StatutUtilisateur;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

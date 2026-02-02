@@ -87,7 +87,7 @@ export default function AdminDashboard(): ReactElement {
       value: "573",
       change: -2.4,
       icon: Tag,
-    },
+    }
   ];
 
   return (

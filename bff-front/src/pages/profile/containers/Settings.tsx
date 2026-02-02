@@ -39,7 +39,7 @@ export default function Settings() {
       label: t("profile.changePassword"),
       type: "password",
       placeholder: t("auth.password"),
-    },
+    }
   ];
 
   return (

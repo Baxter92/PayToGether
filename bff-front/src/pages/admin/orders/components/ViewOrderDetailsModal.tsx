@@ -105,9 +105,9 @@ export default function ViewOrderDetailsModal({
         { label: "Complété", value: "completed" },
         { label: "En attente", value: "pending" },
         { label: "Remboursé", value: "refunded" },
-        { label: "Annulé", value: "cancelled" },
+        { label: "Annulé", value: "cancelled" }
       ],
-    },
+    }
   ];
 
   return (

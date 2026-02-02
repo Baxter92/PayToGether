@@ -105,7 +105,7 @@ export default function CheckoutPage(): JSX.Element {
     {
       title: t("checkout.paymentTitle"),
       description: t("checkout.paymentDescription"),
-    },
+    }
   ];
 
   return (

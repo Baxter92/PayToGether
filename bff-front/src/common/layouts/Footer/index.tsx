@@ -67,7 +67,7 @@ const Footer = () => {
                 { label: tFooter("privacy"), href: "#" },
                 { label: tFooter("terms"), href: "#" },
                 { label: tFooter("contact"), href: "#" },
-                { label: "FAQ", href: "#" },
+                { label: "FAQ", href: "#" }
               ].map((link, i) => (
                 <li key={i}>
                   <a

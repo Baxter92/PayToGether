@@ -101,9 +101,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     const displayValue = controlled
       ? (() => {
-          const raw = computeRaw(String(value ?? ""));
-          return format ? format(raw) : String(value ?? "");
-        })()
+        const raw = computeRaw(String(value ?? ""));
+        return format ? format(raw) : String(value ?? "");
+      })()
       : undefined;
 
     // centraliser la logique qui notifie le parent (réutilisée par handleChange et par la détection autofill)
@@ -222,8 +222,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       size === "sm"
         ? "h-8 text-sm px-2"
         : size === "lg"
-        ? "h-11 text-base px-4"
-        : "h-9 text-sm px-3";
+          ? "h-11 text-base px-4"
+          : "h-9 text-sm px-3";
 
     const wouldBeDisabled = !!(disabled || loading || (rest as any).readOnly);
 

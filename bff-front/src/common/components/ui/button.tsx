@@ -346,7 +346,7 @@ const buttonVariants = cva(
         variant: "link",
         colorScheme: "info",
         class: "text-blue-600 underline-offset-4 hover:underline",
-      },
+      }
     ],
 
     defaultVariants: {
@@ -409,12 +409,12 @@ function Button({
     size === "sm"
       ? "h-3 w-3 border-2"
       : size === "lg"
-      ? "h-5 w-5 border-2"
-      : size === "icon-sm"
-      ? "h-3 w-3 border-2"
-      : size === "icon-lg"
-      ? "h-6 w-6 border-2"
-      : "h-4 w-4 border-2";
+        ? "h-5 w-5 border-2"
+        : size === "icon-sm"
+          ? "h-3 w-3 border-2"
+          : size === "icon-lg"
+            ? "h-6 w-6 border-2"
+            : "h-4 w-4 border-2";
 
   const spinner = (
     <span

@@ -102,28 +102,28 @@ export default function Select({
           <div className={cn(maxContentHeight, "overflow-auto")}>
             {hasGroups
               ? groups!.map((g) => (
-                  <SelectGroup key={g.label}>
-                    <SelectLabel>{g.label}</SelectLabel>
-                    {g.items.map((it) => (
-                      <SelectItem
-                        key={it.value}
-                        value={it.value}
-                        disabled={it.disabled}
-                      >
-                        {renderItem ? renderItem(it) : it.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                ))
+                <SelectGroup key={g.label}>
+                  <SelectLabel>{g.label}</SelectLabel>
+                  {g.items.map((it) => (
+                    <SelectItem
+                      key={it.value}
+                      value={it.value}
+                      disabled={it.disabled}
+                    >
+                      {renderItem ? renderItem(it) : it.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              ))
               : items.map((it) => (
-                  <SelectItem
-                    key={it.value}
-                    value={it.value}
-                    disabled={it.disabled}
-                  >
-                    {renderItem ? renderItem(it) : it.label}
-                  </SelectItem>
-                ))}
+                <SelectItem
+                  key={it.value}
+                  value={it.value}
+                  disabled={it.disabled}
+                >
+                  {renderItem ? renderItem(it) : it.label}
+                </SelectItem>
+              ))}
           </div>
         </SelectContent>
       </ShadcnSelect>

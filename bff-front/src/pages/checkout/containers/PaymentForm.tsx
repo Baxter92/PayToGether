@@ -187,7 +187,7 @@ export default function PaymentFormCard({
         const val = watch(field.name) ?? "";
         const formatted = formatCardNumber(val);
         const brand = detectCardBrand(val);
-        
+
         // update detectedBrand and Luhn check (local state)
         useEffect(() => {
           setDetectedBrand(brand);
@@ -295,7 +295,7 @@ export default function PaymentFormCard({
       label: "Enregistrer la carte pour une prochaine fois",
       type: "checkbox",
       colSpan: 12,
-    },
+    }
   ];
 
   return (

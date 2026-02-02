@@ -204,7 +204,7 @@ export default function DealsList({
         type: "select",
         items: [
           { value: "all", label: "Toutes les catégories" },
-          ...uniqueCategories,
+          ...uniqueCategories
         ],
       });
     }
@@ -226,7 +226,7 @@ export default function DealsList({
         items: [
           { value: "all", label: "Tous" },
           { value: "active", label: "Actif" },
-          { value: "soldout", label: "Épuisé" },
+          { value: "soldout", label: "Épuisé" }
         ],
       });
     }
@@ -410,8 +410,8 @@ export default function DealsList({
                     percentage >= 80
                       ? "text-destructive"
                       : percentage >= 50
-                      ? "text-amber-500"
-                      : "text-primary"
+                        ? "text-amber-500"
+                        : "text-primary"
                   )}
                 >
                   {percentage}%
@@ -424,8 +424,8 @@ export default function DealsList({
                   percentage >= 80
                     ? "[&>div]:bg-destructive"
                     : percentage >= 50
-                    ? "[&>div]:bg-amber-500"
-                    : "[&>div]:bg-primary"
+                      ? "[&>div]:bg-amber-500"
+                      : "[&>div]:bg-primary"
                 )}
               />
             </div>
@@ -461,7 +461,7 @@ export default function DealsList({
             {String(getValue() ?? "")}
           </Badge>
         ),
-      },
+      }
     ];
   }, []);
 
@@ -592,36 +592,36 @@ export default function DealsList({
                     {...tableProps}
                     {...(isAdmin
                       ? {
-                          actionsRow: (props: any) => [
-                            ...(tableProps?.actionsRow?.(props) || []),
-                            {
-                              leftIcon:
+                        actionsRow: (props: any) => [
+                          ...(tableProps?.actionsRow?.(props) || []),
+                          {
+                            leftIcon:
                                 props.row.original.status === "published" ? (
                                   <FileEdit />
                                 ) : (
                                   <Globe />
                                 ),
-                              tooltip:
+                            tooltip:
                                 props.row.original.status === "published"
                                   ? "Mettre en brouillon"
                                   : "Publier",
+                          },
+                          {
+                            leftIcon: <Edit2 className="w-4 h-4" />,
+                            onClick: () => {
+                              setCreateModalOpen(true);
                             },
-                            {
-                              leftIcon: <Edit2 className="w-4 h-4" />,
-                              onClick: () => {
-                                setCreateModalOpen(true);
-                              },
+                          },
+                          {
+                            leftIcon: <Trash2 className="w-4 h-4" />,
+                            colorScheme: "danger",
+                            tooltip: "Supprimer",
+                            onClick: () => {
+                              console.log(props.row);
                             },
-                            {
-                              leftIcon: <Trash2 className="w-4 h-4" />,
-                              colorScheme: "danger",
-                              tooltip: "Supprimer",
-                              onClick: () => {
-                                console.log(props.row);
-                              },
-                            },
-                          ],
-                        }
+                          }
+                        ],
+                      }
                       : {})}
                   />
                 </div>

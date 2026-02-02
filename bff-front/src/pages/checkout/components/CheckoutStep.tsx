@@ -27,8 +27,8 @@ export default function CheckoutStep({
             isCompleted
               ? "bg-primary border-primary text-primary-foreground"
               : isActive
-              ? "border-primary text-primary"
-              : "border-muted text-muted-foreground"
+                ? "border-primary text-primary"
+                : "border-muted text-muted-foreground"
           }`}
         >
           {isCompleted ? (

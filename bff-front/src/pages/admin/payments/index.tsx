@@ -93,7 +93,7 @@ const mockPayments: Payment[] = [
     method: "card",
     status: "refunded",
     createdAt: "2024-03-26T11:00:00",
-  },
+  }
 ];
 
 const statusConfig = {
@@ -205,7 +205,7 @@ export default function AdminPayments(): ReactElement {
           hour: "2-digit",
           minute: "2-digit",
         }),
-    },
+    }
   ];
 
   const totalRevenue = mockPayments
@@ -294,7 +294,7 @@ export default function AdminPayments(): ReactElement {
                   { value: "completed", label: tStatus("completed") },
                   { value: "pending", label: tStatus("pending") },
                   { value: "failed", label: tStatus("failed") },
-                  { value: "refunded", label: tStatus("refunded") },
+                  { value: "refunded", label: tStatus("refunded") }
                 ]}
               />
             </div>
@@ -310,7 +310,7 @@ export default function AdminPayments(): ReactElement {
                 label: "Commande",
                 type: "select",
                 options: mockOrders.map((o) => ({ label: o.id, value: o.id })),
-              },
+              }
             ]}
           />
         </CardContent>

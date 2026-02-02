@@ -137,7 +137,7 @@ export default function AdminCategories(): ReactElement {
                   name: "icon",
                   label: "Icône",
                   type: "text",
-                },
+                }
               ]}
             />
           </DialogContent>
@@ -270,7 +270,7 @@ export default function AdminCategories(): ReactElement {
                   name: "slug",
                   label: "Slug",
                   type: "text",
-                },
+                }
               ]}
             />
           )}

@@ -131,7 +131,7 @@ export const mockDeals = [
     discount: 39,
     popular: false,
     status: "published",
-  },
+  }
 ];
 
 export const features = [
@@ -155,7 +155,7 @@ export const features = [
     icon: Shield,
     title: "Sécurisé",
     description: "Paiement sécurisé et garantie de satisfaction client",
-  },
+  }
 ];
 
 export const slides = [
@@ -214,7 +214,7 @@ export const slides = [
     gradient: "from-blue-600/50 to-indigo-600/50",
     textColor: "text-white",
     badge: "Aventure",
-  },
+  }
 ];
 
 export const categories = [
@@ -245,7 +245,7 @@ export const categories = [
     image:
       "https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?q=80&w=1200",
     subcategories: ["Massages", "Coiffure", "Soins du visage", "Manicure"],
-  },
+  }
 ];
 
 export const mockPayments = [
@@ -304,7 +304,7 @@ export const mockPayments = [
     method: "stripe",
     createdAt: "2025-12-14T11:30:00.000Z",
     status: "succeeded",
-  },
+  }
 ];
 
 export const mockOrdersReceived = [
@@ -383,7 +383,7 @@ export const mockOrdersReceived = [
     currency: "USD",
     status: "refunded",
     createdAt: "2025-12-08T16:20:00.000Z",
-  },
+  }
 ];
 
 export const mockReviews = [
@@ -536,7 +536,7 @@ export const mockReviews = [
       "Viande convenable pour mijoter mais quelques morceaux nerveux. Livraison ok.",
     status: "pending",
     createdAt: "2025-12-04T08:50:00.000Z",
-  },
+  }
 ];
 
 export const popularDeals = [
@@ -629,7 +629,7 @@ export const popularDeals = [
     city: "Yaoundé",
     discount: 37,
     popular: true,
-  },
+  }
 ];
 
 export const mockMerchants = [
@@ -672,5 +672,5 @@ export const mockMerchants = [
     totalSales: 95000,
     status: "suspended",
     createdAt: "2024-03-25",
-  },
+  }
 ];
