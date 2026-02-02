@@ -56,5 +56,5 @@ spec:
           configMap:
             name: bff-config
             items:
-              - key: application.yml
-                path: application.yml
+              - key: application.properties
+                path: application.properties

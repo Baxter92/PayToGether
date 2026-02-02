@@ -18,3 +18,15 @@ Alors voici le role des différents modules dans cette architecture:
 L'ensemble de ces modules sont orcherstrer par le pom parent qui gère les dépendances et la construction du projet globalement.
 chaque module a un pom.xml qui gère les dépendances spécifiques à ce module.
 Lors de la rédaction de code ou de la fourniture d'instructions, il est important de respecter cette architecture et de s'assurer que chaque module interagit correctement avec les autres selon les principes de l'architecture hexagonale et du DDD.
+Je veux que tu me demandes toujours que tu me demandes avant de créer une documentation des implementations ou des instructions.
+le module bff-provider a un package adapter pour les implémentations des repository JPA, mapper pour mapper les fichier jpa en model core
+Tous les models de tables de la base de données doivent être du suffixe jpa dans le module bff-provider. 
+Les models du module bff-core doivent être indépendants de toute technologie spécifique comme JPA.
+Les models du module bff-core doivent servir de pont avec l'interface provider pour servir de command et couche métier.
+Les services CRUD du module bff-core doivent utiliser les models du module bff-core
+le module bff-api doit utiliser un package apiadapter pour les implémentations des services CRUD et mapping des models core en dto pour l'api.
+le module bff-wsclient doit contenir les services pour la génération de token JWT en utilisant WebClient pour appeler une api d'authentification externe.
+
+le module bff-core a un package service avec les interfaces pour chaque intentions et l'implémenter dans le package impl dans le module bff-core les intentions venant des interfaces providers.
+le package apiadapter dans le module bff-api doit utiliser uniquement les intentions de l'interface service du module bff-core pour implémenter les services.
+écrire tous les fichiers md nécessaires pour documenter l'architecture, les modèles, les instructions d'installation et de démarrage rapide, ainsi que le résumé de l'implémentation du projet PayToGether en suivant les exemples fournis dans le dossier .github/documentation.
