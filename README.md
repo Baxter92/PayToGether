@@ -1,5 +1,10 @@
 # PayToGether
 
+> **✅ Build Status : FONCTIONNEL** (mis à jour le 3 février 2026)  
+> Les problèmes de build Maven ont été résolus. Voir [`README_BUILD_FIX.md`](README_BUILD_FIX.md) pour les détails.
+
+---
+
 Documentation rapide pour build, tag et push des images sur Docker Hub et pour activer le registry local (kubernetes).
 
 ## Repository Docker Hub
