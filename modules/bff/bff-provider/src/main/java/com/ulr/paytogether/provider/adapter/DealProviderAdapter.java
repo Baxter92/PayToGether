@@ -49,7 +49,7 @@ public class DealProviderAdapter implements DealProvider {
             List<ImageDealJpa> imageDealJpas = deal.getListeImages().stream()
                     .map(imageDealModele -> ImageDealJpa.builder()
                             .uuid(imageDealModele.getUuid())
-                            .urlImage(imageDealModele.getUrlImage() + "_" + System.currentTimeMillis())
+                            .urlImage(Tools.DIRECTORY_DEALS_IMAGES + imageDealModele.getUrlImage() + "_" + System.currentTimeMillis())
                             .isPrincipal(imageDealModele.getIsPrincipal())
                             .statut(imageDealModele.getStatut())
                             .dealJpa(entite)

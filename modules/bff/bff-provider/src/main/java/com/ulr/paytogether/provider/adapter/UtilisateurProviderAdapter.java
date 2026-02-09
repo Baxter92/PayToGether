@@ -37,7 +37,7 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
     public UtilisateurModele sauvegarder(UtilisateurModele utilisateur) {
         UtilisateurJpa entite = mapper.versEntite(utilisateur);
         if (entite.getPhotoProfil() != null) {
-            entite.setPhotoProfilUnique(entite.getPhotoProfil().getUrlImage());
+            entite.setPhotoProfilUnique(Tools.DIRECTORY_UTILISATEUR_IMAGES, entite.getPhotoProfil().getUrlImage());
         }
         UtilisateurModele modele = mapper.versModele(jpaRepository.save(entite));
         if (modele.getPhotoProfil() != null) {

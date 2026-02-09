@@ -62,9 +62,9 @@ public class UtilisateurJpa {
     @Column(nullable = false)
     private LocalDateTime dateModification;
 
-    public void setPhotoProfilUnique(String urlImage) {
+    public void setPhotoProfilUnique(String folder, String urlImage) {
         if (this.photoProfil != null) {
-            this.photoProfil.setUrlImage(urlImage+'_'+System.currentTimeMillis());
+            this.photoProfil.setUrlImage(folder+urlImage+'_'+System.currentTimeMillis());
         }
     }
 
