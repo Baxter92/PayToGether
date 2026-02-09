@@ -22,11 +22,11 @@
   </properties>
 
   <modules>
-    <module>bff-core</module>
-    <module>bff-provider</module>
-    <module>bff-wsclient</module>
-    <module>bff-api</module>
-    <module>bff-configuration</module>
-    <module>bff-front</module>
+    <module>modules/bff/bff-core</module>
+    <module>modules/bff/bff-provider</module>
+    <module>modules/bff/bff-wsclient</module>
+    <module>modules/bff/bff-api</module>
+    <module>modules/bff/bff-configuration</module>
+    <module>modules/front</module>
   </modules>
 </project>

@@ -18,18 +18,22 @@ rad.json
 *.g.xlf
 #License-file
 *.flf
+#idea folder
+.idea/
 #Test results file
 TestResults.xml
 #Node modules
 node_modules/
 dist/
+target/
 #Target folder
-bff-provider/target/
-bff-wsclient/target/
-bff-core/target/
-bff-configuration/target/
-bff-front/node_modules/
-bff-front/node/
-bff-api/target/
+modules/bff-provider/target/
+modules/bff-wsclient/target/
+modules/bff-core/target/
+modules/bff-configuration/target/
+modules/front/node_modules/
+modules/front/node/
+modules/bff-api/target/
 #Compiled JavaScript map files
 *.js.map
+mvnw
