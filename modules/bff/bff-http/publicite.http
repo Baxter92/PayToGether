@@ -1,0 +1,48 @@
+### 1. Créer une publicité (POST)
+POST {{base_url}}/api/publicites
+Content-Type: application/json
+
+{
+  "titre": "Promotion Spéciale",
+  "description": "Ne manquez pas cette offre exceptionnelle !",
+  "lienExterne": "https://example.com/promo",
+  "listeImages": [
+    "pub_image1.jpg",
+    "pub_image2.jpg"
+  ],
+  "dateDebut": "2026-02-09T00:00:00",
+  "dateFin": "2026-03-31T23:59:59",
+  "active": true
+}
+
+### 2. Récupérer toutes les publicités (GET)
+GET {{base_url}}/api/publicites
+Content-Type: application/json
+
+### 3. Récupérer une publicité par UUID (GET)
+GET {{base_url}}/api/publicites/123e4567-e89b-12d3-a456-426614174000
+Content-Type: application/json
+
+### 4. Récupérer les publicités actives (GET)
+GET {{base_url}}/api/publicites/actives
+Content-Type: application/json
+
+### 5. Mettre à jour une publicité (PUT)
+PUT {{base_url}}/api/publicites/123e4567-e89b-12d3-a456-426614174000
+Content-Type: application/json
+
+{
+  "titre": "Promotion Mise à Jour",
+  "description": "Offre prolongée jusqu'à fin avril !",
+  "lienExterne": "https://example.com/promo-extended",
+  "listeImages": [
+    "pub_image_updated.jpg"
+  ],
+  "dateDebut": "2026-02-09T00:00:00",
+  "dateFin": "2026-04-30T23:59:59",
+  "active": true
+}
+
+### 6. Supprimer une publicité (DELETE)
+DELETE {{base_url}}/api/publicites/123e4567-e89b-12d3-a456-426614174000
+Content-Type: application/json

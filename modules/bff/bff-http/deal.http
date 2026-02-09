@@ -1,8 +1,5 @@
-### GET request to example server
-GET https://examples.http-client.intellij.net/get
-    ?generated-in=IntelliJ IDEA
 
-### Send POST deal with json body
+### 1. Créer un deal (POST)
 POST {{base_url}}/api/deals
 Content-Type: application/json
 
@@ -12,8 +9,9 @@ Content-Type: application/json
   "prixDeal": 1200.00,
   "prixPart": 12.00,
   "nbParticipants": 100,
-  "dateFin": "2026-12-31",
-  "dateExpiration": "2026-12-31",
+  "dateDebut": "2026-02-09T10:00:00",
+  "dateFin": "2026-12-31T23:59:59",
+  "dateExpiration": "2026-12-31T23:59:59",
   "categorieUuid": "123e4567-e89b-12d3-a456-426614174000",
   "categorieNom": "POISSON",
   "createurUuid": "123e4567-e89b-12d3-a456-426614174001",
@@ -30,9 +28,56 @@ Content-Type: application/json
     "Point fort 2",
     "Point fort 3"
   ]
-
 }
 
-### GET all deals
+### 2. Récupérer tous les deals (GET)
 GET {{base_url}}/api/deals
 Content-Type: application/json
+
+### 3. Récupérer un deal par UUID (GET)
+GET {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000
+Content-Type: application/json
+
+### 4. Mettre à jour un deal (PUT)
+
+PUT {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000
+Content-Type: application/json
+
+{
+  "titre": "Deal mis à jour",
+  "description": "Description modifiée",
+  "prixDeal": 1500.00,
+  "prixPart": 15.00,
+  "nbParticipants": 100,
+  "dateDebut": "2026-02-09T10:00:00",
+  "dateFin": "2026-12-31T23:59:59",
+  "dateExpiration": "2026-12-31T23:59:59",
+  "categorieUuid": "123e4567-e89b-12d3-a456-426614174000",
+  "createurUuid": "123e4567-e89b-12d3-a456-426614174001",
+  "statut": "PUBLIE",
+  "ville": "Montreal",
+  "pays": "Canada",
+  "listeImages": [
+    "image1_updated.jpg"
+  ],
+  "listePointsForts": [
+    "Nouveau point fort"
+  ]
+}
+
+### 5. Supprimer un deal (DELETE)
+DELETE {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000
+Content-Type: application/json
+
+### 6. Récupérer deals par statut (GET)
+GET {{base_url}}/api/deals/statut/PUBLIE
+Content-Type: application/json
+
+### 7. Récupérer deals par créateur (GET)
+GET {{base_url}}/api/deals/createur/123e4567-e89b-12d3-a456-426614174001
+Content-Type: application/json
+
+### 8. Récupérer deals par catégorie (GET)
+GET {{base_url}}/api/deals/categorie/123e4567-e89b-12d3-a456-426614174000
+Content-Type: application/json
+

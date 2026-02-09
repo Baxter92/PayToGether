@@ -1,0 +1,46 @@
+### 1. Créer un utilisateur (POST)
+POST {{base_url}}/api/utilisateurs
+Content-Type: application/json
+
+{
+  "nom": "Dupont",
+  "prenom": "Jean",
+  "email": "jean.dupont@example.com",
+  "motDePasse": "MotDePasse123!",
+  "statut": "ACTIF",
+  "role": "UTILISATEUR",
+  "photoProfil": "photo_profil.jpg"
+}
+
+### 2. Récupérer tous les utilisateurs (GET)
+GET {{base_url}}/api/utilisateurs
+Content-Type: application/json
+
+### 3. Récupérer un utilisateur par UUID (GET)
+GET {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000
+Content-Type: application/json
+
+### 4. Récupérer un utilisateur par email (GET)
+GET {{base_url}}/api/utilisateurs/email/jean.dupont@example.com
+Content-Type: application/json
+
+### 5. Vérifier si un email existe (GET)
+GET {{base_url}}/api/utilisateurs/existe/jean.dupont@example.com
+Content-Type: application/json
+
+### 6. Mettre à jour un utilisateur (PUT)
+PUT {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000
+Content-Type: application/json
+
+{
+  "nom": "Dupont",
+  "prenom": "Jean-Claude",
+  "email": "jean.dupont@example.com",
+  "statut": "ACTIF",
+  "role": "VENDEUR",
+  "photoProfil": "photo_profil_updated.jpg"
+}
+
+### 7. Supprimer un utilisateur (DELETE)
+DELETE {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000
+Content-Type: application/json

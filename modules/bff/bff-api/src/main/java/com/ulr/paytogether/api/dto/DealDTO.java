@@ -1,5 +1,6 @@
 package com.ulr.paytogether.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -42,8 +43,10 @@ public class DealDTO {
     @Positive(message = "Le nombre de participants doit être positif")
     private Integer nbParticipants;
 
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime dateDebut;
 
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @NotNull(message = "La date de fin est obligatoire")
     private LocalDateTime dateFin;
 
@@ -61,6 +64,7 @@ public class DealDTO {
     private List<String> listeImages;
     private List<String> listePointsForts;
 
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime dateExpiration;
     @NotNull(message = "La ville est obligatoire")
     private String ville;
