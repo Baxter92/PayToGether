@@ -26,7 +26,7 @@ public class ImageUtilisateurJpa {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID uuid;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String urlImage;
 
     @OneToOne

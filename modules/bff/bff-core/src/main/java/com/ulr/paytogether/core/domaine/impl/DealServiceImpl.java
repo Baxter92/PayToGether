@@ -22,7 +22,6 @@ public class DealServiceImpl implements DealService {
 
     private final DealProvider dealProvider;
     private final DealValidator dealValidator;
-    private final DealService dealService;
 
     @Override
     public DealModele creer(DealModele deal) {
@@ -72,7 +71,7 @@ public class DealServiceImpl implements DealService {
 
     @Override
     public Set<String> lireVillesDisponibles() {
-        return dealService.lireTous().stream()
+        return dealProvider.trouverTous().stream()
                 .filter(ville -> ville != null && StringUtils.isNotBlank(ville.getVille()))
                 .map(DealModele::getVille)
                 .collect(Collectors.toSet());

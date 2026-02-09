@@ -1,10 +1,12 @@
 package com.ulr.paytogether.provider.adapter;
 
+import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.modele.ImageModele;
 import com.ulr.paytogether.core.modele.PubliciteModele;
 import com.ulr.paytogether.provider.adapter.entity.PubliciteJpa;
 import com.ulr.paytogether.provider.adapter.mapper.PubliciteJpaMapper;
 import com.ulr.paytogether.provider.repository.PubliciteRepository;
+import com.ulr.paytogether.provider.utils.FileManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +22,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
@@ -33,6 +36,9 @@ class PubliciteProviderAdapterTest {
 
     @Mock
     private PubliciteJpaMapper mapper;
+
+    @Mock
+    private FileManager fileManager;
 
     @InjectMocks
     private PubliciteProviderAdapter providerAdapter;
@@ -203,7 +209,7 @@ class PubliciteProviderAdapterTest {
     }
 
     @Test
-    void testSupprimerParUuid_DevraitSupprimerPublicite() {
+    void testSauvegarder_DevraitSupprimerPublicite() {
         // Given
         doNothing().when(jpaRepository).deleteById(uuidPublicite);
 
@@ -212,5 +218,184 @@ class PubliciteProviderAdapterTest {
 
         // Then
         verify(jpaRepository, times(1)).deleteById(uuidPublicite);
+    }
+
+    // ==================== Tests pour la gestion du FileManager ====================
+
+    @Test
+    void testSauvegarder_AvecImages_DevraitGenererUrlPresignee() {
+        // Given
+        ImageModele imagePending = ImageModele.builder()
+                .uuid(UUID.randomUUID())
+                .urlImage("image_pending.jpg")
+                .statut(StatutImage.PENDING)
+                .build();
+
+        PubliciteModele publiciteAvecImages = PubliciteModele.builder()
+                .uuid(uuidPublicite)
+                .titre("Publicité avec images")
+                .listeImages(List.of(imagePending))
+                .dateDebut(LocalDateTime.now())
+                .dateFin(LocalDateTime.now().plusDays(30))
+                .active(true)
+                .build();
+
+        when(mapper.versEntite(publiciteAvecImages)).thenReturn(publiciteJpa);
+        when(jpaRepository.save(any(PubliciteJpa.class))).thenReturn(publiciteJpa);
+        when(mapper.versModele(publiciteJpa)).thenReturn(publiciteAvecImages);
+        when(fileManager.generatePresignedUrl(anyString(), anyString())).thenReturn("https://presigned-url.com/image");
+
+        // When
+        PubliciteModele resultat = providerAdapter.sauvegarder(publiciteAvecImages);
+
+        // Then
+        assertNotNull(resultat);
+        verify(fileManager, times(1)).generatePresignedUrl(anyString(), anyString());
+        verify(jpaRepository, times(1)).save(any(PubliciteJpa.class));
+        assertEquals("https://presigned-url.com/image", imagePending.getPresignUrl());
+    }
+
+    @Test
+    void testSauvegarder_SansImages_NePasGenererUrlPresignee() {
+        // Given
+        when(mapper.versEntite(publiciteModele)).thenReturn(publiciteJpa);
+        when(jpaRepository.save(publiciteJpa)).thenReturn(publiciteJpa);
+        when(mapper.versModele(publiciteJpa)).thenReturn(publiciteModele);
+
+        // When
+        PubliciteModele resultat = providerAdapter.sauvegarder(publiciteModele);
+
+        // Then
+        assertNotNull(resultat);
+        verify(fileManager, never()).generatePresignedUrl(anyString(), anyString());
+    }
+
+    @Test
+    void testSauvegarder_AvecImagesUploaded_NePasGenererUrlPresignee() {
+        // Given
+        ImageModele imageUploaded = ImageModele.builder()
+                .uuid(UUID.randomUUID())
+                .urlImage("image_uploaded.jpg")
+                .statut(StatutImage.UPLOADED)
+                .build();
+
+        PubliciteModele publiciteAvecImageUploaded = PubliciteModele.builder()
+                .uuid(uuidPublicite)
+                .titre("Publicité avec image uploaded")
+                .listeImages(List.of(imageUploaded))
+                .dateDebut(LocalDateTime.now())
+                .dateFin(LocalDateTime.now().plusDays(30))
+                .active(true)
+                .build();
+
+        when(mapper.versEntite(publiciteAvecImageUploaded)).thenReturn(publiciteJpa);
+        when(jpaRepository.save(any(PubliciteJpa.class))).thenReturn(publiciteJpa);
+        when(mapper.versModele(publiciteJpa)).thenReturn(publiciteAvecImageUploaded);
+
+        // When
+        PubliciteModele resultat = providerAdapter.sauvegarder(publiciteAvecImageUploaded);
+
+        // Then
+        assertNotNull(resultat);
+        verify(fileManager, never()).generatePresignedUrl(anyString(), anyString());
+    }
+
+    @Test
+    void testMettreAJour_AvecNouvelleImage_DevraitMettreStatutPending() {
+        // Given
+        ImageModele nouvelleImage = ImageModele.builder()
+                .uuid(UUID.randomUUID())
+                .urlImage("nouvelle_image.jpg")
+                .statut(StatutImage.PENDING)
+                .build();
+
+        com.ulr.paytogether.provider.adapter.entity.ImageJpa ancienneImageJpa =
+            com.ulr.paytogether.provider.adapter.entity.ImageJpa.builder()
+                .uuid(nouvelleImage.getUuid())
+                .urlImage("ancienne_image.jpg")
+                .statut(StatutImage.UPLOADED)
+                .build();
+
+        PubliciteModele publiciteAvecNouvelleImage = PubliciteModele.builder()
+                .uuid(uuidPublicite)
+                .titre("Publicité modifiée")
+                .listeImages(List.of(nouvelleImage))
+                .dateDebut(LocalDateTime.now())
+                .dateFin(LocalDateTime.now().plusDays(30))
+                .active(true)
+                .build();
+
+        PubliciteJpa publiciteJpaExistante = PubliciteJpa.builder()
+                .uuid(uuidPublicite)
+                .titre("Publicité")
+                .listeImages(List.of(ancienneImageJpa))
+                .dateDebut(LocalDateTime.now())
+                .dateFin(LocalDateTime.now().plusDays(30))
+                .active(true)
+                .build();
+
+        when(jpaRepository.findById(uuidPublicite)).thenReturn(Optional.of(publiciteJpaExistante));
+        doNothing().when(mapper).mettreAJour(publiciteJpaExistante, publiciteAvecNouvelleImage);
+        when(jpaRepository.save(publiciteJpaExistante)).thenReturn(publiciteJpaExistante);
+        when(mapper.versModele(publiciteJpaExistante)).thenReturn(publiciteAvecNouvelleImage);
+        when(fileManager.generatePresignedUrl(anyString(), anyString())).thenReturn("https://presigned-url.com/nouvelle-image");
+
+        // When
+        PubliciteModele resultat = providerAdapter.mettreAJour(uuidPublicite, publiciteAvecNouvelleImage);
+
+        // Then
+        assertNotNull(resultat);
+        verify(jpaRepository, times(1)).save(publiciteJpaExistante);
+        verify(fileManager, times(1)).generatePresignedUrl(anyString(), anyString());
+        assertEquals(StatutImage.PENDING, ancienneImageJpa.getStatut());
+    }
+
+    @Test
+    void testMettreAJour_SansChangementImage_NePasModifierStatut() {
+        // Given
+        ImageModele imageExistante = ImageModele.builder()
+                .uuid(UUID.randomUUID())
+                .urlImage("image_existante.jpg")
+                .statut(StatutImage.UPLOADED)
+                .build();
+
+        com.ulr.paytogether.provider.adapter.entity.ImageJpa imageJpa =
+            com.ulr.paytogether.provider.adapter.entity.ImageJpa.builder()
+                .uuid(imageExistante.getUuid())
+                .urlImage("image_existante.jpg")
+                .statut(StatutImage.UPLOADED)
+                .build();
+
+        PubliciteModele publiciteModifiee = PubliciteModele.builder()
+                .uuid(uuidPublicite)
+                .titre("Publicité modifiée")
+                .listeImages(List.of(imageExistante))
+                .dateDebut(LocalDateTime.now())
+                .dateFin(LocalDateTime.now().plusDays(30))
+                .active(true)
+                .build();
+
+        PubliciteJpa publiciteJpaExistante = PubliciteJpa.builder()
+                .uuid(uuidPublicite)
+                .titre("Publicité")
+                .listeImages(List.of(imageJpa))
+                .dateDebut(LocalDateTime.now())
+                .dateFin(LocalDateTime.now().plusDays(30))
+                .active(true)
+                .build();
+
+        when(jpaRepository.findById(uuidPublicite)).thenReturn(Optional.of(publiciteJpaExistante));
+        doNothing().when(mapper).mettreAJour(publiciteJpaExistante, publiciteModifiee);
+        when(jpaRepository.save(publiciteJpaExistante)).thenReturn(publiciteJpaExistante);
+        when(mapper.versModele(publiciteJpaExistante)).thenReturn(publiciteModifiee);
+
+        // When
+        PubliciteModele resultat = providerAdapter.mettreAJour(uuidPublicite, publiciteModifiee);
+
+        // Then
+        assertNotNull(resultat);
+        verify(jpaRepository, times(1)).save(publiciteJpaExistante);
+        assertEquals(StatutImage.UPLOADED, imageJpa.getStatut());
+        verify(fileManager, never()).generatePresignedUrl(anyString(), anyString());
     }
 }

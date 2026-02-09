@@ -288,7 +288,7 @@ class UtilisateurProviderAdapterTest {
         when(mapper.versEntite(utilisateurAvecPhoto)).thenReturn(utilisateurJpaAvecPhoto);
         when(jpaRepository.save(any(UtilisateurJpa.class))).thenReturn(utilisateurJpaAvecPhoto);
         when(mapper.versModele(utilisateurJpaAvecPhoto)).thenReturn(utilisateurAvecPhoto);
-        when(fileManager.generatePresignedUrl(anyString())).thenReturn("https://presigned-url.com/photo");
+        when(fileManager.generatePresignedUrl(anyString(), anyString())).thenReturn("https://presigned-url.com/photo");
 
         // When
         UtilisateurModele resultat = providerAdapter.sauvegarder(utilisateurAvecPhoto);
@@ -296,7 +296,7 @@ class UtilisateurProviderAdapterTest {
         // Then
         assertNotNull(resultat);
         assertNotNull(resultat.getPhotoProfil());
-        verify(fileManager, times(1)).generatePresignedUrl(anyString());
+        verify(fileManager, times(1)).generatePresignedUrl(anyString(), anyString());
         verify(jpaRepository, times(1)).save(any(UtilisateurJpa.class));
         assertEquals("https://presigned-url.com/photo", utilisateurAvecPhoto.getPresignUrlPhotoProfil());
     }
@@ -313,7 +313,7 @@ class UtilisateurProviderAdapterTest {
 
         // Then
         assertNotNull(resultat);
-        verify(fileManager, never()).generatePresignedUrl(anyString());
+        verify(fileManager, never()).generatePresignedUrl(anyString(), anyString());
         verify(jpaRepository, times(1)).save(utilisateurJpa);
     }
 
@@ -357,7 +357,7 @@ class UtilisateurProviderAdapterTest {
 
         // Then
         assertNotNull(resultat);
-        verify(fileManager, times(1)).generatePresignedUrl(anyString());
+        verify(fileManager, times(1)).generatePresignedUrl(anyString(), anyString());
     }
 
     @Test
@@ -395,7 +395,7 @@ class UtilisateurProviderAdapterTest {
         doNothing().when(mapper).mettreAJour(utilisateurJpaExistant, utilisateurAvecNouvellePhoto);
         when(jpaRepository.save(utilisateurJpaExistant)).thenReturn(utilisateurJpaExistant);
         when(mapper.versModele(utilisateurJpaExistant)).thenReturn(utilisateurAvecNouvellePhoto);
-        when(fileManager.generatePresignedUrl(anyString())).thenReturn("https://presigned-url.com/nouvelle-photo");
+        when(fileManager.generatePresignedUrl(anyString(), anyString())).thenReturn("https://presigned-url.com/nouvelle-photo");
 
         // When
         UtilisateurModele resultat = providerAdapter.mettreAJour(uuidUtilisateur, utilisateurAvecNouvellePhoto);
@@ -403,7 +403,7 @@ class UtilisateurProviderAdapterTest {
         // Then
         assertNotNull(resultat);
         verify(jpaRepository, times(1)).save(utilisateurJpaExistant);
-        verify(fileManager, times(1)).generatePresignedUrl(anyString());
+        verify(fileManager, times(1)).generatePresignedUrl(anyString(), anyString());
         assertEquals(StatutImage.PENDING, ancienneImageJpa.getStatut());
     }
 
@@ -451,7 +451,7 @@ class UtilisateurProviderAdapterTest {
         verify(jpaRepository, times(1)).save(utilisateurJpaExistant);
         // Le statut ne doit pas être modifié car l'URL est la même
         assertEquals(StatutImage.UPLOADED, imageJpa.getStatut());
-        verify(fileManager, never()).generatePresignedUrl(anyString());
+        verify(fileManager, never()).generatePresignedUrl(anyString(), anyString());
     }
 
     @Test
@@ -467,7 +467,7 @@ class UtilisateurProviderAdapterTest {
 
         // Then
         assertNotNull(resultat);
-        verify(fileManager, never()).generatePresignedUrl(anyString());
+        verify(fileManager, never()).generatePresignedUrl(anyString(), anyString());
     }
 
     @Test
@@ -504,7 +504,7 @@ class UtilisateurProviderAdapterTest {
         when(mapper.versEntite(utilisateurAvecPhoto)).thenReturn(utilisateurJpaAvecPhoto);
         when(jpaRepository.save(any(UtilisateurJpa.class))).thenReturn(utilisateurJpaAvecPhoto);
         when(mapper.versModele(utilisateurJpaAvecPhoto)).thenReturn(utilisateurAvecPhoto);
-        when(fileManager.generatePresignedUrl(anyString())).thenReturn("https://presigned-url.com/photo");
+        when(fileManager.generatePresignedUrl(anyString(), anyString())).thenReturn("https://presigned-url.com/photo");
 
         // When
         UtilisateurModele resultat = providerAdapter.sauvegarder(utilisateurAvecPhoto);
@@ -513,6 +513,6 @@ class UtilisateurProviderAdapterTest {
         assertNotNull(resultat);
         // Vérifier que save est appelé (le nom de l'image est modifié avec timestamp dans setPhotoProfilUnique)
         verify(jpaRepository, times(1)).save(any(UtilisateurJpa.class));
-        verify(fileManager, times(1)).generatePresignedUrl(anyString());
+        verify(fileManager, times(1)).generatePresignedUrl(anyString(), anyString());
     }
 }

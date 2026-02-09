@@ -3,12 +3,18 @@ package com.ulr.paytogether.provider.adapter;
 import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.modele.DealModele;
 import com.ulr.paytogether.core.provider.DealProvider;
+import com.ulr.paytogether.provider.adapter.entity.CategorieJpa;
 import com.ulr.paytogether.provider.adapter.entity.DealJpa;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
 import com.ulr.paytogether.provider.adapter.entity.ImageDealJpa;
+import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
 import com.ulr.paytogether.provider.adapter.mapper.DealJpaMapper;
+import com.ulr.paytogether.provider.repository.CategorieRepository;
 import com.ulr.paytogether.provider.repository.DealRepository;
+import com.ulr.paytogether.provider.repository.UtilisateurRepository;
 import com.ulr.paytogether.provider.utils.FileManager;
+import com.ulr.paytogether.provider.utils.Tools;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -27,9 +33,13 @@ import java.util.stream.Collectors;
 public class DealProviderAdapter implements DealProvider {
 
     private final DealRepository jpaRepository;
+    private final UtilisateurRepository utilisateurRepository;
+    private final CategorieRepository categorieRepository;
     private final DealJpaMapper mapper;
     private final FileManager fileManager;
 
+
+    @Transactional(rollbackOn = Exception.class)
     @Override
     public DealModele sauvegarder(DealModele deal) {
         DealJpa entite = mapper.versEntite(deal);
@@ -62,7 +72,7 @@ public class DealProviderAdapter implements DealProvider {
             modeleSauvegarde.getListeImages().stream()
                     .filter(imageDealModele -> imageDealModele.getStatut() == StatutImage.PENDING)
                     .forEach(imageDealModele -> {
-                        String presignedUrl = fileManager.generatePresignedUrl(imageDealModele.getUrlImage());
+                        String presignedUrl = fileManager.generatePresignedUrl(Tools.DIRECTORY_DEALS_IMAGES, imageDealModele.getUrlImage());
                         imageDealModele.setPresignUrl(presignedUrl);
             });
         }
@@ -92,7 +102,9 @@ public class DealProviderAdapter implements DealProvider {
 
     @Override
     public List<DealModele> trouverParCreateur(UUID createurUuid) {
-        return jpaRepository.findByCreateurUuid(createurUuid)
+        UtilisateurJpa marchandJpa = utilisateurRepository.findById(createurUuid)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé pour l'UUID : " + createurUuid));
+        return jpaRepository.findByMarchandJpa(marchandJpa)
                 .stream()
                 .map(mapper::versModele)
                 .collect(Collectors.toList());
@@ -100,12 +112,16 @@ public class DealProviderAdapter implements DealProvider {
 
     @Override
     public List<DealModele> trouverParCategorie(UUID categorieUuid) {
-        return jpaRepository.findByCategorieUuid(categorieUuid)
+        CategorieJpa categorieJpa = categorieRepository.findById(categorieUuid)
+                .orElseThrow(() -> new IllegalArgumentException("Catégorie non trouvée pour l'UUID : " + categorieUuid));
+
+        return jpaRepository.findByCategorieJpa(categorieJpa)
                 .stream()
                 .map(mapper::versModele)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(rollbackOn = Exception.class)
     @Override
     public DealModele mettreAJour(UUID uuid, DealModele deal) {
         DealJpa entite = jpaRepository.findById(uuid)

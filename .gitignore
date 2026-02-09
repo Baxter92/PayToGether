@@ -18,6 +18,8 @@ rad.json
 *.g.xlf
 #License-file
 *.flf
+#idea folder
+.idea/
 #Test results file
 TestResults.xml
 #Node modules

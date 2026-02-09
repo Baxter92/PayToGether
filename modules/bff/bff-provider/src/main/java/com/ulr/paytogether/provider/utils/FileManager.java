@@ -119,12 +119,12 @@ public class FileManager {
      * @param uniqueFileName le nom unique du fichier
      * @return l'URL pré-signée
      */
-    public String generatePresignedUrl(String uniqueFileName) {
+    public String generatePresignedUrl(String folderName, String uniqueFileName) {
         try {
             return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs
                     .builder()
                     .bucket(bucketName)
-                    .object(uniqueFileName)
+                    .object(folderName.concat(uniqueFileName))
                     .method(Method.PUT)
                     .expiry(presignedUrlExpiry)
                     .build());

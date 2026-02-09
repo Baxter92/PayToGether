@@ -1,5 +1,6 @@
 package com.ulr.paytogether.provider.adapter.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ulr.paytogether.core.enumeration.StatutCommande;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -50,6 +51,7 @@ public class CommandeJpa {
     @Column(nullable = false)
     private LocalDateTime dateCommande;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "commandeJpa", cascade = CascadeType.ALL,
             orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PaiementJpa> paiements;

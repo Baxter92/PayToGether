@@ -1,0 +1,38 @@
+### GET request to example server
+GET https://examples.http-client.intellij.net/get
+    ?generated-in=IntelliJ IDEA
+
+### Send POST deal with json body
+POST {{base_url}}/api/deals
+Content-Type: application/json
+
+{
+  "titre": "Mon super deal",
+  "description": "Deal incroyable à ne pas manquer !",
+  "prixDeal": 1200.00,
+  "prixPart": 12.00,
+  "nbParticipants": 100,
+  "dateFin": "2026-12-31",
+  "dateExpiration": "2026-12-31",
+  "categorieUuid": "123e4567-e89b-12d3-a456-426614174000",
+  "categorieNom": "POISSON",
+  "createurUuid": "123e4567-e89b-12d3-a456-426614174001",
+  "createurNom": "John Doe",
+  "statut": "PUBLIE",
+  "ville": "Alberta",
+  "pays": "Canada",
+  "listeImages": [
+    "image1.jpg",
+    "image2.jpg"
+  ],
+  "listePointsForts": [
+    "Point fort 1",
+    "Point fort 2",
+    "Point fort 3"
+  ]
+
+}
+
+### GET all deals
+GET {{base_url}}/api/deals
+Content-Type: application/json

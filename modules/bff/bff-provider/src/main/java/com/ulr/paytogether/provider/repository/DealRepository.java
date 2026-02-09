@@ -1,7 +1,9 @@
 package com.ulr.paytogether.provider.repository;
 
+import com.ulr.paytogether.provider.adapter.entity.CategorieJpa;
 import com.ulr.paytogether.provider.adapter.entity.DealJpa;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
+import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -21,17 +23,17 @@ public interface DealRepository extends JpaRepository<DealJpa, UUID> {
      */
     List<DealJpa> findByStatut(StatutDeal statut);
 
-    /**
+/**
      * Recherche tous les deals d'un créateur
-     * @param createurUuid l'UUID du créateur
+     * @param utilisateurJpa le créateur
      * @return la liste des deals
      */
-    List<DealJpa> findByCreateurUuid(UUID createurUuid);
+    List<DealJpa> findByMarchandJpa(UtilisateurJpa utilisateurJpa);
 
     /**
      * Recherche tous les deals d'une catégorie
-     * @param categorieUuid l'UUID de la catégorie
+     * @param categorieJpa la catégorie
      * @return la liste des deals
      */
-    List<DealJpa> findByCategorieUuid(UUID categorieUuid);
+    List<DealJpa> findByCategorieJpa(CategorieJpa categorieJpa);
 }

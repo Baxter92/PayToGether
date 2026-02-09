@@ -9,6 +9,7 @@ import com.ulr.paytogether.provider.adapter.mapper.ImageUtilisateurJpaMapper;
 import com.ulr.paytogether.provider.adapter.mapper.UtilisateurJpaMapper;
 import com.ulr.paytogether.provider.repository.UtilisateurRepository;
 import com.ulr.paytogether.provider.utils.FileManager;
+import com.ulr.paytogether.provider.utils.Tools;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +41,7 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
         }
         UtilisateurModele modele = mapper.versModele(jpaRepository.save(entite));
         if (modele.getPhotoProfil() != null) {
-            String presignUrl = fileManager.generatePresignedUrl(modele.getPhotoProfil().getUrlImage());
+            String presignUrl = fileManager.generatePresignedUrl(Tools.DIRECTORY_UTILISATEUR_IMAGES, modele.getPhotoProfil().getUrlImage());
             modele.setPresignUrlPhotoProfil(presignUrl);
         }
         return modele;
@@ -105,7 +106,7 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
     private void setPresignUrl(UtilisateurModele modeleSauvegarde) {
         // Gérer les fichiers associés au deal (génération des URL présignées)
         if (modeleSauvegarde.getPhotoProfil() != null && modeleSauvegarde.getPhotoProfil().getStatut() == StatutImage.PENDING) {
-            String presignedUrl = fileManager.generatePresignedUrl(modeleSauvegarde.getPhotoProfil().getUrlImage());
+            String presignedUrl = fileManager.generatePresignedUrl(Tools.DIRECTORY_UTILISATEUR_IMAGES, modeleSauvegarde.getPhotoProfil().getUrlImage());
             modeleSauvegarde.setPresignUrlPhotoProfil(presignedUrl);
         }
     }

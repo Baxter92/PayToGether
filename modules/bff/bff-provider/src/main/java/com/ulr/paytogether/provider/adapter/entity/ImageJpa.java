@@ -1,5 +1,6 @@
 package com.ulr.paytogether.provider.adapter.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ulr.paytogether.core.enumeration.StatutImage;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -27,11 +28,16 @@ public class ImageJpa {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID uuid;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String urlImage;
 
     @Builder.Default
     private StatutImage statut = StatutImage.PENDING;
+
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "publicite_uuid")
+    private PubliciteJpa publiciteJpa;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

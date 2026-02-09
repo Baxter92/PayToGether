@@ -20,6 +20,7 @@ public class ImageModele {
     private UUID uuid;
     private String urlImage;
     private StatutImage statut;
+    private String presignUrl;
     private LocalDateTime dateCreation;
     private LocalDateTime dateModification;
 }

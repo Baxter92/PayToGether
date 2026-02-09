@@ -1,6 +1,8 @@
 package com.ulr.paytogether.provider.repository;
 
 import com.ulr.paytogether.provider.adapter.entity.CommentaireJpa;
+import com.ulr.paytogether.provider.adapter.entity.DealJpa;
+import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,22 +17,16 @@ public interface CommentaireRepository extends JpaRepository<CommentaireJpa, UUI
 
     /**
      * Recherche tous les commentaires d'un deal
-     * @param dealUuid l'UUID du deal
-     * @return la liste des commentaires
+     * @param dealJpa
+     * @return
      */
-    List<CommentaireJpa> findByDealUuid(UUID dealUuid);
+    List<CommentaireJpa> findByDealJpa(DealJpa dealJpa);
 
     /**
      * Recherche tous les commentaires d'un auteur
-     * @param auteurUuid l'UUID de l'auteur
-     * @return la liste des commentaires
+     * @param utilisateurJpa
+     * @return
      */
-    List<CommentaireJpa> findByAuteurUuid(UUID auteurUuid);
+    List<CommentaireJpa> findByUtilisateurJpa(UtilisateurJpa utilisateurJpa);
 
-    /**
-     * Recherche toutes les réponses d'un commentaire parent
-     * @param commentaireParentUuid l'UUID du commentaire parent
-     * @return la liste des réponses
-     */
-    List<CommentaireJpa> findByCommentaireParentUuid(UUID commentaireParentUuid);
 }

@@ -44,8 +44,10 @@ public class DealJpa {
     @Column(nullable = false)
     private Integer nbParticipants;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL,
-            orphanRemoval = true, mappedBy = "utilisateurJpa")
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "deal_participants",
+            joinColumns = @JoinColumn(name = "deal_uuid"),
+            inverseJoinColumns = @JoinColumn(name = "utilisateur_uuid"))
     @Builder.Default
     private Set<UtilisateurJpa> participants = new HashSet<>();
 

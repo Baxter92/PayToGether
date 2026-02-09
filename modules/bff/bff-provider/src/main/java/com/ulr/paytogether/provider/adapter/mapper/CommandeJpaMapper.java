@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 public class CommandeJpaMapper {
     private final UtilisateurJpaMapper utilisateurJpaMapper;
     private final DealJpaMapper dealJpaMapper;
-    private final PaiementJpaMapper paiementJpaMapper;
 
     public CommandeModele versModele(CommandeJpa jpaCommande) {
         if (jpaCommande == null) return null;
@@ -21,10 +20,6 @@ public class CommandeJpaMapper {
                 .utilisateur(jpaCommande.getMarchandJpa() != null ?
                         utilisateurJpaMapper.versModele(jpaCommande.getMarchandJpa()) : null)
                 .dealModele(jpaCommande.getDealJpa() != null ? dealJpaMapper.versModele(jpaCommande.getDealJpa()) : null)
-                .paiements(jpaCommande.getPaiements() != null ?
-                        jpaCommande.getPaiements().stream().map(
-                                paiementJpaMapper::versModele
-                        ).toList() : null)
                 .dateCommande(jpaCommande.getDateCommande())
                 .dateCreation(jpaCommande.getDateCreation())
                 .dateModification(jpaCommande.getDateModification())
@@ -40,10 +35,6 @@ public class CommandeJpaMapper {
                         utilisateurJpaMapper.versEntite(modele.getUtilisateur()) : null)
                 .dealJpa(modele.getDealModele() != null ?
                         dealJpaMapper.versEntite(modele.getDealModele()) : null)
-                .paiements(modele.getPaiements() != null ?
-                        modele.getPaiements().stream().map(
-                                paiementJpaMapper::versEntite
-                        ).toList() : null)
                 .dateCommande(modele.getDateCommande())
                 .dateCreation(modele.getDateCreation())
                 .dateModification(modele.getDateModification())

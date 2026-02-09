@@ -1,5 +1,6 @@
 package com.ulr.paytogether.provider.adapter.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ulr.paytogether.core.enumeration.MethodePaiement;
 import com.ulr.paytogether.core.enumeration.StatutPaiement;
 import jakarta.persistence.*;

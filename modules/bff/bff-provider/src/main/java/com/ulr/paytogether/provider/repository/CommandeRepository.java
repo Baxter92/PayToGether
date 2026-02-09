@@ -2,6 +2,8 @@ package com.ulr.paytogether.provider.repository;
 
 import com.ulr.paytogether.provider.adapter.entity.CommandeJpa;
 import com.ulr.paytogether.core.enumeration.StatutCommande;
+import com.ulr.paytogether.provider.adapter.entity.DealJpa;
+import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -24,17 +26,17 @@ public interface CommandeRepository extends JpaRepository<CommandeJpa, UUID> {
 
     /**
      * Recherche toutes les commandes d'un utilisateur (vendeur)
-     * @param utilisateurUuid l'UUID de l'utilisateur
+     * @param marchandJpa l'utilisateur marchand
      * @return la liste des commandes
      */
-    List<CommandeJpa> findByUtilisateurUuid(UUID utilisateurUuid);
+    List<CommandeJpa> findByMarchandJpa(UtilisateurJpa marchandJpa);
 
     /**
      * Recherche toutes les commandes d'un deal
-     * @param dealUuid l'UUID du deal
+     * @param dealJpa le deal
      * @return la liste des commandes
      */
-    List<CommandeJpa> findByDealUuid(UUID dealUuid);
+    List<CommandeJpa> findByDealJpa(DealJpa dealJpa);
 
     /**
      * Recherche toutes les commandes par statut

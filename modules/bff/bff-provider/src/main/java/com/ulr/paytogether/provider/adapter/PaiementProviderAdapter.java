@@ -3,8 +3,10 @@ package com.ulr.paytogether.provider.adapter;
 import com.ulr.paytogether.core.modele.PaiementModele;
 import com.ulr.paytogether.core.provider.PaiementProvider;
 import com.ulr.paytogether.provider.adapter.entity.PaiementJpa;
+import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
 import com.ulr.paytogether.provider.adapter.mapper.PaiementJpaMapper;
 import com.ulr.paytogether.provider.repository.PaiementRepository;
+import com.ulr.paytogether.provider.repository.UtilisateurRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 public class PaiementProviderAdapter implements PaiementProvider {
 
     private final PaiementRepository jpaRepository;
+    private final UtilisateurRepository utilisateurRepository;
     private final PaiementJpaMapper mapper;
 
     @Override
@@ -47,7 +50,10 @@ public class PaiementProviderAdapter implements PaiementProvider {
 
     @Override
     public List<PaiementModele> trouverParUtilisateur(UUID utilisateurUuid) {
-        return jpaRepository.findByUtilisateurUuid(utilisateurUuid)
+        UtilisateurJpa utilisateurJpa = utilisateurRepository.findById(utilisateurUuid)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé pour l'UUID : " + utilisateurUuid));
+
+        return jpaRepository.findByUtilisateurJpa(utilisateurJpa)
                 .stream()
                 .map(mapper::versModele)
                 .collect(Collectors.toList());
@@ -55,10 +61,7 @@ public class PaiementProviderAdapter implements PaiementProvider {
 
     @Override
     public List<PaiementModele> trouverParCommande(UUID commandeUuid) {
-        return jpaRepository.findByCommandeUuid(commandeUuid)
-                .stream()
-                .map(mapper::versModele)
-                .collect(Collectors.toList());
+        return List.of();
     }
 
     @Override

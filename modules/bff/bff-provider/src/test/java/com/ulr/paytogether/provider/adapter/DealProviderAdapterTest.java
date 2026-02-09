@@ -6,9 +6,13 @@ import com.ulr.paytogether.core.modele.CategorieModele;
 import com.ulr.paytogether.core.modele.DealModele;
 import com.ulr.paytogether.core.modele.ImageDealModele;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
+import com.ulr.paytogether.provider.adapter.entity.CategorieJpa;
 import com.ulr.paytogether.provider.adapter.entity.DealJpa;
+import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
 import com.ulr.paytogether.provider.adapter.mapper.DealJpaMapper;
+import com.ulr.paytogether.provider.repository.CategorieRepository;
 import com.ulr.paytogether.provider.repository.DealRepository;
+import com.ulr.paytogether.provider.repository.UtilisateurRepository;
 import com.ulr.paytogether.provider.utils.FileManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +43,12 @@ class DealProviderAdapterTest {
     private DealRepository jpaRepository;
 
     @Mock
+    private UtilisateurRepository utilisateurRepository;
+
+    @Mock
+    private CategorieRepository categorieRepository;
+
+    @Mock
     private DealJpaMapper mapper;
 
     @Mock
@@ -52,6 +62,8 @@ class DealProviderAdapterTest {
     private UUID uuidDeal;
     private UUID uuidCreateur;
     private UUID uuidCategorie;
+    private UtilisateurJpa marchand;
+    CategorieJpa categorieJpa;
 
     @BeforeEach
     void setUp() {
@@ -64,8 +76,18 @@ class DealProviderAdapterTest {
                 .nom("Dupont")
                 .prenom("Jean")
                 .build();
+        marchand = UtilisateurJpa.builder()
+                .uuid(uuidCreateur)
+                .nom("Dupont")
+                .prenom("Jean")
+                .build();
 
         CategorieModele categorie = CategorieModele.builder()
+                .uuid(uuidCategorie)
+                .nom("Viandes")
+                .build();
+
+        categorieJpa = CategorieJpa.builder()
                 .uuid(uuidCategorie)
                 .nom("Viandes")
                 .build();
@@ -208,7 +230,8 @@ class DealProviderAdapterTest {
     @Test
     void testTrouverParCreateur_DevraitRetournerDealsCreateur() {
         // Given
-        when(jpaRepository.findByCreateurUuid(uuidCreateur)).thenReturn(List.of(dealJpa));
+        when((utilisateurRepository.findById(uuidCreateur))).thenReturn(Optional.of(marchand));
+        when(jpaRepository.findByMarchandJpa(any(UtilisateurJpa.class))).thenReturn(List.of(dealJpa));
         when(mapper.versModele(dealJpa)).thenReturn(dealModele);
 
         // When
@@ -218,14 +241,16 @@ class DealProviderAdapterTest {
         assertNotNull(resultat);
         assertEquals(1, resultat.size());
         assertEquals(uuidCreateur, resultat.get(0).getCreateur().getUuid());
-        verify(jpaRepository, times(1)).findByCreateurUuid(uuidCreateur);
+        verify(utilisateurRepository, times(1)).findById(uuidCreateur);
+        verify(jpaRepository, times(1)).findByMarchandJpa(marchand);
         verify(mapper, times(1)).versModele(dealJpa);
     }
 
     @Test
     void testTrouverParCategorie_DevraitRetournerDealsCategorie() {
         // Given
-        when(jpaRepository.findByCategorieUuid(uuidCategorie)).thenReturn(List.of(dealJpa));
+        when(categorieRepository.findById(uuidCategorie)).thenReturn(Optional.of(categorieJpa));
+        when(jpaRepository.findByCategorieJpa(any(CategorieJpa.class))).thenReturn(List.of(dealJpa));
         when(mapper.versModele(dealJpa)).thenReturn(dealModele);
 
         // When
@@ -235,7 +260,8 @@ class DealProviderAdapterTest {
         assertNotNull(resultat);
         assertEquals(1, resultat.size());
         assertEquals(uuidCategorie, resultat.get(0).getCategorie().getUuid());
-        verify(jpaRepository, times(1)).findByCategorieUuid(uuidCategorie);
+        verify(categorieRepository, times(1)).findById(uuidCategorie);
+        verify(jpaRepository, times(1)).findByCategorieJpa(categorieJpa);
         verify(mapper, times(1)).versModele(dealJpa);
     }
 
@@ -342,7 +368,7 @@ class DealProviderAdapterTest {
         when(mapper.versEntite(dealAvecImages)).thenReturn(dealJpa);
         when(jpaRepository.save(any(DealJpa.class))).thenReturn(dealJpa);
         when(mapper.versModele(dealJpa)).thenReturn(dealAvecImages);
-        when(fileManager.generatePresignedUrl(anyString())).thenReturn("https://presigned-url.com/image");
+        when(fileManager.generatePresignedUrl(anyString(), anyString())).thenReturn("https://presigned-url.com/image");
 
         // When
         DealModele resultat = providerAdapter.sauvegarder(dealAvecImages);
@@ -354,7 +380,7 @@ class DealProviderAdapterTest {
         verify(jpaRepository, times(1)).save(any(DealJpa.class));
         verify(mapper, times(1)).versModele(dealJpa);
         // Vérifier que generatePresignedUrl est appelé pour les images PENDING
-        verify(fileManager, times(1)).generatePresignedUrl(anyString());
+        verify(fileManager, times(1)).generatePresignedUrl(anyString(), anyString());
     }
 
     @Test
@@ -390,7 +416,7 @@ class DealProviderAdapterTest {
         when(mapper.versEntite(dealAvecImages)).thenReturn(dealJpa);
         when(jpaRepository.save(any(DealJpa.class))).thenReturn(dealJpa);
         when(mapper.versModele(dealJpa)).thenReturn(dealAvecImages);
-        when(fileManager.generatePresignedUrl(anyString())).thenReturn("https://presigned-url.com/image");
+        when(fileManager.generatePresignedUrl(anyString(), anyString())).thenReturn("https://presigned-url.com/image");
 
         // When
         DealModele resultat = providerAdapter.sauvegarder(dealAvecImages);
@@ -398,7 +424,7 @@ class DealProviderAdapterTest {
         // Then
         assertNotNull(resultat);
         // Vérifier que generatePresignedUrl est appelé seulement pour les images PENDING (1 fois)
-        verify(fileManager, times(1)).generatePresignedUrl(anyString());
+        verify(fileManager, times(1)).generatePresignedUrl(anyString(), anyString());
         // Vérifier que l'URL présignée est définie sur l'image PENDING
         assertEquals("https://presigned-url.com/image", imagePending.getPresignUrl());
     }
@@ -427,7 +453,7 @@ class DealProviderAdapterTest {
         // Then
         assertNotNull(resultat);
         // Vérifier que generatePresignedUrl n'est jamais appelé
-        verify(fileManager, never()).generatePresignedUrl(anyString());
+        verify(fileManager, never()).generatePresignedUrl(anyString(), anyString());
     }
 
     @Test
@@ -462,6 +488,6 @@ class DealProviderAdapterTest {
         // Then
         assertNotNull(resultat);
         // Vérifier que generatePresignedUrl n'est pas appelé pour les images UPLOADED
-        verify(fileManager, never()).generatePresignedUrl(anyString());
+        verify(fileManager, never()).generatePresignedUrl(anyString(), anyString());
     }
 }

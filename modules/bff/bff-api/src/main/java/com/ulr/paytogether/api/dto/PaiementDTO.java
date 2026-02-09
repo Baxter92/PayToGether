@@ -1,6 +1,7 @@
 package com.ulr.paytogether.api.dto;
 
-import com.ulr.paytogether.core.enumeration.StatutCommande;
+import com.ulr.paytogether.core.enumeration.MethodePaiement;
+import com.ulr.paytogether.core.enumeration.StatutPaiement;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -10,26 +11,30 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 /**
- * DTO pour l'entité Commande
+ * DTO pour l'entité Paiement
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CommandeDTO {
+public class PaiementDTO {
 
     private UUID uuid;
 
-    @NotNull(message = "Le montant total est obligatoire")
-    @Positive(message = "Le montant total doit être positif")
-    private BigDecimal montantTotal;
+    @NotNull(message = "Le montant est obligatoire")
+    @Positive(message = "Le montant doit être positif")
+    private BigDecimal montant;
 
     @NotNull(message = "Le statut est obligatoire")
-    private StatutCommande statut;
+    private StatutPaiement statut;
+
+    @NotNull(message = "La méthode de paiement est obligatoire")
+    private MethodePaiement methodePaiement;
+
+    private String transactionId;
 
     @NotNull(message = "L'UUID de l'utilisateur est obligatoire")
     private UUID utilisateurUuid;
@@ -37,15 +42,10 @@ public class CommandeDTO {
     private String utilisateurNom;
     private String utilisateurPrenom;
 
-    @NotNull(message = "L'UUID du deal est obligatoire")
-    private UUID dealUuid;
+    @NotNull(message = "L'UUID de la commande est obligatoire")
+    private UUID commandeUuid;
 
-    private String dealTitre;
-    private BigDecimal dealPrixPart;
-
-    private List<PaiementDTO> paiements;
-
-    private LocalDateTime dateCommande;
+    private LocalDateTime datePaiement;
 
     private LocalDateTime dateCreation;
 

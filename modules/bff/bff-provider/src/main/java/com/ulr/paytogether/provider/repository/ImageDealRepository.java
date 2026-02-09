@@ -15,17 +15,9 @@ import java.util.UUID;
 public interface ImageDealRepository extends JpaRepository<ImageDealJpa, UUID> {
 
     /**
-     * Recherche toutes les images d'un deal
-     * @param dealUuid l'UUID du deal
-     * @return la liste des images
+     * Recherche une image par son URL
+     * @param urlImage l'URL de l'image
+     * @return un Optional contenant l'image si elle existe
      */
-    List<ImageDealJpa> findByDealUuid(UUID dealUuid);
-
-    /**
-     * Recherche l'image principale d'un deal
-     * @param dealUuid l'UUID du deal
-     * @param principale true pour l'image principale
-     * @return un Optional contenant l'image principale si elle existe
-     */
-    Optional<ImageDealJpa> findByDealUuidAndPrincipale(UUID dealUuid, Boolean principale);
+    ImageDealJpa findByUrlImage(String urlImage);
 }

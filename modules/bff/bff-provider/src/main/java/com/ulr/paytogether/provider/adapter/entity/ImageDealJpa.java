@@ -28,7 +28,7 @@ public class ImageDealJpa {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID uuid;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String urlImage;
 
     @ManyToOne
