@@ -174,4 +174,40 @@ public class DealProviderAdapter implements DealProvider {
             }
         });
     }
+
+    @Override
+    public void mettreAJourStatutImage(UUID dealUuid, UUID imageUuid, StatutImage statut) {
+        // Récupérer le deal
+        DealJpa deal = jpaRepository.findById(dealUuid)
+                .orElseThrow(() -> new IllegalArgumentException("Deal non trouvé pour l'UUID : " + dealUuid));
+
+        // Trouver l'image et mettre à jour son statut
+        deal.getImageDealJpas().stream()
+                .filter(image -> image.getUuid().equals(imageUuid))
+                .findFirst()
+                .ifPresentOrElse(
+                        image -> {
+                            image.setStatut(statut);
+                            image.setDateModification(java.time.LocalDateTime.now());
+                            jpaRepository.save(deal);
+                        },
+                        () -> {
+                            throw new IllegalArgumentException("Image non trouvée pour l'UUID : " + imageUuid);
+                        }
+                );
+    }
+
+    @Override
+    public String obtenirUrlLectureImage(UUID dealUuid, UUID imageUuid) {
+        // Récupérer le deal
+        DealJpa deal = jpaRepository.findById(dealUuid)
+                .orElseThrow(() -> new IllegalArgumentException("Deal non trouvé pour l'UUID : " + dealUuid));
+
+        // Trouver l'image et générer l'URL de lecture
+        return deal.getImageDealJpas().stream()
+                .filter(image -> image.getUuid().equals(imageUuid))
+                .findFirst()
+                .map(image -> fileManager.generatePresignedUrlForRead(image.getUrlImage()))
+                .orElseThrow(() -> new IllegalArgumentException("Image non trouvée pour l'UUID : " + imageUuid));
+    }
 }

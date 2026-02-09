@@ -81,3 +81,13 @@ Content-Type: application/json
 GET {{base_url}}/api/deals/categorie/123e4567-e89b-12d3-a456-426614174000
 Content-Type: application/json
 
+### 9. Confirmer l'upload d'une image (PATCH)
+### Endpoint appelé par le frontend après upload réussi vers MinIO
+PATCH {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000/images/456e7890-e89b-12d3-a456-426614174001/confirm
+Content-Type: application/json
+
+### 10. Obtenir l'URL de lecture d'une image (GET)
+### Génère une URL présignée pour lire l'image depuis MinIO
+GET {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000/images/456e7890-e89b-12d3-a456-426614174001/url
+Content-Type: application/json
+

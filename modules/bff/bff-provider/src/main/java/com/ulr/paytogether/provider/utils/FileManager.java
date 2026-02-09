@@ -135,4 +135,25 @@ public class FileManager {
         }
     }
 
+    /**
+     * Génère une URL pré-signée pour lire un fichier depuis MinIO
+     * @param fullFileName le chemin complet du fichier avec son nom
+     * @return l'URL pré-signée de lecture
+     */
+    public String generatePresignedUrlForRead(String fullFileName) {
+        try {
+            return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs
+                    .builder()
+                    .bucket(bucketName)
+                    .object(fullFileName)
+                    .method(Method.GET)
+                    .expiry(presignedUrlExpiry)
+                    .build());
+        } catch (ErrorResponseException | InsufficientDataException | InternalException | InvalidKeyException |
+                 InvalidResponseException | IOException | NoSuchAlgorithmException | ServerException |
+                 XmlParserException e) {
+            throw new RuntimeException("Erreur lors de la génération de l'URL pré-signée de lecture pour MinIO: " + e.getMessage(), e);
+        }
+    }
+
 }

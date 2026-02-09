@@ -4,6 +4,7 @@ import com.ulr.paytogether.api.apiadapter.DealApiAdapter;
 import com.ulr.paytogether.api.dto.DealResponseDto;
 import com.ulr.paytogether.api.dto.DealDTO;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
+import com.ulr.paytogether.core.enumeration.StatutImage;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -119,5 +120,47 @@ public class DealResource {
     public ResponseEntity<Set<String>> lireVilles() {
         log.debug("Récupération des villes disponibles pour les deals");
         return ResponseEntity.ok(dealApiAdapter.lireVillesDisponibles());
+    }
+
+    /**
+     * Confirmer l'upload d'une image
+     * Endpoint appelé par le frontend après upload réussi vers MinIO
+     */
+    @PatchMapping("/{dealUuid}/images/{imageUuid}/confirm")
+    public ResponseEntity<Void> confirmerUploadImage(
+            @PathVariable UUID dealUuid,
+            @PathVariable UUID imageUuid) {
+        log.info("Confirmation upload image {} pour deal {}", imageUuid, dealUuid);
+
+        try {
+            dealApiAdapter.mettreAJourStatutImage(
+                dealUuid,
+                imageUuid,
+                StatutImage.UPLOADED
+            );
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            log.error("Erreur lors de la confirmation de l'upload: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Obtenir l'URL de lecture d'une image
+     * Génère une URL présignée pour lire l'image depuis MinIO
+     */
+    @GetMapping("/{dealUuid}/images/{imageUuid}/url")
+    public ResponseEntity<java.util.Map<String, String>> obtenirUrlImage(
+            @PathVariable UUID dealUuid,
+            @PathVariable UUID imageUuid) {
+        log.debug("Récupération de l'URL de lecture pour l'image {} du deal {}", imageUuid, dealUuid);
+
+        try {
+            String urlLecture = dealApiAdapter.obtenirUrlLectureImage(dealUuid, imageUuid);
+            return ResponseEntity.ok(java.util.Map.of("url", urlLecture));
+        } catch (IllegalArgumentException e) {
+            log.error("Erreur lors de la récupération de l'URL de lecture: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
     }
 }

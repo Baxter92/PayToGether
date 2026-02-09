@@ -5,6 +5,7 @@ import com.ulr.paytogether.api.dto.DealResponseDto;
 import com.ulr.paytogether.api.mapper.DealMapper;
 import com.ulr.paytogether.core.domaine.service.DealService;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
+import com.ulr.paytogether.core.enumeration.StatutImage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -72,5 +73,13 @@ public class DealApiAdapter {
 
     public Set<String> lireVillesDisponibles() {
         return dealService.lireVillesDisponibles();
+    }
+
+    public void mettreAJourStatutImage(UUID dealUuid, UUID imageUuid, StatutImage statut) {
+        dealService.mettreAJourStatutImage(dealUuid, imageUuid, statut);
+    }
+
+    public String obtenirUrlLectureImage(UUID dealUuid, UUID imageUuid) {
+        return dealService.obtenirUrlLectureImage(dealUuid, imageUuid);
     }
 }

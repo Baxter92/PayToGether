@@ -1,5 +1,6 @@
 package com.ulr.paytogether.core.domaine.service;
 
+import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.modele.DealModele;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
 
@@ -57,4 +58,14 @@ public interface DealService {
      * Récupérer les villes disponibles pour les deals
      */
     Set<String> lireVillesDisponibles();
+
+    /**
+     * Mettre à jour le statut d'une image d'un deal
+     */
+    void mettreAJourStatutImage(UUID dealUuid, UUID imageUuid, StatutImage statut);
+
+    /**
+     * Obtenir l'URL de lecture d'une image d'un deal
+     */
+    String obtenirUrlLectureImage(UUID dealUuid, UUID imageUuid);
 }

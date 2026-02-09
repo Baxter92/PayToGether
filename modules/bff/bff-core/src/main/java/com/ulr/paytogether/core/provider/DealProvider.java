@@ -1,5 +1,6 @@
 package com.ulr.paytogether.core.provider;
 
+import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.modele.DealModele;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
 
@@ -27,4 +28,14 @@ public interface DealProvider {
     DealModele mettreAJour(UUID uuid, DealModele deal);
 
     void supprimerParUuid(UUID uuid);
+
+    /**
+     * Mettre à jour le statut d'une image d'un deal
+     */
+    void mettreAJourStatutImage(UUID dealUuid, UUID imageUuid, StatutImage statut);
+
+    /**
+     * Obtenir l'URL de lecture d'une image d'un deal
+     */
+    String obtenirUrlLectureImage(UUID dealUuid, UUID imageUuid);
 }

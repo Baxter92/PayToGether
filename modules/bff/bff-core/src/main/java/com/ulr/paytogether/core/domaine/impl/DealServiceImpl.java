@@ -2,6 +2,7 @@ package com.ulr.paytogether.core.domaine.impl;
 
 import com.ulr.paytogether.core.domaine.service.DealService;
 import com.ulr.paytogether.core.domaine.validator.DealValidator;
+import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.modele.DealModele;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
 import com.ulr.paytogether.core.provider.DealProvider;
@@ -76,4 +77,15 @@ public class DealServiceImpl implements DealService {
                 .map(DealModele::getVille)
                 .collect(Collectors.toSet());
     }
+
+    @Override
+    public void mettreAJourStatutImage(UUID dealUuid, UUID imageUuid, StatutImage statut) {
+        dealProvider.mettreAJourStatutImage(dealUuid, imageUuid, statut);
+    }
+
+    @Override
+    public String obtenirUrlLectureImage(UUID dealUuid, UUID imageUuid) {
+        return dealProvider.obtenirUrlLectureImage(dealUuid, imageUuid);
+    }
 }
+
