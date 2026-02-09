@@ -6,6 +6,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CategorieJpaMapper {
+
+    /**
+     * Convertit une entité JPA en modèle métier
+     */
     public CategorieModele versModele(CategorieJpa jpaCategorie) {
         if (jpaCategorie == null) return null;
         return CategorieModele.builder()
@@ -17,6 +21,10 @@ public class CategorieJpaMapper {
                 .dateModification(jpaCategorie.getDateModification())
                 .build();
     }
+
+    /**
+     * Convertit un modèle métier en entité JPA
+     */
     public CategorieJpa versEntite(CategorieModele modele) {
         if (modele == null) return null;
         return CategorieJpa.builder()
@@ -27,5 +35,16 @@ public class CategorieJpaMapper {
                 .dateCreation(modele.getDateCreation())
                 .dateModification(modele.getDateModification())
                 .build();
+    }
+
+    /**
+     * Met à jour une entité JPA existante avec les données d'un modèle métier
+     */
+    public void mettreAJour(CategorieJpa entite, CategorieModele modele) {
+        if (entite == null || modele == null) return;
+
+        entite.setNom(modele.getNom());
+        entite.setDescription(modele.getDescription());
+        entite.setIcone(modele.getIcone());
     }
 }

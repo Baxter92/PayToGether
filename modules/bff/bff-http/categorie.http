@@ -1,0 +1,73 @@
+
+### 1. Créer une catégorie (POST)
+POST {{base_url}}/api/categories
+Content-Type: application/json
+
+{
+  "nom": "POISSON",
+  "description": "Produits de la mer et poissons frais",
+  "icone": "fish-icon.svg"
+}
+
+### 2. Créer une autre catégorie (POST)
+POST {{base_url}}/api/categories
+Content-Type: application/json
+
+{
+  "nom": "VIANDE",
+  "description": "Produits carnés et charcuterie",
+  "icone": "meat-icon.svg"
+}
+
+### 3. Récupérer toutes les catégories (GET)
+GET {{base_url}}/api/categories
+Content-Type: application/json
+
+### 4. Récupérer une catégorie par UUID (GET)
+GET {{base_url}}/api/categories/123e4567-e89b-12d3-a456-426614174000
+Content-Type: application/json
+
+### 5. Récupérer une catégorie par nom (GET)
+GET {{base_url}}/api/categories/nom/POISSON
+Content-Type: application/json
+
+### 6. Vérifier si une catégorie existe par son nom (GET)
+GET {{base_url}}/api/categories/existe/POISSON
+Content-Type: application/json
+
+### 7. Vérifier si une catégorie inexistante existe (GET)
+GET {{base_url}}/api/categories/existe/FRUITS
+Content-Type: application/json
+
+### 8. Mettre à jour une catégorie (PUT)
+PUT {{base_url}}/api/categories/123e4567-e89b-12d3-a456-426614174000
+Content-Type: application/json
+
+{
+  "nom": "POISSON_FRAIS",
+  "description": "Poissons frais du jour et fruits de mer",
+  "icone": "fresh-fish-icon.svg"
+}
+
+### 9. Supprimer une catégorie (DELETE)
+DELETE {{base_url}}/api/categories/123e4567-e89b-12d3-a456-426614174000
+Content-Type: application/json
+
+### 10. Tester validation - Nom manquant (POST)
+POST {{base_url}}/api/categories
+Content-Type: application/json
+
+{
+  "description": "Description sans nom",
+  "icone": "icon.svg"
+}
+
+### 11. Tester validation - Nom trop long (POST)
+POST {{base_url}}/api/categories
+Content-Type: application/json
+
+{
+  "nom": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+  "description": "Nom trop long",
+  "icone": "icon.svg"
+}

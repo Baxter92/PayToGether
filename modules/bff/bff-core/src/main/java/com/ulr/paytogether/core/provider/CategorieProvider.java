@@ -19,6 +19,8 @@ public interface CategorieProvider {
 
     List<CategorieModele> trouverTous();
 
+    CategorieModele mettreAJour(UUID uuid, CategorieModele categorie);
+
     void supprimerParUuid(UUID uuid);
 
     boolean existeParNom(String nom);

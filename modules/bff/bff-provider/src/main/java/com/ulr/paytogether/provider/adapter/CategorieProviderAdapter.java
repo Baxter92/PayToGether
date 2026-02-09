@@ -53,6 +53,17 @@ public class CategorieProviderAdapter implements CategorieProvider {
     }
 
     @Override
+    public CategorieModele mettreAJour(UUID uuid, CategorieModele categorie) {
+        return jpaRepository.findById(uuid)
+                .map(categorieExistante -> {
+                    mapper.mettreAJour(categorieExistante, categorie);
+                    CategorieJpa sauvegarde = jpaRepository.save(categorieExistante);
+                    return mapper.versModele(sauvegarde);
+                })
+                .orElseThrow(() -> new RuntimeException("Catégorie non trouvée avec l'UUID: " + uuid));
+    }
+
+    @Override
     public void supprimerParUuid(UUID uuid) {
         jpaRepository.deleteById(uuid);
     }
