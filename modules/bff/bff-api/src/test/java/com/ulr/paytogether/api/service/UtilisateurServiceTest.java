@@ -1,6 +1,5 @@
 package com.ulr.paytogether.api.service;
 
-import com.ulr.paytogether.core.domaine.impl.UtilisationServiceImpl;
 import com.ulr.paytogether.core.domaine.validator.UtilisateurValidator;
 import com.ulr.paytogether.core.enumeration.RoleUtilisateur;
 import com.ulr.paytogether.core.enumeration.StatutUtilisateur;

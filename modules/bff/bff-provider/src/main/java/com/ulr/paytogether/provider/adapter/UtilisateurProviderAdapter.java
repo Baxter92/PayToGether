@@ -110,4 +110,34 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
             modeleSauvegarde.setPresignUrlPhotoProfil(presignedUrl);
         }
     }
+
+    @Override
+    public void mettreAJourStatutPhotoProfil(UUID utilisateurUuid, StatutImage statut) {
+        // Récupérer l'utilisateur
+        UtilisateurJpa utilisateur = jpaRepository.findById(utilisateurUuid)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé pour l'UUID : " + utilisateurUuid));
+
+        // Mettre à jour le statut de la photo de profil
+        if (utilisateur.getPhotoProfil() != null) {
+            utilisateur.getPhotoProfil().setStatut(statut);
+            utilisateur.getPhotoProfil().setDateModification(LocalDateTime.now());
+            jpaRepository.save(utilisateur);
+        } else {
+            throw new IllegalArgumentException("Aucune photo de profil trouvée pour cet utilisateur");
+        }
+    }
+
+    @Override
+    public String obtenirUrlLecturePhotoProfil(UUID utilisateurUuid) {
+        // Récupérer l'utilisateur
+        UtilisateurJpa utilisateur = jpaRepository.findById(utilisateurUuid)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé pour l'UUID : " + utilisateurUuid));
+
+        // Générer l'URL de lecture pour la photo de profil
+        if (utilisateur.getPhotoProfil() != null) {
+            return fileManager.generatePresignedUrlForRead(utilisateur.getPhotoProfil().getUrlImage());
+        } else {
+            throw new IllegalArgumentException("Aucune photo de profil trouvée pour cet utilisateur");
+        }
+    }
 }

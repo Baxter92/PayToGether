@@ -4,6 +4,7 @@ import com.ulr.paytogether.api.dto.CreerUtilisateurDTO;
 import com.ulr.paytogether.api.dto.UtilisateurDTO;
 import com.ulr.paytogether.api.mapper.UtilisateurMapper;
 import com.ulr.paytogether.core.domaine.service.UtilisateurService;
+import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -96,5 +97,19 @@ public class UtilisateurApiAdapter {
      */
     public boolean existeParEmail(String email) {
         return utilisateurService.existeParEmail(email);
+    }
+
+    /**
+     * Mettre à jour le statut de la photo de profil
+     */
+    public void mettreAJourStatutPhotoProfil(UUID utilisateurUuid, StatutImage statut) {
+        utilisateurService.mettreAJourStatutPhotoProfil(utilisateurUuid, statut);
+    }
+
+    /**
+     * Obtenir l'URL de lecture de la photo de profil
+     */
+    public String obtenirUrlLecturePhotoProfil(UUID utilisateurUuid) {
+        return utilisateurService.obtenirUrlLecturePhotoProfil(utilisateurUuid);
     }
 }

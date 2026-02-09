@@ -1,6 +1,7 @@
 package com.ulr.paytogether.core.domaine.impl;
 
 import com.ulr.paytogether.core.domaine.service.PubliciteService;
+import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.modele.PubliciteModele;
 import com.ulr.paytogether.core.provider.PubliciteProvider;
 import lombok.RequiredArgsConstructor;
@@ -56,5 +57,15 @@ public class PubliciteServiceImpl implements PubliciteService {
     public void supprimerParUuid(UUID uuid) {
         log.info("Suppression de la publicité: {}", uuid);
         publiciteProvider.supprimerParUuid(uuid);
+    }
+
+    @Override
+    public void mettreAJourStatutImage(UUID publiciteUuid, UUID imageUuid, StatutImage statut) {
+        publiciteProvider.mettreAJourStatutImage(publiciteUuid, imageUuid, statut);
+    }
+
+    @Override
+    public String obtenirUrlLectureImage(UUID publiciteUuid, UUID imageUuid) {
+        return publiciteProvider.obtenirUrlLectureImage(publiciteUuid, imageUuid);
     }
 }

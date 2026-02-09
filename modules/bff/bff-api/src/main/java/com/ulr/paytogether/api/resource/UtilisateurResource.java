@@ -113,4 +113,41 @@ public class UtilisateurResource {
         boolean existe = apiAdapter.existeParEmail(email);
         return ResponseEntity.ok(existe);
     }
+
+    /**
+     * Confirmer l'upload de la photo de profil
+     * Endpoint appelé par le frontend après upload réussi vers MinIO
+     */
+    @PatchMapping("/{utilisateurUuid}/photo-profil/confirm")
+    public ResponseEntity<Void> confirmerUploadPhotoProfil(@PathVariable UUID utilisateurUuid) {
+        log.info("Confirmation upload photo de profil pour utilisateur {}", utilisateurUuid);
+
+        try {
+            apiAdapter.mettreAJourStatutPhotoProfil(
+                utilisateurUuid,
+                com.ulr.paytogether.core.enumeration.StatutImage.UPLOADED
+            );
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            log.error("Erreur lors de la confirmation de l'upload: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Obtenir l'URL de lecture de la photo de profil
+     * Génère une URL présignée pour lire la photo depuis MinIO
+     */
+    @GetMapping("/{utilisateurUuid}/photo-profil/url")
+    public ResponseEntity<java.util.Map<String, String>> obtenirUrlPhotoProfil(@PathVariable UUID utilisateurUuid) {
+        log.debug("Récupération de l'URL de lecture pour la photo de profil de l'utilisateur {}", utilisateurUuid);
+
+        try {
+            String urlLecture = apiAdapter.obtenirUrlLecturePhotoProfil(utilisateurUuid);
+            return ResponseEntity.ok(java.util.Map.of("url", urlLecture));
+        } catch (IllegalArgumentException e) {
+            log.error("Erreur lors de la récupération de l'URL de lecture: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

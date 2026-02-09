@@ -1,7 +1,10 @@
 package com.ulr.paytogether.provider.adapter;
 
+import com.ulr.paytogether.core.enumeration.StatutImage;
+import com.ulr.paytogether.core.modele.ImageModele;
 import com.ulr.paytogether.core.modele.PubliciteModele;
 import com.ulr.paytogether.core.provider.PubliciteProvider;
+import com.ulr.paytogether.provider.adapter.entity.ImageJpa;
 import com.ulr.paytogether.provider.adapter.entity.PubliciteJpa;
 import com.ulr.paytogether.provider.adapter.mapper.PubliciteJpaMapper;
 import com.ulr.paytogether.provider.repository.PubliciteRepository;
@@ -34,8 +37,8 @@ public class PubliciteProviderAdapter implements PubliciteProvider {
 
         // Mettre à jour les noms des fichiers associés de façon unique à la publicité avant de les sauvegarder
         if (publicite.getListeImages() != null && !publicite.getListeImages().isEmpty()) {
-            List<com.ulr.paytogether.provider.adapter.entity.ImageJpa> imageJpas = publicite.getListeImages().stream()
-                    .map(imageModele -> com.ulr.paytogether.provider.adapter.entity.ImageJpa.builder()
+            List<ImageJpa> imageJpas = publicite.getListeImages().stream()
+                    .map(imageModele -> ImageJpa.builder()
                             .uuid(imageModele.getUuid())
                             .urlImage(imageModele.getUrlImage() + "_" + System.currentTimeMillis())
                             .statut(imageModele.getStatut())
@@ -56,7 +59,7 @@ public class PubliciteProviderAdapter implements PubliciteProvider {
         // Gérer les fichiers associés à la publicité (génération des URL présignées)
         if (modeleSauvegarde.getListeImages() != null && !modeleSauvegarde.getListeImages().isEmpty()) {
             modeleSauvegarde.getListeImages().stream()
-                    .filter(imageModele -> imageModele.getStatut() == com.ulr.paytogether.core.enumeration.StatutImage.PENDING)
+                    .filter(imageModele -> imageModele.getStatut() == StatutImage.PENDING)
                     .forEach(imageModele -> {
                         String presignedUrl = fileManager.generatePresignedUrl(Tools.DIRECTORY_PUBLICITES_IMAGES, imageModele.getUrlImage());
                         imageModele.setPresignUrl(presignedUrl);
@@ -112,7 +115,7 @@ public class PubliciteProviderAdapter implements PubliciteProvider {
         var imagesParUuid = publicite.getListeImages().stream()
                 .filter(image -> image.getUuid() != null)
                 .collect(Collectors.toMap(
-                        com.ulr.paytogether.core.modele.ImageModele::getUuid,
+                        ImageModele::getUuid,
                         image -> image
                 ));
 
@@ -120,7 +123,7 @@ public class PubliciteProviderAdapter implements PubliciteProvider {
             var imageModele = imagesParUuid.get(imageJpa.getUuid());
             if (imageModele != null && !imageJpa.getUrlImage().equals(imageModele.getUrlImage())) {
                 imageJpa.setUrlImage(imageModele.getUrlImage() + "_" + System.currentTimeMillis());
-                imageJpa.setStatut(com.ulr.paytogether.core.enumeration.StatutImage.PENDING);
+                imageJpa.setStatut(StatutImage.PENDING);
                 imageJpa.setDateModification(java.time.LocalDateTime.now());
             }
         });
@@ -129,5 +132,41 @@ public class PubliciteProviderAdapter implements PubliciteProvider {
     @Override
     public void supprimerParUuid(UUID uuid) {
         jpaRepository.deleteById(uuid);
+    }
+
+    @Override
+    public void mettreAJourStatutImage(UUID publiciteUuid, UUID imageUuid, StatutImage statut) {
+        // Récupérer la publicité
+        PubliciteJpa publicite = jpaRepository.findById(publiciteUuid)
+                .orElseThrow(() -> new IllegalArgumentException("Publicité non trouvée pour l'UUID : " + publiciteUuid));
+
+        // Trouver l'image et mettre à jour son statut
+        publicite.getListeImages().stream()
+                .filter(image -> image.getUuid().equals(imageUuid))
+                .findFirst()
+                .ifPresentOrElse(
+                        image -> {
+                            image.setStatut(statut);
+                            image.setDateModification(java.time.LocalDateTime.now());
+                            jpaRepository.save(publicite);
+                        },
+                        () -> {
+                            throw new IllegalArgumentException("Image non trouvée pour l'UUID : " + imageUuid);
+                        }
+                );
+    }
+
+    @Override
+    public String obtenirUrlLectureImage(UUID publiciteUuid, UUID imageUuid) {
+        // Récupérer la publicité
+        PubliciteJpa publicite = jpaRepository.findById(publiciteUuid)
+                .orElseThrow(() -> new IllegalArgumentException("Publicité non trouvée pour l'UUID : " + publiciteUuid));
+
+        // Trouver l'image et générer l'URL de lecture
+        return publicite.getListeImages().stream()
+                .filter(image -> image.getUuid().equals(imageUuid))
+                .findFirst()
+                .map(image -> fileManager.generatePresignedUrlForRead(image.getUrlImage()))
+                .orElseThrow(() -> new IllegalArgumentException("Image non trouvée pour l'UUID : " + imageUuid));
     }
 }

@@ -44,3 +44,14 @@ Content-Type: application/json
 ### 7. Supprimer un utilisateur (DELETE)
 DELETE {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000
 Content-Type: application/json
+
+### 8. Confirmer l'upload de la photo de profil (PATCH)
+### Endpoint appelé par le frontend après upload réussi vers MinIO
+PATCH {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000/photo-profil/confirm
+Content-Type: application/json
+
+### 9. Obtenir l'URL de lecture de la photo de profil (GET)
+### Génère une URL présignée pour lire la photo depuis MinIO
+GET {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000/photo-profil/url
+Content-Type: application/json
+

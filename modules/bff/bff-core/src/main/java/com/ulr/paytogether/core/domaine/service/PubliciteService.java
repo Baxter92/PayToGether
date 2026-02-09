@@ -1,5 +1,6 @@
 package com.ulr.paytogether.core.domaine.service;
 
+import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.modele.PubliciteModele;
 
 import java.util.List;
@@ -40,4 +41,14 @@ public interface PubliciteService {
      * Supprimer une publicité par son UUID
      */
     void supprimerParUuid(UUID uuid);
+
+    /**
+     * Mettre à jour le statut d'une image d'une publicité
+     */
+    void mettreAJourStatutImage(UUID publiciteUuid, UUID imageUuid, StatutImage statut);
+
+    /**
+     * Obtenir l'URL de lecture d'une image d'une publicité
+     */
+    String obtenirUrlLectureImage(UUID publiciteUuid, UUID imageUuid);
 }

@@ -1,5 +1,6 @@
 package com.ulr.paytogether.core.domaine.impl;
 
+import com.ulr.paytogether.core.modele.ImageUtilisateurModele;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
 import com.ulr.paytogether.core.provider.UtilisateurProvider;
 import com.ulr.paytogether.core.enumeration.RoleUtilisateur;
@@ -30,7 +31,7 @@ class UtilisateurServiceImplTest {
     private UtilisateurProvider utilisateurProvider;
 
     @InjectMocks
-    private UtilisationServiceImpl utilisateurService;
+    private UtilisateurServiceImpl utilisateurService;
 
     private UtilisateurModele utilisateurModele;
     private UUID uuidUtilisateur;
@@ -139,7 +140,7 @@ class UtilisateurServiceImplTest {
                 .email("jacques.durand@example.com")
                 .statut(StatutUtilisateur.ACTIF)
                 .role(RoleUtilisateur.VENDEUR)
-                .photoProfil("http://example.com/photo.jpg")
+                .photoProfil(new ImageUtilisateurModele())
                 .build();
 
         when(utilisateurProvider.mettreAJour(eq(uuidUtilisateur), any(UtilisateurModele.class)))

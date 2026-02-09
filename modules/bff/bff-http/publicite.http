@@ -46,3 +46,14 @@ Content-Type: application/json
 ### 6. Supprimer une publicité (DELETE)
 DELETE {{base_url}}/api/publicites/123e4567-e89b-12d3-a456-426614174000
 Content-Type: application/json
+
+### 7. Confirmer l'upload d'une image de publicité (PATCH)
+### Endpoint appelé par le frontend après upload réussi vers MinIO
+PATCH {{base_url}}/api/publicites/123e4567-e89b-12d3-a456-426614174000/images/456e7890-e89b-12d3-a456-426614174001/confirm
+Content-Type: application/json
+
+### 8. Obtenir l'URL de lecture d'une image de publicité (GET)
+### Génère une URL présignée pour lire l'image depuis MinIO
+GET {{base_url}}/api/publicites/123e4567-e89b-12d3-a456-426614174000/images/456e7890-e89b-12d3-a456-426614174001/url
+Content-Type: application/json
+

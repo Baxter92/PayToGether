@@ -3,6 +3,7 @@ package com.ulr.paytogether.api.apiadapter;
 import com.ulr.paytogether.api.dto.PubliciteDTO;
 import com.ulr.paytogether.api.mapper.PubliciteMapper;
 import com.ulr.paytogether.core.domaine.service.PubliciteService;
+import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.modele.PubliciteModele;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -56,5 +57,13 @@ public class PubliciteApiAdapter {
 
     public void supprimerParUuid(UUID uuid) {
         publiciteService.supprimerParUuid(uuid);
+    }
+
+    public void mettreAJourStatutImage(UUID publiciteUuid, UUID imageUuid, StatutImage statut) {
+        publiciteService.mettreAJourStatutImage(publiciteUuid, imageUuid, statut);
+    }
+
+    public String obtenirUrlLectureImage(UUID publiciteUuid, UUID imageUuid) {
+        return publiciteService.obtenirUrlLectureImage(publiciteUuid, imageUuid);
     }
 }
