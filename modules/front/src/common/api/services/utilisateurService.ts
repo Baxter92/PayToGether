@@ -1,6 +1,6 @@
-import { apiClient } from "../index";
-import { createResourceService } from "../service/resourceFactory";
+import { createResourceService } from "../module/service/resourceFactory";
 import type { Utilisateur, CreerUtilisateurDTO } from "../types";
+import { apiClient } from "./apiClient";
 
 // Service de base avec méthodes CRUD standard
 export const utilisateurBaseService = createResourceService<Utilisateur>(

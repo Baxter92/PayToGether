@@ -1,4 +1,3 @@
-// src/services/resourceFactory.ts
 import type { ApiClient } from "../client/ApiClient";
 
 export const createResourceService = <T>(

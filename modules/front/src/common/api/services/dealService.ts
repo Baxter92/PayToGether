@@ -1,19 +1,21 @@
-import { apiClient } from "../index";
-import { createResourceService } from "../service/resourceFactory";
-import type { Deal } from "../types";
+import { createResourceService } from "../module/service/resourceFactory";
+import type { Deal, StatutDeal } from "../types";
+import { apiClient } from "./apiClient";
 
 // Service de base avec méthodes CRUD standard
-export const dealBaseService = createResourceService<Deal>(
-  apiClient,
-  "/deals"
-);
+export const dealBaseService = createResourceService<Deal>(apiClient, "/deals");
 
 // Service étendu avec méthodes spécifiques
 export const dealService = {
   ...dealBaseService,
 
+  create: (deal: Deal) =>
+    apiClient.post<Deal>("/deals", {
+      body: deal,
+    }),
+
   // Récupérer les deals par statut
-  getByStatut: (statut: string) =>
+  getByStatut: (statut: typeof StatutDeal) =>
     apiClient.get<Deal[]>(`/deals/statut/${statut}`),
 
   // Récupérer les deals par créateur
@@ -30,5 +32,7 @@ export const dealService = {
 
   // Obtenir l'URL de lecture d'une image
   getImageUrl: (dealUuid: string, imageUuid: string) =>
-    apiClient.get<{ url: string }>(`/deals/${dealUuid}/images/${imageUuid}/url`),
+    apiClient.get<{ url: string }>(
+      `/deals/${dealUuid}/images/${imageUuid}/url`,
+    ),
 };

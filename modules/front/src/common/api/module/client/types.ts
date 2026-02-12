@@ -1,5 +1,19 @@
 // Types partagés pour ApiClient et plugins.
 
+import type { AxiosRequestConfig } from "axios";
+import type { ResponseHandler } from "./responseHandler";
+
+export interface ApiClientOptions {
+  baseURL: string;
+  getToken?: () => string | null | Promise<string | null>;
+  defaultHeaders?: Record<string, string>;
+  defaultRetry?: number;
+  defaultTimeoutMs?: number;
+  plugins?: ApiPlugin[];
+  responseHandler?: ResponseHandler;
+  axiosConfig?: Partial<AxiosRequestConfig>;
+}
+
 export type QueryParams = Record<
   string,
   string | number | boolean | null | undefined
@@ -12,6 +26,7 @@ export interface RequestConfig {
   signal?: AbortSignal | null;
   timeoutMs?: number;
   retry?: number;
+  onUploadProgress?: (percent: number) => void;
 }
 
 export interface RequestContext {

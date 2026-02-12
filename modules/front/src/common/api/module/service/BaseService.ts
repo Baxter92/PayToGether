@@ -1,5 +1,5 @@
-import type { ApiClient } from "../client/ApiClient";
-import type { RequestConfig } from "../client/types";
+import type { ApiClient } from "../../client/ApiClient";
+import type { RequestConfig } from "../../client/types";
 
 export class BaseService<T> {
   protected client: ApiClient;

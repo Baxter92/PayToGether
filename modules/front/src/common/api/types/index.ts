@@ -1,22 +1,24 @@
 // Types pour les entités backend
 
-export enum StatutUtilisateur {
-  ACTIF = "ACTIF",
-  INACTIF = "INACTIF",
-}
+import type { ImageResponse } from "../hooks/useImageUpload";
 
-export enum RoleUtilisateur {
-  UTILISATEUR = "UTILISATEUR",
-  VENDEUR = "VENDEUR",
-  ADMIN = "ADMIN",
-}
+export const StatutUtilisateur = {
+  ACTIF: "ACTIF",
+  INACTIF: "INACTIF",
+} as const;
 
-export enum StatutDeal {
-  BROUILLON = "BROUILLON",
-  PUBLIE = "PUBLIE",
-  ANNULE = "ANNULE",
-  TERMINE = "TERMINE",
-}
+export const RoleUtilisateur = {
+  UTILISATEUR: "UTILISATEUR",
+  VENDEUR: "VENDEUR",
+  ADMIN: "ADMIN",
+} as const;
+
+export const StatutDeal = {
+  BROUILLON: "BROUILLON",
+  PUBLIE: "PUBLIE",
+  ANNULE: "ANNULE",
+  TERMINE: "TERMINE",
+} as const;
 
 export interface Utilisateur {
   uuid: string;
@@ -24,8 +26,8 @@ export interface Utilisateur {
   prenom: string;
   email: string;
   motDePasse: string;
-  statut: StatutUtilisateur;
-  role: RoleUtilisateur;
+  statut: typeof StatutUtilisateur;
+  role: typeof RoleUtilisateur;
   photoProfil: string;
   dateCreation: string;
   dateModification: string;
@@ -50,12 +52,12 @@ export interface Deal {
   dateDebut: string;
   dateFin: string;
   dateExpiration: string;
-  statut: StatutDeal;
+  statut: typeof StatutDeal;
   createurUuid: string;
   createurNom: string;
   categorieUuid: string;
   categorieNom: string;
-  listeImages: string[];
+  listeImages: Partial<ImageResponse>[];
   listePointsForts: string[];
   ville: string;
   pays: string;
@@ -68,8 +70,8 @@ export interface CreerUtilisateurDTO {
   prenom: string;
   email: string;
   motDePasse: string;
-  statut: StatutUtilisateur;
-  role: RoleUtilisateur;
+  statut: typeof StatutUtilisateur;
+  role: typeof RoleUtilisateur;
   photoProfil: string;
 }
 
