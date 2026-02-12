@@ -6,12 +6,15 @@ import App from "./App.tsx";
 import { I18nProvider } from "./common/context/I18nContext.tsx";
 import "./common/extensions/string-extensions";
 import { Toaster } from "./common/components/ui/sonner.tsx";
+import { ReactQueryProvider } from "./common/api";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <I18nProvider>
-      <App />
-      <Toaster />
-    </I18nProvider>
+    <ReactQueryProvider>
+      <I18nProvider>
+        <App />
+        <Toaster />
+      </I18nProvider>
+    </ReactQueryProvider>
   </StrictMode>
 );
