@@ -343,15 +343,14 @@ const Form = <T extends FieldValues>({
 
     return null;
   };
-
   return (
     <form
+      className={className}
+      {...props}
       onSubmit={handleSubmit(
         (data) => onSubmit?.({ data, form }),
         onError, // ✅ NOUVEAU: callback d'erreur
       )}
-      className={className}
-      {...props}
     >
       {normalizedGroups
         .filter((group) => !group.hidden) // ✅ NOUVEAU: filtrer les groupes cachés

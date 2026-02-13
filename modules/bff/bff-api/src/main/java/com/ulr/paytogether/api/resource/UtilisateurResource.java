@@ -17,6 +17,7 @@ import java.util.UUID;
  * Resource REST pour la gestion des utilisateurs
  * Utilise l'ApiAdapter selon l'architecture hexagonale
  */
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/utilisateurs")
 @RequiredArgsConstructor

@@ -14,8 +14,6 @@ export function UserManagementExample() {
     prenom: "",
     email: "",
     motDePasse: "",
-    statut: "ACTIF" as const,
-    role: "UTILISATEUR" as const,
     photoProfil: "",
   });
 
@@ -27,8 +25,6 @@ export function UserManagementExample() {
         prenom: "",
         email: "",
         motDePasse: "",
-        statut: "ACTIF",
-        role: "UTILISATEUR",
         photoProfil: "",
       });
     } catch (error) {
@@ -39,7 +35,7 @@ export function UserManagementExample() {
   const handleUpdateUser = async (uuid: string) => {
     try {
       await updateUser.mutateAsync({
-        uuid,
+        id: uuid,
         data: { nom: "Nom mis à jour" },
       });
     } catch (error) {

@@ -13,7 +13,6 @@ export interface CreateCategoryDTO {
   icone: string;
 }
 
-export type UpdateCategoryDTO = Omit<
-  CreateCategoryDTO,
-  "uuid" | "dateCreation" | "dateModification"
+export type UpdateCategoryDTO = Partial<
+  Omit<CreateCategoryDTO, "uuid" | "dateCreation" | "dateModification">
 >;

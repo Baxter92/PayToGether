@@ -11,6 +11,7 @@ import { PATHS } from "@/common/constants/path";
 
 export default function Home(): JSX.Element {
   const { t } = useI18n("home");
+  console.log(import.meta.env);
 
   return (
     <div className="mx-auto">

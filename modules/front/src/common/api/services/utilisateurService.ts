@@ -1,9 +1,9 @@
 import { createResourceService } from "../module/service/resourceFactory";
-import type { Utilisateur, CreerUtilisateurDTO } from "../types";
+import type { UtilisateurDTO, CreateUtilisateurDTO } from "../types";
 import { apiClient } from "./apiClient";
 
 // Service de base avec méthodes CRUD standard
-export const utilisateurBaseService = createResourceService<Utilisateur>(
+export const utilisateurBaseService = createResourceService<UtilisateurDTO>(
   apiClient,
   "/utilisateurs",
 );
@@ -14,7 +14,7 @@ export const utilisateurService = {
 
   // Récupérer un utilisateur par email
   getByEmail: (email: string) =>
-    apiClient.get<Utilisateur>(`/utilisateurs/email/${email}`),
+    apiClient.get<UtilisateurDTO>(`/utilisateurs/email/${email}`),
 
   // Vérifier si un email existe
   existsByEmail: (email: string) =>
@@ -33,6 +33,6 @@ export const utilisateurService = {
     ),
 
   // Créer un utilisateur (avec DTO spécifique)
-  create: (dto: CreerUtilisateurDTO) =>
-    apiClient.post<Utilisateur>("/utilisateurs", { body: dto }),
+  create: (dto: CreateUtilisateurDTO) =>
+    apiClient.post<UtilisateurDTO>("/utilisateurs", { body: dto }),
 };

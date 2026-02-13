@@ -1,47 +1,44 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { dealService } from "../services/dealService";
-import type { Deal, StatutDeal } from "../types";
+import type {
+  CreateDealDTO,
+  DealDTO,
+  StatutDeal,
+  UpdateDealDTO,
+} from "../types";
 import { apiClient } from "../services/apiClient";
 import {
   useImageUpload,
   type ImageFile,
   type ImageResponse,
 } from "./useImageUpload";
+import { createResourceHooks } from "./factories/createResourceHooks";
 
-// Clés de cache pour les requêtes
-export const dealKeys = {
-  all: ["deals"] as const,
-  lists: () => [...dealKeys.all, "list"] as const,
-  list: (filters: string) => [...dealKeys.lists(), { filters }] as const,
-  details: () => [...dealKeys.all, "detail"] as const,
-  detail: (id: string) => [...dealKeys.details(), id] as const,
-  byStatut: (statut: typeof StatutDeal) =>
-    [...dealKeys.all, "statut", statut] as const,
-  byCreateur: (createurUuid: string) =>
-    [...dealKeys.all, "createur", createurUuid] as const,
-  byCategorie: (categorieUuid: string) =>
-    [...dealKeys.all, "categorie", categorieUuid] as const,
-};
+const dealHooks = createResourceHooks<DealDTO, CreateDealDTO, UpdateDealDTO>({
+  resourceName: "deals",
+  service: dealService,
+  customKeys: {
+    byStatut: (statut: typeof StatutDeal) =>
+      ["deals", "statut", statut] as const,
+    byCreateur: (createurUuid: string) =>
+      ["deals", "createur", createurUuid] as const,
+    byCategorie: (categorieUuid: string) =>
+      ["deals", "categorie", categorieUuid] as const,
+  },
+});
+
+export const {
+  keys: dealKeys,
+  useList: useDeals,
+  useDetail: useDeal,
+  useUpdate: useUpdateDeal,
+  useDelete: useDeleteDeal,
+} = dealHooks;
 
 // ===== QUERIES =====
 
-export const useDeals = () => {
-  return useQuery<Deal[], Error>({
-    queryKey: dealKeys.lists(),
-    queryFn: () => dealService.list(),
-  });
-};
-
-export const useDeal = (uuid: string) => {
-  return useQuery<Deal, Error>({
-    queryKey: dealKeys.detail(uuid),
-    queryFn: () => dealService.getById(uuid),
-    enabled: !!uuid,
-  });
-};
-
 export const useDealsByStatut = (statut: typeof StatutDeal) => {
-  return useQuery<Deal[], Error>({
+  return useQuery<DealDTO[], Error>({
     queryKey: dealKeys.byStatut(statut),
     queryFn: () => dealService.getByStatut(statut),
     enabled: !!statut,
@@ -49,7 +46,7 @@ export const useDealsByStatut = (statut: typeof StatutDeal) => {
 };
 
 export const useDealsByCreateur = (createurUuid: string) => {
-  return useQuery<Deal[], Error>({
+  return useQuery<DealDTO[], Error>({
     queryKey: dealKeys.byCreateur(createurUuid),
     queryFn: () => dealService.getByCreateur(createurUuid),
     enabled: !!createurUuid,
@@ -57,7 +54,7 @@ export const useDealsByCreateur = (createurUuid: string) => {
 };
 
 export const useDealsByCategorie = (categorieUuid: string) => {
-  return useQuery<Deal[], Error>({
+  return useQuery<DealDTO[], Error>({
     queryKey: dealKeys.byCategorie(categorieUuid),
     queryFn: () => dealService.getByCategorie(categorieUuid),
     enabled: !!categorieUuid,
@@ -70,22 +67,18 @@ export const useCreateDeal = () => {
   const queryClient = useQueryClient();
   const { uploadImages, progress, isUploading, hasErrors } = useImageUpload();
 
-  const mutation = useMutation<
-    Deal,
-    Error,
-    Omit<Deal, "uuid" | "dateCreation" | "dateModification">
-  >({
+  const mutation = useMutation<DealDTO, Error, CreateDealDTO>({
     mutationFn: async (input) => {
-      // 1) Construire payload pour la création (backend doit accepter listeImages)
+      // 1) Construire payload pour la création
+      // Le backend attend un tableau de noms de fichiers (listeImages: string[]).
       const payload = {
         ...input,
         listeImages: input.listeImages.map((img) => img.nomUnique),
-        // ajoute autres champs si besoin
       };
 
       // 2) Créer le deal côté backend (utilise ton dealService.create ou apiClient)
       // j'utilise apiClient.post pour rester aligné avec ta stack
-      const dealCree = await apiClient.post<Deal>("/deals", {
+      const dealCree = await apiClient.post<DealDTO>("/deals", {
         body: payload,
       });
 
@@ -102,8 +95,12 @@ export const useCreateDeal = () => {
       const filesForUpload: ImageFile[] = imagesFromBackend
         .filter((f) => f.presignUrl && f.statut === "PENDING")
         .map((f) => ({
-          file: input.listeImages.find((img) => img.nomUnique === f.nomUnique)
-            ?.file as File,
+          file: input.listeImages.find(
+            (img) =>
+              img.nomUnique === f.nomUnique ||
+              img.urlImage === f.urlImage ||
+              img.file?.name === f.urlImage,
+          )?.file as File,
           isPrincipal: f.isPrincipal,
           presignUrl: f.presignUrl as string,
         }));
@@ -143,40 +140,6 @@ export const useCreateDeal = () => {
     isUploading, // bool (upload en cours)
     hasErrors, // bool (au moins une image en erreur)
   };
-};
-
-export const useUpdateDeal = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation<Deal, Error, { uuid: string; data: Partial<Deal> }>({
-    mutationFn: ({ uuid, data }) => dealService.update(uuid, data),
-    onSuccess: (updatedDeal) => {
-      queryClient.invalidateQueries({ queryKey: dealKeys.lists() });
-      queryClient.invalidateQueries({
-        queryKey: dealKeys.detail(updatedDeal.uuid),
-      });
-      queryClient.invalidateQueries({
-        queryKey: dealKeys.byStatut(updatedDeal.statut),
-      });
-      queryClient.invalidateQueries({
-        queryKey: dealKeys.byCreateur(updatedDeal.createurUuid),
-      });
-      queryClient.invalidateQueries({
-        queryKey: dealKeys.byCategorie(updatedDeal.categorieUuid),
-      });
-    },
-  });
-};
-
-export const useDeleteDeal = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation<void, Error, string>({
-    mutationFn: (uuid) => dealService.remove(uuid),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: dealKeys.lists() });
-    },
-  });
 };
 
 export const useConfirmDealImageUpload = () => {

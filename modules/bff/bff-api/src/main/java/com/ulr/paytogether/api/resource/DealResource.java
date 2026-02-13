@@ -19,6 +19,7 @@ import java.util.UUID;
 /**
  * Resource REST pour la gestion des deals
  */
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/deals")
 @RequiredArgsConstructor

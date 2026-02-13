@@ -1,9 +1,5 @@
 import { Dialog, DialogContent } from "@/common/components/ui/dialog";
 import Form, { type IFieldGroup } from "@/common/containers/Form";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { categories, mockMerchants } from "@/common/constants/data";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { useCallback, useState, type KeyboardEvent } from "react";
 import { Button } from "@/common/components/ui/button";
@@ -12,67 +8,16 @@ import Cropper from "react-easy-crop";
 import { Crop, ImageIcon, Plus, Sparkles, Upload, X } from "lucide-react";
 import { Input } from "@/common/components/ui/input";
 import { HStack } from "@/common/components";
-
-// ==============================
-// Types
-// ==============================
-export type CreateDealInput = {
-  title: string;
-  shortSubtitle?: string;
-  description: string;
-
-  price: number;
-  originalPrice?: number;
-  currency: "USD";
-
-  partsTotal: number;
-  minRequired: number;
-  expiryDate?: Date;
-
-  location: string;
-  categoryId: string;
-
-  highlights?: string;
-  whatsIncluded?: string;
-
-  images: File[];
-  status: "draft" | "published";
-
-  supplierName?: string;
-  packagingMethod?: string;
-};
-
-// ==============================
-// Schema Zod
-// ==============================
-export const createDealFormSchema = z.object({
-  title: z.string().min(3, "Titre trop court").max(100),
-  shortSubtitle: z.string().optional(),
-  description: z.string().min(10, "Description trop courte"),
-
-  price: z.number().min(0),
-  originalPrice: z.number().optional(),
-  currency: z.enum(["USD"]),
-
-  partsTotal: z.number().min(1),
-  minRequired: z.number().min(1),
-  expiryDate: z.date().optional(),
-
-  location: z.string().min(3),
-  categoryId: z.string(),
-
-  highlights: z.string().optional(),
-  whatsIncluded: z.string().optional(),
-
-  status: z.enum(["draft", "published"]),
-
-  supplierName: z.string().optional(),
-  packagingMethod: z.string().optional(),
-  images: z
-    .array(z.instanceof(File))
-    .min(1, "Au moins une image est requise")
-    .max(5, "Maximum 5 images"),
-});
+import {
+  StatutDeal,
+  useCategories,
+  useCreateDeal,
+  useUsers,
+  type CreateDealDTO,
+} from "@/common/api";
+import type { ImageResponse } from "@/common/api/hooks/useImageUpload";
+import { toast } from "sonner";
+import { dealSchema } from "@/common/schemas/deal.schema";
 
 // ==============================
 // Component
@@ -80,9 +25,11 @@ export const createDealFormSchema = z.object({
 export function CreateDealModal({
   open,
   onClose,
+  onSuccess,
 }: {
   open: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }) {
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [cropIndex, setCropIndex] = useState<number | null>(null);
@@ -91,24 +38,14 @@ export function CreateDealModal({
   const [zoom, setZoom] = useState(1);
 
   const [inputValue, setInputValue] = useState("");
+  const { data: categoriesData } = useCategories();
+  const { data: usersData } = useUsers();
+  const { mutateAsync: createDeal, isPending: isCreating, isUploading } = useCreateDeal();
 
   const onCropComplete = useCallback((_area: any, pixels: any) => {
     setCroppedArea(pixels);
   }, []);
 
-  // const isAdmin = useMemo(
-  //   () => location.pathname.includes("/admin"),
-  //   [location]
-  // );
-
-  const form = useForm<CreateDealInput>({
-    defaultValues: {
-      currency: "USD",
-      status: "draft",
-      images: [],
-    },
-    resolver: zodResolver(createDealFormSchema),
-  });
   const renderImagesField = (field: any, form: any) => {
     const images = (form.watch(field.name) as File[]) ?? [];
 
@@ -125,7 +62,7 @@ export function CreateDealModal({
       const newFile = await getCroppedImg(
         cropSrc,
         croppedArea,
-        images[cropIndex]
+        images[cropIndex],
       );
 
       const updated = [...images];
@@ -468,9 +405,9 @@ export function CreateDealModal({
           type: "select",
           name: "categoryId",
           label: "Catégorie",
-          items: categories.map((c) => ({
-            label: c.name,
-            value: c.id.toString(),
+          items: (categoriesData ?? []).map((category) => ({
+            label: category.nom,
+            value: category.uuid,
           })),
         },
         {
@@ -479,9 +416,9 @@ export function CreateDealModal({
           label: "Statut du deal",
           items: [
             { label: "Brouillon", value: "draft" },
-            { label: "Publié", value: "published" }
+            { label: "Publié", value: "published" },
           ],
-        }
+        },
       ],
     },
 
@@ -504,7 +441,7 @@ export function CreateDealModal({
           name: "currency",
           label: "Devise",
           items: [{ label: "Dollar", value: "USD" }],
-        }
+        },
       ],
     },
 
@@ -526,7 +463,7 @@ export function CreateDealModal({
           type: "date",
           name: "expiryDate",
           label: "Date d’expiration",
-        }
+        },
       ],
     },
 
@@ -539,7 +476,7 @@ export function CreateDealModal({
           name: "location",
           label: "Lieu",
           placeholder: "Douala – Bonapriso",
-        }
+        },
       ],
     },
 
@@ -552,7 +489,7 @@ export function CreateDealModal({
           name: "highlights",
           label: "Points forts",
           render: renderHighlightsField,
-        }
+        },
       ],
     },
 
@@ -564,9 +501,12 @@ export function CreateDealModal({
           type: "select" as const,
           name: "merchantId",
           label: "Nom du fournisseur",
-          items: mockMerchants.map((merchant) => ({
-            label: merchant.name,
-            value: merchant.id,
+          items: (usersData ?? []).map((user: any) => ({
+            label:
+              [user?.prenom, user?.nom].filter(Boolean).join(" ").trim() ||
+              user?.email ||
+              user?.uuid,
+            value: user?.uuid,
           })),
         },
         {
@@ -575,9 +515,9 @@ export function CreateDealModal({
           label: "Méthode de packaging",
           items: [
             { label: "Sur place", value: "on-site" },
-            { label: "À emporter", value: "takeaway" }
+            { label: "À emporter", value: "takeaway" },
           ],
-        }
+        },
       ],
     },
     {
@@ -590,9 +530,9 @@ export function CreateDealModal({
           label: "Images",
           maxFiles: 5,
           render: renderImagesField,
-        }
+        },
       ],
-    }
+    },
   ];
 
   return (
@@ -603,14 +543,68 @@ export function CreateDealModal({
         </DialogTitle>
 
         <div className="h-[calc(90vh-72px)] overflow-y-auto px-6 py-4">
-          <Form<CreateDealInput>
-            form={form}
+          <Form<CreateDealDTO>
             groups={createDealFormGroups}
+            schema={dealSchema}
             submitLabel="Créer le deal"
             onSubmit={async ({ data }) => {
-              console.log(data);
-              onClose();
+              try {
+                const formData = data as any;
+                const now = new Date().toISOString();
+                const expiration = formData.expiryDate
+                  ? new Date(formData.expiryDate).toISOString()
+                  : now;
+                const [ville = "", pays = "CM"] = String(
+                  formData.location ?? "",
+                )
+                  .split(",")
+                  .map((part: string) => part.trim());
+                const images = (formData.images ?? []) as File[];
+
+                const payload: CreateDealDTO = {
+                  titre: formData.title,
+                  description: formData.description,
+                  prixDeal:
+                    Number(formData.originalPrice) ||
+                    Number(formData.price) * Number(formData.partsTotal || 1),
+                  prixPart: Number(formData.price),
+                  nbParticipants: Number(formData.partsTotal),
+                  dateDebut: now,
+                  dateFin: expiration,
+                  dateExpiration: expiration,
+                  statut: StatutDeal.BROUILLON,
+                  createurUuid: String(formData.merchantId ?? ""),
+                  categorieUuid: String(formData.categoryId ?? ""),
+                  listePointsForts: String(formData.highlights ?? "")
+                    .split("\n")
+                    .map((item) => item.trim())
+                    .filter(Boolean),
+                  ville,
+                  pays,
+                  listeImages: images.map(
+                    (file, index): Partial<ImageResponse> => ({
+                      urlImage: file.name,
+                      nomUnique: file.name,
+                      statut: "PENDING",
+                      isPrincipal: index === 0,
+                      file,
+                    }),
+                  ),
+                };
+
+                await createDeal(payload);
+                toast.success("Deal créé avec succès");
+                onSuccess?.();
+                onClose();
+              } catch (error: any) {
+                const errorMessage =
+                  error?.response?.data?.message || error?.message;
+                toast.error("Erreur lors de la création du deal", {
+                  description: errorMessage,
+                });
+              }
             }}
+            isLoading={isCreating || isUploading}
           />
         </div>
       </DialogContent>

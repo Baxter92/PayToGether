@@ -1,4 +1,4 @@
-import {type ReactElement, useState } from "react";
+import { type ReactElement, useState } from "react";
 import {
   FolderTree,
   Plus,
@@ -297,9 +297,10 @@ export default function AdminCategories(): ReactElement {
               icone: selectedCategory?.icone || "",
             }}
             onSubmit={async ({ data }) => {
+              console.log("data", data);
+
               await handleSubmitForm(data);
             }}
-            resetOnDefaultValuesChange={true}
             submitLabel={formMode === "create" ? "Créer" : "Enregistrer"}
             resetLabel="Annuler"
             isLoading={isLoading}
