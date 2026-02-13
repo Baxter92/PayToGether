@@ -2,6 +2,8 @@
 
 import type { ImageResponse } from "../hooks/useImageUpload";
 
+export * from "./category";
+
 export const StatutUtilisateur = {
   ACTIF: "ACTIF",
   INACTIF: "INACTIF",
@@ -29,15 +31,6 @@ export interface Utilisateur {
   statut: typeof StatutUtilisateur;
   role: typeof RoleUtilisateur;
   photoProfil: string;
-  dateCreation: string;
-  dateModification: string;
-}
-
-export interface Categorie {
-  uuid: string;
-  nom: string;
-  description: string;
-  icone: string;
   dateCreation: string;
   dateModification: string;
 }

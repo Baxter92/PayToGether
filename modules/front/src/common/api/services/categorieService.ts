@@ -1,9 +1,9 @@
 import { createResourceService } from "../module/service/resourceFactory";
-import type { Categorie } from "../types";
+import type { CategoryDTO } from "../types";
 import { apiClient } from "./apiClient";
 
 // Service de base avec méthodes CRUD standard
-export const categorieBaseService = createResourceService<Categorie>(
+export const categorieBaseService = createResourceService<CategoryDTO>(
   apiClient,
   "/categories",
 );
@@ -13,7 +13,8 @@ export const categorieService = {
   ...categorieBaseService,
 
   // Récupérer une catégorie par nom
-  getByNom: (nom: string) => apiClient.get<Categorie>(`/categories/nom/${nom}`),
+  getByNom: (nom: string) =>
+    apiClient.get<CategoryDTO>(`/categories/nom/${nom}`),
 
   // Vérifier si une catégorie existe par son nom
   existsByNom: (nom: string) =>
