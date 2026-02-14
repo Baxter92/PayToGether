@@ -2,8 +2,10 @@ package com.ulr.paytogether.api.mapper;
 
 import com.ulr.paytogether.api.dto.DealDTO;
 import com.ulr.paytogether.api.dto.DealResponseDto;
+import com.ulr.paytogether.core.modele.CategorieModele;
 import com.ulr.paytogether.core.modele.DealModele;
 import com.ulr.paytogether.core.modele.ImageDealModele;
+import com.ulr.paytogether.core.modele.UtilisateurModele;
 import org.springframework.stereotype.Component;
 
 /**
@@ -65,6 +67,12 @@ public class DealMapper {
                             .urlImage(url)
                             .build()
                 ).toList() : null)
+                .createur(dto.getCreateurUuid() != null ? UtilisateurModele.builder()
+                        .uuid(dto.getCreateurUuid())
+                        .build() : null)
+                .categorie(dto.getCategorieUuid() != null ? CategorieModele.builder()
+                        .uuid(dto.getCategorieUuid())
+                        .build() : null)
                 .listePointsForts(dto.getListePointsForts())
                 .dateExpiration(dto.getDateExpiration())
                 .ville(dto.getVille())
@@ -93,6 +101,13 @@ public class DealMapper {
                     .urlImage(url)
                     .build()
         ).toList() : null);
+        deal.setCreateur(dto.getCreateurUuid() != null ? UtilisateurModele.builder()
+                .uuid(dto.getCreateurUuid())
+                .build() : null);
+        deal.setCategorie(dto.getCategorieUuid() != null ? CategorieModele.builder()
+                .uuid(dto.getCategorieUuid())
+                .build() : null);
+        deal.setListePointsForts(dto.getListePointsForts());
         deal.setDateExpiration(dto.getDateExpiration());
         deal.setVille(dto.getVille());
         deal.setPays(dto.getPays());
