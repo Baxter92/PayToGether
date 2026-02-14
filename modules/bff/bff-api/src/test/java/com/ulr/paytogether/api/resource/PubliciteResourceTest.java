@@ -2,6 +2,7 @@ package com.ulr.paytogether.api.resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ulr.paytogether.api.apiadapter.PubliciteApiAdapter;
+import com.ulr.paytogether.api.dto.ImageDto;
 import com.ulr.paytogether.api.dto.PubliciteDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,7 +52,9 @@ class PubliciteResourceTest {
                 .titre("Publicité de test")
                 .description("Description de la publicité")
                 .lienExterne("https://example.com")
-                .listeImages(List.of("image1.jpg"))
+                .listeImages(List.of(
+                        new ImageDto("image1.jpg", null, null)
+                ))
                 .dateDebut(LocalDateTime.now())
                 .dateFin(LocalDateTime.now().plusDays(30))
                 .active(true)

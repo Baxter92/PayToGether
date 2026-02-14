@@ -65,5 +65,11 @@
       <artifactId>commons-io</artifactId>
       <version>2.15.1</version>
     </dependency>
+
+    <!-- Spring Security pour BCryptPasswordEncoder -->
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-crypto</artifactId>
+    </dependency>
   </dependencies>
 </project>

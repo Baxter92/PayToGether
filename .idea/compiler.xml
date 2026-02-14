@@ -15,7 +15,6 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="bff" target="21" />
       <module name="bff-front" target="21" />
     </bytecodeTargetLevel>
   </component>

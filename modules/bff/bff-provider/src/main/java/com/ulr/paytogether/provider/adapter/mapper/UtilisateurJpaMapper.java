@@ -73,7 +73,12 @@ public class UtilisateurJpaMapper {
         entite.setNom(modele.getNom());
         entite.setPrenom(modele.getPrenom());
         entite.setEmail(modele.getEmail());
-        entite.setMotDePasse(modele.getMotDePasse());
+
+        // Ne mettre à jour le mot de passe que s'il est fourni (sera haché dans l'adapter)
+        if (modele.getMotDePasse() != null && !modele.getMotDePasse().isEmpty()) {
+            entite.setMotDePasse(modele.getMotDePasse());
+        }
+
         entite.setStatut(modele.getStatut());
         entite.setRole(modele.getRole());
         entite.setPhotoProfil(modele.getPhotoProfil() != null

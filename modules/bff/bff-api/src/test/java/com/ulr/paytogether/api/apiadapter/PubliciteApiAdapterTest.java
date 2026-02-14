@@ -1,5 +1,6 @@
 package com.ulr.paytogether.api.apiadapter;
 
+import com.ulr.paytogether.api.dto.ImageDto;
 import com.ulr.paytogether.api.dto.PubliciteDTO;
 import com.ulr.paytogether.api.mapper.PubliciteMapper;
 import com.ulr.paytogether.core.domaine.service.PubliciteService;
@@ -65,7 +66,9 @@ class PubliciteApiAdapterTest {
                 .titre("Publicité de test")
                 .description("Description")
                 .lienExterne("https://example.com")
-                .listeImages(List.of("image1.jpg"))
+                .listeImages(List.of(
+                        new ImageDto("image1.jpg", null, null)
+                ))
                 .dateDebut(LocalDateTime.now())
                 .dateFin(LocalDateTime.now().plusDays(30))
                 .active(true)

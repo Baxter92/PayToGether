@@ -1,6 +1,7 @@
 package com.ulr.paytogether.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,8 +30,9 @@ public class PubliciteDTO {
 
     private String lienExterne;
 
-    @NotBlank(message = "Les images sont obligatoire")
-    private List<String> listeImages;
+    @NotNull(message = "Les images sont obligatoires")
+    @NotEmpty(message = "Au moins une image est obligatoire")
+    private List<ImageDto> listeImages;
 
     @NotNull(message = "La date de début est obligatoire")
     private LocalDateTime dateDebut;
