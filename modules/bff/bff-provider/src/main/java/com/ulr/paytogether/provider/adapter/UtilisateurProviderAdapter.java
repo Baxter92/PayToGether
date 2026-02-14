@@ -1,7 +1,6 @@
 package com.ulr.paytogether.provider.adapter;
 
 import com.ulr.paytogether.core.enumeration.StatutImage;
-import com.ulr.paytogether.core.modele.DealModele;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
 import com.ulr.paytogether.core.provider.UtilisateurProvider;
 import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
@@ -11,6 +10,7 @@ import com.ulr.paytogether.provider.repository.UtilisateurRepository;
 import com.ulr.paytogether.provider.utils.FileManager;
 import com.ulr.paytogether.provider.utils.Tools;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -32,10 +32,17 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
     private final UtilisateurJpaMapper mapper;
     private final ImageUtilisateurJpaMapper imageMapper;
     private final FileManager fileManager;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Override
     public UtilisateurModele sauvegarder(UtilisateurModele utilisateur) {
         UtilisateurJpa entite = mapper.versEntite(utilisateur);
+
+        // Hacher le mot de passe avec BCrypt si présent
+        if (entite.getMotDePasse() != null && !entite.getMotDePasse().isEmpty()) {
+            entite.setMotDePasse(passwordEncoder.encode(entite.getMotDePasse()));
+        }
+
         if (entite.getPhotoProfil() != null) {
             entite.setPhotoProfilUnique(Tools.DIRECTORY_UTILISATEUR_IMAGES, entite.getPhotoProfil().getUrlImage());
         }
@@ -73,6 +80,12 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
                 .map(utilisateurExistant -> {
                     // Mettre à jour les champs modifiables
                     mapper.mettreAJour(utilisateurExistant, utilisateur);
+
+                    // Hacher le mot de passe avec BCrypt si un nouveau mot de passe est fourni
+                    if (utilisateur.getMotDePasse() != null && !utilisateur.getMotDePasse().isEmpty()) {
+                        utilisateurExistant.setMotDePasse(passwordEncoder.encode(utilisateur.getMotDePasse()));
+                    }
+
                     // Gérer la mise à jour de la photo de profil si nécessaire
                     mettreAJourPhotoProfilSiBesoin(utilisateurExistant, utilisateur);
                     // Sauvegarder et retourner le modèle mis à jour

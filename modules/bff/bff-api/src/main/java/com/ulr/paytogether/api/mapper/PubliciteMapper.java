@@ -1,17 +1,20 @@
 package com.ulr.paytogether.api.mapper;
 
 import com.ulr.paytogether.api.dto.PubliciteDTO;
-import com.ulr.paytogether.core.modele.ImageModele;
 import com.ulr.paytogether.core.modele.PubliciteModele;
 import org.springframework.stereotype.Component;
-
-import java.util.stream.Collectors;
 
 /**
  * Mapper pour convertir entre PubliciteDTO et PubliciteModele
  */
 @Component
 public class PubliciteMapper {
+
+    private final ImageMapper imageMapper;
+
+    public PubliciteMapper(ImageMapper imageMapper) {
+        this.imageMapper = imageMapper;
+    }
 
     /**
      * Convertit un DTO en modèle métier
@@ -28,7 +31,7 @@ public class PubliciteMapper {
                 .lienExterne(dto.getLienExterne())
                 .listeImages(dto.getListeImages() != null
                         ? dto.getListeImages().stream()
-                        .map(url -> ImageModele.builder().urlImage(url).build())
+                        .map(imageMapper::dtoVersModele)
                         .toList()
                         : null)
                 .dateDebut(dto.getDateDebut())
@@ -54,7 +57,7 @@ public class PubliciteMapper {
                 .lienExterne(modele.getLienExterne())
                 .listeImages(modele.getListeImages() != null
                         ? modele.getListeImages().stream()
-                        .map(ImageModele::getUrlImage)
+                        .map(imageMapper::modeleVersDto)
                         .toList()
                         : null)
                 .dateDebut(modele.getDateDebut())

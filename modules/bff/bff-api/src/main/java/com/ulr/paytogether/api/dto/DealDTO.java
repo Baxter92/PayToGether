@@ -61,7 +61,7 @@ public class DealDTO {
     private String categorieNom;
 
     @NotNull(message = "Une image est obligatoire")
-    private List<String> listeImages;
+    private List<ImageDealDto> listeImages;
     private List<String> listePointsForts;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ulr.paytogether.api.apiadapter.DealApiAdapter;
 import com.ulr.paytogether.api.dto.DealDTO;
 import com.ulr.paytogether.api.dto.DealResponseDto;
+import com.ulr.paytogether.api.dto.ImageDealDto;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,7 +67,9 @@ class DealResourceTest {
                 .statut(StatutDeal.PUBLIE)
                 .createurUuid(uuidCreateur)
                 .categorieUuid(uuidCategorie)
-                .listeImages(List.of("image1.jpg"))
+                .listeImages(List.of(
+                        new ImageDealDto("image1.jpg", true, null, null)
+                ))
                 .ville("Montreal")
                 .build();
 
