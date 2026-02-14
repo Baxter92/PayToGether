@@ -57,7 +57,7 @@ export const refreshTokenPlugin = (
       // Start refresh
       isRefreshing = true;
       try {
-        const refreshToken = await cfg.getRefreshToken();
+        const refreshToken = await cfg?.getRefreshToken?.();
         if (!refreshToken) throw error;
 
         const r = await fetch(cfg.refreshEndpoint, {

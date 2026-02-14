@@ -5,9 +5,13 @@ import type { ApiPlugin } from "../types";
 export const retryPlugin = (opts?: {
   onRetry?: (attempt: number, err: any) => void;
 }): ApiPlugin => {
+  console.log(opts, "retry plugin");
+
   return {
     onError: (err) => {
       // possibilité d'envoyer metrics
+      console.log(err, "retry plugin");
+
       return undefined;
     },
   };

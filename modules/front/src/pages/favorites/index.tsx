@@ -48,7 +48,11 @@ export default function Favorites() {
         </div>
 
         {favoriteDeals.length > 0 && (
-          <Button variant="outline" onClick={clearAll} className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={clearAll}
+            className="flex items-center gap-2"
+          >
             <Trash2 className="w-4 h-4" />
             {t("favorites.removeAll")}
           </Button>
@@ -56,12 +60,14 @@ export default function Favorites() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-16 text-muted-foreground">Chargement...</div>
+        <div className="text-center py-16 text-muted-foreground">
+          Chargement...
+        </div>
       ) : favoriteDeals.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {favoriteDeals.map((deal) => (
+          {favoriteDeals.map((deal: any) => (
             <div key={deal.id} className="relative group">
-              <DealCard deal={deal} />
+              <DealCard deal={deal as any} />
               <button
                 onClick={() => removeFavorite(String(deal.id))}
                 className="absolute top-3 right-3 p-2 bg-white/90 hover:bg-red-50 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100"
@@ -92,7 +98,9 @@ export default function Favorites() {
 
       {favoriteDeals.length > 0 && (
         <div className="mt-12 bg-primary-50 dark:bg-primary/10 rounded-lg p-6">
-          <h3 className="font-semibold text-foreground mb-2">💡 {t("favorites.tip")}</h3>
+          <h3 className="font-semibold text-foreground mb-2">
+            💡 {t("favorites.tip")}
+          </h3>
           <p className="text-muted-foreground text-sm">
             {t("favorites.tipMessage")}
           </p>

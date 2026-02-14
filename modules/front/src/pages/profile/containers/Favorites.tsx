@@ -21,7 +21,7 @@ export default function Favorites() {
   }, [deals, favoriteIds.length]);
 
   const favoriteDeals = deals.filter((deal: any) =>
-    favoriteIds.includes(String(deal.id))
+    favoriteIds.includes(String(deal.id)),
   );
 
   const removeFavorite = (id: string) => {
@@ -60,12 +60,14 @@ export default function Favorites() {
 
       {/* Favorites Grid */}
       {isLoading ? (
-        <div className="text-center py-8 text-muted-foreground">Chargement...</div>
+        <div className="text-center py-8 text-muted-foreground">
+          Chargement...
+        </div>
       ) : favoriteDeals.length > 0 ? (
         <Grid cols={{ md: 3 }} gap={10}>
           {favoriteDeals.map((deal) => (
             <div key={deal.id} className="relative group">
-              <DealCard deal={deal} />
+              <DealCard deal={deal as any} />
               <button
                 onClick={() => removeFavorite(String(deal.id))}
                 className="absolute top-3 right-3 p-2 bg-white/90 hover:bg-red-50 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100"

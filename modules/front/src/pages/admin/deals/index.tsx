@@ -14,7 +14,7 @@ export default function AdminDeals(): ReactElement {
   const { t: tAdmin } = useI18n("admin");
   const { data: dealsData, isLoading, refetch } = useDeals();
 
-  const mappedDeals: DealView[] = (dealsData ?? []).map((deal: DealDTO) => {
+  const mappedDeals = (dealsData ?? []).map((deal: DealDTO) => {
     const expirationDate = deal.dateExpiration
       ? new Date(deal.dateExpiration)
       : null;
