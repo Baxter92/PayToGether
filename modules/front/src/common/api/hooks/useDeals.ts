@@ -73,7 +73,13 @@ export const useCreateDeal = () => {
       // Le backend attend un tableau de noms de fichiers (listeImages: string[]).
       const payload = {
         ...input,
-        listeImages: input.listeImages.map((img) => img.nomUnique),
+        listeImages: input.listeImages.map((img) => ({
+          urlImage: img.urlImage,
+          nomUnique: img.nomUnique,
+          statut: null,
+          isPrincipal: img.isPrincipal,
+          presignUrl: null,
+        })),
       };
 
       // 2) Créer le deal côté backend (utilise ton dealService.create ou apiClient)
@@ -94,16 +100,19 @@ export const useCreateDeal = () => {
       //    (le hook attend les files sous forme { file, preview, isPrincipal })
       const filesForUpload: ImageFile[] = imagesFromBackend
         .filter((f) => f.presignUrl && f.statut === "PENDING")
-        .map((f) => ({
-          file: input.listeImages.find(
-            (img) =>
-              img.nomUnique === f.nomUnique ||
-              img.urlImage === f.urlImage ||
-              img.file?.name === f.urlImage,
-          )?.file as File,
-          isPrincipal: f.isPrincipal,
-          presignUrl: f.presignUrl as string,
-        }));
+        .map((f) => {
+          const backendFileName = f.urlImage?.split("/")[1]?.split("_")[0];
+
+          const matchedImage = input.listeImages.find(
+            (img) => img.file?.name === backendFileName,
+          );
+
+          return {
+            file: matchedImage?.file as File,
+            isPrincipal: f.isPrincipal,
+            presignUrl: f.presignUrl as string,
+          };
+        });
 
       // 5) Lancer les uploads + confirmations (uploadImages effectue la confirmation)
       //    uploadImages : (entityType, entityUuid, imagesFromBackend, filesForUpload)

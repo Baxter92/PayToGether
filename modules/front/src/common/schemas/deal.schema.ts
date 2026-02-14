@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { StatutDeal } from "../api";
 
 export const dealSchema = z.object({
   title: z.string().min(3, "Titre trop court").max(100),
@@ -19,7 +20,7 @@ export const dealSchema = z.object({
   highlights: z.string().optional(),
   whatsIncluded: z.string().optional(),
 
-  status: z.enum(["draft", "published"]),
+  status: z.enum(Object.entries(StatutDeal).map(([key, value]) => value)),
 
   supplierName: z.string().optional(),
   packagingMethod: z.string().optional(),

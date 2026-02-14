@@ -6,7 +6,8 @@ import { Heading } from "@/common/containers/Heading";
 import { Badge } from "@/common/components/ui/badge";
 import { formatCurrency } from "@/common/utils/formatCurrency";
 import { CheckCircle, Clock, Send } from "lucide-react";
-import { mockDeals } from "@/common/constants/data";
+import { useDeals } from "@/common/api";
+import { mapDealToView } from "@/common/api/mappers/catalog";
 import { Button } from "@/common/components/ui/button";
 import { ViewDetailDealModal } from "../deals/containers/ViewDetailDealModal";
 import ViewDetailMerchantModal from "../merchants/containers/ViewDetailMerchantModal";
@@ -118,6 +119,11 @@ export default function AdminPayouts(): ReactElement {
   const [selectedPayout, setSelectedPayout] = useState<any>();
   const [openDealDetails, setOpenDealDetails] = useState(false);
   const [openMerchantDetails, setOpenMerchantDetails] = useState(false);
+  const { data: dealsData } = useDeals();
+  const deals = (dealsData ?? []).map(mapDealToView);
+  const resolveDeal = (dealId: number) =>
+    deals.find((d: any) => String(d.id) === String(dealId)) ||
+    deals[Math.max(0, dealId - 1)];
   const { t: tAdmin } = useI18n("admin");
 
   const columns: ColumnDef<Payout>[] = [
@@ -158,7 +164,7 @@ export default function AdminPayouts(): ReactElement {
             setOpenDealDetails(true);
           }}
         >
-          {mockDeals.find((d) => d.id === row.original.dealId)?.title}
+          {resolveDeal(row.original.dealId)?.title || "-"}
         </Button>
       ),
     },
@@ -283,7 +289,7 @@ export default function AdminPayouts(): ReactElement {
       <ViewDetailDealModal
         open={openDealDetails}
         onClose={() => setOpenDealDetails(false)}
-        deal={mockDeals.find((d) => d.id === selectedPayout?.dealId)}
+        deal={resolveDeal(Number(selectedPayout?.dealId ?? 0))}
       />
       <ViewDetailMerchantModal
         open={openMerchantDetails}

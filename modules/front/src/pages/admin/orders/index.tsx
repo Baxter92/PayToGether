@@ -10,7 +10,8 @@ import { formatCurrency } from "@/common/utils/formatCurrency";
 import { DataTable } from "@/common/components";
 import ViewOrderDetailsModal from "./components/ViewOrderDetailsModal";
 import { ViewDetailDealModal } from "../deals/containers/ViewDetailDealModal";
-import { mockDeals } from "@/common/constants/data";
+import { useDeals } from "@/common/api";
+import { mapDealToView } from "@/common/api/mappers/catalog";
 import { useI18n } from "@/common/hooks/useI18n";
 
 export const mockOrders = [
@@ -85,6 +86,11 @@ export default function AdminOrders(): ReactElement {
   const [openViewDetails, setOpenViewDetails] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [openDealDetails, setOpenDealDetails] = useState(false);
+  const { data: dealsData } = useDeals();
+  const deals = (dealsData ?? []).map(mapDealToView);
+  const resolveDeal = (dealId: number) =>
+    deals.find((d: any) => String(d.id) === String(dealId)) ||
+    deals[Math.max(0, dealId - 1)];
   const { t: tAdmin } = useI18n("admin");
   const { t: tStatus } = useI18n("status");
 
@@ -270,7 +276,7 @@ export default function AdminOrders(): ReactElement {
           <ViewDetailDealModal
             open={openDealDetails}
             onClose={() => setOpenDealDetails(false)}
-            deal={mockDeals.find((d) => d.id === selectedOrder?.dealId)}
+            deal={resolveDeal(Number(selectedOrder?.dealId ?? 0))}
           />
         </CardContent>
       </Card>

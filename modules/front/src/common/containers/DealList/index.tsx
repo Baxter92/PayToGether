@@ -291,8 +291,12 @@ export default function DealsList({
     if (filters.status && filters.status !== "all") {
       dataset = dataset.filter((d) => d.status === filters.status);
     }
-    // price range
-    if (filters.priceMin !== undefined && filters.priceMax !== undefined) {
+    // price range (only if price filter is enabled)
+    if (
+      availableFilters.includes("price") &&
+      filters.priceMin !== undefined &&
+      filters.priceMax !== undefined
+    ) {
       dataset = dataset.filter(
         (d) =>
           d.groupPrice >= filters.priceMin! && d.groupPrice <= filters.priceMax!
@@ -300,7 +304,7 @@ export default function DealsList({
     }
 
     return dataset;
-  }, [deals, filters]);
+  }, [deals, filters, availableFilters]);
 
   // Grid dataset: apply pagination slice
   const _totalPages = useMemo(() => {

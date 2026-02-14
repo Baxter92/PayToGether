@@ -1,6 +1,7 @@
 import { HStack } from "@/common/components";
 import { Button } from "@/common/components/ui/button";
-import { mockDeals } from "@/common/constants/data";
+import { useDeals } from "@/common/api";
+import { mapDealToView } from "@/common/api/mappers/catalog";
 import DealsList from "@/common/containers/DealList";
 import { Heading } from "@/common/containers/Heading";
 import { Plus } from "lucide-react";
@@ -10,6 +11,8 @@ import type { IColumnFilter } from "@/common/components/DataTable";
 
 export default function MyDeals(): JSX.Element {
   const [addDealModalOpen, setAddDealModalOpen] = useState(false);
+  const { data: dealsData, refetch } = useDeals();
+  const deals = (dealsData ?? []).map(mapDealToView);
 
   // Configuration des filtres pour le DataTable
   const columnFiltersConfig: IColumnFilter[] = [
@@ -58,7 +61,7 @@ export default function MyDeals(): JSX.Element {
       </HStack>
 
       <DealsList
-        deals={mockDeals}
+        deals={deals}
         cols={{ md: 2, base: 1, lg: 3 }}
         showFilters={false}
         viewMode="list"
@@ -72,6 +75,7 @@ export default function MyDeals(): JSX.Element {
       <CreateDealModal
         open={addDealModalOpen}
         onClose={() => setAddDealModalOpen(false)}
+        onSuccess={() => refetch()}
       />
     </section>
   );

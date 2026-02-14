@@ -3,9 +3,13 @@ import { Tag } from "lucide-react";
 import { Outlet } from "react-router-dom";
 import Header from "../Header";
 import Footer from "../Footer";
-import { categories } from "@/common/constants/data";
+import { useCategories } from "@/common/api";
+import { mapCategoryToView } from "@/common/api/mappers/catalog";
 
 export const MainLayout = () => {
+  const { data: categoriesData } = useCategories();
+  const categories = (categoriesData ?? []).map(mapCategoryToView);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header

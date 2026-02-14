@@ -14,7 +14,7 @@ export default function AdminDeals(): ReactElement {
   const { t: tAdmin } = useI18n("admin");
   const { data: dealsData, isLoading, refetch } = useDeals();
 
-  const mappedDeals = (dealsData ?? []).map((deal: DealDTO) => {
+  const mappedDeals: DealView[] = (dealsData ?? []).map((deal: DealDTO) => {
     const expirationDate = deal.dateExpiration
       ? new Date(deal.dateExpiration)
       : null;
@@ -24,7 +24,8 @@ export default function AdminDeals(): ReactElement {
         ? Math.max(
             0,
             Math.ceil(
-              (expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+              (expirationDate.getTime() - now.getTime()) /
+                (1000 * 60 * 60 * 24),
             ),
           ).toString()
         : "0";
@@ -48,7 +49,7 @@ export default function AdminDeals(): ReactElement {
         deal.prixDeal > 0
           ? Math.max(0, Math.round((1 - deal.prixPart / deal.prixDeal) * 100))
           : 0,
-      status: deal.statut === "PUBLIE" ? "published" : "draft",
+      status: deal.statut,
       raw: deal,
     };
   });
@@ -71,7 +72,9 @@ export default function AdminDeals(): ReactElement {
       </header>
 
       {isLoading ? (
-        <div className="text-center py-8 text-muted-foreground">Chargement...</div>
+        <div className="text-center py-8 text-muted-foreground">
+          Chargement...
+        </div>
       ) : (
         <DealsList
           deals={mappedDeals}
@@ -82,7 +85,7 @@ export default function AdminDeals(): ReactElement {
           availableFilters={["search", "category", "status"]}
           showPagination
           itemsPerPage={10}
-          isAdmin={false}
+          isAdmin={true}
           tableProps={{
             actionsRow: ({ row }) => [
               {

@@ -1,4 +1,5 @@
-import { categories } from "@/common/constants/data";
+import { useCategories } from "@/common/api";
+import { mapCategoryToView } from "@/common/api/mappers/catalog";
 import { useI18n } from "@hooks/useI18n";
 import {
   Facebook,
@@ -13,6 +14,8 @@ import { Link } from "react-router-dom";
 const Footer = () => {
   const { t: tFooter } = useI18n("footer");
   const { t: tApp } = useI18n("app");
+  const { data: categoriesData } = useCategories();
+  const categories = (categoriesData ?? []).map(mapCategoryToView);
   const currentYear = new Date().getFullYear();
 
   return (

@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Heart, Trash2, ShoppingBag } from "lucide-react";
-import { mockDeals } from "@/common/constants/data";
+import { useDeals } from "@/common/api";
+import { mapDealToView } from "@/common/api/mappers/catalog";
 import DealCard from "@/common/containers/DealCard";
 import { Button } from "@/common/components/ui/button";
 import { Link } from "react-router-dom";
@@ -8,18 +9,23 @@ import { PATHS } from "@/common/constants/path";
 import Grid from "@/common/components/Grid";
 import { Heading } from "@/common/containers/Heading";
 
-// Simulate saved favorites (first 4 deals for demo)
-const initialFavorites = mockDeals.slice(0, 4).map((d) => d.id);
-
 export default function Favorites() {
-  const [favoriteIds, setFavoriteIds] = useState<number[]>(initialFavorites);
+  const { data: dealsData, isLoading } = useDeals();
+  const deals = (dealsData ?? []).map(mapDealToView);
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
 
-  const favoriteDeals = mockDeals.filter((deal) =>
-    favoriteIds.includes(deal.id)
+  useEffect(() => {
+    if (favoriteIds.length === 0 && deals.length > 0) {
+      setFavoriteIds(deals.slice(0, 4).map((d: any) => String(d.id)));
+    }
+  }, [deals, favoriteIds.length]);
+
+  const favoriteDeals = deals.filter((deal: any) =>
+    favoriteIds.includes(String(deal.id))
   );
 
-  const removeFavorite = (id: number) => {
-    setFavoriteIds((prev) => prev.filter((fid) => fid !== id));
+  const removeFavorite = (id: string) => {
+    setFavoriteIds((prev) => prev.filter((fid) => fid !== String(id)));
   };
 
   const clearAll = () => {
@@ -53,13 +59,15 @@ export default function Favorites() {
       </div>
 
       {/* Favorites Grid */}
-      {favoriteDeals.length > 0 ? (
+      {isLoading ? (
+        <div className="text-center py-8 text-muted-foreground">Chargement...</div>
+      ) : favoriteDeals.length > 0 ? (
         <Grid cols={{ md: 3 }} gap={10}>
           {favoriteDeals.map((deal) => (
             <div key={deal.id} className="relative group">
               <DealCard deal={deal} />
               <button
-                onClick={() => removeFavorite(deal.id)}
+                onClick={() => removeFavorite(String(deal.id))}
                 className="absolute top-3 right-3 p-2 bg-white/90 hover:bg-red-50 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100"
                 title="Retirer des favoris"
               >
