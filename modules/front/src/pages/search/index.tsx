@@ -23,8 +23,7 @@ export default function SearchPage() {
   const allDeals = (dealsData ?? []).map(mapDealToView);
   const categories = (categoriesData ?? []).map(mapCategoryToView);
   const locations = useMemo(
-    () =>
-      [...new Set(allDeals.map((d) => d.city).filter(Boolean))] as string[],
+    () => [...new Set(allDeals.map((d) => d.city).filter(Boolean))] as string[],
     [allDeals],
   );
 
@@ -43,7 +42,7 @@ export default function SearchPage() {
     { value: "popular", label: t("popularity") },
     { value: "price-asc", label: t("priceAsc") },
     { value: "price-desc", label: t("priceDesc") },
-    { value: "discount", label: t("bestDiscount") }
+    { value: "discount", label: t("bestDiscount") },
   ];
 
   const filteredDeals = useMemo(() => {
@@ -55,7 +54,7 @@ export default function SearchPage() {
       results = results.filter(
         (deal) =>
           deal.title.toLowerCase().includes(lowerQuery) ||
-          String(deal.category).toLowerCase().includes(lowerQuery)
+          String(deal.category).toLowerCase().includes(lowerQuery),
       );
     }
 
@@ -238,11 +237,13 @@ export default function SearchPage() {
 
       {/* Results Grid */}
       {isLoadingDeals || isLoadingCategories ? (
-        <div className="text-center py-16 text-muted-foreground">Chargement...</div>
+        <div className="text-center py-16 text-muted-foreground">
+          Chargement...
+        </div>
       ) : filteredDeals.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredDeals.map((deal) => (
-            <DealCard key={deal.id} deal={deal} />
+            <DealCard key={deal.id} deal={deal as any} />
           ))}
         </div>
       ) : (

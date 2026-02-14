@@ -5,7 +5,7 @@ export interface ImageResponse {
   uuid: string;
   urlImage: string;
   nomUnique: string;
-  presignUrl: string;
+  presignUrl: string | null;
   statut: "PENDING" | "UPLOADED" | "FAILED";
   isPrincipal?: boolean;
   dateCreation: string;
@@ -119,6 +119,9 @@ export const useImageUpload = (): UseImageUploadReturn => {
               status: "uploading",
             });
 
+            if (!imageResponse.presignUrl) {
+              throw new Error("Presign URL manquante");
+            }
             await imageService.uploadToMinio(
               imageResponse.presignUrl,
               file,

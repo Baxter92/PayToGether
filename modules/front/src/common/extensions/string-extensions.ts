@@ -9,9 +9,9 @@ declare global {
 }
 
 String.prototype.capitalize = function (): string {
-  return capitalize(this);
+  return capitalize(this as string);
 };
 
 String.prototype.capitalizeWords = function (): string {
-  return capitalizeWords(this);
+  return capitalizeWords(this as string);
 };

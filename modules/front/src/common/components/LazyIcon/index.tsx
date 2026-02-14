@@ -27,7 +27,6 @@ export function getLazyIcon(name: string) {
 export function LazyIcon({
   name,
   size = 20,
-  className,
 }: {
   name: string;
   size?: number;
@@ -40,7 +39,7 @@ export function LazyIcon({
         <span style={{ display: "inline-block", width: size, height: size }} />
       }
     >
-      <IconComp size={size} className={className} />
+      <IconComp />
     </Suspense>
   );
 }

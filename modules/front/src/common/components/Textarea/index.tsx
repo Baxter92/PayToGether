@@ -46,7 +46,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       onChange,
       ...props
     },
-    ref
+    ref,
   ) => {
     const wouldBeDisabled = !!(disabled || loading || props.readOnly);
 
@@ -64,7 +64,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           : "text-sm p-3"; // md
 
     // --- Debounce logic ---
-    const debounceTimer = React.useRef<number | null>(null);
+    const debounceTimer = React.useRef<number | NodeJS.Timeout | null>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       if (!debounce || !onChange) {
@@ -100,7 +100,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
               ? "border-destructive/80 focus-within:ring-destructive/30"
               : "border-input focus-within:ring-ring/30",
             wouldBeDisabled ? "opacity-60 pointer-events-none" : "opacity-100",
-            "min-h-[80px]"
+            "min-h-[80px]",
           )}
         >
           {/* Left icon */}
@@ -118,7 +118,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
               sizeClasses,
               leftIcon ? "pl-10" : "",
               rightIcon || loading ? "pr-10" : "",
-              className
+              className,
             )}
             disabled={wouldBeDisabled}
             aria-invalid={!!error || undefined}
@@ -159,7 +159,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         ) : null}
       </div>
     );
-  }
+  },
 );
 
 Textarea.displayName = "Textarea";

@@ -26,12 +26,6 @@ import { dealSchema } from "@/common/schemas/deal.schema";
 const MAX_IMAGES = 5;
 const CROP_ASPECT = 4 / 3;
 
-const PACKAGING_ITEMS = [
-  { label: "Sur place", value: "on-site" },
-  { label: "À emporter", value: "takeaway" },
-] as const;
-
-const CURRENCY_ITEMS = [{ label: "Dollar", value: "USD" }] as const;
 
 /* ==============================
    Helpers
@@ -72,7 +66,7 @@ const buildPayload = (formData: any, now: string): CreateDealDTO => {
       (file, index): Partial<ImageResponse> => ({
         urlImage: file.name,
         nomUnique: file.name,
-        statut: null,
+        statut: "PENDING",
         isPrincipal: index === 0,
         presignUrl: null,
         file,
@@ -544,19 +538,13 @@ export function CreateDealModal({
       },
       {
         title: "Tarification",
-        columns: 3,
+        columns: 2,
         fields: [
           { type: "number", name: "price", label: "Prix de la part (USD)" },
           {
             type: "number",
             name: "originalPrice",
             label: "Prix initial (USD)",
-          },
-          {
-            type: "select",
-            name: "currency",
-            label: "Devise",
-            items: CURRENCY_ITEMS,
           },
         ],
       },
@@ -605,19 +593,13 @@ export function CreateDealModal({
       },
       {
         title: "Fournisseur & logistique",
-        columns: 2,
+        columns: 1,
         fields: [
           {
             type: "select" as const,
             name: "merchantId",
             label: "Nom du fournisseur",
             items: userItems,
-          },
-          {
-            type: "select",
-            name: "packagingMethod",
-            label: "Méthode de packaging",
-            items: PACKAGING_ITEMS,
           },
         ],
       },

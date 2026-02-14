@@ -62,7 +62,7 @@ export class ApiClient {
     ...args: Parameters<NonNullable<ApiPlugin[K]>>
   ) {
     for (const plugin of this.plugins) {
-      const fn = plugin[hook];
+      const fn = plugin[hook] as any;
       if (!fn) continue;
       const result = await fn(...args);
       if (result !== undefined) return result;

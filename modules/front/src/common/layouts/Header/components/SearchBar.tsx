@@ -60,7 +60,9 @@ const SearchBar = ({
 }: SearchBarProps) => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [internalValue, setInternalValue] = useState(defaultValue);
-  const [debounceTimeout, setDebounceTimeout] = useState<number | null>(null);
+  const [debounceTimeout, setDebounceTimeout] = useState<
+    number | NodeJS.Timeout | null
+  >(null);
 
   // Utiliser la valeur contrôlée si fournie, sinon la valeur interne
   const currentValue = value !== undefined ? value : internalValue;

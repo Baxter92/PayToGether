@@ -47,7 +47,7 @@ export const mapDealToView = (deal: DealDTO) => {
     city: deal.ville || "",
     discount,
     popular: false,
-    status: deal.statut === "PUBLIE" ? "published" : "draft",
+    status: deal.statut,
     raw: deal,
   };
 };

@@ -8,7 +8,6 @@ export const dealSchema = z.object({
 
   price: z.number().min(0, "Le prix doit etre positif"),
   originalPrice: z.number().optional(),
-  currency: z.enum(["USD"]),
 
   partsTotal: z.number().min(1, "Le nombre de parts est requis"),
   minRequired: z.number().min(1, "Le minimum requis doit etre superieur a 0"),
@@ -20,9 +19,8 @@ export const dealSchema = z.object({
   highlights: z.string().optional(),
   whatsIncluded: z.string().optional(),
 
-  status: z.enum(Object.entries(StatutDeal).map(([key, value]) => value)),
+  status: z.enum(Object.entries(StatutDeal).map(([_, value]) => value)),
 
-  supplierName: z.string().optional(),
   packagingMethod: z.string().optional(),
   merchantId: z.string().min(1, "Le fournisseur est requis"),
   images: z
