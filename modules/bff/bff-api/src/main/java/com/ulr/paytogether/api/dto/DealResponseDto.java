@@ -1,9 +1,6 @@
 package com.ulr.paytogether.api.dto;
 
 import com.ulr.paytogether.core.enumeration.StatutDeal;
-import com.ulr.paytogether.core.modele.ImageDealModele;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.Builder;
 import lombok.Data;
 
@@ -41,7 +38,7 @@ private UUID categorieUuid;
 
 private String categorieNom;
 
-private List<ImageDealModele> listeImages;
+private List<ImageDealDto> listeImages;
 
 private List<String> listePointsForts;
 

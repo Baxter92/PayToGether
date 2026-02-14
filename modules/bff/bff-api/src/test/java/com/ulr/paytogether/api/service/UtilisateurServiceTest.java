@@ -1,5 +1,6 @@
 package com.ulr.paytogether.api.service;
 
+import com.ulr.paytogether.core.domaine.impl.UtilisateurServiceImpl;
 import com.ulr.paytogether.core.domaine.validator.UtilisateurValidator;
 import com.ulr.paytogether.core.enumeration.RoleUtilisateur;
 import com.ulr.paytogether.core.enumeration.StatutUtilisateur;
@@ -34,7 +35,7 @@ class UtilisateurServiceTest {
     private UtilisateurValidator utilisateurValidator;
 
     @InjectMocks
-    private UtilisationServiceImpl utilisateurService;
+    private UtilisateurServiceImpl utilisateurService;
 
     private UtilisateurModele utilisateur;
     private UUID uuidUtilisateur;

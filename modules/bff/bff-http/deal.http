@@ -12,16 +12,26 @@ Content-Type: application/json
   "dateDebut": "2026-02-09T10:00:00",
   "dateFin": "2026-12-31T23:59:59",
   "dateExpiration": "2026-12-31T23:59:59",
-  "categorieUuid": "59682a41-7f68-480d-bb30-ebd04306948d",
+  "categorieUuid": "b1ce033d-7822-4ba8-8b7c-8bf4b1d4dd03",
   "categorieNom": "POISSON",
-  "createurUuid": "eba8247c-a41c-4929-80e5-233a0677244e",
-  "createurNom": "Jean Doe",
+  "createurUuid": "cac47426-a5fa-4326-b9e3-dce32b39a41c",
+  "createurNom": "Jean Dupont",
   "statut": "BROUILLON",
   "ville": "Alberta",
   "pays": "Canada",
   "listeImages": [
-    "image1.jpg",
-    "image2.jpg"
+    {
+      "urlImage": "deal_image_1.jpg",
+      "isPrincipal": true,
+      "presignUrl": null,
+      "statut": null
+    },
+    {
+      "urlImage": "deal_image_2.jpg",
+      "isPrincipal": false,
+      "presignUrl": null,
+      "statut": null
+    }
   ],
   "listePointsForts": [
     "Point fort 1",
@@ -58,7 +68,12 @@ Content-Type: application/json
   "ville": "Montreal",
   "pays": "Canada",
   "listeImages": [
-    "image1_updated.jpg"
+    {
+      "urlImage": "deal_image_updated.jpg",
+      "isPrincipal": true,
+      "presignUrl": null,
+      "statut": null
+    }
   ],
   "listePointsForts": [
     "Nouveau point fort"

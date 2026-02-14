@@ -8,7 +8,7 @@ Content-Type: application/json
   "email": "jean.dupont@example.com",
   "motDePasse": "MotDePasse123!",
   "statut": "ACTIF",
-  "role": "UTILISATEUR",
+  "role": "VENDEUR",
   "photoProfil": "photo_profil.jpg"
 }
 

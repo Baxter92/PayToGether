@@ -4,7 +4,6 @@ import com.ulr.paytogether.api.dto.DealDTO;
 import com.ulr.paytogether.api.dto.DealResponseDto;
 import com.ulr.paytogether.core.modele.CategorieModele;
 import com.ulr.paytogether.core.modele.DealModele;
-import com.ulr.paytogether.core.modele.ImageDealModele;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +12,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DealMapper {
+
+    private final ImageDealMapper imageDealMapper;
+
+    public DealMapper(ImageDealMapper imageDealMapper) {
+        this.imageDealMapper = imageDealMapper;
+    }
     /**
      * Convertit une entité Deal en DTO
      */
@@ -35,7 +40,10 @@ public class DealMapper {
                 .createurNom(deal.getCreateur() != null ? deal.getCreateur().getNom() + " " + deal.getCreateur().getPrenom() : null)
                 .categorieUuid(deal.getCategorie() != null ? deal.getCategorie().getUuid() : null)
                 .categorieNom(deal.getCategorie() != null ? deal.getCategorie().getNom() : null)
-                .listeImages(deal.getListeImages())
+                .listeImages(deal.getListeImages() != null ?
+                    deal.getListeImages().stream()
+                        .map(imageDealMapper::modeleVersDto)
+                        .toList() : null)
                 .listePointsForts(deal.getListePointsForts())
                 .dateExpiration(deal.getDateExpiration())
                 .ville(deal.getVille())
@@ -62,11 +70,10 @@ public class DealMapper {
                 .dateDebut(dto.getDateDebut())
                 .dateFin(dto.getDateFin())
                 .statut(dto.getStatut())
-                .listeImages(dto.getListeImages() != null ? dto.getListeImages().stream().map(url ->
-                    ImageDealModele.builder()
-                            .urlImage(url)
-                            .build()
-                ).toList() : null)
+                .listeImages(dto.getListeImages() != null ?
+                    dto.getListeImages().stream()
+                        .map(imageDealMapper::dtoVersModele)
+                        .toList() : null)
                 .createur(dto.getCreateurUuid() != null ? UtilisateurModele.builder()
                         .uuid(dto.getCreateurUuid())
                         .build() : null)
@@ -96,11 +103,10 @@ public class DealMapper {
         deal.setDateDebut(dto.getDateDebut());
         deal.setDateFin(dto.getDateFin());
         deal.setStatut(dto.getStatut());
-        deal.setListeImages(dto.getListeImages() != null ? dto.getListeImages().stream().map(url ->
-            ImageDealModele.builder()
-                    .urlImage(url)
-                    .build()
-        ).toList() : null);
+        deal.setListeImages(dto.getListeImages() != null ?
+            dto.getListeImages().stream()
+                .map(imageDealMapper::dtoVersModele)
+                .toList() : null);
         deal.setCreateur(dto.getCreateurUuid() != null ? UtilisateurModele.builder()
                 .uuid(dto.getCreateurUuid())
                 .build() : null);
