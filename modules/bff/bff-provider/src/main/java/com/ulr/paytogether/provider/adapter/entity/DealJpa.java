@@ -61,7 +61,7 @@ public class DealJpa {
     @Column(nullable = false)
     private StatutDeal statut;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "utilisateur_uuid", nullable = false)
     private UtilisateurJpa marchandJpa;
 
