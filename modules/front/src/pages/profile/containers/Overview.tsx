@@ -1,13 +1,16 @@
 import { useI18n } from "@hooks/useI18n";
 import { VStack } from "@/common/components";
 import Grid from "@/common/components/Grid";
-import { mockDeals } from "@/common/constants/data";
+import { useDeals } from "@/common/api";
+import { mapDealToView } from "@/common/api/mappers/catalog";
 import DealsList from "@/common/containers/DealList";
 import { Heading } from "@/common/containers/Heading";
 import type { JSX } from "react";
 
 export default function Overview(): JSX.Element {
   const { t } = useI18n("profile");
+  const { data: dealsData } = useDeals();
+  const deals = (dealsData ?? []).map(mapDealToView);
 
   return (
     <section>
@@ -42,7 +45,7 @@ export default function Overview(): JSX.Element {
       <VStack className="mt-6">
         <Heading level={3} title={t("profile.recommendedForYou")} underline />
         <DealsList
-          deals={mockDeals}
+          deals={deals}
           showFilters={false}
           showPagination={false}
           itemsPerPage={3}

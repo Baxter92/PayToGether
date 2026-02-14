@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 import { useState } from "react";
 import { Search, MoreHorizontal, Mail, Ban, Shield } from "lucide-react";
+import { useUsers } from "@/common/api";
 import { Button } from "@/common/components/ui/button";
 import { Input } from "@/common/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/common/components/ui/card";
@@ -27,66 +28,25 @@ import {
 import { formatCurrency } from "@/common/utils/formatCurrency";
 import { useI18n } from "@/common/hooks/useI18n";
 
-const mockUsers = [
-  {
-    id: 1,
-    name: "Jean Dupont",
-    email: "jean.dupont@email.com",
-    avatar: "",
-    orders: 12,
-    spent: 450,
-    role: "user",
-    status: "active",
-  },
-  {
-    id: 2,
-    name: "Marie Martin",
-    email: "marie.martin@email.com",
-    avatar: "",
-    orders: 8,
-    spent: 320,
-    role: "user",
-    status: "active",
-  },
-  {
-    id: 3,
-    name: "Pierre Bernard",
-    email: "pierre.bernard@email.com",
-    avatar: "",
-    orders: 25,
-    spent: 890,
-    role: "admin",
-    status: "active",
-  },
-  {
-    id: 4,
-    name: "Sophie Laurent",
-    email: "sophie.laurent@email.com",
-    avatar: "",
-    orders: 3,
-    spent: 120,
-    role: "user",
-    status: "banned",
-  },
-  {
-    id: 5,
-    name: "Lucas Petit",
-    email: "lucas.petit@email.com",
-    avatar: "",
-    orders: 15,
-    spent: 560,
-    role: "user",
-    status: "active",
-  }
-];
-
 export default function AdminUsers(): ReactElement {
   const [searchQuery, setSearchQuery] = useState("");
   const { t: tAdmin } = useI18n("admin");
   const { t: tRoles } = useI18n("roles");
   const { t: tStatus } = useI18n("status");
+  const { data: usersData, isLoading, error } = useUsers();
 
-  const filteredUsers = mockUsers.filter(
+  const users = (usersData ?? []).map((user: any) => ({
+    id: user.uuid,
+    name: [user.prenom, user.nom].filter(Boolean).join(" ").trim(),
+    email: user.email,
+    avatar: user.photoProfil || "",
+    orders: 0,
+    spent: 0,
+    role: user.role === "ADMIN" ? "admin" : "user",
+    status: user.statut === "ACTIF" ? "active" : "banned",
+  }));
+
+  const filteredUsers = users.filter(
     (user) =>
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase())
@@ -148,6 +108,16 @@ export default function AdminUsers(): ReactElement {
           </div>
         </CardHeader>
         <CardContent>
+          {isLoading && (
+            <div className="text-center py-8 text-muted-foreground">
+              Chargement...
+            </div>
+          )}
+          {error && (
+            <div className="text-center py-8 text-destructive">
+              {error.message}
+            </div>
+          )}
           <Table>
             <TableHeader>
               <TableRow>
@@ -166,7 +136,9 @@ export default function AdminUsers(): ReactElement {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUsers.map((user) => (
+              {!isLoading &&
+                !error &&
+                filteredUsers.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -217,7 +189,7 @@ export default function AdminUsers(): ReactElement {
                     </DropdownMenu>
                   </TableCell>
                 </TableRow>
-              ))}
+                ))}
             </TableBody>
           </Table>
         </CardContent>

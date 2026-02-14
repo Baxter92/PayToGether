@@ -15,6 +15,7 @@ import java.util.UUID;
 /**
  * Contrôleur REST pour les catégories
  */
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/categories")
 @RequiredArgsConstructor

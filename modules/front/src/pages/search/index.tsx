@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Search, SlidersHorizontal, X, MapPin } from "lucide-react";
-import { mockDeals, categories } from "@/common/constants/data";
+import { useCategories, useDeals } from "@/common/api";
+import { mapCategoryToView, mapDealToView } from "@/common/api/mappers/catalog";
 import DealCard from "@/common/containers/DealCard";
 import { Button } from "@/common/components/ui/button";
 import {
@@ -13,10 +14,20 @@ import {
 } from "@/common/components/ui/select";
 import { useI18n } from "@hooks/useI18n";
 
-const locations = ["Douala", "Yaoundé", "Bafoussam", "Garoua"];
-
 export default function SearchPage() {
   const { t } = useI18n("search");
+  const { data: dealsData, isLoading: isLoadingDeals } = useDeals();
+  const { data: categoriesData, isLoading: isLoadingCategories } =
+    useCategories();
+
+  const allDeals = (dealsData ?? []).map(mapDealToView);
+  const categories = (categoriesData ?? []).map(mapCategoryToView);
+  const locations = useMemo(
+    () =>
+      [...new Set(allDeals.map((d) => d.city).filter(Boolean))] as string[],
+    [allDeals],
+  );
+
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
   const categoryParam = searchParams.get("category") || "";
@@ -36,7 +47,7 @@ export default function SearchPage() {
   ];
 
   const filteredDeals = useMemo(() => {
-    let results = [...mockDeals];
+    let results = [...allDeals];
 
     // Filter by search query
     if (query) {
@@ -44,13 +55,15 @@ export default function SearchPage() {
       results = results.filter(
         (deal) =>
           deal.title.toLowerCase().includes(lowerQuery) ||
-          deal.category.toLowerCase().includes(lowerQuery)
+          String(deal.category).toLowerCase().includes(lowerQuery)
       );
     }
 
     // Filter by category
     if (selectedCategory) {
-      results = results.filter((deal) => deal.category === selectedCategory);
+      results = results.filter(
+        (deal: any) => deal.raw?.categorieUuid === selectedCategory,
+      );
     }
 
     // Filter by location
@@ -74,7 +87,7 @@ export default function SearchPage() {
     }
 
     return results;
-  }, [query, selectedCategory, selectedLocation, sortBy]);
+  }, [allDeals, query, selectedCategory, selectedLocation, sortBy]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,7 +164,7 @@ export default function SearchPage() {
                 <SelectContent>
                   <SelectItem value="">{t("allCategories")}</SelectItem>
                   {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.name}>
+                    <SelectItem key={cat.id} value={String(cat.id)}>
                       {cat.name}
                     </SelectItem>
                   ))}
@@ -224,7 +237,9 @@ export default function SearchPage() {
       </p>
 
       {/* Results Grid */}
-      {filteredDeals.length > 0 ? (
+      {isLoadingDeals || isLoadingCategories ? (
+        <div className="text-center py-16 text-muted-foreground">Chargement...</div>
+      ) : filteredDeals.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredDeals.map((deal) => (
             <DealCard key={deal.id} deal={deal} />

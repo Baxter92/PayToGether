@@ -6,6 +6,7 @@ import {
 } from "react-hook-form";
 import type * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 
 import Select, { type ISelectProps } from "@components/Select";
 import RadioGroup, { type IRadioGroupProps } from "@components/RadioGroup";
@@ -26,6 +27,8 @@ import type { IDateInputProps } from "@/common/components/DateInput";
 import type { ITimeInputProps } from "@/common/components/TimeInput";
 import type { IDateTimeInputProps } from "@/common/components/DateTimeInput";
 import { cn } from "@/common/lib/utils";
+import type { IIconPickerProps } from "@/common/components/IconPicker";
+import IconPicker from "@/common/components/IconPicker";
 
 /* ==============================
    Types
@@ -50,6 +53,7 @@ export type IFieldConfig = {
   label: string;
   colSpan?: number;
   disabled?: boolean;
+  hidden?: boolean; // ✅ NOUVEAU: pour cacher dynamiquement des champs
   render?: (field: IFieldConfig, form: UseFormReturn<any>) => React.ReactNode;
 } & (
   | ({ type: "text" | "email" | "number" | "password" } & InputProps)
@@ -60,6 +64,7 @@ export type IFieldConfig = {
   | ({ type: "date" } & IDateInputProps)
   | ({ type: "time" } & ITimeInputProps)
   | ({ type: "datetime" } & IDateTimeInputProps)
+  | ({ type: "iconPicker" } & IIconPickerProps)
   | ({ type: "file" } & InputProps & {
         maxFiles?: number;
       })
@@ -71,6 +76,7 @@ export interface IFieldGroup {
   columns?: number;
   fields: IFieldConfig[];
   className?: string;
+  hidden?: boolean; // ✅ NOUVEAU: pour cacher dynamiquement des groupes
 }
 
 export interface IFormSubmitOptions<T = FieldValues> {
@@ -85,14 +91,20 @@ export type IFormContainerConfig<T = FieldValues> = {
   columns?: number;
   schema?: z.ZodSchema<any>;
   defaultValues?: Partial<T>;
-  readOnly?: boolean; // ✅ NOUVELLE PROP
+  readOnly?: boolean;
+  resetOnSuccess?: boolean; // ✅ NOUVEAU: reset après succès
+  resetOnDefaultValuesChange?: boolean; // ✅ NOUVEAU: reset quand defaultValues change
   onSubmit?: (options: IFormSubmitOptions<T>) => void | Promise<void>;
+  onError?: (errors: any) => void; // ✅ NOUVEAU: callback pour gérer les erreurs
   submitLabel?: string;
   resetLabel?: string;
   showSubmitButton?: boolean;
   showResetButton?: boolean;
   submitBtnProps?: IButtonProps;
   resetBtnProps?: IButtonProps;
+  isLoading?: boolean;
+  className?: string; // ✅ NOUVEAU: className pour le form
+  buttonsClassName?: string; // ✅ NOUVEAU: className pour la zone de boutons
 };
 
 /* ==============================
@@ -107,13 +119,19 @@ const Form = <T extends FieldValues>({
   schema,
   defaultValues,
   readOnly = false,
+  resetOnSuccess = false,
+  resetOnDefaultValuesChange = true,
   onSubmit,
+  onError,
   submitLabel = "Soumettre",
   resetLabel = "Réinitialiser",
   showSubmitButton = true,
   showResetButton = true,
   submitBtnProps,
   resetBtnProps,
+  isLoading,
+  className,
+  buttonsClassName,
   ...props
 }: IFormContainerConfig<T> &
   Omit<React.ComponentProps<"form">, "onSubmit">) => {
@@ -129,8 +147,22 @@ const Form = <T extends FieldValues>({
     control,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isSubmitSuccessful },
   } = form;
+
+  // ✅ NOUVEAU: Reset automatique après succès
+  useEffect(() => {
+    if (resetOnSuccess && isSubmitSuccessful) {
+      reset(defaultValues as any);
+    }
+  }, [isSubmitSuccessful, resetOnSuccess, reset, defaultValues]);
+
+  // ✅ NOUVEAU: Reset quand defaultValues change (utile pour edit mode)
+  useEffect(() => {
+    if (resetOnDefaultValuesChange && defaultValues) {
+      reset(defaultValues as any);
+    }
+  }, [defaultValues, resetOnDefaultValuesChange, reset]);
 
   const normalizedGroups: IFieldGroup[] =
     groups || (fields ? [{ fields, columns }] : []);
@@ -141,9 +173,10 @@ const Form = <T extends FieldValues>({
       2: "grid-cols-1 md:grid-cols-2",
       3: "grid-cols-1 md:grid-cols-3",
       4: "grid-cols-1 md:grid-cols-2 lg:grid-cols-4",
-    }[cols] || "grid-cols-1");
+    })[cols] || "grid-cols-1";
 
   const renderField = (field: IFieldConfig) => {
+    if (field.hidden) return null; // ✅ NOUVEAU: support du hidden
     if (field.render) return field.render(field, form);
 
     const error = errors[field.name]?.message as string | undefined;
@@ -180,7 +213,7 @@ const Form = <T extends FieldValues>({
       );
     }
 
-    /* ===== SELECT (FULL WIDTH FIX) ===== */
+    /* ===== SELECT ===== */
     if (field.type === "select") {
       return (
         <Controller
@@ -311,42 +344,79 @@ const Form = <T extends FieldValues>({
       );
     }
 
+    if (field.type === "iconPicker") {
+      return (
+        <Controller
+          name={field.name}
+          control={control}
+          render={({ field: f }) => (
+            <IconPicker
+              {...field}
+              value={f.value}
+              onValueChange={f.onChange}
+              disabled={isDisabled}
+              triggerClassName="w-full"
+              error={error}
+            />
+          )}
+        />
+      );
+    }
+
     return null;
   };
-
   return (
     <form
-      onSubmit={handleSubmit((data) => onSubmit?.({ data, form }))}
+      className={className}
       {...props}
+      onSubmit={handleSubmit(
+        (data) => onSubmit?.({ data, form }),
+        onError, // ✅ NOUVEAU: callback d'erreur
+      )}
     >
-      {normalizedGroups.map((group, idx) => (
-        <div
-          key={idx}
-          className={cn(
-            "mb-6",
-            groups && "shadow p-4 rounded-md",
-            group.className
-          )}
-        >
-          {group.title && (
-            <h3 className="text-lg font-semibold mb-2">{group.title}</h3>
-          )}
-          {group.description && (
-            <p className="text-sm mb-4">{group.description}</p>
-          )}
+      {normalizedGroups
+        .filter((group) => !group.hidden) // ✅ NOUVEAU: filtrer les groupes cachés
+        .map((group, idx) => (
+          <div
+            key={idx}
+            className={cn(
+              "mb-6",
+              groups && "shadow p-4 rounded-md",
+              group.className,
+            )}
+          >
+            {group.title && (
+              <h3 className="text-lg font-semibold mb-2">{group.title}</h3>
+            )}
+            {group.description && (
+              <p className="text-sm text-muted-foreground mb-4">
+                {group.description}
+              </p>
+            )}
 
-          <div className={cn("grid gap-4", getColClass(group.columns))}>
-            {group.fields.map((field) => (
-              <div key={field.name}>{renderField(field)}</div>
-            ))}
+            <div className={cn("grid gap-4", getColClass(group.columns))}>
+              {group.fields.map((field) => (
+                <div
+                  key={field.name}
+                  className={cn(
+                    field.colSpan && `col-span-${field.colSpan}`, // ✅ Support colSpan
+                  )}
+                >
+                  {renderField(field)}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
 
       {!readOnly && (
-        <HStack spacing={4}>
+        <HStack spacing={4} className={buttonsClassName}>
           {showSubmitButton && (
-            <Button type="submit" loading={isSubmitting} {...submitBtnProps}>
+            <Button
+              type="submit"
+              loading={isSubmitting || isLoading}
+              {...submitBtnProps}
+            >
               {submitLabel}
             </Button>
           )}
@@ -354,6 +424,7 @@ const Form = <T extends FieldValues>({
             <Button
               type="button"
               variant="secondary"
+              disabled={isSubmitting || isLoading}
               onClick={() => reset(defaultValues as any)}
               {...resetBtnProps}
             >

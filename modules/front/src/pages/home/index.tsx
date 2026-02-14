@@ -1,7 +1,9 @@
-import { mockDeals, popularDeals, slides } from "@/common/constants/data";
+import { slides } from "@/common/constants/data";
+import { useDeals } from "@/common/api";
+import { mapDealToView } from "@/common/api/mappers/catalog";
 import { useI18n } from "@hooks/useI18n";
 import Hero from "@containers/Hero";
-import type { JSX } from "react";
+import { useMemo, type JSX } from "react";
 import DealsList from "@/common/containers/DealList";
 import { Heading } from "@/common/containers/Heading";
 import { VStack } from "@/common/components";
@@ -11,6 +13,17 @@ import { PATHS } from "@/common/constants/path";
 
 export default function Home(): JSX.Element {
   const { t } = useI18n("home");
+  const { data: dealsData, isLoading } = useDeals();
+  const allDeals = (dealsData ?? []).map(mapDealToView);
+
+  const featuredDeals = useMemo(() => allDeals.slice(0, 4), [allDeals]);
+  const popularDeals = useMemo(
+    () =>
+      [...allDeals]
+        .sort((a, b) => (b.discount || 0) - (a.discount || 0))
+        .slice(0, 4),
+    [allDeals],
+  );
 
   return (
     <div className="mx-auto">
@@ -39,7 +52,7 @@ export default function Home(): JSX.Element {
             </Button>
           </div>
           <DealsList
-            deals={mockDeals}
+            deals={featuredDeals}
             showFilters={false}
             showPagination={false}
             itemsPerPage={4}
@@ -109,7 +122,11 @@ export default function Home(): JSX.Element {
             </Button>
           </div>
 
-          <DealsList deals={mockDeals} showFilters={false} />
+          {isLoading ? (
+            <div className="text-center py-8 text-muted-foreground">Chargement...</div>
+          ) : (
+            <DealsList deals={allDeals} showFilters={false} />
+          )}
         </VStack>
       </section>
     </div>

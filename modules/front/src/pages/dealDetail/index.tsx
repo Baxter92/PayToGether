@@ -8,7 +8,8 @@ import { Card, CardContent } from "@components/ui/card";
 import { VStack } from "@/common/components";
 import { Heading } from "@/common/containers/Heading";
 import DealsList from "@/common/containers/DealList";
-import { mockDeals } from "@/common/constants/data";
+import { useDeals } from "@/common/api";
+import { mapDealToView } from "@/common/api/mappers/catalog";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/common/components/ui/button";
 
@@ -57,6 +58,8 @@ export default function DealDetail({
 }: {
   deal?: Deal;
 }): JSX.Element {
+  const { data: dealsData } = useDeals();
+  const similarDeals = (dealsData ?? []).map(mapDealToView);
   const navigate = useNavigate();
 
   const [qty, setQty] = useState(1);
@@ -121,7 +124,7 @@ export default function DealDetail({
             className="mt-8"
           />
           <DealsList
-            deals={mockDeals}
+            deals={similarDeals}
             showFilters={false}
             itemsPerPage={4}
             showPagination={false}

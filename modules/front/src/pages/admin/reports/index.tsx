@@ -1,5 +1,5 @@
 import type React from "react";
-import { useState, type ReactElement } from "react";
+import { useMemo, useState, type ReactElement } from "react";
 import { useI18n } from "@/common/hooks/useI18n";
 import {
   BarChart3,
@@ -27,7 +27,8 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { mockDeals } from "@/common/constants/data";
+import { useDeals } from "@/common/api";
+import { mapDealToView } from "@/common/api/mappers/catalog";
 import {
   Card,
   CardContent,
@@ -39,95 +40,12 @@ import { Button } from "@/common/components/ui/button";
 import { Dropdown } from "@/common/components/Dropdown";
 import { formatCurrency } from "@/common/utils/formatCurrency";
 
-const totalRevenue = mockDeals.reduce(
-  (sum, deal) => sum + deal.originalPrice * deal.sold,
-  0
-);
-const totalSold = mockDeals.reduce((sum, deal) => sum + deal.sold, 0);
-const totalDeals = mockDeals.length;
-const bovinDeals = mockDeals.filter((deal) => deal.category === "bovins");
-const poissonDeals = mockDeals.filter((deal) => deal.category === "poissons");
-const bovinRevenue = bovinDeals.reduce(
-  (sum, deal) => sum + deal.originalPrice * deal.sold,
-  0
-);
-const poissonRevenue = poissonDeals.reduce(
-  (sum, deal) => sum + deal.originalPrice * deal.sold,
-  0
-);
-
 interface StatCard {
   title: string;
   value: string;
   change: number;
   icon: React.ComponentType<{ className?: string }>;
 }
-
-const statsCards: StatCard[] = [
-  {
-    title: "Revenus totaux",
-    value: formatCurrency(totalRevenue),
-    change: 12.5,
-    icon: DollarSign,
-  },
-  {
-    title: "Unités vendues",
-    value: totalSold.toString(),
-    change: 8.2,
-    icon: ShoppingCart,
-  },
-  {
-    title: "Deals actifs",
-    value: totalDeals.toString(),
-    change: 15.7,
-    icon: Tag,
-  },
-  {
-    title: "Villes",
-    value: [...new Set(mockDeals.map((d) => d.city))].length.toString(),
-    change: 5.0,
-    icon: Users,
-  }
-];
-
-const topDeals = mockDeals
-  .sort((a, b) => b.sold - a.sold)
-  .slice(0, 5)
-  .map((deal) => ({
-    name: deal.title,
-    sales: deal.sold,
-    revenue: deal.originalPrice * deal.sold,
-  }));
-
-const cityStats = mockDeals.reduce((acc, deal) => {
-  const existing = acc.find((d) => d.city === deal.city);
-  if (existing) {
-    existing.deals += 1;
-    existing.revenue += deal.originalPrice * deal.sold;
-    existing.sold += deal.sold;
-  } else {
-    acc.push({
-      city: deal.city,
-      deals: 1,
-      revenue: deal.originalPrice * deal.sold,
-      sold: deal.sold,
-    });
-  }
-  return acc;
-}, [] as Array<{ city: string; deals: number; revenue: number; sold: number }>);
-
-const categoryData = [
-  {
-    name: "Bovins",
-    value: Math.round((bovinRevenue / totalRevenue) * 100),
-    revenue: bovinRevenue,
-  },
-  {
-    name: "Poissons",
-    value: Math.round((poissonRevenue / totalRevenue) * 100),
-    revenue: poissonRevenue,
-  }
-];
 
 const marchandData = [
   {
@@ -150,16 +68,9 @@ const marchandData = [
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
 
-const monthlySalesData = [
-  { month: "Jan", revenue: 800000, orders: 120, sold: 450 },
-  { month: "Fév", revenue: 950000, orders: 145, sold: 520 },
-  { month: "Mar", revenue: 1100000, orders: 160, sold: 580 },
-  { month: "Avr", revenue: 1250000, orders: 175, sold: 620 },
-  { month: "Mai", revenue: 1180000, models: 168, sold: 610 },
-  { month: "Juin", revenue: totalRevenue, orders: totalSold, sold: totalSold }
-];
-
 export default function AdminReports(): ReactElement {
+  const { data: dealsData, isLoading } = useDeals();
+  const deals = (dealsData ?? []).map(mapDealToView);
   const [selectedPeriod, setSelectedPeriod] = useState("30d");
   const [selectedCategory, setSelectedCategory] = useState<string | string[]>(
     "all"
@@ -167,7 +78,103 @@ export default function AdminReports(): ReactElement {
   const [selectedCity, setSelectedCity] = useState<string | string[]>("all");
   const { t: tAdmin } = useI18n("admin");
 
-  const cities = [...new Set(mockDeals.map((d) => d.city))];
+  const totalRevenue = useMemo(
+    () => deals.reduce((sum, deal) => sum + deal.originalPrice * deal.sold, 0),
+    [deals],
+  );
+  const totalSold = useMemo(
+    () => deals.reduce((sum, deal) => sum + deal.sold, 0),
+    [deals],
+  );
+  const totalDeals = deals.length;
+  const cities = [...new Set(deals.map((d) => d.city))];
+
+  const bovinDeals = deals.filter((deal) => deal.category === "bovins");
+  const poissonDeals = deals.filter((deal) => deal.category === "poissons");
+  const bovinRevenue = bovinDeals.reduce(
+    (sum, deal) => sum + deal.originalPrice * deal.sold,
+    0,
+  );
+  const poissonRevenue = poissonDeals.reduce(
+    (sum, deal) => sum + deal.originalPrice * deal.sold,
+    0,
+  );
+
+  const statsCards: StatCard[] = [
+    {
+      title: "Revenus totaux",
+      value: formatCurrency(totalRevenue),
+      change: 12.5,
+      icon: DollarSign,
+    },
+    {
+      title: "Unités vendues",
+      value: totalSold.toString(),
+      change: 8.2,
+      icon: ShoppingCart,
+    },
+    {
+      title: "Deals actifs",
+      value: totalDeals.toString(),
+      change: 15.7,
+      icon: Tag,
+    },
+    {
+      title: "Villes",
+      value: cities.length.toString(),
+      change: 5.0,
+      icon: Users,
+    },
+  ];
+
+  const topDeals = [...deals]
+    .sort((a, b) => b.sold - a.sold)
+    .slice(0, 5)
+    .map((deal) => ({
+      name: deal.title,
+      sales: deal.sold,
+      revenue: deal.originalPrice * deal.sold,
+    }));
+
+  const cityStats = deals.reduce((acc, deal) => {
+    const existing = acc.find((d) => d.city === deal.city);
+    if (existing) {
+      existing.deals += 1;
+      existing.revenue += deal.originalPrice * deal.sold;
+      existing.sold += deal.sold;
+    } else {
+      acc.push({
+        city: deal.city,
+        deals: 1,
+        revenue: deal.originalPrice * deal.sold,
+        sold: deal.sold,
+      });
+    }
+    return acc;
+  }, [] as Array<{ city: string; deals: number; revenue: number; sold: number }>);
+
+  const categoryData = [
+    {
+      name: "Bovins",
+      value: totalRevenue > 0 ? Math.round((bovinRevenue / totalRevenue) * 100) : 0,
+      revenue: bovinRevenue,
+    },
+    {
+      name: "Poissons",
+      value:
+        totalRevenue > 0 ? Math.round((poissonRevenue / totalRevenue) * 100) : 0,
+      revenue: poissonRevenue,
+    },
+  ];
+
+  const monthlySalesData = [
+    { month: "Jan", revenue: 800000, orders: 120, sold: 450 },
+    { month: "Fev", revenue: 950000, orders: 145, sold: 520 },
+    { month: "Mar", revenue: 1100000, orders: 160, sold: 580 },
+    { month: "Avr", revenue: 1250000, orders: 175, sold: 620 },
+    { month: "Mai", revenue: 1180000, models: 168, sold: 610 },
+    { month: "Juin", revenue: totalRevenue, orders: totalSold, sold: totalSold },
+  ];
 
   const periodItems = [
     { label: "7 derniers jours", value: "7d" },
@@ -189,6 +196,9 @@ export default function AdminReports(): ReactElement {
 
   return (
     <div className="space-y-6">
+      {isLoading && (
+        <div className="text-center py-4 text-muted-foreground">Chargement...</div>
+      )}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-heading font-bold flex items-center gap-2">
