@@ -27,6 +27,8 @@ import type { IDateInputProps } from "@/common/components/DateInput";
 import type { ITimeInputProps } from "@/common/components/TimeInput";
 import type { IDateTimeInputProps } from "@/common/components/DateTimeInput";
 import { cn } from "@/common/lib/utils";
+import type { IIconPickerProps } from "@/common/components/IconPicker";
+import IconPicker from "@/common/components/IconPicker";
 
 /* ==============================
    Types
@@ -62,6 +64,7 @@ export type IFieldConfig = {
   | ({ type: "date" } & IDateInputProps)
   | ({ type: "time" } & ITimeInputProps)
   | ({ type: "datetime" } & IDateTimeInputProps)
+  | ({ type: "iconPicker" } & IIconPickerProps)
   | ({ type: "file" } & InputProps & {
         maxFiles?: number;
       })
@@ -334,6 +337,25 @@ const Form = <T extends FieldValues>({
               value={f.value}
               onChange={f.onChange}
               disabled={isDisabled}
+              error={error}
+            />
+          )}
+        />
+      );
+    }
+
+    if (field.type === "iconPicker") {
+      return (
+        <Controller
+          name={field.name}
+          control={control}
+          render={({ field: f }) => (
+            <IconPicker
+              {...field}
+              value={f.value}
+              onValueChange={f.onChange}
+              disabled={isDisabled}
+              triggerClassName="w-full"
               error={error}
             />
           )}

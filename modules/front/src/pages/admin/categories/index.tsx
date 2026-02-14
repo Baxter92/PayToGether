@@ -51,6 +51,7 @@ import {
   type CreateCategoryDTO,
   type UpdateCategoryDTO,
 } from "@/common/api";
+import { LazyIcon } from "@/common/components/LazyIcon";
 
 type CategoryFormMode = "create" | "edit" | null;
 
@@ -176,7 +177,7 @@ export default function AdminCategories(): ReactElement {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Total catégories</CardDescription>
@@ -185,14 +186,7 @@ export default function AdminCategories(): ReactElement {
             </CardTitle>
           </CardHeader>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Actives</CardDescription>
-            <CardTitle className="text-2xl text-green-600">
-              {categories?.length || 0}
-            </CardTitle>
-          </CardHeader>
-        </Card>
+
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Total deals</CardDescription>
@@ -218,15 +212,14 @@ export default function AdminCategories(): ReactElement {
           ) : (
             <div className="space-y-2">
               {categories.map((category) => {
-                const Icon = category.icone;
                 return (
                   <div
                     key={category.uuid}
                     className="flex items-center gap-4 p-4 border rounded-lg bg-card hover:bg-muted/50 transition-colors"
                   >
-                    {Icon && (
+                    {category.icone && (
                       <span className="text-2xl">
-                        <Icon />
+                        <LazyIcon name={category.icone} size={20} />
                       </span>
                     )}
 
@@ -297,8 +290,6 @@ export default function AdminCategories(): ReactElement {
               icone: selectedCategory?.icone || "",
             }}
             onSubmit={async ({ data }) => {
-              console.log("data", data);
-
               await handleSubmitForm(data);
             }}
             submitLabel={formMode === "create" ? "Créer" : "Enregistrer"}
@@ -333,8 +324,8 @@ export default function AdminCategories(): ReactElement {
               {
                 name: "icone",
                 label: "Icône",
-                type: "text",
-                placeholder: "Ex: utensils",
+                type: "iconPicker",
+                placeholder: "Selectionner une icone",
               },
             ]}
           />

@@ -40,7 +40,11 @@ export function CreateDealModal({
   const [inputValue, setInputValue] = useState("");
   const { data: categoriesData } = useCategories();
   const { data: usersData } = useUsers();
-  const { mutateAsync: createDeal, isPending: isCreating, isUploading } = useCreateDeal();
+  const {
+    mutateAsync: createDeal,
+    isPending: isCreating,
+    isUploading,
+  } = useCreateDeal();
 
   const onCropComplete = useCallback((_area: any, pixels: any) => {
     setCroppedArea(pixels);
@@ -550,9 +554,9 @@ export function CreateDealModal({
             onSubmit={async ({ data }) => {
               try {
                 const formData = data as any;
-                const now = new Date().toISOString();
+                const now = new Date().toISOString().slice(0, 19);
                 const expiration = formData.expiryDate
-                  ? new Date(formData.expiryDate).toISOString()
+                  ? new Date(formData.expiryDate).toISOString().slice(0, 19)
                   : now;
                 const [ville = "", pays = "CM"] = String(
                   formData.location ?? "",
