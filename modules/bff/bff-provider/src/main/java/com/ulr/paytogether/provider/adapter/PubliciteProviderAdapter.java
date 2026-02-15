@@ -41,8 +41,7 @@ public class PubliciteProviderAdapter implements PubliciteProvider {
             List<ImageJpa> imageJpas = publicite.getListeImages().stream()
                     .map(imageModele -> ImageJpa.builder()
                             .uuid(imageModele.getUuid())
-                            .urlImage(Tools.DIRECTORY_PUBLICITES_IMAGES
-                                    + FilenameUtils.getBaseName(imageModele.getUrlImage())
+                            .urlImage(FilenameUtils.getBaseName(imageModele.getUrlImage())
                                     + "_" + System.currentTimeMillis()
                                     + "." + FilenameUtils.getExtension(imageModele.getUrlImage()))
                             .statut(imageModele.getStatut())

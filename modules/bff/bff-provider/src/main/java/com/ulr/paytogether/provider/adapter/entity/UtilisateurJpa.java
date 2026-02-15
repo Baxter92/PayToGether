@@ -66,7 +66,7 @@ public class UtilisateurJpa {
 
     public void setPhotoProfilUnique(String folder, String urlImage) {
         if (this.photoProfil != null) {
-            this.photoProfil.setUrlImage(folder+FilenameUtils.getBaseName(urlImage)+'_'+System.currentTimeMillis()+ "." + FilenameUtils.getExtension(urlImage));
+            this.photoProfil.setUrlImage(FilenameUtils.getBaseName(urlImage)+'_'+System.currentTimeMillis()+ "." + FilenameUtils.getExtension(urlImage));
         }
     }
 
