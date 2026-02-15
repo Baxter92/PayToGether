@@ -34,6 +34,8 @@ export interface CreateUtilisateurDTO {
   email: string;
   motDePasse: string;
   photoProfil?: string;
+  statut: StatutUtilisateurType;
+  role: RoleUtilisateurType;
 }
 
 // Backend: UtilisateurDTO utilise en update (PUT /utilisateurs/{uuid})

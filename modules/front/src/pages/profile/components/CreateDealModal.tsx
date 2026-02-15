@@ -26,7 +26,6 @@ import { dealSchema } from "@/common/schemas/deal.schema";
 const MAX_IMAGES = 5;
 const CROP_ASPECT = 4 / 3;
 
-
 /* ==============================
    Helpers
 ============================== */
@@ -491,7 +490,7 @@ export function CreateDealModal({
         await createDeal(buildPayload(data, now));
         toast.success("Deal créé avec succès");
         onSuccess?.();
-        onClose();
+        // onClose();
       } catch (error: any) {
         toast.error("Erreur lors de la création du deal", {
           description: error?.response?.data?.message || error?.message,

@@ -111,6 +111,8 @@ export const useCreateDeal = () => {
             file: matchedImage?.file as File,
             isPrincipal: f.isPrincipal,
             presignUrl: f.presignUrl as string,
+            id: f.urlImage || "",
+            name: backendFileName || "",
           };
         });
 
@@ -118,12 +120,7 @@ export const useCreateDeal = () => {
       //    uploadImages : (entityType, entityUuid, imagesFromBackend, filesForUpload)
       //    - entityType = "deals"
       //    - entityUuid = dealCree.uuid
-      await uploadImages(
-        "deals",
-        dealCree.uuid,
-        imagesFromBackend as ImageResponse[],
-        filesForUpload,
-      );
+      await uploadImages("deals", dealCree.uuid, filesForUpload);
 
       // 6) Optionnel : récupérer la version finale du deal (avec statuts d'images à jour)
       // Remplace par ton service si tu as dealService.getByUuid

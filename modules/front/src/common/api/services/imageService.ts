@@ -6,6 +6,8 @@ export const imageService = {
     file: File,
     onProgress?: (progress: number) => void,
   ): Promise<void> => {
+    console.log(presignUrl, "image service");
+
     try {
       await apiClient.put(presignUrl, {
         headers: {

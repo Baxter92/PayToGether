@@ -17,6 +17,8 @@ export interface ImageFile {
   file: File;
   isPrincipal?: boolean;
   presignUrl: string;
+  id: string;
+  name: string;
 }
 
 export interface UploadProgress {
@@ -31,7 +33,6 @@ interface UseImageUploadReturn {
   uploadImages: (
     entityType: "deals" | "publicites" | "utilisateurs",
     entityUuid: string,
-    images: ImageResponse[],
     files: ImageFile[],
   ) => Promise<void>;
   progress: Map<string, UploadProgress>;
@@ -67,7 +68,6 @@ export const useImageUpload = (): UseImageUploadReturn => {
     async (
       entityType: "deals" | "publicites" | "utilisateurs",
       entityUuid: string,
-      images: ImageResponse[],
       files: ImageFile[],
     ) => {
       setIsUploading(true);
@@ -83,22 +83,14 @@ export const useImageUpload = (): UseImageUploadReturn => {
         });
 
         // Uploader chaque image
-        const uploadPromises = images.map(async (imageResponse) => {
-          const imageId = imageResponse.uuid;
-
-          // Extraire le nom original (avant le timestamp)
-          const originalName =
-            imageResponse.urlImage.split("_")[0] +
-            imageResponse.urlImage.substring(
-              imageResponse.urlImage.lastIndexOf("."),
-            );
-
-          const file = fileMap.get(originalName);
+        const uploadPromises = files.map(async (imageResponse) => {
+          const imageId = imageResponse.id;
+          const file = imageResponse.file;
 
           if (!file) {
-            console.error(`Fichier non trouvé pour ${originalName}`);
+            console.error(`Fichier non trouvé pour ${imageId}`);
             updateProgress(imageId, {
-              fileName: originalName,
+              fileName: imageResponse.name,
               status: "error",
               error: "Fichier introuvable",
             });
