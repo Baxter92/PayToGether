@@ -4,9 +4,15 @@ import { RoleUtilisateur, StatutUtilisateur } from "@/common/api/types";
 export const createUtilisateurSchema = z.object({
   nom: z.string().min(1, "Le nom est obligatoire"),
   prenom: z.string().min(1, "Le prenom est obligatoire"),
-  email: z.string().email("Email invalide"),
+  email: z.email("Email invalide"),
   motDePasse: z.string().min(1, "Le mot de passe est obligatoire"),
   photoProfil: z.string().optional(),
+  statut: z.enum([StatutUtilisateur.ACTIF, StatutUtilisateur.INACTIF]),
+  role: z.enum([
+    RoleUtilisateur.UTILISATEUR,
+    RoleUtilisateur.VENDEUR,
+    RoleUtilisateur.ADMIN,
+  ]),
 });
 
 // Le backend valide UtilisateurDTO sur PUT:

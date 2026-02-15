@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { imageService } from "../services/imageService";
 
 export interface ImageResponse {
-  uuid: string;
+  imageUuid: string;
   urlImage: string;
   nomUnique: string;
   presignUrl: string | null;
@@ -17,6 +17,8 @@ export interface ImageFile {
   file: File;
   isPrincipal?: boolean;
   presignUrl: string;
+  id: string;
+  name: string;
 }
 
 export interface UploadProgress {
@@ -31,7 +33,6 @@ interface UseImageUploadReturn {
   uploadImages: (
     entityType: "deals" | "publicites" | "utilisateurs",
     entityUuid: string,
-    images: ImageResponse[],
     files: ImageFile[],
   ) => Promise<void>;
   progress: Map<string, UploadProgress>;
@@ -67,7 +68,6 @@ export const useImageUpload = (): UseImageUploadReturn => {
     async (
       entityType: "deals" | "publicites" | "utilisateurs",
       entityUuid: string,
-      images: ImageResponse[],
       files: ImageFile[],
     ) => {
       setIsUploading(true);
@@ -77,28 +77,21 @@ export const useImageUpload = (): UseImageUploadReturn => {
       try {
         // Créer une map pour associer fichiers et réponses backend
         const fileMap = new Map<string, File>();
+        const imageIds: string[] = [];
         files.forEach((imageFile) => {
           const cleanName = imageFile.file.name;
           fileMap.set(cleanName, imageFile.file);
         });
 
         // Uploader chaque image
-        const uploadPromises = images.map(async (imageResponse) => {
-          const imageId = imageResponse.uuid;
-
-          // Extraire le nom original (avant le timestamp)
-          const originalName =
-            imageResponse.urlImage.split("_")[0] +
-            imageResponse.urlImage.substring(
-              imageResponse.urlImage.lastIndexOf("."),
-            );
-
-          const file = fileMap.get(originalName);
+        const uploadPromises = files.map(async (imageResponse) => {
+          const imageId = imageResponse.id;
+          const file = imageResponse.file;
 
           if (!file) {
-            console.error(`Fichier non trouvé pour ${originalName}`);
+            console.error(`Fichier non trouvé pour ${imageId}`);
             updateProgress(imageId, {
-              fileName: originalName,
+              fileName: imageResponse.name,
               status: "error",
               error: "Fichier introuvable",
             });
@@ -139,7 +132,7 @@ export const useImageUpload = (): UseImageUploadReturn => {
               status: "confirming",
             });
 
-            await imageService.confirmUpload(entityType, entityUuid, imageId);
+            imageIds.push(imageId);
 
             // Étape 4: Succès
             updateProgress(imageId, {
@@ -159,6 +152,9 @@ export const useImageUpload = (): UseImageUploadReturn => {
         });
 
         await Promise.all(uploadPromises);
+
+        // Étape 5: Confirmation globale
+        await imageService.confirmAllUploads(entityType, entityUuid, imageIds);
       } finally {
         setIsUploading(false);
       }

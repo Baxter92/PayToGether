@@ -20,12 +20,8 @@ export const mapDealToView = (deal: DealDTO) => {
       ? Math.max(0, Math.ceil((expiration.getTime() - now.getTime()) / DAY_MS))
       : 0;
 
-  const firstImage = deal.listeImages?.[0];
-  const image =
-    typeof firstImage?.urlImage === "string" &&
-    firstImage.urlImage.trim().length > 0
-      ? firstImage.urlImage
-      : "/placeholder.svg";
+  const firstImage = deal.listeImages?.find?.((img) => img.isPrincipal);
+  const image = firstImage || "/placeholder.svg";
 
   const discount =
     deal.prixDeal > 0

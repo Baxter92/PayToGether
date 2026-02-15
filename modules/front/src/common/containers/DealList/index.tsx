@@ -27,6 +27,7 @@ import { Progress } from "@/common/components/ui/progress";
 import { formatCurrency } from "@/common/utils/formatCurrency";
 import { Badge } from "@/common/components/ui/badge";
 import { CreateDealModal } from "@/pages/profile/components/CreateDealModal";
+import { useDealVilles, useGetDealImageUrl } from "@/common/api";
 
 /** Déclare le type de filtre */
 interface DealFilters {
@@ -92,7 +93,7 @@ function MobileFilterSheet({
           "fixed inset-0 bg-black/40 transition-opacity z-40",
           open
             ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
+            : "opacity-0 pointer-events-none",
         )}
         onClick={onClose}
         aria-hidden={!open}
@@ -100,7 +101,7 @@ function MobileFilterSheet({
       <div
         className={cn(
           "fixed left-0 right-0 bottom-0 z-50 transform transition-transform bg-white dark:bg-surface-800 border-t shadow-xl",
-          open ? "translate-y-0" : "translate-y-full"
+          open ? "translate-y-0" : "translate-y-full",
         )}
         style={{ minHeight: "40vh", maxHeight: "90vh", overflow: "auto" }}
       >
@@ -113,6 +114,28 @@ function MobileFilterSheet({
         <div className="p-4">{children}</div>
       </div>
     </>
+  );
+}
+
+function DealTableProductCell({ deal }: { deal: any }) {
+  const { data: imageUrl } = useGetDealImageUrl(deal?.id, deal?.image?.imageUuid);
+
+  return (
+    <div className="flex items-center gap-3">
+      <Avatar className="h-12 w-12 rounded-lg border border-border/50 shadow-sm">
+        <AvatarImage
+          src={imageUrl?.url || "/placeholder.svg"}
+          alt={deal?.title}
+          className="object-cover"
+        />
+      </Avatar>
+      <div className="flex flex-col">
+        <span className="font-semibold text-foreground">{deal?.title}</span>
+        {deal?.subtitle && (
+          <span className="text-xs text-muted-foreground">{deal.subtitle}</span>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -143,8 +166,8 @@ export default function DealsList({
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<DealFilters>({
     category: "all",
-    priceMin: 0,
-    priceMax: 200000,
+    priceMin: undefined,
+    priceMax: undefined,
     city: "all",
     status: "all",
     searchQuery: "",
@@ -152,6 +175,8 @@ export default function DealsList({
 
   const [view, setView] = useState<"grid" | "list">(viewMode);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+
+  const { data: cities } = useDealVilles();
 
   // Mobile sheet state
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -177,12 +202,11 @@ export default function DealsList({
   }, [deals]);
 
   const uniqueCities = useMemo(() => {
-    const cities = new Set(deals.map((d) => d.city).filter(Boolean));
-    return Array.from(cities).map((city) => ({
+    return (cities ?? []).map((city) => ({
       value: city,
       label: city,
     }));
-  }, [deals]);
+  }, [cities]);
 
   // Configuration des champs du formulaire de filtres
   const filterFields: IFieldConfig[] = useMemo(() => {
@@ -204,7 +228,7 @@ export default function DealsList({
         type: "select",
         items: [
           { value: "all", label: "Toutes les catégories" },
-          ...uniqueCategories
+          ...uniqueCategories,
         ],
       });
     }
@@ -226,7 +250,7 @@ export default function DealsList({
         items: [
           { value: "all", label: "Tous" },
           { value: "active", label: "Actif" },
-          { value: "soldout", label: "Épuisé" }
+          { value: "soldout", label: "Épuisé" },
         ],
       });
     }
@@ -244,7 +268,7 @@ export default function DealsList({
           label: "Prix maximum",
           type: "number",
           placeholder: "200000",
-        }
+        },
       );
     }
 
@@ -270,13 +294,15 @@ export default function DealsList({
 
   // Filtering (WITHOUT pagination) -> used for LIST view (DataTable)
   const filteredDeals = useMemo(() => {
+    if (!showFilters) return deals;
+
     let dataset = [...deals];
 
     // search
     if (filters.searchQuery && filters.searchQuery.trim() !== "") {
       const q = filters.searchQuery.toLowerCase();
       dataset = dataset.filter((d) =>
-        (d.title || "").toLowerCase().includes(q)
+        (d.title || "").toLowerCase().includes(q),
       );
     }
     // category
@@ -292,15 +318,20 @@ export default function DealsList({
       dataset = dataset.filter((d) => d.status === filters.status);
     }
     // price range (only if price filter is enabled)
-    if (
-      availableFilters.includes("price") &&
-      filters.priceMin !== undefined &&
-      filters.priceMax !== undefined
-    ) {
-      dataset = dataset.filter(
-        (d) =>
-          d.groupPrice >= filters.priceMin! && d.groupPrice <= filters.priceMax!
-      );
+    if (availableFilters.includes("price")) {
+      const minPrice =
+        typeof filters.priceMin === "number" ? filters.priceMin : undefined;
+      const maxPrice =
+        typeof filters.priceMax === "number" ? filters.priceMax : undefined;
+
+      if (minPrice !== undefined || maxPrice !== undefined) {
+        dataset = dataset.filter((d) => {
+          const price = Number(d.groupPrice) || 0;
+          if (minPrice !== undefined && price < minPrice) return false;
+          if (maxPrice !== undefined && price > maxPrice) return false;
+          return true;
+        });
+      }
     }
 
     return dataset;
@@ -343,26 +374,7 @@ export default function DealsList({
         accessorKey: "image",
         header: tTable("product"),
         cell: ({ row }) => {
-          const d = row.original;
-          return (
-            <div className="flex items-center gap-3">
-              <Avatar className="h-12 w-12 rounded-lg border border-border/50 shadow-sm">
-                <AvatarImage
-                  src={d.image}
-                  alt={d.title}
-                  className="object-cover"
-                />
-              </Avatar>
-              <div className="flex flex-col">
-                <span className="font-semibold text-foreground">{d.title}</span>
-                {d.subtitle && (
-                  <span className="text-xs text-muted-foreground">
-                    {d.subtitle}
-                  </span>
-                )}
-              </div>
-            </div>
-          );
+          return <DealTableProductCell deal={row.original} />;
         },
       },
       {
@@ -415,7 +427,7 @@ export default function DealsList({
                       ? "text-destructive"
                       : percentage >= 50
                         ? "text-amber-500"
-                        : "text-primary"
+                        : "text-primary",
                   )}
                 >
                   {percentage}%
@@ -429,7 +441,7 @@ export default function DealsList({
                     ? "[&>div]:bg-destructive"
                     : percentage >= 50
                       ? "[&>div]:bg-amber-500"
-                      : "[&>div]:bg-primary"
+                      : "[&>div]:bg-primary",
                 )}
               />
             </div>
@@ -465,7 +477,7 @@ export default function DealsList({
             {String(getValue() ?? "")}
           </Badge>
         ),
-      }
+      },
     ];
   }, []);
 
@@ -535,7 +547,7 @@ export default function DealsList({
             "grid gap-6",
             showFilters && !renderFiltersInline
               ? "grid-cols-1 md:grid-cols-12"
-              : "grid-cols-1"
+              : "grid-cols-1",
           )}
         >
           {/* Sidebar filters (desktop) */}
@@ -596,36 +608,36 @@ export default function DealsList({
                     {...tableProps}
                     {...(isAdmin
                       ? {
-                        actionsRow: (props: any) => [
-                          ...(tableProps?.actionsRow?.(props) || []),
-                          {
-                            leftIcon:
+                          actionsRow: (props: any) => [
+                            ...(tableProps?.actionsRow?.(props) || []),
+                            {
+                              leftIcon:
                                 props.row.original.status === "published" ? (
                                   <FileEdit />
                                 ) : (
                                   <Globe />
                                 ),
-                            tooltip:
+                              tooltip:
                                 props.row.original.status === "published"
                                   ? "Mettre en brouillon"
                                   : "Publier",
-                          },
-                          {
-                            leftIcon: <Edit2 className="w-4 h-4" />,
-                            onClick: () => {
-                              setCreateModalOpen(true);
                             },
-                          },
-                          {
-                            leftIcon: <Trash2 className="w-4 h-4" />,
-                            colorScheme: "danger",
-                            tooltip: "Supprimer",
-                            onClick: () => {
-                              console.log(props.row);
+                            {
+                              leftIcon: <Edit2 className="w-4 h-4" />,
+                              onClick: () => {
+                                setCreateModalOpen(true);
+                              },
                             },
-                          }
-                        ],
-                      }
+                            {
+                              leftIcon: <Trash2 className="w-4 h-4" />,
+                              colorScheme: "danger",
+                              tooltip: "Supprimer",
+                              onClick: () => {
+                                console.log(props.row);
+                              },
+                            },
+                          ],
+                        }
                       : {})}
                   />
                 </div>

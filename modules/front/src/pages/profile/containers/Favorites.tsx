@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Heart, Trash2, ShoppingBag } from "lucide-react";
-import { useDeals } from "@/common/api";
+import { useDealsByStatut } from "@/common/api";
 import { mapDealToView } from "@/common/api/mappers/catalog";
+import { StatutDeal } from "@/common/api/types/deal";
 import DealCard from "@/common/containers/DealCard";
 import { Button } from "@/common/components/ui/button";
 import { Link } from "react-router-dom";
@@ -10,7 +11,7 @@ import Grid from "@/common/components/Grid";
 import { Heading } from "@/common/containers/Heading";
 
 export default function Favorites() {
-  const { data: dealsData, isLoading } = useDeals();
+  const { data: dealsData, isLoading } = useDealsByStatut(StatutDeal.PUBLIE);
   const deals = (dealsData ?? []).map(mapDealToView);
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
 

@@ -8,8 +8,9 @@ import { Card, CardContent } from "@components/ui/card";
 import { VStack } from "@/common/components";
 import { Heading } from "@/common/containers/Heading";
 import DealsList from "@/common/containers/DealList";
-import { useDeals } from "@/common/api";
+import { useDealsByStatut } from "@/common/api";
 import { mapDealToView } from "@/common/api/mappers/catalog";
+import { StatutDeal } from "@/common/api/types/deal";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/common/components/ui/button";
 
@@ -58,7 +59,7 @@ export default function DealDetail({
 }: {
   deal?: Deal;
 }): JSX.Element {
-  const { data: dealsData } = useDeals();
+  const { data: dealsData } = useDealsByStatut(StatutDeal.PUBLIE);
   const similarDeals = (dealsData ?? []).map(mapDealToView);
   const navigate = useNavigate();
 

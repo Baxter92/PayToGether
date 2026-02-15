@@ -67,7 +67,7 @@ class PubliciteApiAdapterTest {
                 .description("Description")
                 .lienExterne("https://example.com")
                 .listeImages(List.of(
-                        new ImageDto("image1.jpg", null, null)
+                        new ImageDto(UUID.randomUUID(), "image1.jpg", null, null)
                 ))
                 .dateDebut(LocalDateTime.now())
                 .dateFin(LocalDateTime.now().plusDays(30))

@@ -41,6 +41,7 @@ class ImageDealMapperTest {
 
         // Then
         assertThat(resultat).isNotNull();
+        assertThat(resultat.imageUuid()).isEqualTo(modele.getUuid());
         assertThat(resultat.urlImage()).isEqualTo(modele.getUrlImage());
         assertThat(resultat.isPrincipal()).isEqualTo(modele.getIsPrincipal());
         assertThat(resultat.presignUrl()).isEqualTo(modele.getPresignUrl());
@@ -63,6 +64,7 @@ class ImageDealMapperTest {
     void dtoVersModele_DevraitConvertirDtoEnModele() {
         // Given
         ImageDealDto dto = new ImageDealDto(
+                UUID.randomUUID(),
                 "image_deal_456.jpg",
                 false,
                 "https://minio.exemple.com/presign-url-2",
@@ -74,11 +76,11 @@ class ImageDealMapperTest {
 
         // Then
         assertThat(resultat).isNotNull();
+        assertThat(resultat.getUuid()).isEqualTo(dto.imageUuid());
         assertThat(resultat.getUrlImage()).isEqualTo(dto.urlImage());
         assertThat(resultat.getIsPrincipal()).isEqualTo(dto.isPrincipal());
         assertThat(resultat.getPresignUrl()).isEqualTo(dto.presignUrl());
         assertThat(resultat.getStatut()).isEqualTo(dto.statut());
-        assertThat(resultat.getUuid()).isNull();
         assertThat(resultat.getDealUuid()).isNull();
         assertThat(resultat.getDateCreation()).isNull();
         assertThat(resultat.getDateModification()).isNull();
@@ -98,9 +100,10 @@ class ImageDealMapperTest {
 
     @Test
     void mettreAJour_DevraitMettreAJourModeleAvecDonneesDto() {
+        var uuid = UUID.randomUUID();
         // Given
         ImageDealModele modele = ImageDealModele.builder()
-                .uuid(UUID.randomUUID())
+                .uuid(uuid)
                 .urlImage("image_ancienne.jpg")
                 .dealUuid(UUID.randomUUID())
                 .isPrincipal(false)
@@ -111,6 +114,7 @@ class ImageDealMapperTest {
                 .build();
 
         ImageDealDto dto = new ImageDealDto(
+                uuid,
                 "image_nouvelle.jpg",
                 true,
                 "https://minio.exemple.com/new-url",
@@ -121,6 +125,7 @@ class ImageDealMapperTest {
         mapper.mettreAJour(modele, dto);
 
         // Then
+        assertThat(modele.getUuid()).isEqualTo(dto.imageUuid());
         assertThat(modele.getUrlImage()).isEqualTo(dto.urlImage());
         assertThat(modele.getIsPrincipal()).isEqualTo(dto.isPrincipal());
         assertThat(modele.getPresignUrl()).isEqualTo(dto.presignUrl());
@@ -135,6 +140,7 @@ class ImageDealMapperTest {
         // Given
         ImageDealModele modele = null;
         ImageDealDto dto = new ImageDealDto(
+                UUID.randomUUID(),
                 "image.jpg",
                 true,
                 "https://minio.exemple.com/url",
@@ -162,9 +168,10 @@ class ImageDealMapperTest {
 
     @Test
     void mettreAJour_DevraitGererValeursDtoPartielles() {
+        var uuid = UUID.randomUUID();
         // Given
         ImageDealModele modele = ImageDealModele.builder()
-                .uuid(UUID.randomUUID())
+                .uuid(uuid)
                 .urlImage("image_originale.jpg")
                 .isPrincipal(false)
                 .statut(StatutImage.PENDING)
@@ -172,6 +179,7 @@ class ImageDealMapperTest {
                 .build();
 
         ImageDealDto dto = new ImageDealDto(
+                uuid,
                 "image_modifiee.jpg",
                 null, // non modifié
                 null, // non modifié
@@ -182,6 +190,7 @@ class ImageDealMapperTest {
         mapper.mettreAJour(modele, dto);
 
         // Then
+        assertThat(modele.getUuid()).isEqualTo(uuid);
         assertThat(modele.getUrlImage()).isEqualTo("image_modifiee.jpg");
         assertThat(modele.getIsPrincipal()).isFalse(); // reste inchangé
         assertThat(modele.getPresignUrl()).isEqualTo("https://minio.exemple.com/original-url"); // reste inchangé
@@ -217,6 +226,7 @@ class ImageDealMapperTest {
                 null,
                 null,
                 null,
+                null,
                 null
         );
 
@@ -225,6 +235,7 @@ class ImageDealMapperTest {
 
         // Then
         assertThat(resultat).isNotNull();
+        assertThat(resultat.getUuid()).isNull();
         assertThat(resultat.getUrlImage()).isNull();
         assertThat(resultat.getIsPrincipal()).isNull();
         assertThat(resultat.getPresignUrl()).isNull();

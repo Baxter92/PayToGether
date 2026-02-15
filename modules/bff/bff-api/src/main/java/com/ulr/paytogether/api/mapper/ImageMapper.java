@@ -23,6 +23,7 @@ public class ImageMapper {
         }
 
         return new ImageDto(
+                modele.getUuid(),
                 modele.getUrlImage(),
                 modele.getPresignUrl(),
                 modele.getStatut()
@@ -41,6 +42,7 @@ public class ImageMapper {
         }
 
         return ImageModele.builder()
+                .uuid(dto.imageUuid())
                 .urlImage(dto.urlImage())
                 .presignUrl(dto.presignUrl())
                 .statut(dto.statut() != null ? dto.statut() : StatutImage.PENDING)

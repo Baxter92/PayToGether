@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Search, SlidersHorizontal, X, MapPin } from "lucide-react";
-import { useCategories, useDeals } from "@/common/api";
+import { useCategories, useDealsByStatut } from "@/common/api";
 import { mapCategoryToView, mapDealToView } from "@/common/api/mappers/catalog";
+import { StatutDeal } from "@/common/api/types/deal";
 import DealCard from "@/common/containers/DealCard";
 import { Button } from "@/common/components/ui/button";
 import {
@@ -16,7 +17,9 @@ import { useI18n } from "@hooks/useI18n";
 
 export default function SearchPage() {
   const { t } = useI18n("search");
-  const { data: dealsData, isLoading: isLoadingDeals } = useDeals();
+  const { data: dealsData, isLoading: isLoadingDeals } = useDealsByStatut(
+    StatutDeal.PUBLIE,
+  );
   const { data: categoriesData, isLoading: isLoadingCategories } =
     useCategories();
 

@@ -11,6 +11,7 @@ import com.ulr.paytogether.provider.repository.PubliciteRepository;
 import com.ulr.paytogether.provider.utils.FileManager;
 import com.ulr.paytogether.provider.utils.Tools;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -40,7 +41,9 @@ public class PubliciteProviderAdapter implements PubliciteProvider {
             List<ImageJpa> imageJpas = publicite.getListeImages().stream()
                     .map(imageModele -> ImageJpa.builder()
                             .uuid(imageModele.getUuid())
-                            .urlImage(imageModele.getUrlImage() + "_" + System.currentTimeMillis())
+                            .urlImage(FilenameUtils.getBaseName(imageModele.getUrlImage())
+                                    + "_" + System.currentTimeMillis()
+                                    + "." + FilenameUtils.getExtension(imageModele.getUrlImage()))
                             .statut(imageModele.getStatut())
                             .build())
                     .toList();

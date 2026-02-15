@@ -30,13 +30,13 @@ export default function AdminDeals(): ReactElement {
           ).toString()
         : "0";
 
-    const firstImage = deal.listeImages?.[0];
+    const firstImage = deal.listeImages?.find?.((img) => img.isPrincipal);
 
     return {
       id: deal.uuid,
       title: deal.titre,
       description: deal.description,
-      image: firstImage?.urlImage || "/placeholder.svg",
+      image: firstImage || "/placeholder.svg",
       originalPrice: deal.prixDeal,
       groupPrice: deal.prixPart,
       unit: 1,

@@ -13,10 +13,18 @@ import type { JSX } from "react";
 import { Link } from "react-router-dom";
 import { formatCurrency } from "@/common/utils/formatCurrency";
 import { useI18n } from "@hooks/useI18n";
+import { useGetDealImageUrl } from "@/common/api";
 
 export default function DealCard({ deal }: IDealCardProps): JSX.Element {
   const { t } = useI18n();
   const { t: tDeals } = useI18n("deals");
+  console.log(deal.image);
+
+  const { data: imageUrl } = useGetDealImageUrl(
+    deal?.id,
+    deal?.image?.imageUuid,
+  );
+
   const percentage = (deal.sold / deal.total) * 100;
   const isHot = percentage > 70;
 
@@ -27,7 +35,7 @@ export default function DealCard({ deal }: IDealCardProps): JSX.Element {
         <CardHeader className="relative w-full h-52 bg-muted p-0 overflow-hidden">
           <div className="w-full h-full overflow-hidden">
             <img
-              src={deal.image || "/placeholder.svg"}
+              src={imageUrl?.url || "/placeholder.svg"}
               alt={deal.title}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
             />

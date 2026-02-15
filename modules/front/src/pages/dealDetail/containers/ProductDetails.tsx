@@ -7,7 +7,7 @@ export default function ProductDetails({ deal }: { deal: Deal }) {
   const partsRemaining = deal.partsTotal - deal.partsSold;
   const percent = Math.min(
     100,
-    Math.round((deal.partsSold / deal.partsTotal) * 100)
+    Math.round((deal.partsSold / deal.partsTotal) * 100),
   );
   const expiresIn = useMemo(() => {
     if (!deal.expiryDate) return null;
@@ -21,11 +21,6 @@ export default function ProductDetails({ deal }: { deal: Deal }) {
   return (
     <section className="mt-6 bg-white rounded-lg p-5 shadow-sm">
       <h2 className="text-2xl font-semibold">{deal.title}</h2>
-      {deal.shortSubtitle && (
-        <p className="text-sm text-muted-foreground mt-1">
-          {deal.shortSubtitle}
-        </p>
-      )}
 
       <div className="flex items-center gap-4 mt-4">
         <Badge>{deal.rating} ★</Badge>
