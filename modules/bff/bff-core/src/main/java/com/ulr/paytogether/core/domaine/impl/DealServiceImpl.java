@@ -73,8 +73,8 @@ public class DealServiceImpl implements DealService {
     @Override
     public Set<String> lireVillesDisponibles() {
         return dealProvider.trouverTous().stream()
-                .filter(ville -> ville != null && StringUtils.isNotBlank(ville.getVille()))
-                .map(DealModele::getVille)
+                .filter(ville -> ville != null && StringUtils.isNotBlank(ville.getVille()) && ville.getVille().length() > 1)
+                .map(d-> d.getVille().substring(0,1).toUpperCase() + d.getVille().substring(1).toLowerCase())
                 .collect(Collectors.toSet());
     }
 
