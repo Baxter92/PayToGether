@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@components/ui/card";
 import { cn } from "@/common/lib/utils";
 import { Button } from "@/common/components/ui/button";
@@ -7,10 +7,23 @@ import { HStack } from "@/common/components";
 export default function Gallery({ images }: { images: string[] }) {
   const [main, setMain] = useState(images[0]);
 
+  useEffect(() => {
+    if (!images?.length) return;
+
+    // Sync when images are loaded asynchronously or changed.
+    if (!main || !images.includes(main)) {
+      setMain(images[0]);
+    }
+  }, [images, main]);
+
   return (
     <div>
       <Card className="overflow-hidden">
-        <img src={main} alt="produit" className="w-full h-96 object-cover" />
+        <img
+          src={main || images[0] || "/placeholder.svg"}
+          alt="produit"
+          className="w-full h-96 object-cover"
+        />
       </Card>
 
       <HStack className="mt-3" spacing={8}>
