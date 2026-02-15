@@ -1,4 +1,4 @@
-import { useState, type JSX } from "react";
+import { useEffect, useMemo, useState, type JSX } from "react";
 import type { Deal } from "./types";
 import Gallery from "./containers/Gallery";
 import ProductDetails from "./containers/ProductDetails";
@@ -8,84 +8,116 @@ import { Card, CardContent } from "@components/ui/card";
 import { VStack } from "@/common/components";
 import { Heading } from "@/common/containers/Heading";
 import DealsList from "@/common/containers/DealList";
-import { useDealsByStatut } from "@/common/api";
+import { dealService, useDeal, useDealsByStatut } from "@/common/api";
 import { mapDealToView } from "@/common/api/mappers/catalog";
 import { StatutDeal } from "@/common/api/types/deal";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/common/components/ui/button";
-
-const mockDeal: Deal = {
-  id: "deal-003",
-  title: "Parts de Boeuf Premium — Part (0.5 kg)",
-  shortSubtitle:
-    "Parts individuelles de viande de bœuf élevées localement — livraison réfrigérée",
-  priceOriginal: 80,
-  priceDeal: 59,
-  pricePerPart: 5.9,
-  savingsText: "-26%",
-  rating: 4.8,
-  reviewsCount: 342,
-  images: [
-    "/images/FAMILOV_1762258046.jpeg",
-    "/images/images.jpg",
-    "/images/filet-de-boeuf-entier-15-25kg.jpg"
-  ],
-  description:
-    "Achetez des parts individuelles (0.5 kg) d'une caisse de bœuf premium. Chaque part est emballée sous vide, prête à être conservée au réfrigérateur ou congelée. L'offre s'active uniquement si suffisamment de parts sont vendues avant la date d'expiration.",
-  highlights: [
-    "Part 0.5 kg",
-    "Élevage local certifié",
-    "Emballage sous vide",
-    "Livraison réfrigérée"
-  ],
-  whatsIncluded: ["Part 0.5 kg emballée sous vide"],
-  location: "Douala, Cameroon (livraison disponible dans les grandes villes)",
-  expiryDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 10).toISOString(),
-  partsTotal: 50,
-  partsSold: 19,
-  minRequired: 20,
-  partWeightKg: 0.5,
-  supplier: { name: "Ferme" },
-  packaging: { method: "Sous vide" },
-  nutrition: {
-    per100g: { calories: 250, protein: "26g", fat: "17g", iron: "2.6mg" },
-  },
-  cookingTips: ["Saisir les steaks à feu vif 2-3 min par côté"],
-  shelfLifeDays: 5,
-};
-
-export default function DealDetail({
-  deal = mockDeal,
-}: {
-  deal?: Deal;
-}): JSX.Element {
+import { useQueries } from "@tanstack/react-query";
+export default function DealDetail(): JSX.Element {
+  const { id = "" } = useParams<{ id: string }>();
+  const { data: dealData, isLoading, isError } = useDeal(id);
   const { data: dealsData } = useDealsByStatut(StatutDeal.PUBLIE);
-  const similarDeals = (dealsData ?? []).map(mapDealToView);
+  const similarDeals = (dealsData ?? [])
+    .filter((d) => d.uuid !== id)
+    .map(mapDealToView);
   const navigate = useNavigate();
 
-  const [qty, setQty] = useState(1);
-  const [partsSold, setPartsSold] = useState(deal.partsSold);
+  const orderedImagesMeta = useMemo(() => {
+    const images = [...(dealData?.listeImages ?? [])];
+    return images.sort(
+      (a, b) => Number(Boolean(b.isPrincipal)) - Number(Boolean(a.isPrincipal)),
+    );
+  }, [dealData?.listeImages]);
 
-  const partsRemaining = deal.partsTotal - partsSold;
+  const imageUrlQueries = useQueries({
+    queries: orderedImagesMeta.map((img) => ({
+      queryKey: ["deals", "detail", id, "image-url", img.imageUuid],
+      queryFn: () => dealService.getImageUrl(id, img.imageUuid as string),
+      enabled: !!id && !!img.imageUuid,
+    })),
+  });
+
+  const dealImages = useMemo(() => {
+    const urls = imageUrlQueries
+      .map((q) => q.data?.url)
+      .filter((url): url is string => !!url);
+    return urls.length > 0 ? urls : ["/placeholder.svg"];
+  }, [imageUrlQueries]);
+
+  const deal = useMemo<Deal | null>(() => {
+    if (!dealData) return null;
+
+    return {
+      id: dealData.uuid,
+      title: dealData.titre,
+      shortSubtitle: dealData.description,
+      priceOriginal: Number(dealData.prixDeal) || 0,
+      priceDeal: Number(dealData.prixPart) || 0,
+      pricePerPart: Number(dealData.prixPart) || 0,
+      rating: 4.8, // mock temporaire (avis non fournis par le backend)
+      reviewsCount: 342, // mock temporaire (avis non fournis par le backend)
+      images: dealImages,
+      description: dealData.description,
+      highlights: dealData.listePointsForts ?? [],
+      location: [dealData.ville, dealData.pays].filter(Boolean).join(", "),
+      expiryDate: dealData.dateExpiration,
+      partsTotal: Number(dealData.nbParticipants) || 0,
+      partsSold: 0,
+      minRequired: 1,
+      supplier: { name: dealData.createurNom },
+    };
+  }, [dealData, dealImages]);
+
+  const [qty, setQty] = useState(1);
+  const [partsSold, setPartsSold] = useState(0);
+
+  useEffect(() => {
+    setPartsSold(deal?.partsSold ?? 0);
+  }, [deal?.id, deal?.partsSold]);
+
+  const currentPartsSold = partsSold;
+  const currentPartsTotal = deal?.partsTotal ?? 0;
+  const currentMinRequired = deal?.minRequired ?? 1;
+  const currentPricePerPart = deal?.pricePerPart ?? 0;
+
+  const partsRemaining = currentPartsTotal - currentPartsSold;
   const canBuy = qty <= partsRemaining && qty >= 1;
-  const willReachMin = partsSold + qty >= deal.minRequired;
-  const activated = partsSold >= deal.minRequired;
-  const totalPrice = qty * deal.pricePerPart;
+  const willReachMin = currentPartsSold + qty >= currentMinRequired;
+  const activated = currentPartsSold >= currentMinRequired;
+  const totalPrice = qty * currentPricePerPart;
 
   function handleBuy() {
-    if (!canBuy) return;
+    if (!canBuy || !deal) return;
     setPartsSold((s) => s + qty);
     navigate(`/deals/${deal.id}/checkout`, {
       state: { deal, qty, total: totalPrice },
     });
   }
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        Chargement du deal...
+      </div>
+    );
+  }
+
+  if (isError || !deal) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        Deal introuvable.
+      </div>
+    );
+  }
+
   return (
     <div className=" bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           <main className="flex-1">
             <Gallery images={deal.images} />
-            <ProductDetails deal={deal} />
+            <ProductDetails deal={{ ...deal, partsSold: currentPartsSold }} />
             <Reviews count={deal.reviewsCount ?? 0} />
           </main>
 

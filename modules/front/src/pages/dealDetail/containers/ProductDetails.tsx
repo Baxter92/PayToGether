@@ -58,21 +58,12 @@ export default function ProductDetails({ deal }: { deal: Deal }) {
 
       <Separator className="my-4" />
 
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="mt-4 grid grid-cols-1 gap-4">
         <div>
           <h3 className="font-semibold">Points forts</h3>
           <ul className="mt-2 list-disc list-inside text-gray-700">
             {deal.highlights?.map((h) => (
               <li key={h}>{h}</li>
-            ))}
-          </ul>
-        </div>
-
-        <div>
-          <h3 className="font-semibold">Inclus</h3>
-          <ul className="mt-2 list-disc list-inside text-gray-700">
-            {deal.whatsIncluded?.map((w) => (
-              <li key={w}>{w}</li>
             ))}
           </ul>
         </div>
