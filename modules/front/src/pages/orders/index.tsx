@@ -1,11 +1,12 @@
-import { useDeals } from "@/common/api";
+import { useDealsByStatut } from "@/common/api";
 import { mapDealToView } from "@/common/api/mappers/catalog";
+import { StatutDeal } from "@/common/api/types/deal";
 import DealsList from "@/common/containers/DealList";
 import { Heading } from "@/common/containers/Heading";
 import type { JSX } from "react";
 
 export default function Orders(): JSX.Element {
-  const { data: dealsData, isLoading } = useDeals();
+  const { data: dealsData, isLoading } = useDealsByStatut(StatutDeal.PUBLIE);
   const deals = (dealsData ?? []).map(mapDealToView);
 
   return (

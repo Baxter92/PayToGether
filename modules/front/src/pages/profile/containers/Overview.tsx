@@ -1,15 +1,16 @@
 import { useI18n } from "@hooks/useI18n";
 import { VStack } from "@/common/components";
 import Grid from "@/common/components/Grid";
-import { useDeals } from "@/common/api";
+import { useDealsByStatut } from "@/common/api";
 import { mapDealToView } from "@/common/api/mappers/catalog";
+import { StatutDeal } from "@/common/api/types/deal";
 import DealsList from "@/common/containers/DealList";
 import { Heading } from "@/common/containers/Heading";
 import type { JSX } from "react";
 
 export default function Overview(): JSX.Element {
   const { t } = useI18n("profile");
-  const { data: dealsData } = useDeals();
+  const { data: dealsData } = useDealsByStatut(StatutDeal.PUBLIE);
   const deals = (dealsData ?? []).map(mapDealToView);
 
   return (

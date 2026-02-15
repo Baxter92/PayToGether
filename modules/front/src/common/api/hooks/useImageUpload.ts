@@ -131,7 +131,7 @@ export const useImageUpload = (): UseImageUploadReturn => {
               status: "confirming",
             });
 
-            await imageService.confirmUpload(entityType, entityUuid, imageId);
+            imageService.confirmUpload(entityType, entityUuid, imageId);
 
             // Étape 4: Succès
             updateProgress(imageId, {

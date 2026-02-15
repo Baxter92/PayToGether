@@ -1,6 +1,7 @@
 import { slides } from "@/common/constants/data";
-import { useDeals } from "@/common/api";
+import { useDealsByStatut } from "@/common/api";
 import { mapDealToView } from "@/common/api/mappers/catalog";
+import { StatutDeal } from "@/common/api/types/deal";
 import { useI18n } from "@hooks/useI18n";
 import Hero from "@containers/Hero";
 import { useMemo, type JSX } from "react";
@@ -13,7 +14,7 @@ import { PATHS } from "@/common/constants/path";
 
 export default function Home(): JSX.Element {
   const { t } = useI18n("home");
-  const { data: dealsData, isLoading } = useDeals();
+  const { data: dealsData, isLoading } = useDealsByStatut(StatutDeal.PUBLIE);
   const allDeals = (dealsData ?? []).map(mapDealToView);
 
   const featuredDeals = useMemo(() => allDeals.slice(0, 4), [allDeals]);
@@ -123,7 +124,9 @@ export default function Home(): JSX.Element {
           </div>
 
           {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">Chargement...</div>
+            <div className="text-center py-8 text-muted-foreground">
+              Chargement...
+            </div>
           ) : (
             <DealsList deals={allDeals} showFilters={false} />
           )}

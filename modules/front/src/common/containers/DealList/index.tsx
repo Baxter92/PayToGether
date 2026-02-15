@@ -143,8 +143,8 @@ export default function DealsList({
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<DealFilters>({
     category: "all",
-    priceMin: 0,
-    priceMax: 200000,
+    priceMin: undefined,
+    priceMax: undefined,
     city: "all",
     status: "all",
     searchQuery: "",
@@ -270,6 +270,8 @@ export default function DealsList({
 
   // Filtering (WITHOUT pagination) -> used for LIST view (DataTable)
   const filteredDeals = useMemo(() => {
+    if (!showFilters) return deals;
+
     let dataset = [...deals];
 
     // search
@@ -292,15 +294,20 @@ export default function DealsList({
       dataset = dataset.filter((d) => d.status === filters.status);
     }
     // price range (only if price filter is enabled)
-    if (
-      availableFilters.includes("price") &&
-      filters.priceMin !== undefined &&
-      filters.priceMax !== undefined
-    ) {
-      dataset = dataset.filter(
-        (d) =>
-          d.groupPrice >= filters.priceMin! && d.groupPrice <= filters.priceMax!
-      );
+    if (availableFilters.includes("price")) {
+      const minPrice =
+        typeof filters.priceMin === "number" ? filters.priceMin : undefined;
+      const maxPrice =
+        typeof filters.priceMax === "number" ? filters.priceMax : undefined;
+
+      if (minPrice !== undefined || maxPrice !== undefined) {
+        dataset = dataset.filter((d) => {
+          const price = Number(d.groupPrice) || 0;
+          if (minPrice !== undefined && price < minPrice) return false;
+          if (maxPrice !== undefined && price > maxPrice) return false;
+          return true;
+        });
+      }
     }
 
     return dataset;

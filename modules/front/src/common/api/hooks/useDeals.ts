@@ -3,7 +3,7 @@ import { dealService } from "../services/dealService";
 import type {
   CreateDealDTO,
   DealDTO,
-  StatutDeal,
+  StatutDealType,
   UpdateDealDTO,
 } from "../types";
 import { apiClient } from "../services/apiClient";
@@ -18,8 +18,7 @@ const dealHooks = createResourceHooks<DealDTO, CreateDealDTO, UpdateDealDTO>({
   resourceName: "deals",
   service: dealService,
   customKeys: {
-    byStatut: (statut: typeof StatutDeal) =>
-      ["deals", "statut", statut] as const,
+    byStatut: (statut: StatutDealType) => ["deals", "statut", statut] as const,
     byCreateur: (createurUuid: string) =>
       ["deals", "createur", createurUuid] as const,
     byCategorie: (categorieUuid: string) =>
@@ -37,7 +36,7 @@ export const {
 
 // ===== QUERIES =====
 
-export const useDealsByStatut = (statut: typeof StatutDeal) => {
+export const useDealsByStatut = (statut: StatutDealType) => {
   return useQuery<DealDTO[], Error>({
     queryKey: dealKeys.byStatut(statut),
     queryFn: () => dealService.getByStatut(statut),
@@ -104,7 +103,7 @@ export const useCreateDeal = () => {
           const backendFileName = f.urlImage?.split("/")[1]?.split("_")[0];
 
           const matchedImage = input.listeImages.find(
-            (img) => img.file?.name === backendFileName,
+            (img) => img.file?.name?.split(".")[0] === backendFileName,
           );
 
           return {
@@ -122,11 +121,7 @@ export const useCreateDeal = () => {
       //    - entityUuid = dealCree.uuid
       await uploadImages("deals", dealCree.uuid, filesForUpload);
 
-      // 6) Optionnel : récupérer la version finale du deal (avec statuts d'images à jour)
-      // Remplace par ton service si tu as dealService.getByUuid
-      const dealFinal = await apiClient.get<any>(`/deals/${dealCree.uuid}`);
-
-      return dealFinal ?? dealCree;
+      return dealCree;
     },
 
     onSuccess: () => {

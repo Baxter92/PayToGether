@@ -7,6 +7,8 @@ export const StatutDeal = {
   TERMINE: "TERMINE",
 } as const;
 
+export type StatutDealType = (typeof StatutDeal)[keyof typeof StatutDeal];
+
 export interface DealDTO {
   uuid: string;
   titre: string;
@@ -17,7 +19,7 @@ export interface DealDTO {
   dateDebut: string;
   dateFin: string;
   dateExpiration: string;
-  statut: typeof StatutDeal;
+  statut: StatutDealType;
   createurUuid: string;
   createurNom: string;
   categorieUuid: string;

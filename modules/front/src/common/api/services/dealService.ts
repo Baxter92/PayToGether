@@ -1,5 +1,5 @@
 import { createResourceService } from "../module/service/resourceFactory";
-import type { CreateDealDTO, DealDTO, StatutDeal } from "../types";
+import type { CreateDealDTO, DealDTO, StatutDealType } from "../types";
 import { apiClient } from "./apiClient";
 
 // Service de base avec méthodes CRUD standard
@@ -18,7 +18,7 @@ export const dealService = {
     }),
 
   // Récupérer les deals par statut
-  getByStatut: (statut: typeof StatutDeal) =>
+  getByStatut: (statut: StatutDealType) =>
     apiClient.get<DealDTO[]>(`/deals/statut/${statut}`),
 
   // Récupérer les deals par créateur
