@@ -55,6 +55,7 @@ class DealMapperTest {
 
         // Setup ImageDealDto
         imageDealDto = new ImageDealDto(
+                UUID.randomUUID(),
                 "image1.jpg",
                 true,
                 "https://minio.exemple.com/presign",

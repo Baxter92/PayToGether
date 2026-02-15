@@ -16,6 +16,7 @@ import com.ulr.paytogether.provider.utils.FileManager;
 import com.ulr.paytogether.provider.utils.Tools;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -49,7 +50,10 @@ public class DealProviderAdapter implements DealProvider {
             List<ImageDealJpa> imageDealJpas = deal.getListeImages().stream()
                     .map(imageDealModele -> ImageDealJpa.builder()
                             .uuid(imageDealModele.getUuid())
-                            .urlImage(Tools.DIRECTORY_DEALS_IMAGES + imageDealModele.getUrlImage() + "_" + System.currentTimeMillis())
+                            .urlImage(Tools.DIRECTORY_DEALS_IMAGES
+                                    + FilenameUtils.getBaseName(imageDealModele.getUrlImage())
+                                    + "_" + System.currentTimeMillis()
+                                    + "." + FilenameUtils.getExtension(imageDealModele.getUrlImage()))
                             .isPrincipal(imageDealModele.getIsPrincipal())
                             .statut(imageDealModele.getStatut())
                             .dealJpa(entite)

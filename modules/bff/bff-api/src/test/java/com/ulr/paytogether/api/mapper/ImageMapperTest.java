@@ -60,6 +60,7 @@ class ImageMapperTest {
     void dtoVersModele_DevraitConvertirDtoEnModele() {
         // Given
         ImageDto dto = new ImageDto(
+                UUID.randomUUID(),
                 "image_test.jpg",
                 "https://minio.exemple.com/presign-url",
                 StatutImage.PENDING
@@ -73,7 +74,7 @@ class ImageMapperTest {
         assertThat(resultat.getUrlImage()).isEqualTo(dto.urlImage());
         assertThat(resultat.getPresignUrl()).isEqualTo(dto.presignUrl());
         assertThat(resultat.getStatut()).isEqualTo(dto.statut());
-        assertThat(resultat.getUuid()).isNull();
+        assertThat(resultat.getUuid()).isEqualTo(dto.imageUuid());
         assertThat(resultat.getDateCreation()).isNull();
         assertThat(resultat.getDateModification()).isNull();
     }
@@ -92,9 +93,10 @@ class ImageMapperTest {
 
     @Test
     void mettreAJour_DevraitMettreAJourModeleAvecDonneesDto() {
+        var uuid = UUID.randomUUID();
         // Given
         ImageModele modele = ImageModele.builder()
-                .uuid(UUID.randomUUID())
+                .uuid(uuid)
                 .urlImage("image_ancienne.jpg")
                 .presignUrl("https://minio.exemple.com/old-url")
                 .statut(StatutImage.PENDING)
@@ -102,6 +104,7 @@ class ImageMapperTest {
                 .build();
 
         ImageDto dto = new ImageDto(
+                uuid,
                 "image_nouvelle.jpg",
                 "https://minio.exemple.com/new-url",
                 StatutImage.UPLOADED
@@ -115,7 +118,7 @@ class ImageMapperTest {
         assertThat(modele.getPresignUrl()).isEqualTo(dto.presignUrl());
         assertThat(modele.getStatut()).isEqualTo(dto.statut());
         // Les champs non modifiables doivent rester inchangés
-        assertThat(modele.getUuid()).isNotNull();
+        assertThat(modele.getUuid()).isEqualTo(dto.imageUuid());
     }
 
     @Test
@@ -123,6 +126,7 @@ class ImageMapperTest {
         // Given
         ImageModele modele = null;
         ImageDto dto = new ImageDto(
+                UUID.randomUUID(),
                 "image.jpg",
                 "https://minio.exemple.com/url",
                 StatutImage.UPLOADED
@@ -157,6 +161,7 @@ class ImageMapperTest {
                 .build();
 
         ImageDto dto = new ImageDto(
+                UUID.randomUUID(),
                 "image_modifiee.jpg",
                 null, // non modifié
                 StatutImage.UPLOADED
@@ -194,7 +199,7 @@ class ImageMapperTest {
     @Test
     void dtoVersModele_DevraitGererValeursNullesDansDto() {
         // Given
-        ImageDto dto = new ImageDto(null, null, null);
+        ImageDto dto = new ImageDto(null, null, null, null);
 
         // When
         ImageModele resultat = mapper.dtoVersModele(dto);

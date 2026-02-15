@@ -68,7 +68,7 @@ class DealResourceTest {
                 .createurUuid(uuidCreateur)
                 .categorieUuid(uuidCategorie)
                 .listeImages(List.of(
-                        new ImageDealDto("image1.jpg", true, null, null)
+                        new ImageDealDto(UUID.randomUUID(),"image1.jpg", true, null, null)
                 ))
                 .ville("Montreal")
                 .build();

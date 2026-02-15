@@ -10,6 +10,7 @@
 .snapshots/
 #Testing Output folder
 .output/
+.settings/
 #Extension App-file
 *.app
 #Rapid Application Development File
@@ -26,6 +27,7 @@ TestResults.xml
 node_modules/
 dist/
 target/
+bin/
 #Target folder
 modules/bff-provider/target/
 modules/bff-wsclient/target/
@@ -34,6 +36,7 @@ modules/bff-configuration/target/
 modules/front/node_modules/
 modules/front/node/
 modules/bff-api/target/
+modules/bff-api/bin/
 #Compiled JavaScript map files
 *.js.map
 mvnw

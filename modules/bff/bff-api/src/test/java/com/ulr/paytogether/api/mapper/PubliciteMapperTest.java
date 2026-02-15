@@ -49,6 +49,7 @@ class PubliciteMapperTest {
 
         // Setup ImageDto
         imageDto = new ImageDto(
+                UUID.randomUUID(),
                 "pub_image.jpg",
                 "https://minio.exemple.com/presign",
                 StatutImage.UPLOADED
@@ -201,7 +202,7 @@ class PubliciteMapperTest {
                 .urlImage("pub_image2.jpg")
                 .build();
 
-        ImageDto imageDto2 = new ImageDto("pub_image2.jpg", null, null);
+        ImageDto imageDto2 = new ImageDto(UUID.randomUUID(), "pub_image2.jpg", null, null);
 
         publiciteModele.setListeImages(List.of(imageModele, image2));
 
@@ -220,7 +221,7 @@ class PubliciteMapperTest {
     @Test
     void dtoVersModele_DevraitMapperPlusieursImages() {
         // Given
-        ImageDto imageDto2 = new ImageDto("pub_image2.jpg", null, null);
+        ImageDto imageDto2 = new ImageDto(UUID.randomUUID(), "pub_image2.jpg", null, null);
 
         ImageModele image2 = ImageModele.builder()
                 .uuid(UUID.randomUUID())

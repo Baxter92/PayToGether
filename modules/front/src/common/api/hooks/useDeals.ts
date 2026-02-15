@@ -69,11 +69,12 @@ export const useCreateDeal = () => {
 
   const mutation = useMutation<DealDTO, Error, CreateDealDTO>({
     mutationFn: async (input) => {
+      console.log("🎯 Création du deal avec", input.listeImages?.length, "images");
+
       // 1) Construire payload pour la création
-      // Le backend attend un tableau de noms de fichiers (listeImages: string[]).
       const payload = {
         ...input,
-        listeImages: input.listeImages.map((img) => ({
+        listeImages: input.listeImages?.map((img) => ({
           urlImage: img.urlImage,
           nomUnique: img.nomUnique,
           statut: null,
@@ -82,42 +83,73 @@ export const useCreateDeal = () => {
         })),
       };
 
-      // 2) Créer le deal côté backend (utilise ton dealService.create ou apiClient)
-      // j'utilise apiClient.post pour rester aligné avec ta stack
+      // 2) Créer le deal côté backend
       const dealCree = await apiClient.post<DealDTO>("/deals", {
         body: payload,
       });
 
-      // 3) Si pas d'images à uploader, on peut retourner tout de suite
-      const imagesFromBackend: Partial<ImageResponse>[] =
-        dealCree.listeImages ?? [];
-      if (!imagesFromBackend || imagesFromBackend.length === 0) {
-        // invalide la liste pour forcer refresh
+      console.log("✅ Deal créé:", dealCree.uuid);
+      console.log("📸 Images reçues du backend:", dealCree.listeImages);
+
+      // 3) Si pas d'images à uploader, retourner
+      const imagesFromBackend = dealCree.listeImages ?? [];
+      if (imagesFromBackend.length === 0) {
         return dealCree;
       }
 
-      // 4) Préparer files (ImageFile[]) à passer au hook
-      //    (le hook attend les files sous forme { file, preview, isPrincipal })
-      const filesForUpload: ImageFile[] = imagesFromBackend
-        .filter((f) => f.presignUrl && f.statut === "PENDING")
-        .map((f) => {
-          const backendFileName = f.urlImage?.split("/")[1]?.split("_")[0];
+      // 4) Créer une map des fichiers par nom original
+      const filesByName = new Map<string, File>();
+      (input.listeImages || []).forEach((img) => {
+        if (img.file) {
+          filesByName.set(img.file.name, img.file);
+        }
+      });
 
-          const matchedImage = input.listeImages.find(
-            (img) => img.file?.name === backendFileName,
-          );
+      console.log("📁 Fichiers disponibles:", Array.from(filesByName.keys()));
 
-          return {
-            file: matchedImage?.file as File,
-            isPrincipal: f.isPrincipal,
-            presignUrl: f.presignUrl as string,
-          };
-        });
+      // 5) Préparer les fichiers pour upload
+      const filesForUpload: ImageFile[] = [];
 
-      // 5) Lancer les uploads + confirmations (uploadImages effectue la confirmation)
-      //    uploadImages : (entityType, entityUuid, imagesFromBackend, filesForUpload)
-      //    - entityType = "deals"
-      //    - entityUuid = dealCree.uuid
+      imagesFromBackend.forEach((imageFromBackend) => {
+        if (!imageFromBackend.presignUrl || imageFromBackend.statut !== "PENDING") {
+          console.warn(`⚠️ Image ${imageFromBackend.nomUnique} ignorée (pas de presignUrl ou statut différent de PENDING)`);
+          return;
+        }
+
+        // Trouver le fichier correspondant
+        // Le nomUnique peut être "deal/image.jpg_1234567890"
+        // On doit retrouver le fichier original "image.jpg"
+        let matchedFile: File | undefined;
+
+        for (const [fileName, file] of filesByName.entries()) {
+          // Vérifier si le nomUnique contient le nom du fichier
+          if (imageFromBackend.nomUnique?.includes(fileName) ||
+              imageFromBackend.urlImage?.includes(fileName)) {
+            matchedFile = file;
+            break;
+          }
+        }
+
+        if (matchedFile) {
+          filesForUpload.push({
+            file: matchedFile,
+            isPrincipal: imageFromBackend.isPrincipal,
+            presignUrl: imageFromBackend.presignUrl,
+          });
+          console.log(`✅ Fichier associé: ${matchedFile.name} -> ${imageFromBackend.nomUnique}`);
+        } else {
+          console.error(`❌ Aucun fichier trouvé pour: ${imageFromBackend.nomUnique}`);
+        }
+      });
+
+      if (filesForUpload.length === 0) {
+        console.warn("⚠️ Aucun fichier à uploader");
+        return dealCree;
+      }
+
+      console.log(`🚀 Démarrage de l'upload de ${filesForUpload.length} fichier(s)`);
+
+      // 6) Lancer les uploads + confirmations
       await uploadImages(
         "deals",
         dealCree.uuid,
@@ -125,29 +157,28 @@ export const useCreateDeal = () => {
         filesForUpload,
       );
 
-      // 6) Optionnel : récupérer la version finale du deal (avec statuts d'images à jour)
-      // Remplace par ton service si tu as dealService.getByUuid
-      const dealFinal = await apiClient.get<any>(`/deals/${dealCree.uuid}`);
+      // 7) Récupérer la version finale du deal
+      const dealFinal = await apiClient.get<DealDTO>(`/deals/${dealCree.uuid}`);
+
+      console.log("✅ Deal finalisé:", dealFinal.uuid);
 
       return dealFinal ?? dealCree;
     },
 
     onSuccess: () => {
-      // invalider listes / cache
       queryClient.invalidateQueries({ queryKey: dealKeys.lists() });
-      // si tu as d'autres keys (detail), invalide-les aussi
     },
 
     onError: (err) => {
-      console.error("Erreur création deal :", err);
+      console.error("❌ Erreur création deal :", err);
     },
   });
 
   return {
     ...mutation,
-    progress, // Map<string, UploadProgress> venant du hook useImageUpload
-    isUploading, // bool (upload en cours)
-    hasErrors, // bool (au moins une image en erreur)
+    progress,
+    isUploading,
+    hasErrors,
   };
 };
 

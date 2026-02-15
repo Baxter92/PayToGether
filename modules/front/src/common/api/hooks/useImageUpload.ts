@@ -76,34 +76,58 @@ export const useImageUpload = (): UseImageUploadReturn => {
 
       try {
         // Créer une map pour associer fichiers et réponses backend
+        // La clé est le nom du fichier original (sans le chemin du backend)
         const fileMap = new Map<string, File>();
         files.forEach((imageFile) => {
-          const cleanName = imageFile.file.name;
-          fileMap.set(cleanName, imageFile.file);
+          fileMap.set(imageFile.file.name, imageFile.file);
         });
+
+        console.log("📦 Files disponibles:", Array.from(fileMap.keys()));
+        console.log("📥 Images à uploader:", images.map(img => ({
+          uuid: img.uuid,
+          urlImage: img.urlImage,
+          nomUnique: img.nomUnique,
+          presignUrl: img.presignUrl ? "✅" : "❌",
+        })));
 
         // Uploader chaque image
         const uploadPromises = images.map(async (imageResponse) => {
           const imageId = imageResponse.uuid;
 
-          // Extraire le nom original (avant le timestamp)
-          const originalName =
-            imageResponse.urlImage.split("_")[0] +
-            imageResponse.urlImage.substring(
-              imageResponse.urlImage.lastIndexOf("."),
-            );
+          // Le nomUnique contient le chemin complet: "deal/unique_00011.png"
+          // Extraire juste le nom du fichier original avant le timestamp
+          let originalFileName = imageResponse.nomUnique;
 
-          const file = fileMap.get(originalName);
+          // Si nomUnique contient un chemin (ex: deal/image.jpg_timestamp)
+          if (originalFileName.includes("/")) {
+            originalFileName = originalFileName.split("/").pop() || originalFileName;
+          }
+          // Retirer le timestamp si présent (format: nomfichier.ext_timestamp)
+          const lastUnderscore = originalFileName.lastIndexOf("_");
+          if (lastUnderscore > 0) {
+            const extension = originalFileName.substring(originalFileName.lastIndexOf("."));
+            const baseName = originalFileName.substring(0, lastUnderscore);
+            // Vérifier si ce qui suit le _ est un nombre (timestamp)
+            const afterUnderscore = originalFileName.substring(lastUnderscore + 1);
+            if (/^\d+/.test(afterUnderscore.replace(extension, ""))) {
+              originalFileName = baseName + extension;
+            }
+          }
+
+          const file = fileMap.get(originalFileName);
 
           if (!file) {
-            console.error(`Fichier non trouvé pour ${originalName}`);
+            console.error(`❌ Fichier non trouvé pour "${originalFileName}"`);
+            console.error("   Fichiers disponibles:", Array.from(fileMap.keys()));
             updateProgress(imageId, {
-              fileName: originalName,
+              fileName: originalFileName,
               status: "error",
               error: "Fichier introuvable",
             });
             return;
           }
+
+          console.log(`✅ Fichier trouvé: ${originalFileName} -> ${file.name}`);
 
           try {
             // Étape 1: Validation
@@ -122,6 +146,10 @@ export const useImageUpload = (): UseImageUploadReturn => {
             if (!imageResponse.presignUrl) {
               throw new Error("Presign URL manquante");
             }
+
+            console.log(`🚀 Upload vers MinIO: ${imageResponse.nomUnique}`);
+            console.log(`   URL présignée: ${imageResponse.presignUrl.substring(0, 100)}...`);
+
             await imageService.uploadToMinio(
               imageResponse.presignUrl,
               file,
@@ -133,6 +161,8 @@ export const useImageUpload = (): UseImageUploadReturn => {
               },
             );
 
+            console.log(`✅ Upload réussi: ${imageResponse.nomUnique}`);
+
             // Étape 3: Confirmation au backend
             updateProgress(imageId, {
               progress: 100,
@@ -141,13 +171,15 @@ export const useImageUpload = (): UseImageUploadReturn => {
 
             await imageService.confirmUpload(entityType, entityUuid, imageId);
 
+            console.log(`✅ Confirmation réussie: ${imageResponse.nomUnique}`);
+
             // Étape 4: Succès
             updateProgress(imageId, {
               progress: 100,
               status: "success",
             });
           } catch (error) {
-            console.error(`Erreur upload ${file.name}:`, error);
+            console.error(`❌ Erreur upload ${file.name}:`, error);
 
             updateProgress(imageId, {
               status: "error",

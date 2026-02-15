@@ -108,88 +108,403 @@ Le projet PayToGether utilise une **architecture hexagonale** (ports & adapters)
 
 ## 🖼️ Gestion des images avec MinIO
 
+### Architecture complète
+```
+Frontend (React) ←→ Backend (BFF) ←→ MinIO Storage
+      ↓                   ↓               ↓
+  Sélection          Génération      Stockage
+   images          presignUrl        images
+      ↓                   ↓               ↓
+  Upload direct ←--------┘               ↓
+      ↓                                   ↓
+  Confirmation -------→ Statut UPLOADED  ↓
+```
+
 ### Principe
-- Upload direct depuis le frontend vers MinIO via **URL présignées**
-- Backend génère les URL présignées et gère les statuts
+- Upload **direct** depuis le frontend vers MinIO via **URL présignées**
+- Backend génère les URL présignées et gère les statuts des images
+- Le **nom du fichier** est rendu unique avec un **timestamp** (ex: `image.jpg_1707988800000`)
+- Support multi-entités : Deal, Publicité, Utilisateur
 
 ### Statuts des images
 ```java
 public enum StatutImage {
-    PENDING,   // En attente d'upload
-    UPLOADED,  // Uploadé avec succès
-    FAILED     // Échec
+    PENDING,   // En attente d'upload (URL présignée générée)
+    UPLOADED,  // Uploadé avec succès sur MinIO
+    FAILED     // Échec de l'upload
 }
 ```
 
-### Flux d'upload
-1. **Création** : Frontend crée l'entité avec métadonnées images (statut `PENDING`)
-2. **Génération URL** : Backend génère automatiquement `presignUrl` (méthode `PUT`)
-3. **Upload** : Frontend upload directement vers MinIO avec `presignUrl`
-4. **Confirmation** : Frontend appelle `PATCH /{entityUuid}/images/{imageUuid}/confirm`
-5. **Lecture** : Frontend récupère URL de lecture via `GET /{entityUuid}/images/{imageUuid}/url`
+### Flux d'upload complet
+
+#### Backend (création avec images)
+1. **Frontend** envoie les métadonnées des images (nom, isPrincipal)
+2. **Backend** crée l'entité avec statut `PENDING` pour chaque image
+3. **Backend** ajoute un **timestamp unique** au nom de fichier
+4. **Backend** génère les **presignUrl** (PUT, validité 1h)
+5. **Backend** retourne l'entité avec les `presignUrl`
+
+#### Frontend (upload)
+6. **Frontend** upload chaque image directement vers MinIO via `presignUrl`
+7. **Frontend** appelle `PATCH /{entityUuid}/images/{imageUuid}/confirm` pour chaque image uploadée
+8. **Backend** met à jour le statut en `UPLOADED`
+
+#### Lecture
+9. **Frontend** récupère les images avec `GET /{entityUuid}`
+10. **Backend** génère automatiquement les `presignUrl` pour images `PENDING` (lecture)
+11. **Frontend** affiche les images via les URLs présignées
 
 ### FileManager (bff-provider/utils)
-```java
-// Génération URL présignée pour upload (PUT)
-String generatePresignedUrl(String fullFileName)
 
-// Génération URL présignée pour lecture (GET)
-String generatePresignedUrlForRead(String fullFileName)
+```java
+@Component
+@RequiredArgsConstructor
+public class FileManager {
+    private final MinioClient minioClient;
+    
+    @Value("${minio.bucketName}")
+    private String bucketName;
+    
+    @Value("${minio.presignedUrlExpiration:3600}")
+    private int presignedUrlExpiration; // 1 heure par défaut
+
+    /**
+     * Génère URL présignée pour UPLOAD (méthode PUT)
+     * @param fullFileName nom complet avec timestamp (ex: image.jpg_1707988800000)
+     */
+    public String generatePresignedUrl(String fullFileName) {
+        return minioClient.getPresignedObjectUrl(
+            GetPresignedObjectUrlArgs.builder()
+                .method(Method.PUT)
+                .bucket(bucketName)
+                .object(fullFileName)
+                .expiry(presignedUrlExpiration)
+                .build()
+        );
+    }
+
+    /**
+     * Génère URL présignée pour LECTURE (méthode GET)
+     */
+    public String generatePresignedUrlForRead(String fullFileName) {
+        return minioClient.getPresignedObjectUrl(
+            GetPresignedObjectUrlArgs.builder()
+                .method(Method.GET)
+                .bucket(bucketName)
+                .object(fullFileName)
+                .expiry(presignedUrlExpiration)
+                .build()
+        );
+    }
+    
+    /**
+     * Supprime un fichier du bucket MinIO
+     */
+    public void supprimerFichier(String fullFileName) {
+        minioClient.removeObject(
+            RemoveObjectArgs.builder()
+                .bucket(bucketName)
+                .object(fullFileName)
+                .build()
+        );
+    }
+}
 ```
 
 ### Pattern dans ProviderAdapter
+
+#### Méthode sauvegarder() - Deal avec images
 ```java
-@Override
-public DealModele sauvegarder(DealModele deal) {
-    // 1. Mapper vers JPA
-    DealJpa entite = mapper.versEntite(deal);
+@Component
+@RequiredArgsConstructor
+public class DealProviderAdapter implements DealProvider {
     
-    // 2. Ajouter timestamp unique aux noms d'images
-    if (deal.getListeImages() != null) {
-        deal.getListeImages().forEach(image -> {
-            image.setUrlImage(image.getUrlImage() + "_" + System.currentTimeMillis());
-            image.setStatut(StatutImage.PENDING);
+    private final DealRepository jpaRepository;
+    private final DealJpaMapper mapper;
+    private final FileManager fileManager;
+
+    @Override
+    public DealModele sauvegarder(DealModele deal) {
+        DealJpa entite = mapper.versEntite(deal);
+        
+        // 1. Ajouter timestamp unique aux noms d'images
+        if (deal.getListeImages() != null && !deal.getListeImages().isEmpty()) {
+            List<ImageDealJpa> imageDealJpas = deal.getListeImages().stream()
+                .map(imageDealModele -> ImageDealJpa.builder()
+                    .uuid(imageDealModele.getUuid())
+                    .urlImage(imageDealModele.getUrlImage() + "_" + System.currentTimeMillis())
+                    .isPrincipal(imageDealModele.getIsPrincipal())
+                    .statut(StatutImageDeal.PENDING)
+                    .dealJpa(entite)
+                    .build())
+                .toList();
+            entite.setImageDealJpas(imageDealJpas);
+        }
+        
+        // 2. Sauvegarder en base de données
+        DealJpa sauvegarde = jpaRepository.save(entite);
+        DealModele modele = mapper.versModele(sauvegarde);
+        
+        // 3. Générer URL présignées pour images PENDING
+        setPresignUrl(modele);
+        
+        return modele;
+    }
+
+    private void setPresignUrl(DealModele modele) {
+        if (modele.getListeImages() != null && !modele.getListeImages().isEmpty()) {
+            modele.getListeImages().stream()
+                .filter(img -> img.getStatut() == StatutImageDeal.PENDING)
+                .forEach(img -> {
+                    String presignUrl = fileManager.generatePresignedUrl(img.getUrlImage());
+                    img.setPresignUrl(presignUrl);
+                });
+        }
+    }
+
+    @Override
+    public DealModele mettreAJour(UUID uuid, DealModele deal) {
+        DealJpa entite = jpaRepository.findById(uuid)
+            .map(jpa -> {
+                mapper.mettreAJour(jpa, deal);
+                mettreAJourImagesSiBesoin(jpa, deal);
+                return jpaRepository.save(jpa);
+            })
+            .orElseThrow(() -> new IllegalArgumentException("Deal non trouvé : " + uuid));
+            
+        DealModele modeleSauvegarde = mapper.versModele(entite);
+        setPresignUrl(modeleSauvegarde);
+        return modeleSauvegarde;
+    }
+
+    private void mettreAJourImagesSiBesoin(DealJpa jpa, DealModele deal) {
+        if (jpa.getImageDealJpas() == null || jpa.getImageDealJpas().isEmpty()) {
+            return;
+        }
+        if (deal.getListeImages() == null || deal.getListeImages().isEmpty()) {
+            return;
+        }
+
+        var imagesParUuid = deal.getListeImages().stream()
+            .filter(image -> image.getUuid() != null)
+            .collect(Collectors.toMap(
+                ImageDealModele::getUuid,
+                image -> image
+            ));
+
+        // Si URL modifiée : ajouter timestamp et repasser en PENDING
+        jpa.getImageDealJpas().forEach(imageJpa -> {
+            var imageModele = imagesParUuid.get(imageJpa.getUuid());
+            if (imageModele != null && !imageJpa.getUrlImage().equals(imageModele.getUrlImage())) {
+                imageJpa.setUrlImage(imageModele.getUrlImage() + "_" + System.currentTimeMillis());
+                imageJpa.setStatut(StatutImageDeal.PENDING);
+                imageJpa.setDateModification(LocalDateTime.now());
+            }
         });
     }
-    
-    // 3. Sauvegarder
-    DealJpa sauvegarde = jpaRepository.save(entite);
-    DealModele modele = mapper.versModele(sauvegarde);
-    
-    // 4. Générer URL présignées pour images PENDING
-    setPresignUrl(modele);
-    
-    return modele;
-}
 
-private void setPresignUrl(DealModele modele) {
-    if (modele.getListeImages() != null) {
-        modele.getListeImages().stream()
-            .filter(img -> img.getStatut() == StatutImage.PENDING)
-            .forEach(img -> {
-                String presignUrl = fileManager.generatePresignedUrl(img.getUrlImage());
-                img.setPresignUrl(presignUrl);
+    @Override
+    public void mettreAJourStatutImage(UUID dealUuid, UUID imageUuid, StatutImageDeal statut) {
+        DealJpa deal = jpaRepository.findById(dealUuid)
+            .orElseThrow(() -> new IllegalArgumentException("Deal non trouvé : " + dealUuid));
+            
+        deal.getImageDealJpas().stream()
+            .filter(img -> img.getUuid().equals(imageUuid))
+            .findFirst()
+            .ifPresent(img -> {
+                img.setStatut(statut);
+                img.setDateModification(LocalDateTime.now());
+                jpaRepository.save(deal);
             });
+    }
+
+    @Override
+    public String obtenirUrlLectureImage(UUID dealUuid, UUID imageUuid) {
+        DealJpa deal = jpaRepository.findById(dealUuid)
+            .orElseThrow(() -> new IllegalArgumentException("Deal non trouvé : " + dealUuid));
+            
+        return deal.getImageDealJpas().stream()
+            .filter(img -> img.getUuid().equals(imageUuid))
+            .findFirst()
+            .map(img -> fileManager.generatePresignedUrlForRead(img.getUrlImage()))
+            .orElseThrow(() -> new IllegalArgumentException("Image non trouvée : " + imageUuid));
     }
 }
 ```
 
-### Endpoints requis pour chaque entité avec images
-```java
-// Confirmation upload
-@PatchMapping("/{entityUuid}/images/{imageUuid}/confirm")
-ResponseEntity<Void> confirmerUploadImage(@PathVariable UUID entityUuid, @PathVariable UUID imageUuid)
+### Endpoints requis dans Resource
 
-// URL de lecture
-@GetMapping("/{entityUuid}/images/{imageUuid}/url")
-ResponseEntity<Map<String, String>> obtenirUrlImage(@PathVariable UUID entityUuid, @PathVariable UUID imageUuid)
+```java
+@RestController
+@RequestMapping("/deals")
+@RequiredArgsConstructor
+public class DealResource {
+    
+    private final DealApiAdapter apiAdapter;
+
+    /**
+     * Confirmer l'upload d'une image (PENDING → UPLOADED)
+     */
+    @PatchMapping("/{dealUuid}/images/{imageUuid}/confirm")
+    public ResponseEntity<Void> confirmerUploadImage(
+            @PathVariable UUID dealUuid,
+            @PathVariable UUID imageUuid) {
+        apiAdapter.confirmerUploadImage(dealUuid, imageUuid);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Obtenir l'URL de lecture d'une image
+     */
+    @GetMapping("/{dealUuid}/images/{imageUuid}/url")
+    public ResponseEntity<Map<String, String>> obtenirUrlImage(
+            @PathVariable UUID dealUuid,
+            @PathVariable UUID imageUuid) {
+        String url = apiAdapter.obtenirUrlImage(dealUuid, imageUuid);
+        return ResponseEntity.ok(Map.of("url", url));
+    }
+}
+```
+
+### Frontend React - Intégration complète
+
+#### 1. Hook useImageUpload
+```typescript
+// src/common/api/hooks/useImageUpload.ts
+export const useImageUpload = () => {
+  const [progress, setProgress] = useState<Map<string, UploadProgress>>(new Map());
+  const [isUploading, setIsUploading] = useState(false);
+  const [hasErrors, setHasErrors] = useState(false);
+
+  const uploadImages = async (
+    entityType: "deals" | "publicites" | "utilisateurs",
+    entityUuid: string,
+    images: ImageResponse[],
+    files: ImageFile[],
+  ) => {
+    setIsUploading(true);
+    setProgress(new Map());
+
+    const uploadPromises = images.map(async (imageResponse) => {
+      try {
+        // 1. Upload vers MinIO
+        await imageService.uploadToMinio(
+          imageResponse.presignUrl,
+          file,
+          (progressPercent) => updateProgress(imageId, { progress: progressPercent })
+        );
+
+        // 2. Confirmer au backend
+        await imageService.confirmUpload(entityType, entityUuid, imageResponse.uuid);
+        
+        updateProgress(imageId, { status: "success" });
+      } catch (error) {
+        updateProgress(imageId, { status: "error", error: error.message });
+        setHasErrors(true);
+      }
+    });
+
+    await Promise.all(uploadPromises);
+    setIsUploading(false);
+  };
+
+  return { uploadImages, progress, isUploading, hasErrors };
+};
+```
+
+#### 2. Hook useCreateDeal avec upload automatique
+```typescript
+export const useCreateDeal = () => {
+  const { uploadImages, progress, isUploading, hasErrors } = useImageUpload();
+
+  const mutation = useMutation<DealDTO, Error, CreateDealDTO>({
+    mutationFn: async (input) => {
+      // 1. Créer le deal avec métadonnées images
+      const payload = {
+        ...input,
+        listeImages: input.listeImages.map((img) => ({
+          urlImage: img.urlImage,
+          nomUnique: img.nomUnique,
+          statut: null,
+          isPrincipal: img.isPrincipal,
+        })),
+      };
+
+      const dealCree = await apiClient.post<DealDTO>("/deals", { body: payload });
+
+      // 2. Uploader les images vers MinIO + confirmer
+      const imagesFromBackend = dealCree.listeImages ?? [];
+      if (imagesFromBackend.length > 0) {
+        const filesForUpload = /* préparer les fichiers */;
+        await uploadImages("deals", dealCree.uuid, imagesFromBackend, filesForUpload);
+      }
+
+      return dealCree;
+    },
+  });
+
+  return { ...mutation, progress, isUploading, hasErrors };
+};
+```
+
+#### 3. Composant CreateDealModal avec progression
+```tsx
+function CreateDealModal() {
+  const { mutateAsync: createDeal, isUploading, progress } = useCreateDeal();
+
+  const handleSubmit = async (data) => {
+    const payload = {
+      ...data,
+      listeImages: images.map((file, idx) => ({
+        urlImage: file.name,
+        nomUnique: file.name,
+        isPrincipal: idx === 0, // Première image = principale
+        file, // Pour upload ultérieur
+      })),
+    };
+
+    await createDeal(payload);
+  };
+
+  return (
+    <Dialog>
+      {/* Indicateur de progression */}
+      {isUploading && <UploadProgress progress={progress} />}
+      
+      <Form onSubmit={handleSubmit} />
+    </Dialog>
+  );
+}
 ```
 
 ### Méthodes à implémenter dans Provider
 ```java
+// CRUD standard
+DealModele sauvegarder(DealModele deal);
+DealModele mettreAJour(UUID uuid, DealModele deal);
+Optional<DealModele> trouverParUuid(UUID uuid);
+List<DealModele> trouverTous();
+void supprimerParUuid(UUID uuid);
+
+// Gestion des images
 void mettreAJourStatutImage(UUID entityUuid, UUID imageUuid, StatutImage statut);
 String obtenirUrlLectureImage(UUID entityUuid, UUID imageUuid);
 ```
+
+### Points clés à retenir
+
+1. ✅ **Timestamp unique** : Toujours ajouter `System.currentTimeMillis()` au nom
+2. ✅ **Statut PENDING** : État initial pour toute nouvelle image
+3. ✅ **URL présignées** : Générées automatiquement pour images PENDING
+4. ✅ **Upload direct** : Frontend → MinIO (pas de proxy backend)
+5. ✅ **Confirmation** : Frontend doit appeler l'endpoint de confirmation
+6. ✅ **Image principale** : Première image du tableau (`isPrincipal = true`)
+7. ✅ **FileManager** : Toujours utiliser pour interaction avec MinIO
+8. ✅ **Modification détectée** : Si URL change → nouveau timestamp + PENDING
+
+### Documentation complète
+- Backend : `.github/documentation/GESTION_IMAGES_MINIO.md`
+- Frontend : `.github/documentation/GESTION_IMAGES_FRONTEND_UPLOAD.md`
 
 ---
 
