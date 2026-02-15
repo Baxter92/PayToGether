@@ -210,7 +210,7 @@ public class DealProviderAdapter implements DealProvider {
         return deal.getImageDealJpas().stream()
                 .filter(image -> image.getUuid().equals(imageUuid))
                 .findFirst()
-                .map(image -> fileManager.generatePresignedUrlForRead(image.getUrlImage()))
+                .map(image -> fileManager.generatePresignedUrlForRead(Tools.DIRECTORY_DEALS_IMAGES+image.getUrlImage()))
                 .orElseThrow(() -> new IllegalArgumentException("Image non trouvée pour l'UUID : " + imageUuid));
     }
 }
