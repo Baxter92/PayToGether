@@ -23,6 +23,7 @@ const dealHooks = createResourceHooks<DealDTO, CreateDealDTO, UpdateDealDTO>({
       ["deals", "createur", createurUuid] as const,
     byCategorie: (categorieUuid: string) =>
       ["deals", "categorie", categorieUuid] as const,
+    villes: () => ["deals", "villes"] as const,
   },
 });
 
@@ -57,6 +58,13 @@ export const useDealsByCategorie = (categorieUuid: string) => {
     queryKey: dealKeys.byCategorie(categorieUuid),
     queryFn: () => dealService.getByCategorie(categorieUuid),
     enabled: !!categorieUuid,
+  });
+};
+
+export const useDealVilles = () => {
+  return useQuery<string[], Error>({
+    queryKey: dealKeys.villes(),
+    queryFn: () => dealService.getVilles(),
   });
 };
 
@@ -100,7 +108,7 @@ export const useCreateDeal = () => {
       const filesForUpload: ImageFile[] = imagesFromBackend
         .filter((f) => f.presignUrl && f.statut === "PENDING")
         .map((f) => {
-          const backendFileName = f.urlImage?.split("/")[1]?.split("_")[0];
+          const backendFileName = f.urlImage?.split("_")[0];
 
           const matchedImage = input.listeImages.find(
             (img) => img.file?.name?.split(".")[0] === backendFileName,
@@ -110,7 +118,7 @@ export const useCreateDeal = () => {
             file: matchedImage?.file as File,
             isPrincipal: f.isPrincipal,
             presignUrl: f.presignUrl as string,
-            id: f.urlImage || "",
+            id: f.imageUuid || "",
             name: backendFileName || "",
           };
         });

@@ -22,21 +22,21 @@ export default function AdminDeals(): ReactElement {
     const deadline =
       expirationDate && !Number.isNaN(expirationDate.getTime())
         ? Math.max(
-          0,
-          Math.ceil(
-            (expirationDate.getTime() - now.getTime()) /
+            0,
+            Math.ceil(
+              (expirationDate.getTime() - now.getTime()) /
                 (1000 * 60 * 60 * 24),
-          ),
-        ).toString()
+            ),
+          ).toString()
         : "0";
 
-    const firstImage = deal.listeImages?.[0];
+    const firstImage = deal.listeImages?.find?.((img) => img.isPrincipal);
 
     return {
       id: deal.uuid,
       title: deal.titre,
       description: deal.description,
-      image: firstImage?.urlImage || "/placeholder.svg",
+      image: firstImage || "/placeholder.svg",
       originalPrice: deal.prixDeal,
       groupPrice: deal.prixPart,
       unit: 1,

@@ -45,7 +45,7 @@ const buildPayload = (formData: any, now: string): CreateDealDTO => {
     ? new Date(formData.expiryDate).toISOString().slice(0, 19)
     : now;
 
-  const [ville = "", pays = "CM"] = String(formData.location ?? "")
+  const [ville = "", pays = "CA"] = String(formData.location ?? "")
     .split(",")
     .map((s: string) => s.trim());
 
@@ -191,7 +191,9 @@ function ImagesField({ field, form }: { field: any; form: any }) {
       const filesToAdd = files.slice(0, remaining);
 
       if (files.length > remaining) {
-        toast.warning(`Vous ne pouvez ajouter que ${remaining} image(s) supplémentaire(s)`);
+        toast.warning(
+          `Vous ne pouvez ajouter que ${remaining} image(s) supplémentaire(s)`,
+        );
       }
 
       setImages([...images, ...filesToAdd]);
@@ -246,17 +248,19 @@ function ImagesField({ field, form }: { field: any; form: any }) {
             <ImageIcon className="w-5 h-5 text-blue-600" />
           </div>
           <div>
-            <p className="text-sm font-bold text-gray-900">
-              Galerie d'images
-            </p>
+            <p className="text-sm font-bold text-gray-900">Galerie d'images</p>
             <p className="text-xs text-gray-600">
               JPG, PNG, WEBP • Max 5 MB par image
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border-2 border-blue-100">
-          <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">{images.length}</span>
-          <span className="text-sm text-gray-500 font-medium">/ {maxFiles}</span>
+          <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            {images.length}
+          </span>
+          <span className="text-sm text-gray-500 font-medium">
+            / {maxFiles}
+          </span>
         </div>
       </div>
 
@@ -294,7 +298,8 @@ function ImagesField({ field, form }: { field: any; form: any }) {
         <div className="space-y-4">
           <div className="flex items-center justify-between px-1">
             <p className="text-sm font-bold text-gray-900">
-              {images.length} image{images.length > 1 ? "s" : ""} sélectionnée{images.length > 1 ? "s" : ""}
+              {images.length} image{images.length > 1 ? "s" : ""} sélectionnée
+              {images.length > 1 ? "s" : ""}
             </p>
             <p className="text-xs text-blue-600 font-medium bg-blue-50 px-3 py-1 rounded-full">
               ⭐ La 1ère image est principale
@@ -491,7 +496,9 @@ function HighlightsField({ field, form }: { field: any; form: any }) {
       {highlights.length > 0 ? (
         <div className="space-y-3">
           <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-            {highlights.length} point{highlights.length > 1 ? "s" : ""} fort{highlights.length > 1 ? "s" : ""} ajouté{highlights.length > 1 ? "s" : ""}
+            {highlights.length} point{highlights.length > 1 ? "s" : ""} fort
+            {highlights.length > 1 ? "s" : ""} ajouté
+            {highlights.length > 1 ? "s" : ""}
           </p>
           <div className="flex flex-wrap gap-2">
             {highlights.map((highlight: string, idx: number) => (
@@ -587,8 +594,10 @@ export function CreateDealModal({
     const progressArray = Array.from(progress.values());
     const totalProgress = progressArray.reduce((sum, p) => sum + p.progress, 0);
     const avgProgress = totalProgress / progressArray.length;
-    const completed = progressArray.filter(p => p.status === "success").length;
-    const failed = progressArray.filter(p => p.status === "error").length;
+    const completed = progressArray.filter(
+      (p) => p.status === "success",
+    ).length;
+    const failed = progressArray.filter((p) => p.status === "error").length;
 
     return {
       percentage: Math.round(avgProgress),
@@ -615,7 +624,7 @@ export function CreateDealModal({
         }
 
         onSuccess?.();
-        // onClose();
+        onClose();
       } catch (error: any) {
         toast.error("❌ Erreur lors de la création du deal", {
           description: error?.response?.data?.message || error?.message,
@@ -637,7 +646,8 @@ export function CreateDealModal({
             type: "text",
             name: "title",
             label: "Titre du deal",
-            placeholder: "Ex : Dîner romantique pour 2 personnes au restaurant étoilé",
+            placeholder:
+              "Ex : Dîner romantique pour 2 personnes au restaurant étoilé",
             colSpan: 1,
           },
           {
@@ -645,7 +655,8 @@ export function CreateDealModal({
             name: "description",
             label: "Description complète",
             colSpan: 1,
-            placeholder: "Décrivez votre offre de manière détaillée et attractive...",
+            placeholder:
+              "Décrivez votre offre de manière détaillée et attractive...",
             rows: 4,
           },
         ],
@@ -784,7 +795,10 @@ export function CreateDealModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent size="xl" className="p-0 h-[90vh] overflow-hidden bg-gradient-to-br from-gray-50 to-blue-50/30">
+      <DialogContent
+        size="xl"
+        className="p-0 h-[90vh] overflow-hidden bg-gradient-to-br from-gray-50 to-blue-50/30"
+      >
         <DialogTitle className="px-6 py-5 border-b border-gray-200 bg-white shadow-sm">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg">
@@ -795,7 +809,8 @@ export function CreateDealModal({
                 Créer un nouveau deal
               </h2>
               <p className="text-sm text-gray-600 font-normal mt-0.5">
-                Remplissez les informations pour publier votre offre exceptionnelle
+                Remplissez les informations pour publier votre offre
+                exceptionnelle
               </p>
             </div>
           </div>
@@ -838,7 +853,8 @@ export function CreateDealModal({
                   )}
                 </div>
                 <span className="text-gray-600 font-medium">
-                  {uploadProgress.completed + uploadProgress.failed} / {uploadProgress.total}
+                  {uploadProgress.completed + uploadProgress.failed} /{" "}
+                  {uploadProgress.total}
                 </span>
               </div>
             </div>

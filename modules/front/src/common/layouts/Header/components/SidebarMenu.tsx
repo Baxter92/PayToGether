@@ -83,9 +83,9 @@ const SidebarMenu = ({
     { label: "Douala", value: "Douala" },
     { label: "Yaoundé", value: "Yaoundé" },
     { label: "Bafoussam", value: "Bafoussam" },
-    { label: "Garoua", value: "Garoua" }
+    { label: "Garoua", value: "Garoua" },
   ],
-  showLocationSelector = true,
+  showLocationSelector = false,
   categories = [],
   showCategories = true,
   loginLink = "/login",
@@ -258,7 +258,9 @@ const SidebarMenu = ({
                       onClick={closeMenu}
                       title={category.name}
                       leftIcon={
-                        Icon ? <Icon className="w-4 h-4 mr-2 text-primary-600" /> : undefined
+                        Icon ? (
+                          <Icon className="w-4 h-4 mr-2 text-primary-600" />
+                        ) : undefined
                       }
                     />
                   );

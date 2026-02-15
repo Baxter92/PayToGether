@@ -1,8 +1,10 @@
+import type { ImageResponse } from "@/common/api/hooks/useImageUpload";
+
 export interface IDealCardProps {
   deal: {
-    id: number;
+    id: string;
     title: string;
-    image: string;
+    image: ImageResponse;
     originalPrice: number;
     groupPrice: number;
     unit: number;

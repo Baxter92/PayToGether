@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { imageService } from "../services/imageService";
 
 export interface ImageResponse {
-  uuid: string;
+  imageUuid: string;
   urlImage: string;
   nomUnique: string;
   presignUrl: string | null;
@@ -77,6 +77,7 @@ export const useImageUpload = (): UseImageUploadReturn => {
       try {
         // Créer une map pour associer fichiers et réponses backend
         const fileMap = new Map<string, File>();
+        const imageIds: string[] = [];
         files.forEach((imageFile) => {
           const cleanName = imageFile.file.name;
           fileMap.set(cleanName, imageFile.file);
@@ -131,7 +132,7 @@ export const useImageUpload = (): UseImageUploadReturn => {
               status: "confirming",
             });
 
-            imageService.confirmUpload(entityType, entityUuid, imageId);
+            imageIds.push(imageId);
 
             // Étape 4: Succès
             updateProgress(imageId, {
@@ -151,6 +152,9 @@ export const useImageUpload = (): UseImageUploadReturn => {
         });
 
         await Promise.all(uploadPromises);
+
+        // Étape 5: Confirmation globale
+        await imageService.confirmAllUploads(entityType, entityUuid, imageIds);
       } finally {
         setIsUploading(false);
       }

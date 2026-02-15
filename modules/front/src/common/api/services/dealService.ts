@@ -38,4 +38,7 @@ export const dealService = {
     apiClient.get<{ url: string }>(
       `/deals/${dealUuid}/images/${imageUuid}/url`,
     ),
+
+  // Récupérer les villes disponibles
+  getVilles: () => apiClient.get<string[]>("/deals/villes"),
 };

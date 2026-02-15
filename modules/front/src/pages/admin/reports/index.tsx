@@ -27,7 +27,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { useDeals } from "@/common/api";
+import { useDeals, useDealVilles } from "@/common/api";
 import { mapDealToView } from "@/common/api/mappers/catalog";
 import {
   Card,
@@ -63,17 +63,18 @@ const marchandData = [
   {
     name: "Sophie Nkomo",
     value: 42,
-  }
+  },
 ];
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
 
 export default function AdminReports(): ReactElement {
   const { data: dealsData, isLoading } = useDeals();
+  const { data: cities } = useDealVilles();
   const deals = (dealsData ?? []).map(mapDealToView);
   const [selectedPeriod, setSelectedPeriod] = useState("30d");
   const [selectedCategory, setSelectedCategory] = useState<string | string[]>(
-    "all"
+    "all",
   );
   const [selectedCity, setSelectedCity] = useState<string | string[]>("all");
   const { t: tAdmin } = useI18n("admin");
@@ -87,7 +88,6 @@ export default function AdminReports(): ReactElement {
     [deals],
   );
   const totalDeals = deals.length;
-  const cities = [...new Set(deals.map((d) => d.city))];
 
   const bovinDeals = deals.filter((deal) => deal.category === "bovins");
   const poissonDeals = deals.filter((deal) => deal.category === "poissons");
@@ -121,7 +121,7 @@ export default function AdminReports(): ReactElement {
     },
     {
       title: "Villes",
-      value: cities.length.toString(),
+      value: (cities ?? []).length.toString(),
       change: 5.0,
       icon: Users,
     },
@@ -136,33 +136,39 @@ export default function AdminReports(): ReactElement {
       revenue: deal.originalPrice * deal.sold,
     }));
 
-  const cityStats = deals.reduce((acc, deal) => {
-    const existing = acc.find((d) => d.city === deal.city);
-    if (existing) {
-      existing.deals += 1;
-      existing.revenue += deal.originalPrice * deal.sold;
-      existing.sold += deal.sold;
-    } else {
-      acc.push({
-        city: deal.city,
-        deals: 1,
-        revenue: deal.originalPrice * deal.sold,
-        sold: deal.sold,
-      });
-    }
-    return acc;
-  }, [] as Array<{ city: string; deals: number; revenue: number; sold: number }>);
+  const cityStats = deals.reduce(
+    (acc, deal) => {
+      const existing = acc.find((d) => d.city === deal.city);
+      if (existing) {
+        existing.deals += 1;
+        existing.revenue += deal.originalPrice * deal.sold;
+        existing.sold += deal.sold;
+      } else {
+        acc.push({
+          city: deal.city,
+          deals: 1,
+          revenue: deal.originalPrice * deal.sold,
+          sold: deal.sold,
+        });
+      }
+      return acc;
+    },
+    [] as Array<{ city: string; deals: number; revenue: number; sold: number }>,
+  );
 
   const categoryData = [
     {
       name: "Bovins",
-      value: totalRevenue > 0 ? Math.round((bovinRevenue / totalRevenue) * 100) : 0,
+      value:
+        totalRevenue > 0 ? Math.round((bovinRevenue / totalRevenue) * 100) : 0,
       revenue: bovinRevenue,
     },
     {
       name: "Poissons",
       value:
-        totalRevenue > 0 ? Math.round((poissonRevenue / totalRevenue) * 100) : 0,
+        totalRevenue > 0
+          ? Math.round((poissonRevenue / totalRevenue) * 100)
+          : 0,
       revenue: poissonRevenue,
     },
   ];
@@ -173,31 +179,38 @@ export default function AdminReports(): ReactElement {
     { month: "Mar", revenue: 1100000, orders: 160, sold: 580 },
     { month: "Avr", revenue: 1250000, orders: 175, sold: 620 },
     { month: "Mai", revenue: 1180000, models: 168, sold: 610 },
-    { month: "Juin", revenue: totalRevenue, orders: totalSold, sold: totalSold },
+    {
+      month: "Juin",
+      revenue: totalRevenue,
+      orders: totalSold,
+      sold: totalSold,
+    },
   ];
 
   const periodItems = [
     { label: "7 derniers jours", value: "7d" },
     { label: "30 derniers jours", value: "30d" },
     { label: "90 derniers jours", value: "90d" },
-    { label: "Cette année", value: "1y" }
+    { label: "Cette année", value: "1y" },
   ];
 
   const categoryItems = [
     { label: "Tous", value: "all" },
     { label: "Bovins", value: "bovins" },
-    { label: "Poissons", value: "poissons" }
+    { label: "Poissons", value: "poissons" },
   ];
 
   const cityItems = [
     { label: "Toutes les villes", value: "all" },
-    ...cities.map((city) => ({ label: city, value: city }))
+    ...(cities ?? []).map((city) => ({ label: city, value: city })),
   ];
 
   return (
     <div className="space-y-6">
       {isLoading && (
-        <div className="text-center py-4 text-muted-foreground">Chargement...</div>
+        <div className="text-center py-4 text-muted-foreground">
+          Chargement...
+        </div>
       )}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>

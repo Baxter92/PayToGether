@@ -72,7 +72,7 @@ const Header = ({
   appName = "DealToGether",
   appLogo,
   topBanner,
-  showLocationSelector = true,
+  showLocationSelector = false,
   defaultLocation = "Douala",
   locations = [],
   onLocationChange,
@@ -180,7 +180,7 @@ const Header = ({
       label: mergedTexts.logout,
       icon: <LogOut className="w-4 h-4 mr-2" />,
       onClick: handleLogout,
-    }
+    },
   ];
 
   return (

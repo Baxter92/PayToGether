@@ -21,7 +21,9 @@ export const imageService = {
         if (onProgress) {
           xhr.upload.addEventListener("progress", (event) => {
             if (event.lengthComputable) {
-              const percentComplete = Math.round((event.loaded / event.total) * 100);
+              const percentComplete = Math.round(
+                (event.loaded / event.total) * 100,
+              );
               onProgress(percentComplete);
             }
           });
@@ -64,6 +66,23 @@ export const imageService = {
     try {
       await apiClient.patch(
         `${entityType}/${entityUuid}/images/${imageUuid}/confirm`,
+      );
+    } catch (error) {
+      console.error("Erreur confirmation upload:", error);
+      throw new Error("Échec de la confirmation d'upload");
+    }
+  },
+  confirmAllUploads: async (
+    entityType: "deals" | "publicites" | "utilisateurs",
+    entityUuid: string,
+    imageUuids: string[],
+  ): Promise<void> => {
+    try {
+      await apiClient.patch(
+        `${entityType}/${entityUuid}/images/confirm-batch`,
+        {
+          body: imageUuids,
+        },
       );
     } catch (error) {
       console.error("Erreur confirmation upload:", error);
