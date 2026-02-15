@@ -2,11 +2,13 @@ package com.ulr.paytogether.provider.adapter.entity;
 
 import com.ulr.paytogether.core.enumeration.RoleUtilisateur;
 import com.ulr.paytogether.core.enumeration.StatutUtilisateur;
+import com.ulr.paytogether.provider.utils.Tools;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.io.FilenameUtils;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -64,7 +66,7 @@ public class UtilisateurJpa {
 
     public void setPhotoProfilUnique(String folder, String urlImage) {
         if (this.photoProfil != null) {
-            this.photoProfil.setUrlImage(folder+urlImage+'_'+System.currentTimeMillis());
+            this.photoProfil.setUrlImage(folder+FilenameUtils.getBaseName(urlImage)+'_'+System.currentTimeMillis()+ "." + FilenameUtils.getExtension(urlImage));
         }
     }
 

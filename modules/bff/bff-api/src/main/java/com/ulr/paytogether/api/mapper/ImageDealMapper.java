@@ -23,6 +23,7 @@ public class ImageDealMapper {
         }
 
         return new ImageDealDto(
+                modele.getUuid(),
                 modele.getUrlImage(),
                 modele.getIsPrincipal(),
                 modele.getPresignUrl(),
@@ -42,6 +43,7 @@ public class ImageDealMapper {
         }
 
         return ImageDealModele.builder()
+                .uuid(dto.imageUuid())
                 .urlImage(dto.urlImage())
                 .isPrincipal(dto.isPrincipal())
                 .presignUrl(dto.presignUrl())

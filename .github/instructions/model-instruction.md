@@ -11,25 +11,54 @@ Créer les modèles, repositories, services et API pour toutes les entités du p
 ### 1. **Utilisateur**
 **Champs** :
 - `uuid` : UUID (PK)
-- `nom` : String
-- `prenom` : String
-- `email` : String (unique)
-- `motDePasse` : String (hashé)
-- `statut` : Enum (ACTIF, INACTIF)
-- `role` : Enum (ADMIN, UTILISATEUR, VENDEUR)
+- `nom` : String (max 100 caractères)
+- `prenom` : String (max 100 caractères)
+- `email` : String (unique, max 255 caractères, obligatoire)
+- `motDePasse` : String (haché avec BCrypt, obligatoire)
+- `statut` : Enum (ACTIF, INACTIF) - défaut: INACTIF
+- `role` : Enum (ADMIN, UTILISATEUR, VENDEUR) - défaut: UTILISATEUR
 - `photoProfil` : Relation OneToOne avec ImageUtilisateur
 - `dateCreation` : LocalDateTime
 - `dateModification` : LocalDateTime
 
 **Relations** :
-- OneToMany avec Adresse
-- OneToMany avec Deal (créateur)
-- OneToMany avec Paiement
-- OneToMany avec Notification
+- **OneToOne** avec **ImageUtilisateur** (photo de profil)
+  - Nom du champ JPA : `photoProfil`
+  - Un utilisateur a une seule photo de profil
+  
+- **OneToMany** avec **Deal** (en tant que créateur/marchand)
+  - Inverse de `DealJpa.marchandJpa`
+  - Un utilisateur peut créer plusieurs deals
+  - **Note** : Cette relation inverse n'est généralement pas mappée dans `UtilisateurJpa` pour éviter les performances
+  - Pour obtenir les deals d'un utilisateur : `DealRepository.findByMarchandJpaUuid(UUID utilisateurUuid)`
+  
+- **ManyToMany** avec **Deal** (en tant que participant)
+  - Inverse de `DealJpa.participants`
+  - Table de jointure : `deal_participants`
+  - Un utilisateur peut participer à plusieurs deals
+  - **Note** : Cette relation inverse n'est généralement pas mappée dans `UtilisateurJpa`
+  - Pour obtenir les participations : `DealRepository.findByParticipantsUuid(UUID utilisateurUuid)`
+  
+- **OneToMany** avec **Adresse**
+- **OneToMany** avec **Paiement**
+- **OneToMany** avec **Commande**
+- **OneToMany** avec **Notification**
+- **OneToMany** avec **Commentaire** (auteur)
 
 **Gestion images** :
 - Photo de profil unique avec statut (PENDING, UPLOADED, FAILED)
 - Génération URL présignée pour upload et lecture
+- Méthode utilitaire : `setPhotoProfilUnique(String folder, String urlImage)` pour ajouter timestamp
+
+**Sécurité** :
+- Le mot de passe est haché avec **BCrypt** (10 rounds par défaut)
+- Ne jamais retourner le mot de passe haché dans les DTOs de réponse
+- Utiliser `BCryptPasswordEncoder.encode()` pour hasher
+- Utiliser `BCryptPasswordEncoder.matches()` pour vérifier
+
+**Important** :
+- Les relations inverses (OneToMany depuis Utilisateur vers Deal) ne sont pas mappées dans l'entité JPA pour des raisons de performance
+- Utiliser des requêtes spécifiques dans les repositories pour obtenir ces relations
 
 ---
 
@@ -52,30 +81,70 @@ Créer les modèles, repositories, services et API pour toutes les entités du p
 - `dateModification` : LocalDateTime
 
 **Relations** :
-- ManyToOne avec Utilisateur (créateur)
-- ManyToOne avec Catégorie
-- OneToMany avec ImageDeal
-- OneToMany avec Commentaire
-- OneToMany avec Paiement
+- **ManyToOne** avec **Utilisateur** (créateur/marchand) - `@JoinColumn(name = "utilisateur_uuid", nullable = false)`
+  - Nom du champ JPA : `marchandJpa` (ou `createurJpa`)
+  - Nom du champ Modèle : `createur`
+  - Un utilisateur peut créer plusieurs deals
+  - Un deal a un seul créateur
+  
+- **ManyToOne** avec **Catégorie** - `@JoinColumn(name = "categorie_uuid", nullable = false)`
+  - Nom du champ JPA : `categorieJpa`
+  - Nom du champ Modèle : `categorie`
+  - Une catégorie peut contenir plusieurs deals
+  - Un deal appartient à une seule catégorie
+  
+- **ManyToMany** avec **Utilisateur** (participants) - Table de jointure `deal_participants`
+  - `@JoinTable(name = "deal_participants", joinColumns = @JoinColumn(name = "deal_uuid"), inverseJoinColumns = @JoinColumn(name = "utilisateur_uuid"))`
+  - Nom du champ JPA : `participants` (Set<UtilisateurJpa>)
+  - Un deal peut avoir plusieurs participants
+  - Un utilisateur peut participer à plusieurs deals
+  - **Note** : Cette relation n'est pas présente dans le modèle métier (DealModele) - gérée uniquement au niveau JPA
+  
+- **OneToMany** avec **ImageDeal** - `mappedBy = "dealJpa"`
+  - Cascade ALL, orphanRemoval = true
+  - Un deal peut avoir plusieurs images
+  - Une image appartient à un seul deal
+  
+- **OneToMany** avec **Commentaire** (à implémenter)
+- **OneToMany** avec **Paiement** via **Commande** (à implémenter)
 
 **Gestion images** :
-- Liste d'images avec une principale
+- Liste d'images avec une principale (`isPrincipal`)
 - Statut pour chaque image (PENDING, UPLOADED, FAILED)
 - Génération URL présignées pour upload et lecture
+
+**Important** :
+- Dans le **modèle métier** (`DealModele`) : utiliser `createur` de type `UtilisateurModele`
+- Dans l'**entité JPA** (`DealJpa`) : utiliser `marchandJpa` de type `UtilisateurJpa`
+- Le mapper JPA doit faire la conversion : `marchandJpa` ↔ `createur`
 
 ---
 
 ### 3. **Catégorie**
 **Champs** :
 - `uuid` : UUID (PK)
-- `nom` : String (unique)
-- `description` : String
-- `icone` : String (URL ou nom fichier)
+- `nom` : String (unique, max 100 caractères)
+- `description` : String (TEXT)
+- `icone` : String (URL ou nom fichier, max 255 caractères)
 - `dateCreation` : LocalDateTime
 - `dateModification` : LocalDateTime
 
 **Relations** :
-- OneToMany avec Deal
+- **OneToMany** avec **Deal** - `mappedBy = "categorieJpa"`
+  - Nom du champ JPA : `deals` (List<DealJpa>)
+  - Cascade ALL, orphanRemoval = true, FetchType.LAZY
+  - Une catégorie peut contenir plusieurs deals
+  - Lorsqu'une catégorie est supprimée, tous ses deals sont également supprimés (cascade)
+  - **Note** : Cette relation inverse n'est généralement pas présente dans le modèle métier (`CategorieModele`) pour éviter les dépendances circulaires
+
+**Contraintes** :
+- `nom` : unique et obligatoire
+- Index recommandé sur `nom` pour les recherches
+
+**Important** :
+- La relation bidirectionnelle est gérée uniquement au niveau JPA
+- Le modèle métier `CategorieModele` ne contient pas la liste des deals
+- Pour obtenir les deals d'une catégorie, utiliser `DealRepository.findByCategorieUuid(UUID categorieUuid)`
 
 ---
 
@@ -335,6 +404,41 @@ public interface {Entité}Repository extends JpaRepository<{Entité}Jpa, UUID> {
 }
 ```
 
+**Exemple pour DealRepository** :
+```java
+@Repository
+public interface DealRepository extends JpaRepository<DealJpa, UUID> {
+    // Trouver les deals créés par un utilisateur (marchand)
+    List<DealJpa> findByMarchandJpaUuid(UUID utilisateurUuid);
+    
+    // Trouver les deals auxquels un utilisateur participe
+    @Query("SELECT d FROM DealJpa d JOIN d.participants p WHERE p.uuid = :utilisateurUuid")
+    List<DealJpa> findByParticipantsUuid(@Param("utilisateurUuid") UUID utilisateurUuid);
+    
+    // Trouver les deals d'une catégorie
+    List<DealJpa> findByCategorieJpaUuid(UUID categorieUuid);
+    
+    // Trouver les deals actifs
+    @Query("SELECT d FROM DealJpa d WHERE d.statut = :statut")
+    List<DealJpa> findByStatut(@Param("statut") StatutDeal statut);
+    
+    // Trouver les deals par ville
+    List<DealJpa> findByVille(String ville);
+}
+```
+
+**Exemple pour CategorieRepository** :
+```java
+@Repository
+public interface CategorieRepository extends JpaRepository<CategorieJpa, UUID> {
+    // Trouver une catégorie par nom
+    Optional<CategorieJpa> findByNom(String nom);
+    
+    // Vérifier si une catégorie existe par nom
+    boolean existsByNom(String nom);
+}
+```
+
 #### 3. Mapper JPA (`adapter/mapper/{Entité}JpaMapper.java`)
 ```java
 package com.ulr.paytogether.provider.adapter.mapper;
@@ -363,6 +467,84 @@ public class {Entité}JpaMapper {
     }
 }
 ```
+
+**Exemple pour DealJpaMapper** :
+```java
+@Component
+@RequiredArgsConstructor
+public class DealJpaMapper {
+    private final ImageDealJpaMapper imageDealJpaMapper;
+    private final CategorieJpaMapper categorieJpaMapper;
+    private final UtilisateurJpaMapper utilisateurJpaMapper;
+    
+    public DealModele versModele(DealJpa jpa) {
+        if (jpa == null) return null;
+        
+        return DealModele.builder()
+            .uuid(jpa.getUuid())
+            .titre(jpa.getTitre())
+            .description(jpa.getDescription())
+            // ... autres champs
+            
+            // Mapper ManyToOne : marchandJpa -> createur
+            .createur(jpa.getMarchandJpa() != null 
+                ? utilisateurJpaMapper.versModele(jpa.getMarchandJpa()) 
+                : null)
+            
+            // Mapper ManyToOne : categorieJpa -> categorie
+            .categorie(jpa.getCategorieJpa() != null 
+                ? categorieJpaMapper.versModele(jpa.getCategorieJpa()) 
+                : null)
+            
+            // Mapper OneToMany : imageDealJpas -> listeImages
+            .listeImages(jpa.getImageDealJpas() != null 
+                ? jpa.getImageDealJpas().stream()
+                    .map(imageDealJpaMapper::versModele)
+                    .toList() 
+                : null)
+            
+            // Note: participants (ManyToMany) n'est pas mappé dans le modèle métier
+            .build();
+    }
+    
+    public DealJpa versEntite(DealModele modele) {
+        if (modele == null) return null;
+        
+        return DealJpa.builder()
+            .uuid(modele.getUuid())
+            .titre(modele.getTitre())
+            .description(modele.getDescription())
+            // ... autres champs
+            
+            // Mapper createur -> marchandJpa (juste l'UUID)
+            .marchandJpa(modele.getCreateur() != null 
+                ? UtilisateurJpa.builder()
+                    .uuid(modele.getCreateur().getUuid())
+                    .build() 
+                : null)
+            
+            // Mapper categorie -> categorieJpa (juste l'UUID)
+            .categorieJpa(modele.getCategorie() != null 
+                ? CategorieJpa.builder()
+                    .uuid(modele.getCategorie().getUuid())
+                    .build() 
+                : null)
+            
+            // Mapper listeImages -> imageDealJpas
+            .imageDealJpas(modele.getListeImages() != null 
+                ? modele.getListeImages().stream()
+                    .map(imageDealJpaMapper::versEntite)
+                    .toList() 
+                : null)
+            .build();
+    }
+}
+```
+
+**Important pour les relations** :
+- **ManyToOne** : Lors de la conversion Modèle → JPA, ne créer qu'une entité JPA avec l'UUID (pas besoin de tous les champs)
+- **OneToMany** : Mapper complètement les collections (images, etc.)
+- **ManyToMany** : Les relations `participants` ne sont pas dans le modèle métier, gérées uniquement au niveau JPA
 
 #### 4. Provider Adapter (`adapter/{Entité}ProviderAdapter.java`)
 ```java
