@@ -123,8 +123,14 @@ Frontend (React) ←→ Backend (BFF) ←→ MinIO Storage
 ### Principe
 - Upload **direct** depuis le frontend vers MinIO via **URL présignées**
 - Backend génère les URL présignées et gère les statuts des images
-- Le **nom du fichier** est rendu unique avec un **timestamp** (ex: `image.jpg_1707988800000`)
+- Le **nom du fichier** est rendu unique avec un **timestamp** et placé dans un **répertoire par entité**
+  - Format : `{entite}/{baseName}_{timestamp}.{extension}`
+  - Exemple : `deals/unique_00011_1707988800000.png`
 - Support multi-entités : Deal, Publicité, Utilisateur
+- Répertoires définis dans `Tools.java` :
+  - `DIRECTORY_DEALS_IMAGES = "deals/"`
+  - `DIRECTORY_PUBLICITES_IMAGES = "publicites/"`
+  - `DIRECTORY_UTILISATEUR_IMAGES = "utilisateurs/"`
 
 ### Statuts des images
 ```java
@@ -138,75 +144,110 @@ public enum StatutImage {
 ### Flux d'upload complet
 
 #### Backend (création avec images)
-1. **Frontend** envoie les métadonnées des images (nom, isPrincipal)
+1. **Frontend** envoie les métadonnées des images (urlImage, nomUnique, isPrincipal)
+   - `urlImage` : nom original du fichier (ex: `image.jpg`)
+   - `nomUnique` : nom proposé par le frontend (ex: `unique_00011.png`)
+   - `isPrincipal` : boolean indiquant l'image principale
 2. **Backend** crée l'entité avec statut `PENDING` pour chaque image
-3. **Backend** ajoute un **timestamp unique** au nom de fichier
-4. **Backend** génère les **presignUrl** (PUT, validité 1h)
-5. **Backend** retourne l'entité avec les `presignUrl`
+3. **Backend** génère le **nom complet unique** avec timestamp :
+   - Format : `{répertoire}{baseName}_{timestamp}.{extension}`
+   - Utilise `FilenameUtils` d'Apache Commons IO
+   - Exemple : `deals/unique_00011_1707988800000.png`
+4. **Backend** génère les **presignUrl** (PUT, validité configurée dans `presignedUrlExpiry`)
+5. **Backend** retourne l'entité avec les `presignUrl` et `nomUnique`
 
 #### Frontend (upload)
-6. **Frontend** upload chaque image directement vers MinIO via `presignUrl`
-7. **Frontend** appelle `PATCH /{entityUuid}/images/{imageUuid}/confirm` pour chaque image uploadée
-8. **Backend** met à jour le statut en `UPLOADED`
+6. **Frontend** extrait le **répertoire** et le **nom de fichier** depuis `nomUnique`
+   - Parsing de `deals/unique_00011_1707988800000.png`
+   - Répertoire : `deals/`
+   - Nom du fichier : `unique_00011_1707988800000.png`
+7. **Frontend** upload chaque image directement vers MinIO via `presignUrl` avec méthode PUT
+8. **Frontend** appelle `PATCH /{entityUuid}/images/{imageUuid}/confirm` pour chaque image uploadée
+9. **Backend** met à jour le statut en `UPLOADED`
 
 #### Lecture
-9. **Frontend** récupère les images avec `GET /{entityUuid}`
-10. **Backend** génère automatiquement les `presignUrl` pour images `PENDING` (lecture)
-11. **Frontend** affiche les images via les URLs présignées
+10. **Frontend** récupère les images avec `GET /{entityUuid}`
+11. **Backend** génère automatiquement les `presignUrl` (GET) pour images avec statut `PENDING`
+12. **Frontend** affiche les images via les URLs présignées
 
 ### FileManager (bff-provider/utils)
 
 ```java
 @Component
-@RequiredArgsConstructor
 public class FileManager {
-    private final MinioClient minioClient;
     
-    @Value("${minio.bucketName}")
+    @Value("${minio.bucket.name}")
     private String bucketName;
     
-    @Value("${minio.presignedUrlExpiration:3600}")
-    private int presignedUrlExpiration; // 1 heure par défaut
+    @Value("${minio.presigned.url.expiration}")
+    private int presignedUrlExpiry; // Durée de validité en secondes
+
+    @Autowired
+    private MinioClient minioClient;
 
     /**
      * Génère URL présignée pour UPLOAD (méthode PUT)
-     * @param fullFileName nom complet avec timestamp (ex: image.jpg_1707988800000)
+     * @param folderName répertoire dans MinIO (ex: "deals/")
+     * @param uniqueFileName nom complet du fichier avec timestamp
+     * @return URL présignée pour upload
      */
-    public String generatePresignedUrl(String fullFileName) {
-        return minioClient.getPresignedObjectUrl(
-            GetPresignedObjectUrlArgs.builder()
-                .method(Method.PUT)
-                .bucket(bucketName)
-                .object(fullFileName)
-                .expiry(presignedUrlExpiration)
-                .build()
-        );
+    public String generatePresignedUrl(String folderName, String uniqueFileName) {
+        try {
+            return minioClient.getPresignedObjectUrl(
+                GetPresignedObjectUrlArgs.builder()
+                    .method(Method.PUT)
+                    .bucket(bucketName)
+                    .object(folderName.concat(uniqueFileName))
+                    .expiry(presignedUrlExpiry)
+                    .build()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur génération URL présignée: " + e.getMessage(), e);
+        }
     }
 
     /**
      * Génère URL présignée pour LECTURE (méthode GET)
+     * @param fullFileName chemin complet (ex: "deals/unique_00011_1707988800000.png")
+     * @return URL présignée pour lecture
      */
     public String generatePresignedUrlForRead(String fullFileName) {
-        return minioClient.getPresignedObjectUrl(
-            GetPresignedObjectUrlArgs.builder()
-                .method(Method.GET)
-                .bucket(bucketName)
-                .object(fullFileName)
-                .expiry(presignedUrlExpiration)
-                .build()
-        );
+        try {
+            return minioClient.getPresignedObjectUrl(
+                GetPresignedObjectUrlArgs.builder()
+                    .method(Method.GET)
+                    .bucket(bucketName)
+                    .object(fullFileName)
+                    .expiry(presignedUrlExpiry)
+                    .build()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur génération URL lecture: " + e.getMessage(), e);
+        }
     }
     
     /**
-     * Supprime un fichier du bucket MinIO
+     * Upload un fichier vers MinIO
+     * @param inputStream flux d'entrée du fichier
+     * @param uniqueFileName nom unique du fichier
+     * @param folderName répertoire de destination
+     * @param size taille du fichier
      */
-    public void supprimerFichier(String fullFileName) {
-        minioClient.removeObject(
-            RemoveObjectArgs.builder()
+    public void uploadMinioFile(InputStream inputStream, String uniqueFileName, 
+                                String folderName, long size) {
+        FileNameMap fileNameMap = URLConnection.getFileNameMap();
+        String mimeType = fileNameMap.getContentTypeFor(uniqueFileName);
+        
+        try {
+            minioClient.putObject(PutObjectArgs.builder()
                 .bucket(bucketName)
-                .object(fullFileName)
-                .build()
-        );
+                .contentType(mimeType)
+                .object(folderName + "/" + uniqueFileName)
+                .stream(inputStream, size, -1)
+                .build());
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur upload MinIO: " + e.getMessage(), e);
+        }
     }
 }
 ```
@@ -223,18 +264,22 @@ public class DealProviderAdapter implements DealProvider {
     private final DealJpaMapper mapper;
     private final FileManager fileManager;
 
+    @Transactional(rollbackOn = Exception.class)
     @Override
     public DealModele sauvegarder(DealModele deal) {
         DealJpa entite = mapper.versEntite(deal);
         
-        // 1. Ajouter timestamp unique aux noms d'images
+        // 1. Générer noms uniques avec timestamp pour chaque image
         if (deal.getListeImages() != null && !deal.getListeImages().isEmpty()) {
             List<ImageDealJpa> imageDealJpas = deal.getListeImages().stream()
                 .map(imageDealModele -> ImageDealJpa.builder()
                     .uuid(imageDealModele.getUuid())
-                    .urlImage(imageDealModele.getUrlImage() + "_" + System.currentTimeMillis())
+                    .urlImage(Tools.DIRECTORY_DEALS_IMAGES
+                        + FilenameUtils.getBaseName(imageDealModele.getUrlImage())
+                        + "_" + System.currentTimeMillis()
+                        + "." + FilenameUtils.getExtension(imageDealModele.getUrlImage()))
                     .isPrincipal(imageDealModele.getIsPrincipal())
-                    .statut(StatutImageDeal.PENDING)
+                    .statut(imageDealModele.getStatut())
                     .dealJpa(entite)
                     .build())
                 .toList();
@@ -254,14 +299,19 @@ public class DealProviderAdapter implements DealProvider {
     private void setPresignUrl(DealModele modele) {
         if (modele.getListeImages() != null && !modele.getListeImages().isEmpty()) {
             modele.getListeImages().stream()
-                .filter(img -> img.getStatut() == StatutImageDeal.PENDING)
+                .filter(img -> img.getStatut() == StatutImage.PENDING)
                 .forEach(img -> {
-                    String presignUrl = fileManager.generatePresignedUrl(img.getUrlImage());
+                    // Génère URL présignée en passant le répertoire et le nom complet
+                    String presignUrl = fileManager.generatePresignedUrl(
+                        Tools.DIRECTORY_DEALS_IMAGES, 
+                        img.getUrlImage()
+                    );
                     img.setPresignUrl(presignUrl);
                 });
         }
     }
 
+    @Transactional(rollbackOn = Exception.class)
     @Override
     public DealModele mettreAJour(UUID uuid, DealModele deal) {
         DealJpa entite = jpaRepository.findById(uuid)
@@ -288,34 +338,48 @@ public class DealProviderAdapter implements DealProvider {
         var imagesParUuid = deal.getListeImages().stream()
             .filter(image -> image.getUuid() != null)
             .collect(Collectors.toMap(
-                ImageDealModele::getUuid,
-                image -> image
+                image -> image.getUuid(),
+                image -> image,
+                (image1, image2) -> image2
             ));
 
         // Si URL modifiée : ajouter timestamp et repasser en PENDING
         jpa.getImageDealJpas().forEach(imageJpa -> {
-            var imageModele = imagesParUuid.get(imageJpa.getUuid());
-            if (imageModele != null && !imageJpa.getUrlImage().equals(imageModele.getUrlImage())) {
-                imageJpa.setUrlImage(imageModele.getUrlImage() + "_" + System.currentTimeMillis());
-                imageJpa.setStatut(StatutImageDeal.PENDING);
+            var imageEntrante = imagesParUuid.get(imageJpa.getUuid());
+            if (imageEntrante == null) {
+                return;
+            }
+
+            String urlEntrante = imageEntrante.getUrlImage();
+            String urlActuelle = imageJpa.getUrlImage();
+
+            if (urlEntrante != null && !urlEntrante.equals(urlActuelle)) {
+                String nouvelleUrl = urlEntrante + "_" + System.currentTimeMillis();
+                imageJpa.setUrlImage(nouvelleUrl);
+                imageJpa.setStatut(StatutImage.PENDING);
                 imageJpa.setDateModification(LocalDateTime.now());
             }
         });
     }
 
     @Override
-    public void mettreAJourStatutImage(UUID dealUuid, UUID imageUuid, StatutImageDeal statut) {
+    public void mettreAJourStatutImage(UUID dealUuid, UUID imageUuid, StatutImage statut) {
         DealJpa deal = jpaRepository.findById(dealUuid)
             .orElseThrow(() -> new IllegalArgumentException("Deal non trouvé : " + dealUuid));
             
         deal.getImageDealJpas().stream()
             .filter(img -> img.getUuid().equals(imageUuid))
             .findFirst()
-            .ifPresent(img -> {
-                img.setStatut(statut);
-                img.setDateModification(LocalDateTime.now());
-                jpaRepository.save(deal);
-            });
+            .ifPresentOrElse(
+                img -> {
+                    img.setStatut(statut);
+                    img.setDateModification(LocalDateTime.now());
+                    jpaRepository.save(deal);
+                },
+                () -> {
+                    throw new IllegalArgumentException("Image non trouvée : " + imageUuid);
+                }
+            );
     }
 
     @Override
@@ -336,39 +400,142 @@ public class DealProviderAdapter implements DealProvider {
 
 ```java
 @RestController
-@RequestMapping("/deals")
+@RequestMapping("/api/deals")
 @RequiredArgsConstructor
+@Slf4j
 public class DealResource {
     
     private final DealApiAdapter apiAdapter;
 
     /**
+     * Créer un nouveau deal avec images
+     * Le frontend envoie les métadonnées des images (urlImage, nomUnique, isPrincipal)
+     * Le backend répond avec les presignUrl pour chaque image
+     */
+    @PostMapping
+    public ResponseEntity<DealResponseDto> creer(@RequestBody DealDTO dto) {
+        log.info("Création d'un deal: {}", dto.getTitre());
+        DealResponseDto deal = apiAdapter.creerDeal(dto);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(deal);
+    }
+
+    /**
      * Confirmer l'upload d'une image (PENDING → UPLOADED)
+     * Endpoint appelé par le frontend après upload réussi vers MinIO
      */
     @PatchMapping("/{dealUuid}/images/{imageUuid}/confirm")
     public ResponseEntity<Void> confirmerUploadImage(
             @PathVariable UUID dealUuid,
             @PathVariable UUID imageUuid) {
-        apiAdapter.confirmerUploadImage(dealUuid, imageUuid);
-        return ResponseEntity.noContent().build();
+        log.info("Confirmation upload image {} pour deal {}", imageUuid, dealUuid);
+        
+        try {
+            apiAdapter.mettreAJourStatutImage(
+                dealUuid,
+                imageUuid,
+                StatutImage.UPLOADED
+            );
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            log.error("Erreur confirmation upload: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
     }
 
     /**
      * Obtenir l'URL de lecture d'une image
+     * Génère une URL présignée pour lire l'image depuis MinIO
      */
     @GetMapping("/{dealUuid}/images/{imageUuid}/url")
     public ResponseEntity<Map<String, String>> obtenirUrlImage(
             @PathVariable UUID dealUuid,
             @PathVariable UUID imageUuid) {
-        String url = apiAdapter.obtenirUrlImage(dealUuid, imageUuid);
-        return ResponseEntity.ok(Map.of("url", url));
+        log.debug("Récupération URL lecture image {} du deal {}", imageUuid, dealUuid);
+        
+        try {
+            String urlLecture = apiAdapter.obtenirUrlLectureImage(dealUuid, imageUuid);
+            return ResponseEntity.ok(Map.of("url", urlLecture));
+        } catch (IllegalArgumentException e) {
+            log.error("Erreur récupération URL: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
     }
 }
 ```
 
 ### Frontend React - Intégration complète
 
-#### 1. Hook useImageUpload
+#### 1. Service d'upload d'images
+```typescript
+// src/common/api/imageService.ts
+export const imageService = {
+  /**
+   * Upload une image vers MinIO via URL présignée
+   * @param presignUrl URL présignée générée par le backend
+   * @param file Fichier à uploader
+   * @param onProgress Callback pour suivre la progression
+   */
+  uploadToMinio: async (
+    presignUrl: string,
+    file: File,
+    onProgress?: (progress: number) => void
+  ): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      
+      // Suivi de progression
+      xhr.upload.addEventListener("progress", (e) => {
+        if (e.lengthComputable && onProgress) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          onProgress(percent);
+        }
+      });
+
+      xhr.addEventListener("load", () => {
+        if (xhr.status === 200) {
+          resolve();
+        } else {
+          reject(new Error(`Upload échoué: ${xhr.status}`));
+        }
+      });
+
+      xhr.addEventListener("error", () => {
+        reject(new Error("Erreur réseau lors de l'upload"));
+      });
+
+      // Upload vers MinIO avec méthode PUT
+      xhr.open("PUT", presignUrl);
+      xhr.setRequestHeader("Content-Type", file.type);
+      xhr.send(file);
+    });
+  },
+
+  /**
+   * Confirme l'upload d'une image auprès du backend
+   */
+  confirmUpload: async (
+    entityType: "deals" | "publicites" | "utilisateurs",
+    entityUuid: string,
+    imageUuid: string
+  ): Promise<void> => {
+    const response = await fetch(
+      `/api/${entityType}/${entityUuid}/images/${imageUuid}/confirm`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Échec de la confirmation d'upload");
+    }
+  },
+};
+```
+
+#### 2. Hook useImageUpload
 ```typescript
 // src/common/api/hooks/useImageUpload.ts
 export const useImageUpload = () => {
@@ -380,26 +547,39 @@ export const useImageUpload = () => {
     entityType: "deals" | "publicites" | "utilisateurs",
     entityUuid: string,
     images: ImageResponse[],
-    files: ImageFile[],
+    files: File[],
   ) => {
     setIsUploading(true);
     setProgress(new Map());
 
     const uploadPromises = images.map(async (imageResponse) => {
       try {
-        // 1. Upload vers MinIO
+        // Trouver le fichier correspondant
+        const file = files.find(f => {
+          const baseName = f.name.split('.')[0];
+          return imageResponse.nomUnique?.includes(baseName);
+        });
+
+        if (!file) {
+          throw new Error(`Fichier non trouvé pour ${imageResponse.nomUnique}`);
+        }
+
+        // 1. Upload vers MinIO via URL présignée
         await imageService.uploadToMinio(
           imageResponse.presignUrl,
           file,
-          (progressPercent) => updateProgress(imageId, { progress: progressPercent })
+          (progressPercent) => updateProgress(imageResponse.uuid, { progress: progressPercent })
         );
 
         // 2. Confirmer au backend
         await imageService.confirmUpload(entityType, entityUuid, imageResponse.uuid);
         
-        updateProgress(imageId, { status: "success" });
+        updateProgress(imageResponse.uuid, { status: "success" });
       } catch (error) {
-        updateProgress(imageId, { status: "error", error: error.message });
+        updateProgress(imageResponse.uuid, { 
+          status: "error", 
+          error: error.message 
+        });
         setHasErrors(true);
       }
     });
@@ -412,7 +592,7 @@ export const useImageUpload = () => {
 };
 ```
 
-#### 2. Hook useCreateDeal avec upload automatique
+#### 3. Hook useCreateDeal avec upload automatique
 ```typescript
 export const useCreateDeal = () => {
   const { uploadImages, progress, isUploading, hasErrors } = useImageUpload();
@@ -435,7 +615,7 @@ export const useCreateDeal = () => {
       // 2. Uploader les images vers MinIO + confirmer
       const imagesFromBackend = dealCree.listeImages ?? [];
       if (imagesFromBackend.length > 0) {
-        const filesForUpload = /* préparer les fichiers */;
+        const filesForUpload = input.listeImages.map(img => img.file);
         await uploadImages("deals", dealCree.uuid, imagesFromBackend, filesForUpload);
       }
 
@@ -447,17 +627,18 @@ export const useCreateDeal = () => {
 };
 ```
 
-#### 3. Composant CreateDealModal avec progression
+#### 4. Composant CreateDealModal avec progression
 ```tsx
 function CreateDealModal() {
   const { mutateAsync: createDeal, isUploading, progress } = useCreateDeal();
+  const [images, setImages] = useState<File[]>([]);
 
   const handleSubmit = async (data) => {
     const payload = {
       ...data,
       listeImages: images.map((file, idx) => ({
         urlImage: file.name,
-        nomUnique: file.name,
+        nomUnique: `unique_${String(idx).padStart(5, '0')}.${file.name.split('.').pop()}`,
         isPrincipal: idx === 0, // Première image = principale
         file, // Pour upload ultérieur
       })),
@@ -471,10 +652,42 @@ function CreateDealModal() {
       {/* Indicateur de progression */}
       {isUploading && <UploadProgress progress={progress} />}
       
-      <Form onSubmit={handleSubmit} />
+      <Form onSubmit={handleSubmit}>
+        <ImageUploader
+          maxImages={5}
+          onChange={setImages}
+          accept="image/jpeg,image/png"
+        />
+      </Form>
     </Dialog>
   );
 }
+```
+
+#### 5. Parsing du nomUnique pour upload (IMPORTANT)
+```typescript
+/**
+ * Parse le nomUnique reçu du backend pour extraire le répertoire et le nom
+ * Exemple: "deals/unique_00011_1707988800000.png"
+ * Retourne: { directory: "deals/", filename: "unique_00011_1707988800000.png" }
+ */
+function parseImagePath(nomUnique: string): { directory: string; filename: string } {
+  const lastSlashIndex = nomUnique.lastIndexOf('/');
+  
+  if (lastSlashIndex === -1) {
+    return { directory: '', filename: nomUnique };
+  }
+  
+  return {
+    directory: nomUnique.substring(0, lastSlashIndex + 1),
+    filename: nomUnique.substring(lastSlashIndex + 1)
+  };
+}
+
+// Utilisation lors de l'upload
+const { directory, filename } = parseImagePath(imageResponse.nomUnique);
+// Le presignUrl contient déjà le chemin complet, pas besoin de reconstruire
+await imageService.uploadToMinio(imageResponse.presignUrl, file);
 ```
 
 ### Méthodes à implémenter dans Provider
@@ -486,25 +699,58 @@ Optional<DealModele> trouverParUuid(UUID uuid);
 List<DealModele> trouverTous();
 void supprimerParUuid(UUID uuid);
 
-// Gestion des images
+// Gestion des images (obligatoire si l'entité a des images)
 void mettreAJourStatutImage(UUID entityUuid, UUID imageUuid, StatutImage statut);
 String obtenirUrlLectureImage(UUID entityUuid, UUID imageUuid);
 ```
 
 ### Points clés à retenir
 
-1. ✅ **Timestamp unique** : Toujours ajouter `System.currentTimeMillis()` au nom
-2. ✅ **Statut PENDING** : État initial pour toute nouvelle image
-3. ✅ **URL présignées** : Générées automatiquement pour images PENDING
-4. ✅ **Upload direct** : Frontend → MinIO (pas de proxy backend)
-5. ✅ **Confirmation** : Frontend doit appeler l'endpoint de confirmation
-6. ✅ **Image principale** : Première image du tableau (`isPrincipal = true`)
-7. ✅ **FileManager** : Toujours utiliser pour interaction avec MinIO
-8. ✅ **Modification détectée** : Si URL change → nouveau timestamp + PENDING
+1. ✅ **Format du nom complet** : `{répertoire}/{baseName}_{timestamp}.{extension}`
+   - Utiliser `FilenameUtils.getBaseName()` et `FilenameUtils.getExtension()`
+   - Exemple : `deals/unique_00011_1707988800000.png`
+
+2. ✅ **Répertoires définis** : Toujours utiliser les constantes de `Tools.java`
+   - `Tools.DIRECTORY_DEALS_IMAGES` = `"deals/"`
+   - `Tools.DIRECTORY_PUBLICITES_IMAGES` = `"publicites/"`
+   - `Tools.DIRECTORY_UTILISATEUR_IMAGES` = `"utilisateurs/"`
+
+3. ✅ **Statut PENDING** : État initial pour toute nouvelle image
+
+4. ✅ **URL présignées** : 
+   - Upload : `generatePresignedUrl(folderName, uniqueFileName)` avec méthode PUT
+   - Lecture : `generatePresignedUrlForRead(fullFileName)` avec méthode GET
+   - Générées automatiquement pour images PENDING dans `setPresignUrl()`
+
+5. ✅ **Upload direct** : Frontend → MinIO (pas de proxy backend)
+   - Utilise XMLHttpRequest avec méthode PUT
+   - Content-Type doit correspondre au type du fichier
+
+6. ✅ **Confirmation** : Frontend doit appeler l'endpoint PATCH `/confirm` après upload réussi
+
+7. ✅ **Image principale** : Première image du tableau (`isPrincipal = true`)
+
+8. ✅ **FileManager** : Toujours utiliser pour interaction avec MinIO
+   - Injecté via `@RequiredArgsConstructor` dans le ProviderAdapter
+   - Gère toutes les opérations MinIO (upload, URL présignées, etc.)
+
+9. ✅ **Modification détectée** : Si URL change → nouveau timestamp + PENDING
+   - Dans `mettreAJourImagesSiBesoin()` du ProviderAdapter
+
+10. ✅ **Timestamp unique** : `System.currentTimeMillis()` garantit l'unicité du nom
+
+11. ✅ **Gestion des erreurs** : 
+    - Backend : `IllegalArgumentException` avec message descriptif
+    - Frontend : Try/catch avec gestion du statut FAILED
+
+12. ✅ **Parsing du nomUnique** : Frontend doit extraire répertoire et nom de fichier
+    - Format reçu : `deals/unique_00011_1707988800000.png`
+    - presignUrl contient déjà le chemin complet
 
 ### Documentation complète
 - Backend : `.github/documentation/GESTION_IMAGES_MINIO.md`
-- Frontend : `.github/documentation/GESTION_IMAGES_FRONTEND_UPLOAD.md`
+- Frontend : `.github/documentation/FRONTEND_UPLOAD_IMAGES_REACT.md`
+- **Instruction complète** : `.github/instructions/GESTION_IMAGES_MINIO_INSTRUCTION.md`
 
 ---
 

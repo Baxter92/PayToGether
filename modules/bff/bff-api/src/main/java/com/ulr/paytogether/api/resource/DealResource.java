@@ -147,6 +147,22 @@ public class DealResource {
     }
 
     /**
+     * Confirmer l'upload de plusieurs images en batch
+     * Endpoint appelé par le frontend après upload réussi vers MinIO
+     */
+    @PatchMapping("/{dealUuid}/images/confirm-batch")
+    public ResponseEntity<Void> confirmerUploadImagesBatch(
+            @PathVariable UUID dealUuid,
+            @RequestBody List<UUID> imageUuids) {
+
+        imageUuids.forEach(imageUuid ->
+                dealApiAdapter.mettreAJourStatutImage(dealUuid, imageUuid, StatutImage.UPLOADED)
+        );
+
+        return ResponseEntity.ok().build();
+    }
+
+    /**
      * Obtenir l'URL de lecture d'une image
      * Génère une URL présignée pour lire l'image depuis MinIO
      */
