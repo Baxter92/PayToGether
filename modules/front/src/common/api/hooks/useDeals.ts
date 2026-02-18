@@ -12,6 +12,7 @@ import {
   type ImageFile,
   type ImageResponse,
 } from "./useImageUpload";
+import { formatFileName } from "@/common/utils/fileFormatter";
 import { createResourceHooks } from "./factories/createResourceHooks";
 
 const dealHooks = createResourceHooks<DealDTO, CreateDealDTO, UpdateDealDTO>({
@@ -82,7 +83,8 @@ export const useCreateDeal = () => {
         ...input,
         listeImages: input.listeImages.map((img) => ({
           urlImage: img.urlImage,
-          nomUnique: img.nomUnique,
+          // Ensure nomUnique is formatted before sending to backend
+          nomUnique: formatFileName(img.nomUnique || ""),
           statut: null,
           isPrincipal: img.isPrincipal,
           presignUrl: null,
@@ -111,7 +113,9 @@ export const useCreateDeal = () => {
           const backendFileName = f.urlImage?.split("_")[0];
 
           const matchedImage = input.listeImages.find(
-            (img) => img.file?.name?.split(".")[0] === backendFileName,
+            (img) =>
+              formatFileName(img.file?.name || "")?.split(".")[0] ===
+              backendFileName,
           );
 
           return {
