@@ -82,7 +82,7 @@ export const useCreateDeal = () => {
       const payload = {
         ...input,
         listeImages: input.listeImages.map((img) => ({
-          urlImage: img.urlImage,
+          urlImage: formatFileName(img.nomUnique || ""),
           // Ensure nomUnique is formatted before sending to backend
           nomUnique: formatFileName(img.nomUnique || ""),
           statut: null,

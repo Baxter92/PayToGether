@@ -1,4 +1,4 @@
-import { useState, type JSX } from "react";
+import { useEffect, useState, type JSX } from "react";
 import { useI18n } from "@/common/hooks/useI18n";
 import {
   DndContext,
@@ -19,10 +19,10 @@ import { Card, CardContent } from "@/common/components/ui/card";
 import { Switch } from "@/common/components/ui/switch";
 import { Label } from "@/common/components/ui/label";
 import { Heading } from "@/common/containers/Heading";
-import { slides as initialSlides } from "@/common/constants/data";
 import { Save, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { SortableSlideCard } from "./components/SortableSlideCard";
+import { useCreatePublicite, usePublicites } from "@/common/api";
 
 interface HeroSlide {
   id: number;
@@ -36,26 +36,62 @@ interface HeroSlide {
   textColor: string;
   badge?: string;
   isActive: boolean;
+  imageFile?: File;
 }
 
 export default function AdminHero(): JSX.Element {
-  const [slides, setSlides] = useState<HeroSlide[]>(
-    initialSlides.map((slide) => ({ ...slide, isActive: true }))
-  );
+  const [slides, setSlides] = useState<HeroSlide[]>([]);
   const [heroEnabled, setHeroEnabled] = useState(true);
   const { t: tAdmin } = useI18n("admin");
+  const {
+    data: publicitesData,
+    isLoading: isLoadingPublicites,
+    isError: isErrorPublicites,
+  } = usePublicites();
+  const {
+    mutateAsync: createPublicite,
+    isPending,
+    isUploading,
+  } = useCreatePublicite();
 
   const sensors = useSensors(useSensor(PointerSensor));
+
+  useEffect(() => {
+    if (!publicitesData) return;
+
+    const mappedSlides = publicitesData.map((publicite, index) => {
+      const parts = (publicite.description ?? "")
+        .split(" • ")
+        .map((part) => part.trim())
+        .filter(Boolean);
+
+      return {
+        id: index + 1,
+        title: publicite.titre,
+        subtitle: parts[0] ?? "",
+        description: parts[1] ?? publicite.description ?? "",
+        buttonText: "Voir l'offre",
+        buttonLink: publicite.lienExterne ?? "/deals",
+        image: publicite.listeImages?.[0]?.urlImage || "/placeholder.svg",
+        gradient: "from-blue-600/50 to-indigo-600/50",
+        textColor: "text-white",
+        badge: parts[2],
+        isActive: Boolean(publicite.active ?? true),
+      };
+    });
+
+    setSlides(mappedSlides);
+  }, [publicitesData]);
 
   const handleSlideChange = (
     id: number,
     field: keyof HeroSlide,
-    value: string | boolean
+    value: string | boolean,
   ) => {
     setSlides((prev) =>
       prev.map((slide) =>
-        slide.id === id ? { ...slide, [field]: value } : slide
-      )
+        slide.id === id ? { ...slide, [field]: value } : slide,
+      ),
     );
   };
 
@@ -73,7 +109,13 @@ export default function AdminHero(): JSX.Element {
     const reader = new FileReader();
     reader.onload = (e) => {
       const base64 = e.target?.result as string;
-      handleSlideChange(id, "image", base64);
+      setSlides((prev) =>
+        prev.map((slide) =>
+          slide.id === id
+            ? { ...slide, image: base64, imageFile: file }
+            : slide,
+        ),
+      );
       toast.success(tAdmin("hero.imageUploaded"));
     };
     reader.onerror = () => {
@@ -85,8 +127,8 @@ export default function AdminHero(): JSX.Element {
   const handleToggleSlide = (id: number) => {
     setSlides((prev) =>
       prev.map((slide) =>
-        slide.id === id ? { ...slide, isActive: !slide.isActive } : slide
-      )
+        slide.id === id ? { ...slide, isActive: !slide.isActive } : slide,
+      ),
     );
   };
 
@@ -118,7 +160,7 @@ export default function AdminHero(): JSX.Element {
         textColor: "text-white",
         badge: tAdmin("hero.newBadge"),
         isActive: true,
-      }
+      },
     ]);
     toast.success(tAdmin("hero.slideAdded"));
   };
@@ -136,10 +178,62 @@ export default function AdminHero(): JSX.Element {
     }
   };
 
-  const handleSave = () => {
-    toast.success(tAdmin("hero.saved"), {
-      description: tAdmin("hero.saveDescription"),
-    });
+  const handleSave = async () => {
+    const activeSlides = slides.filter((slide) => slide.isActive);
+    const slidesToCreate = activeSlides.filter((slide) => slide.imageFile);
+
+    if (slidesToCreate.length === 0) {
+      toast.error(tAdmin("hero.invalidImage"), {
+        description:
+          "Ajoute au moins une image locale sur un slide actif avant de sauvegarder.",
+      });
+      return;
+    }
+
+    const skippedCount = activeSlides.length - slidesToCreate.length;
+
+    try {
+      await Promise.all(
+        slidesToCreate.map(async (slide) => {
+          const now = new Date();
+          const dateDebut = now.toISOString().slice(0, 19);
+          const dateFin = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .slice(0, 19);
+
+          await createPublicite({
+            titre: slide.title,
+            description: [slide.subtitle, slide.description, slide.badge]
+              .filter(Boolean)
+              .join(" • "),
+            lienExterne: slide.buttonLink || null,
+            listeImages: [
+              {
+                urlImage: slide.imageFile?.name || "hero-image.jpg",
+                statut: "PENDING",
+                presignUrl: null,
+                file: slide.imageFile,
+              },
+            ],
+            dateDebut,
+            dateFin,
+            active: true,
+          });
+        }),
+      );
+
+      toast.success(tAdmin("hero.saved"), {
+        description:
+          skippedCount > 0
+            ? `${slidesToCreate.length} slide(s) enregistré(s), ${skippedCount} ignoré(s) (image non uploadée).`
+            : tAdmin("hero.saveDescription"),
+      });
+    } catch (error) {
+      toast.error("Erreur lors de la création des publicités", {
+        description:
+          error instanceof Error ? error.message : "Une erreur est survenue",
+      });
+    }
   };
 
   return (
@@ -152,7 +246,11 @@ export default function AdminHero(): JSX.Element {
           underline
         />
         <HStack spacing={3}>
-          <Button onClick={handleSave} leftIcon={<Save className="h-4 w-4" />}>
+          <Button
+            onClick={handleSave}
+            leftIcon={<Save className="h-4 w-4" />}
+            disabled={isPending || isUploading}
+          >
             {tAdmin("hero.save")}
           </Button>
         </HStack>
@@ -196,30 +294,40 @@ export default function AdminHero(): JSX.Element {
           </Button>
         </HStack>
 
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={slides.map((s) => s.id)}
-            strategy={verticalListSortingStrategy}
+        {isLoadingPublicites && slides.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            Chargement...
+          </div>
+        ) : isErrorPublicites && slides.length === 0 ? (
+          <div className="text-center py-8 text-destructive">
+            Erreur lors du chargement des publicites.
+          </div>
+        ) : (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
           >
-            <VStack spacing={10}>
-              {slides.map((slide, index) => (
-                <SortableSlideCard
-                  key={slide.id}
-                  slide={slide}
-                  index={index}
-                  onSlideChange={handleSlideChange}
-                  onToggleSlide={handleToggleSlide}
-                  onDeleteSlide={handleDeleteSlide}
-                  onImageUpload={handleImageUpload}
-                />
-              ))}
-            </VStack>
-          </SortableContext>
-        </DndContext>
+            <SortableContext
+              items={slides.map((s) => s.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <VStack spacing={10}>
+                {slides.map((slide, index) => (
+                  <SortableSlideCard
+                    key={slide.id}
+                    slide={slide}
+                    index={index}
+                    onSlideChange={handleSlideChange}
+                    onToggleSlide={handleToggleSlide}
+                    onDeleteSlide={handleDeleteSlide}
+                    onImageUpload={handleImageUpload}
+                  />
+                ))}
+              </VStack>
+            </SortableContext>
+          </DndContext>
+        )}
       </VStack>
     </main>
   );

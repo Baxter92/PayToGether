@@ -153,8 +153,18 @@ export const useImageUpload = (): UseImageUploadReturn => {
 
         await Promise.all(uploadPromises);
 
-        // Étape 5: Confirmation globale
-        await imageService.confirmAllUploads(entityType, entityUuid, imageIds);
+        // Étape 5: Confirmation backend
+        if (imageIds.length > 0) {
+          if (entityType === "deals") {
+            await imageService.confirmAllUploads(entityType, entityUuid, imageIds);
+          } else {
+            await Promise.all(
+              imageIds.map((imageUuid) =>
+                imageService.confirmUpload(entityType, entityUuid, imageUuid),
+              ),
+            );
+          }
+        }
       } finally {
         setIsUploading(false);
       }

@@ -27,7 +27,7 @@ import { Progress } from "@/common/components/ui/progress";
 import { formatCurrency } from "@/common/utils/formatCurrency";
 import { Badge } from "@/common/components/ui/badge";
 import { CreateDealModal } from "@/pages/profile/components/CreateDealModal";
-import { useDealVilles, useGetDealImageUrl } from "@/common/api";
+import { useDealVilles, useGetDealImageUrl, useDeal } from "@/common/api";
 
 /** Déclare le type de filtre */
 interface DealFilters {
@@ -118,7 +118,10 @@ function MobileFilterSheet({
 }
 
 function DealTableProductCell({ deal }: { deal: any }) {
-  const { data: imageUrl } = useGetDealImageUrl(deal?.id, deal?.image?.imageUuid);
+  const { data: imageUrl } = useGetDealImageUrl(
+    deal?.id,
+    deal?.image?.imageUuid,
+  );
 
   return (
     <div className="flex items-center gap-3">
@@ -175,8 +178,12 @@ export default function DealsList({
 
   const [view, setView] = useState<"grid" | "list">(viewMode);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [editingDealUuid, setEditingDealUuid] = useState<string | null>(null);
 
   const { data: cities } = useDealVilles();
+
+  // Fetch selected deal details when editing
+  const { data: editingDealData } = useDeal(editingDealUuid ?? "");
 
   // Mobile sheet state
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -625,6 +632,10 @@ export default function DealsList({
                             {
                               leftIcon: <Edit2 className="w-4 h-4" />,
                               onClick: () => {
+                                const uuid =
+                                  props.row.original.id ||
+                                  props.row.original.uuid;
+                                setEditingDealUuid(uuid);
                                 setCreateModalOpen(true);
                               },
                             },
@@ -647,7 +658,11 @@ export default function DealsList({
         </div>
         <CreateDealModal
           open={createModalOpen}
-          onClose={() => setCreateModalOpen(false)}
+          onClose={() => {
+            setCreateModalOpen(false);
+            setEditingDealUuid(null);
+          }}
+          initialData={editingDealData ?? null}
         />
       </VStack>
 

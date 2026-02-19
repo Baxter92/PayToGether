@@ -22,7 +22,9 @@ import {
   useCategories,
   useCreateDeal,
   useUsers,
+  useUpdateDeal,
   type CreateDealDTO,
+  type DealDTO,
 } from "@/common/api";
 import type { ImageResponse } from "@/common/api/hooks/useImageUpload";
 import { toast } from "sonner";
@@ -547,10 +549,12 @@ export function CreateDealModal({
   open,
   onClose,
   onSuccess,
+  initialData,
 }: {
   open: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  initialData?: DealDTO | null;
 }) {
   const { data: categoriesData } = useCategories();
   const { data: usersData } = useUsers();
@@ -561,6 +565,8 @@ export function CreateDealModal({
     progress,
     hasErrors,
   } = useCreateDeal();
+
+  const { mutateAsync: updateDeal, isPending: isUpdating } = useUpdateDeal();
 
   const categoryItems = useMemo(
     () => (categoriesData ?? []).map((c) => ({ label: c.nom, value: c.uuid })),
@@ -611,27 +617,44 @@ export function CreateDealModal({
     async ({ data }: { data: any }) => {
       try {
         const now = new Date().toISOString().slice(0, 19);
-        await createDeal(buildPayload(data, now));
 
-        if (hasErrors) {
-          toast.warning("Deal créé avec des erreurs d'upload", {
-            description: "Certaines images n'ont pas pu être téléchargées",
-          });
+        if (initialData) {
+          // Update existing deal
+          const payload = buildPayload(
+            data,
+            now,
+          ) as unknown as Partial<DealDTO>;
+          await updateDeal({ id: initialData.uuid, data: payload });
+          toast.success("✅ Deal mis à jour avec succès");
         } else {
-          toast.success("✨ Deal créé avec succès!", {
-            description: "Toutes les images ont été téléchargées",
-          });
+          // Create new deal
+          await createDeal(buildPayload(data, now));
+
+          if (hasErrors) {
+            toast.warning("Deal créé avec des erreurs d'upload", {
+              description: "Certaines images n'ont pas pu être téléchargées",
+            });
+          } else {
+            toast.success("✨ Deal créé avec succès!", {
+              description: "Toutes les images ont été téléchargées",
+            });
+          }
         }
 
         onSuccess?.();
         onClose();
       } catch (error: any) {
-        toast.error("❌ Erreur lors de la création du deal", {
-          description: error?.response?.data?.message || error?.message,
-        });
+        toast.error(
+          initialData
+            ? "❌ Erreur lors de la mise à jour du deal"
+            : "❌ Erreur lors de la création du deal",
+          {
+            description: error?.response?.data?.message || error?.message,
+          },
+        );
       }
     },
-    [createDeal, onSuccess, onClose, hasErrors],
+    [createDeal, updateDeal, onSuccess, onClose, hasErrors, initialData],
   );
 
   const formGroups: IFieldGroup[] = useMemo(
@@ -799,22 +822,116 @@ export function CreateDealModal({
         size="xl"
         className="p-0 h-[90vh] overflow-hidden bg-gradient-to-br from-gray-50 to-blue-50/30"
       >
-        <DialogTitle className="px-6 py-5 border-b border-gray-200 bg-white shadow-sm">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg">
-              <Sparkles className="w-6 h-6 text-white" />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-bold text-gray-900">
-                Créer un nouveau deal
-              </h2>
-              <p className="text-sm text-gray-600 font-normal mt-0.5">
-                Remplissez les informations pour publier votre offre
-                exceptionnelle
-              </p>
-            </div>
-          </div>
-        </DialogTitle>
+        {/** Prefill defaults when editing */}
+        {(() => {
+          const defaultValues = initialData
+            ? {
+                title: initialData.titre,
+                description: initialData.description,
+                categoryId: initialData.categorieUuid,
+                status: initialData.statut,
+                price: initialData.prixPart,
+                originalPrice: initialData.prixDeal,
+                partsTotal: initialData.nbParticipants,
+                expiryDate: initialData.dateExpiration,
+                location: initialData.ville
+                  ? `${initialData.ville}, ${initialData.pays}`
+                  : undefined,
+                highlights: (initialData.listePointsForts || []).join("\n"),
+                merchantId: initialData.createurUuid,
+              }
+            : undefined;
+
+          return (
+            <>
+              <DialogTitle className="px-6 py-5 border-b border-gray-200 bg-white shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg">
+                    <Sparkles className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-xl font-bold text-gray-900">
+                      {initialData
+                        ? "Modifier le deal"
+                        : "Créer un nouveau deal"}
+                    </h2>
+                    <p className="text-sm text-gray-600 font-normal mt-0.5">
+                      {initialData
+                        ? "Mettre à jour les informations de l'offre"
+                        : "Remplissez les informations pour publier votre offre exceptionnelle"}
+                    </p>
+                  </div>
+                </div>
+              </DialogTitle>
+
+              {/* Indicateur de progression d'upload */}
+              {isUploading && uploadProgress && (
+                <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200/50 shadow-sm">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+                        <span className="text-sm font-bold text-gray-900">
+                          Upload des images en cours...
+                        </span>
+                      </div>
+                      <span className="text-base font-bold text-blue-600">
+                        {uploadProgress.percentage}%
+                      </span>
+                    </div>
+
+                    <div className="w-full bg-white rounded-full h-3 overflow-hidden shadow-inner">
+                      <div
+                        className="bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 h-3 rounded-full transition-all duration-500 ease-out shadow-sm"
+                        style={{ width: `${uploadProgress.percentage}%` }}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-4">
+                        <span className="flex items-center gap-1.5 text-green-700 font-semibold bg-green-50 px-2.5 py-1 rounded-full">
+                          <Check className="w-3.5 h-3.5" />
+                          {uploadProgress.completed} réussie(s)
+                        </span>
+                        {uploadProgress.failed > 0 && (
+                          <span className="flex items-center gap-1.5 text-red-700 font-semibold bg-red-50 px-2.5 py-1 rounded-full">
+                            <X className="w-3.5 h-3.5" />
+                            {uploadProgress.failed} échouée(s)
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-gray-600 font-medium">
+                        {uploadProgress.completed + uploadProgress.failed} /{" "}
+                        {uploadProgress.total}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="h-[calc(90vh-88px)] overflow-y-auto px-6 py-6">
+                <Form<CreateDealDTO>
+                  groups={formGroups}
+                  schema={dealSchema}
+                  defaultValues={defaultValues}
+                  submitLabel={
+                    isCreating || isUploading || isUpdating
+                      ? isUploading
+                        ? "⏳ Upload des images..."
+                        : isUpdating
+                          ? "⏳ Mise à jour en cours..."
+                          : "⏳ Création en cours..."
+                      : initialData
+                        ? "🔁 Mettre à jour"
+                        : "✨ Créer le deal"
+                  }
+                  onSubmit={handleSubmit}
+                  isLoading={isCreating || isUploading || isUpdating}
+                />
+              </div>
+            </>
+          );
+        })()}
 
         {/* Indicateur de progression d'upload */}
         {isUploading && uploadProgress && (
