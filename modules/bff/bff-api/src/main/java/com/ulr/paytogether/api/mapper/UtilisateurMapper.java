@@ -82,7 +82,7 @@ public class UtilisateurMapper {
                                 .build()
                         : null)
                 .statut(StatutUtilisateur.ACTIF)
-                .role(RoleUtilisateur.UTILISATEUR)
+                .role(dto.getRole())
                 .build();
     }
 }
