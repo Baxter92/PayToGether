@@ -1,21 +1,50 @@
-import { slides } from "@/common/constants/data";
-import { useDealsByStatut } from "@/common/api";
+import { publiciteService, useDealsByStatut, usePublicitesActives } from "@/common/api";
 import { mapDealToView } from "@/common/api/mappers/catalog";
 import { StatutDeal } from "@/common/api/types/deal";
 import { useI18n } from "@hooks/useI18n";
 import Hero from "@containers/Hero";
-import { useMemo, type JSX } from "react";
+import { useMemo, type ComponentProps, type JSX } from "react";
 import DealsList from "@/common/containers/DealList";
 import { Heading } from "@/common/containers/Heading";
 import { VStack } from "@/common/components";
 import { Button } from "@/common/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { PATHS } from "@/common/constants/path";
+import { useQueries } from "@tanstack/react-query";
 
 export default function Home(): JSX.Element {
   const { t } = useI18n("home");
   const { data: dealsData, isLoading } = useDealsByStatut(StatutDeal.PUBLIE);
+  const { data: publicitesData = [] } = usePublicitesActives();
   const allDeals = (dealsData ?? []).map(mapDealToView);
+  type HeroSlide = ComponentProps<typeof Hero>["slides"][number];
+
+  const heroImageQueries = useQueries({
+    queries: publicitesData.map((publicite) => {
+      const imageUuid = publicite.listeImages?.[0]?.imageUuid;
+      return {
+        queryKey: ["publicites", "detail", publicite.uuid, "image-url", imageUuid],
+        queryFn: () => publiciteService.getImageUrl(publicite.uuid, imageUuid as string),
+        enabled: !!publicite.uuid && !!imageUuid,
+      };
+    }),
+  });
+
+  const heroSlides = useMemo<HeroSlide[]>(
+    () =>
+      publicitesData.map((publicite, index) => ({
+        id: index + 1,
+        title: publicite.titre ?? "",
+        subtitle: "",
+        description: publicite.description ?? "",
+        buttonText: t("exploreAll"),
+        buttonLink: publicite.lienExterne ?? PATHS.DEALS,
+        image: heroImageQueries[index]?.data?.url ?? "/placeholder.svg",
+        gradient: "from-blue-600/50 to-indigo-600/50",
+        textColor: "text-white",
+      })),
+    [heroImageQueries, publicitesData, t],
+  );
 
   const featuredDeals = useMemo(() => allDeals.slice(0, 4), [allDeals]);
   const popularDeals = useMemo(
@@ -28,7 +57,7 @@ export default function Home(): JSX.Element {
 
   return (
     <div className="mx-auto">
-      <Hero slides={slides} />
+      {heroSlides.length > 0 ? <Hero slides={heroSlides} /> : null}
 
       {/* Promotional Deals Section */}
       <section className="py-16 bg-background">
