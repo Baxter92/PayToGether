@@ -3,6 +3,7 @@ package com.ulr.paytogether.api.resource;
 import com.ulr.paytogether.api.apiadapter.UtilisateurApiAdapter;
 import com.ulr.paytogether.api.dto.CreerUtilisateurDTO;
 import com.ulr.paytogether.api.dto.UtilisateurDTO;
+import com.ulr.paytogether.core.enumeration.StatutImage;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -126,7 +127,7 @@ public class UtilisateurResource {
         try {
             apiAdapter.mettreAJourStatutPhotoProfil(
                 utilisateurUuid,
-                com.ulr.paytogether.core.enumeration.StatutImage.UPLOADED
+                StatutImage.UPLOADED
             );
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {

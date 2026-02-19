@@ -45,6 +45,7 @@ public class PubliciteProviderAdapter implements PubliciteProvider {
                                     + "_" + System.currentTimeMillis()
                                     + "." + FilenameUtils.getExtension(imageModele.getUrlImage()))
                             .statut(imageModele.getStatut())
+                            .publiciteJpa(entite)
                             .build())
                     .toList();
             entite.setListeImages(imageJpas);
