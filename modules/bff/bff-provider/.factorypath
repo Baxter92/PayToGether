@@ -101,6 +101,6 @@
     <factorypathentry kind="VARJAR" id="M2_REPO/org/bouncycastle/bcprov-jdk15on/1.69/bcprov-jdk15on-1.69.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/apache/commons/commons-compress/1.21/commons-compress-1.21.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/xerial/snappy/snappy-java/1.1.8.4/snappy-java-1.1.8.4.jar" enabled="true" runInBatchMode="false"/>
-    <factorypathentry kind="VARJAR" id="M2_REPO/commons-io/commons-io/2.15.1/commons-io-2.15.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="VARJAR" id="M2_REPO/commons-io/commons-io/2.16.1/commons-io-2.16.1.jar" enabled="true" runInBatchMode="false"/>
     <factorypathentry kind="VARJAR" id="M2_REPO/org/springframework/security/spring-security-crypto/6.4.5/spring-security-crypto-6.4.5.jar" enabled="true" runInBatchMode="false"/>
 </factorypath>
