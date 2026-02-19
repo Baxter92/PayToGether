@@ -10,6 +10,7 @@ import com.ulr.paytogether.provider.adapter.mapper.PubliciteJpaMapper;
 import com.ulr.paytogether.provider.repository.PubliciteRepository;
 import com.ulr.paytogether.provider.utils.FileManager;
 import com.ulr.paytogether.provider.utils.Tools;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,7 @@ public class PubliciteProviderAdapter implements PubliciteProvider {
     private final PubliciteJpaMapper mapper;
     private final FileManager fileManager;
 
+    @Transactional
     @Override
     public PubliciteModele sauvegarder(PubliciteModele publicite) {
         PubliciteJpa entite = mapper.versEntite(publicite);
@@ -170,7 +172,7 @@ public class PubliciteProviderAdapter implements PubliciteProvider {
         return publicite.getListeImages().stream()
                 .filter(image -> image.getUuid().equals(imageUuid))
                 .findFirst()
-                .map(image -> fileManager.generatePresignedUrlForRead(image.getUrlImage()))
+                .map(image -> fileManager.generatePresignedUrlForRead(Tools.DIRECTORY_PUBLICITES_IMAGES+image.getUrlImage()))
                 .orElseThrow(() -> new IllegalArgumentException("Image non trouvée pour l'UUID : " + imageUuid));
     }
 }

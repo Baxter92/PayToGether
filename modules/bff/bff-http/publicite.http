@@ -3,23 +3,18 @@ POST {{base_url}}/api/publicites
 Content-Type: application/json
 
 {
-  "titre": "Promotion Spéciale",
-  "description": "Ne manquez pas cette offre exceptionnelle !",
-  "lienExterne": "https://example.com/promo",
+  "titre": "New slide",
+  "description": "Subtitle • Slide description • New",
+  "lienExterne": "/deals",
   "listeImages": [
     {
-      "urlImage": "pub_image1.jpg",
-      "presignUrl": null,
-      "statut": null
-    },
-    {
-      "urlImage": "pub_image2.jpg",
+      "urlImage": "Capture-d'écran-2024-07-26-161940.png",
       "presignUrl": null,
       "statut": null
     }
   ],
-  "dateDebut": "2026-02-09T00:00:00",
-  "dateFin": "2026-03-31T23:59:59",
+  "dateDebut": "2026-02-19T18:57:36",
+  "dateFin": "2026-03-21T18:57:36",
   "active": true
 }
 

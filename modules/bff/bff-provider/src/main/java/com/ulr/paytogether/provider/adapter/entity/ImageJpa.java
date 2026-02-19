@@ -34,7 +34,6 @@ public class ImageJpa {
     @Builder.Default
     private StatutImage statut = StatutImage.PENDING;
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "publicite_uuid")
     private PubliciteJpa publiciteJpa;

@@ -148,7 +148,7 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
 
         // Générer l'URL de lecture pour la photo de profil
         if (utilisateur.getPhotoProfil() != null) {
-            return fileManager.generatePresignedUrlForRead(utilisateur.getPhotoProfil().getUrlImage());
+            return fileManager.generatePresignedUrlForRead(Tools.DIRECTORY_UTILISATEUR_IMAGES+utilisateur.getPhotoProfil().getUrlImage());
         } else {
             throw new IllegalArgumentException("Aucune photo de profil trouvée pour cet utilisateur");
         }
