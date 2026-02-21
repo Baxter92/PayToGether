@@ -1,11 +1,78 @@
-# Patterns to exclude from docker build context
-target/
-**/target/
-node/
-.vscode/
-.idea/
-*.log
-*.tmp
-*.jar
+# ===============================================
+# .dockerignore optimisé pour PayToGether
+# ===============================================
 
+# Fichiers de build et binaires
+**/target/
+**/bin/
+**/*.class
+**/*.jar
+**/*.war
+
+# Node.js et frontend
+**/node_modules/
+**/dist/
+**/.next/
+**/build/
+**/node/
+**/*.tsbuildinfo
+
+# IDE et éditeurs
+**/.idea/
+**/.vscode/
 **/*.iml
+**/.project
+**/.classpath
+**/.settings/
+**/.eclipse/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+**/.gitkeep
+
+# Docker
+**/Dockerfile*
+**/.dockerignore
+**/docker-compose*.yml
+
+# Documentation et README
+**/*.md
+**/docs/
+**/.github/
+
+# Tests et logs
+**/*.log
+**/logs/
+**/test-results/
+**/coverage/
+**/.nyc_output/
+
+# Fichiers système
+**/.DS_Store
+**/Thumbs.db
+**/*.swp
+**/*.swo
+**/*~
+
+# Configuration locale et secrets
+**/*.env
+**/*.env.local
+**/*.env.*.local
+**/application-local.properties
+**/application-local.yml
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+
+# Kubernetes et CI/CD
+**/k8s/
+**/Jenkinsfile
+**/.gitlab-ci.yml
+
+# Fichiers temporaires
+**/*.tmp
+**/*.temp
+**/.cache/
+
