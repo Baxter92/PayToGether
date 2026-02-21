@@ -9,3 +9,7 @@ spec:
   type: ClusterIP
   selector:
     app: connect
+  ports:
+    - protocol: TCP
+      port: 8092
+      targetPort: 8080
