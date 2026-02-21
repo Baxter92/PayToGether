@@ -1,8 +1,8 @@
 # ===============================================
-# .dockerignore optimisé pour PayToGether
+# .dockerignore optimisé pour PayToGether BFF
 # ===============================================
 
-# Fichiers de build et binaires
+# Fichiers de build et binaires (sauf pom.xml)
 **/target/
 **/bin/
 **/*.class
@@ -32,8 +32,7 @@
 .gitattributes
 **/.gitkeep
 
-# Docker
-**/Dockerfile*
+# Docker (ne pas exclure le Dockerfile principal)
 **/.dockerignore
 **/docker-compose*.yml
 
@@ -75,4 +74,9 @@
 **/*.tmp
 **/*.temp
 **/.cache/
+
+# IMPORTANT: Ne PAS exclure les sources nécessaires au build
+!modules/bff/*/src/
+!modules/bff/*/pom.xml
+!pom.xml
 
