@@ -12,6 +12,7 @@ import com.ulr.paytogether.wsclient.dto.LoginResponse;
 import com.ulr.paytogether.wsclient.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Base64;
@@ -30,11 +31,13 @@ public class AuthProviderAdapter implements AuthProvider {
     private final AuthApiCLient authApiClient;
     private final UserApiClient userApiClient;
     private final UtilisateurRepository utilisateurRepository;
+    @Value("${api.auth.admin.user}")
+    private String adminUtilisateur;
 
     @Override
     public LoginResponseModele login(LoginModele login) {
         log.info("Appel à Keycloak pour authentifier l'utilisateur: {}", login.getUsername());
-        if (utilisateurRepository.existsByEmail(login.getUsername())) {
+        if (!login.getUsername().equals(adminUtilisateur + "@hanacalgary.ca") && utilisateurRepository.existsByEmail(login.getUsername())) {
             log.warn("Tentative d'authentification pour un utilisateur qui n'existe pas: {}", login.getUsername());
             throw new RuntimeException("Utilisateur non trouvé. Vérifiez vos identifiants.");
         }
