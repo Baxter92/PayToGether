@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: connect-service
+  namespace: paytogether
+  labels:
+    app: connect
+spec:
+  type: ClusterIP
+  selector:
+    app: connect

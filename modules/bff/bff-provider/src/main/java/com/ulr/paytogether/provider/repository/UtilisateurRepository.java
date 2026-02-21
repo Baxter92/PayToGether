@@ -26,4 +26,11 @@ public interface UtilisateurRepository extends JpaRepository<UtilisateurJpa, UUI
      * @return true si l'utilisateur existe
      */
     boolean existsByEmail(String email);
+
+    /**
+     * Vérifie si un utilisateur existe avec cet ID Keycloak
+     * @param keycloakId l'ID Keycloak à vérifier
+     * @return true si l'utilisateur existe
+     */
+    boolean existsByKeycloakId(String keycloakId);
 }

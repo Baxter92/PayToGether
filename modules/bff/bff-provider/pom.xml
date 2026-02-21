@@ -30,6 +30,13 @@
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
 
+    <dependency>
+      <groupId>com.ulr.paytogether</groupId>
+      <artifactId>bff-wsclient</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+
+
 
     <!-- Base de données H2 pour le développement -->
     <dependency>

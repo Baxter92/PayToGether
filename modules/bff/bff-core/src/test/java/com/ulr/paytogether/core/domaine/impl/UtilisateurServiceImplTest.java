@@ -133,6 +133,7 @@ class UtilisateurServiceImplTest {
     @Test
     void testMettreAJour_DevraitMettreAJourUtilisateur() {
         // Given
+        String token = "Bearer token123";
         UtilisateurModele utilisateurModifie = UtilisateurModele.builder()
                 .uuid(uuidUtilisateur)
                 .nom("Durand")
@@ -143,16 +144,16 @@ class UtilisateurServiceImplTest {
                 .photoProfil(new ImageUtilisateurModele())
                 .build();
 
-        when(utilisateurProvider.mettreAJour(eq(uuidUtilisateur), any(UtilisateurModele.class)))
+        when(utilisateurProvider.mettreAJour(eq(uuidUtilisateur), any(UtilisateurModele.class), eq(token)))
                 .thenReturn(utilisateurModifie);
 
         // When
-        UtilisateurModele resultat = utilisateurService.mettreAJour(uuidUtilisateur, utilisateurModifie);
+        UtilisateurModele resultat = utilisateurService.mettreAJour(uuidUtilisateur, utilisateurModifie, token);
 
         // Then
         assertNotNull(resultat);
         assertEquals("Durand", resultat.getNom());
-        verify(utilisateurProvider, times(1)).mettreAJour(eq(uuidUtilisateur), any(UtilisateurModele.class));
+        verify(utilisateurProvider, times(1)).mettreAJour(eq(uuidUtilisateur), any(UtilisateurModele.class), eq(token));
     }
 
     @Test
@@ -191,5 +192,107 @@ class UtilisateurServiceImplTest {
         // Then
         assertFalse(resultat);
         verify(utilisateurProvider, times(1)).existeParEmail("inexistant@example.com");
+    }
+
+    @Test
+    void testReinitialiserMotDePasse_DevraitReinitialiserMotDePasse() {
+        // Given
+        String nouveauMotDePasse = "nouveauMotDePasse123";
+        String token = "Bearer token123";
+        doNothing().when(utilisateurProvider).reinitialiserMotDePasse(uuidUtilisateur, nouveauMotDePasse, token);
+
+        // When
+        utilisateurService.reinitialiserMotDePasse(uuidUtilisateur, nouveauMotDePasse, token);
+
+        // Then
+        verify(utilisateurProvider, times(1)).reinitialiserMotDePasse(uuidUtilisateur, nouveauMotDePasse, token);
+    }
+
+    @Test
+    void testReinitialiserMotDePasse_DevraitLeverExceptionSiMotDePasseVide() {
+        // Given
+        String token = "Bearer token123";
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> {
+            utilisateurService.reinitialiserMotDePasse(uuidUtilisateur, "", token);
+        });
+        verify(utilisateurProvider, never()).reinitialiserMotDePasse(any(), any(), any());
+    }
+
+    @Test
+    void testReinitialiserMotDePasse_DevraitLeverExceptionSiMotDePasseNull() {
+        // Given
+        String token = "Bearer token123";
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> {
+            utilisateurService.reinitialiserMotDePasse(uuidUtilisateur, null, token);
+        });
+        verify(utilisateurProvider, never()).reinitialiserMotDePasse(any(), any(), any());
+    }
+
+    @Test
+    void testActiverUtilisateur_DevraitActiverUtilisateur() {
+        // Given
+        String token = "Bearer token123";
+        doNothing().when(utilisateurProvider).activerUtilisateur(uuidUtilisateur, true, token);
+
+        // When
+        utilisateurService.activerUtilisateur(uuidUtilisateur, true, token);
+
+        // Then
+        verify(utilisateurProvider, times(1)).activerUtilisateur(uuidUtilisateur, true, token);
+    }
+
+    @Test
+    void testActiverUtilisateur_DevraitDesactiverUtilisateur() {
+        // Given
+        String token = "Bearer token123";
+        doNothing().when(utilisateurProvider).activerUtilisateur(uuidUtilisateur, false, token);
+
+        // When
+        utilisateurService.activerUtilisateur(uuidUtilisateur, false, token);
+
+        // Then
+        verify(utilisateurProvider, times(1)).activerUtilisateur(uuidUtilisateur, false, token);
+    }
+
+    @Test
+    void testAssignerRole_DevraitAssignerRole() {
+        // Given
+        String nomRole = "VENDEUR";
+        String token = "Bearer token123";
+        doNothing().when(utilisateurProvider).assignerRole(uuidUtilisateur, nomRole, token);
+
+        // When
+        utilisateurService.assignerRole(uuidUtilisateur, nomRole, token);
+
+        // Then
+        verify(utilisateurProvider, times(1)).assignerRole(uuidUtilisateur, nomRole, token);
+    }
+
+    @Test
+    void testAssignerRole_DevraitLeverExceptionSiRoleVide() {
+        // Given
+        String token = "Bearer token123";
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> {
+            utilisateurService.assignerRole(uuidUtilisateur, "", token);
+        });
+        verify(utilisateurProvider, never()).assignerRole(any(), any(), any());
+    }
+
+    @Test
+    void testAssignerRole_DevraitLeverExceptionSiRoleNull() {
+        // Given
+        String token = "Bearer token123";
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> {
+            utilisateurService.assignerRole(uuidUtilisateur, null, token);
+        });
+        verify(utilisateurProvider, never()).assignerRole(any(), any(), any());
     }
 }

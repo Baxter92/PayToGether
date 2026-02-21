@@ -11,12 +11,15 @@ import com.ulr.paytogether.provider.adapter.mapper.ImageUtilisateurJpaMapper;
 import com.ulr.paytogether.provider.adapter.mapper.UtilisateurJpaMapper;
 import com.ulr.paytogether.provider.repository.UtilisateurRepository;
 import com.ulr.paytogether.provider.utils.FileManager;
+import com.ulr.paytogether.wsclient.client.apiclient.AuthApiCLient;
+import com.ulr.paytogether.wsclient.client.apiclient.UserApiClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -45,6 +48,15 @@ class UtilisateurProviderAdapterTest {
 
     @Mock
     private FileManager fileManager;
+
+    @Mock
+    private BCryptPasswordEncoder passwordEncoder;
+
+    @Mock
+    private UserApiClient userApiClient;
+
+    @Mock
+    private AuthApiCLient authApiClient;
 
     @InjectMocks
     private UtilisateurProviderAdapter providerAdapter;
@@ -173,6 +185,7 @@ class UtilisateurProviderAdapterTest {
     @Test
     void testMettreAJour_DevraitMettreAJourUtilisateur() {
         // Given
+        String token = "Bearer token123";
         UtilisateurModele utilisateurModifie = UtilisateurModele.builder()
                 .nom("Durand")
                 .prenom("Jacques")
@@ -183,9 +196,10 @@ class UtilisateurProviderAdapterTest {
         doNothing().when(mapper).mettreAJour(utilisateurJpa, utilisateurModifie);
         when(jpaRepository.save(utilisateurJpa)).thenReturn(utilisateurJpa);
         when(mapper.versModele(utilisateurJpa)).thenReturn(utilisateurModifie);
+        doNothing().when(userApiClient).updateUser(anyString(), anyString(), any());
 
         // When
-        UtilisateurModele resultat = providerAdapter.mettreAJour(uuidUtilisateur, utilisateurModifie);
+        UtilisateurModele resultat = providerAdapter.mettreAJour(uuidUtilisateur, utilisateurModifie, token);
 
         // Then
         assertNotNull(resultat);
@@ -198,12 +212,13 @@ class UtilisateurProviderAdapterTest {
     @Test
     void testMettreAJour_DevraitLancerExceptionSiUtilisateurNonTrouve() {
         // Given
+        String token = "Bearer token123";
         when(jpaRepository.findById(uuidUtilisateur)).thenReturn(Optional.empty());
 
         // When & Then
-        assertThrows(RuntimeException.class, () -> {
-            providerAdapter.mettreAJour(uuidUtilisateur, utilisateurModele);
-        });
+        assertThrows(RuntimeException.class, () ->
+            providerAdapter.mettreAJour(uuidUtilisateur, utilisateurModele, token)
+        );
         verify(jpaRepository, times(1)).findById(uuidUtilisateur);
         verify(jpaRepository, never()).save(any());
     }
@@ -363,6 +378,7 @@ class UtilisateurProviderAdapterTest {
     @Test
     void testMettreAJour_AvecNouvellePhotoProfil_DevraitMettreStatutPending() {
         // Given
+        String token = "Bearer token123";
         ImageUtilisateurModele nouvelleImage = ImageUtilisateurModele.builder()
                 .uuid(UUID.randomUUID())
                 .urlImage("nouvelle_photo.jpg")
@@ -396,9 +412,10 @@ class UtilisateurProviderAdapterTest {
         when(jpaRepository.save(utilisateurJpaExistant)).thenReturn(utilisateurJpaExistant);
         when(mapper.versModele(utilisateurJpaExistant)).thenReturn(utilisateurAvecNouvellePhoto);
         when(fileManager.generatePresignedUrl(anyString(), anyString())).thenReturn("https://presigned-url.com/nouvelle-photo");
+        doNothing().when(userApiClient).updateUser(anyString(), anyString(), any());
 
         // When
-        UtilisateurModele resultat = providerAdapter.mettreAJour(uuidUtilisateur, utilisateurAvecNouvellePhoto);
+        UtilisateurModele resultat = providerAdapter.mettreAJour(uuidUtilisateur, utilisateurAvecNouvellePhoto, token);
 
         // Then
         assertNotNull(resultat);
@@ -410,6 +427,7 @@ class UtilisateurProviderAdapterTest {
     @Test
     void testMettreAJour_SansChangementPhotoProfil_NePasModifierStatut() {
         // Given
+        String token = "Bearer token123";
         ImageUtilisateurModele imageModele = ImageUtilisateurModele.builder()
                 .uuid(UUID.randomUUID())
                 .urlImage("photo_existante.jpg")
@@ -442,9 +460,10 @@ class UtilisateurProviderAdapterTest {
         doNothing().when(mapper).mettreAJour(utilisateurJpaExistant, utilisateurAvecPhoto);
         when(jpaRepository.save(utilisateurJpaExistant)).thenReturn(utilisateurJpaExistant);
         when(mapper.versModele(utilisateurJpaExistant)).thenReturn(utilisateurAvecPhoto);
+        doNothing().when(userApiClient).updateUser(anyString(), anyString(), any());
 
         // When
-        UtilisateurModele resultat = providerAdapter.mettreAJour(uuidUtilisateur, utilisateurAvecPhoto);
+        UtilisateurModele resultat = providerAdapter.mettreAJour(uuidUtilisateur, utilisateurAvecPhoto, token);
 
         // Then
         assertNotNull(resultat);
@@ -457,13 +476,15 @@ class UtilisateurProviderAdapterTest {
     @Test
     void testMettreAJour_SansPhotoProfil_NePasGenererUrl() {
         // Given
+        String token = "Bearer token123";
         when(jpaRepository.findById(uuidUtilisateur)).thenReturn(Optional.of(utilisateurJpa));
         doNothing().when(mapper).mettreAJour(utilisateurJpa, utilisateurModele);
         when(jpaRepository.save(utilisateurJpa)).thenReturn(utilisateurJpa);
         when(mapper.versModele(utilisateurJpa)).thenReturn(utilisateurModele);
+        doNothing().when(userApiClient).updateUser(anyString(), anyString(), any());
 
         // When
-        UtilisateurModele resultat = providerAdapter.mettreAJour(uuidUtilisateur, utilisateurModele);
+        UtilisateurModele resultat = providerAdapter.mettreAJour(uuidUtilisateur, utilisateurModele, token);
 
         // Then
         assertNotNull(resultat);
@@ -514,5 +535,151 @@ class UtilisateurProviderAdapterTest {
         // Vérifier que save est appelé (le nom de l'image est modifié avec timestamp dans setPhotoProfilUnique)
         verify(jpaRepository, times(1)).save(any(UtilisateurJpa.class));
         verify(fileManager, times(1)).generatePresignedUrl(anyString(), anyString());
+    }
+
+    // ==================== Tests pour reset password, enable user et assign role ====================
+
+    @Test
+    void testReinitialiserMotDePasse_DevraitReinitialiserMotDePasseEtMettreAJourKeycloak() {
+        // Given
+        String nouveauMotDePasse = "nouveauMotDePasse123";
+        String token = "Bearer token123";
+        String keycloakId = "keycloak-user-id";
+
+        utilisateurJpa.setKeycloakId(keycloakId);
+
+        when(jpaRepository.findById(uuidUtilisateur)).thenReturn(Optional.of(utilisateurJpa));
+        when(passwordEncoder.encode(nouveauMotDePasse)).thenReturn("encodedNewPassword");
+        when(jpaRepository.save(utilisateurJpa)).thenReturn(utilisateurJpa);
+        doNothing().when(userApiClient).resetPassword(token, keycloakId, nouveauMotDePasse);
+
+        // When
+        providerAdapter.reinitialiserMotDePasse(uuidUtilisateur, nouveauMotDePasse, token);
+
+        // Then
+        verify(jpaRepository, times(1)).findById(uuidUtilisateur);
+        verify(passwordEncoder, times(1)).encode(nouveauMotDePasse);
+        verify(jpaRepository, times(1)).save(utilisateurJpa);
+        verify(userApiClient, times(1)).resetPassword(token, keycloakId, nouveauMotDePasse);
+        assertEquals("encodedNewPassword", utilisateurJpa.getMotDePasse());
+    }
+
+    @Test
+    void testReinitialiserMotDePasse_DevraitLeverExceptionSiUtilisateurNonTrouve() {
+        // Given
+        String nouveauMotDePasse = "nouveauMotDePasse123";
+        String token = "Bearer token123";
+
+        when(jpaRepository.findById(uuidUtilisateur)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> {
+            providerAdapter.reinitialiserMotDePasse(uuidUtilisateur, nouveauMotDePasse, token);
+        });
+
+        verify(jpaRepository, times(1)).findById(uuidUtilisateur);
+        verify(passwordEncoder, never()).encode(anyString());
+        verify(jpaRepository, never()).save(any());
+        verify(userApiClient, never()).resetPassword(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    void testActiverUtilisateur_DevraitActiverUtilisateurEtMettreAJourKeycloak() {
+        // Given
+        String token = "Bearer token123";
+        String keycloakId = "keycloak-user-id";
+
+        utilisateurJpa.setKeycloakId(keycloakId);
+        utilisateurJpa.setStatut(StatutUtilisateur.INACTIF);
+
+        when(jpaRepository.findById(uuidUtilisateur)).thenReturn(Optional.of(utilisateurJpa));
+        when(jpaRepository.save(utilisateurJpa)).thenReturn(utilisateurJpa);
+        doNothing().when(userApiClient).enableUser(token, keycloakId, true);
+
+        // When
+        providerAdapter.activerUtilisateur(uuidUtilisateur, true, token);
+
+        // Then
+        verify(jpaRepository, times(1)).findById(uuidUtilisateur);
+        verify(jpaRepository, times(1)).save(utilisateurJpa);
+        verify(userApiClient, times(1)).enableUser(token, keycloakId, true);
+        assertEquals(StatutUtilisateur.ACTIF, utilisateurJpa.getStatut());
+    }
+
+    @Test
+    void testActiverUtilisateur_DevraitDesactiverUtilisateurEtMettreAJourKeycloak() {
+        // Given
+        String token = "Bearer token123";
+        String keycloakId = "keycloak-user-id";
+
+        utilisateurJpa.setKeycloakId(keycloakId);
+        utilisateurJpa.setStatut(StatutUtilisateur.ACTIF);
+
+        when(jpaRepository.findById(uuidUtilisateur)).thenReturn(Optional.of(utilisateurJpa));
+        when(jpaRepository.save(utilisateurJpa)).thenReturn(utilisateurJpa);
+        doNothing().when(userApiClient).enableUser(token, keycloakId, false);
+
+        // When
+        providerAdapter.activerUtilisateur(uuidUtilisateur, false, token);
+
+        // Then
+        verify(jpaRepository, times(1)).findById(uuidUtilisateur);
+        verify(jpaRepository, times(1)).save(utilisateurJpa);
+        verify(userApiClient, times(1)).enableUser(token, keycloakId, false);
+        assertEquals(StatutUtilisateur.INACTIF, utilisateurJpa.getStatut());
+    }
+
+    @Test
+    void testActiverUtilisateur_DevraitLeverExceptionSiUtilisateurNonTrouve() {
+        // Given
+        String token = "Bearer token123";
+
+        when(jpaRepository.findById(uuidUtilisateur)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> {
+            providerAdapter.activerUtilisateur(uuidUtilisateur, true, token);
+        });
+
+        verify(jpaRepository, times(1)).findById(uuidUtilisateur);
+        verify(jpaRepository, never()).save(any());
+        verify(userApiClient, never()).enableUser(anyString(), anyString(), anyBoolean());
+    }
+
+    @Test
+    void testAssignerRole_DevraitAssignerRoleDansKeycloak() {
+        // Given
+        String nomRole = "VENDEUR";
+        String token = "Bearer token123";
+        String keycloakId = "keycloak-user-id";
+
+        utilisateurJpa.setKeycloakId(keycloakId);
+
+        when(jpaRepository.findById(uuidUtilisateur)).thenReturn(Optional.of(utilisateurJpa));
+        doNothing().when(userApiClient).assignRoleToUser(token, keycloakId, nomRole);
+
+        // When
+        providerAdapter.assignerRole(uuidUtilisateur, nomRole, token);
+
+        // Then
+        verify(jpaRepository, times(1)).findById(uuidUtilisateur);
+        verify(userApiClient, times(1)).assignRoleToUser(token, keycloakId, nomRole);
+    }
+
+    @Test
+    void testAssignerRole_DevraitLeverExceptionSiUtilisateurNonTrouve() {
+        // Given
+        String nomRole = "VENDEUR";
+        String token = "Bearer token123";
+
+        when(jpaRepository.findById(uuidUtilisateur)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> {
+            providerAdapter.assignerRole(uuidUtilisateur, nomRole, token);
+        });
+
+        verify(jpaRepository, times(1)).findById(uuidUtilisateur);
+        verify(userApiClient, never()).assignRoleToUser(anyString(), anyString(), anyString());
     }
 }
