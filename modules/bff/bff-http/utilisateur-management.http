@@ -1,0 +1,138 @@
+### Tests des nouvelles API Utilisateur (Reset Password, Enable User, Assign Role)
+
+### Variables
+@baseUrl = http://localhost:8080/api
+@utilisateurUuid = REPLACE_WITH_VALID_UUID
+@token = Bearer REPLACE_WITH_VALID_JWT_TOKEN
+
+### =========================================================================================
+### 1. Réinitialiser le mot de passe d'un utilisateur
+### =========================================================================================
+
+PATCH {{baseUrl}}/utilisateurs/{{utilisateurUuid}}/reset-password
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "nouveauMotDePasse": "NouveauMotDePasse123!"
+}
+
+### =========================================================================================
+### 2. Activer un utilisateur
+### =========================================================================================
+
+PATCH {{baseUrl}}/utilisateurs/{{utilisateurUuid}}/enable
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "actif": true
+}
+
+### =========================================================================================
+### 3. Désactiver un utilisateur
+### =========================================================================================
+
+PATCH {{baseUrl}}/utilisateurs/{{utilisateurUuid}}/enable
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "actif": false
+}
+
+### =========================================================================================
+### 4. Assigner le rôle VENDEUR à un utilisateur
+### =========================================================================================
+
+PATCH {{baseUrl}}/utilisateurs/{{utilisateurUuid}}/assign-role
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "nomRole": "VENDEUR"
+}
+
+### =========================================================================================
+### 5. Assigner le rôle ADMIN à un utilisateur
+### =========================================================================================
+
+PATCH {{baseUrl}}/utilisateurs/{{utilisateurUuid}}/assign-role
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "nomRole": "ADMIN"
+}
+
+### =========================================================================================
+### 6. Assigner le rôle UTILISATEUR à un utilisateur
+### =========================================================================================
+
+PATCH {{baseUrl}}/utilisateurs/{{utilisateurUuid}}/assign-role
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "nomRole": "UTILISATEUR"
+}
+
+### =========================================================================================
+### Tests avec erreurs - mot de passe trop court (devrait retourner 400)
+### =========================================================================================
+
+PATCH {{baseUrl}}/utilisateurs/{{utilisateurUuid}}/reset-password
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "nouveauMotDePasse": "court"
+}
+
+### =========================================================================================
+### Tests avec erreurs - mot de passe vide (devrait retourner 400)
+### =========================================================================================
+
+PATCH {{baseUrl}}/utilisateurs/{{utilisateurUuid}}/reset-password
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "nouveauMotDePasse": ""
+}
+
+### =========================================================================================
+### Tests avec erreurs - champ actif manquant (devrait retourner 400)
+### =========================================================================================
+
+PATCH {{baseUrl}}/utilisateurs/{{utilisateurUuid}}/enable
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+}
+
+### =========================================================================================
+### Tests avec erreurs - nom de rôle vide (devrait retourner 400)
+### =========================================================================================
+
+PATCH {{baseUrl}}/utilisateurs/{{utilisateurUuid}}/assign-role
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "nomRole": ""
+}
+
+### =========================================================================================
+### Tests avec erreurs - utilisateur inexistant (devrait retourner 404 ou 400)
+### =========================================================================================
+
+PATCH {{baseUrl}}/utilisateurs/00000000-0000-0000-0000-000000000000/reset-password
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "nouveauMotDePasse": "NouveauMotDePasse123!"
+}
+

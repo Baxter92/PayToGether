@@ -184,18 +184,18 @@ class UtilisateurApiAdapterTest {
                 .build();
 
         when(mapper.dtoVersModele(utilisateurModifieDTO)).thenReturn(utilisateurModifieModele);
-        when(utilisateurService.mettreAJour(eq(uuidUtilisateur), any(UtilisateurModele.class)))
+        when(utilisateurService.mettreAJour(eq(uuidUtilisateur), any(UtilisateurModele.class), anyString()))
                 .thenReturn(utilisateurModifieModele);
         when(mapper.modeleVersDto(utilisateurModifieModele)).thenReturn(utilisateurModifieDTO);
 
         // When
-        UtilisateurDTO resultat = apiAdapter.mettreAJour(uuidUtilisateur, utilisateurModifieDTO);
+        UtilisateurDTO resultat = apiAdapter.mettreAJour(uuidUtilisateur, utilisateurModifieDTO, "token");
 
         // Then
         assertNotNull(resultat);
         assertEquals("Durand", resultat.getNom());
         verify(mapper, times(1)).dtoVersModele(utilisateurModifieDTO);
-        verify(utilisateurService, times(1)).mettreAJour(eq(uuidUtilisateur), any(UtilisateurModele.class));
+        verify(utilisateurService, times(1)).mettreAJour(eq(uuidUtilisateur), any(UtilisateurModele.class), anyString());
         verify(mapper, times(1)).modeleVersDto(utilisateurModifieModele);
     }
 
@@ -235,5 +235,59 @@ class UtilisateurApiAdapterTest {
         // Then
         assertFalse(resultat);
         verify(utilisateurService, times(1)).existeParEmail("inexistant@example.com");
+    }
+
+    @Test
+    void testReinitialiserMotDePasse_DevraitReinitialiserMotDePasse() {
+        // Given
+        String nouveauMotDePasse = "nouveauMotDePasse123";
+        String token = "Bearer token123";
+        doNothing().when(utilisateurService).reinitialiserMotDePasse(uuidUtilisateur, nouveauMotDePasse, token);
+
+        // When
+        apiAdapter.reinitialiserMotDePasse(uuidUtilisateur, nouveauMotDePasse, token);
+
+        // Then
+        verify(utilisateurService, times(1)).reinitialiserMotDePasse(uuidUtilisateur, nouveauMotDePasse, token);
+    }
+
+    @Test
+    void testActiverUtilisateur_DevraitActiverUtilisateur() {
+        // Given
+        String token = "Bearer token123";
+        doNothing().when(utilisateurService).activerUtilisateur(uuidUtilisateur, true, token);
+
+        // When
+        apiAdapter.activerUtilisateur(uuidUtilisateur, true, token);
+
+        // Then
+        verify(utilisateurService, times(1)).activerUtilisateur(uuidUtilisateur, true, token);
+    }
+
+    @Test
+    void testActiverUtilisateur_DevraitDesactiverUtilisateur() {
+        // Given
+        String token = "Bearer token123";
+        doNothing().when(utilisateurService).activerUtilisateur(uuidUtilisateur, false, token);
+
+        // When
+        apiAdapter.activerUtilisateur(uuidUtilisateur, false, token);
+
+        // Then
+        verify(utilisateurService, times(1)).activerUtilisateur(uuidUtilisateur, false, token);
+    }
+
+    @Test
+    void testAssignerRole_DevraitAssignerRole() {
+        // Given
+        String nomRole = "VENDEUR";
+        String token = "Bearer token123";
+        doNothing().when(utilisateurService).assignerRole(uuidUtilisateur, nomRole, token);
+
+        // When
+        apiAdapter.assignerRole(uuidUtilisateur, nomRole, token);
+
+        // Then
+        verify(utilisateurService, times(1)).assignerRole(uuidUtilisateur, nomRole, token);
     }
 }

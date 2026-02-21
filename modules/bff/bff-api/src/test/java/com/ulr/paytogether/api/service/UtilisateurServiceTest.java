@@ -235,16 +235,16 @@ class UtilisateurServiceTest {
                 .build();
 
         doNothing().when(utilisateurValidator).validerPourMiseAJour(any(UtilisateurModele.class));
-        when(utilisateurProvider.mettreAJour(uuidUtilisateur, utilisateurMisAJour)).thenReturn(utilisateurMisAJour);
+        when(utilisateurProvider.mettreAJour(uuidUtilisateur, utilisateurMisAJour, anyString())).thenReturn(utilisateurMisAJour);
 
         // When
-        UtilisateurModele resultat = utilisateurService.mettreAJour(uuidUtilisateur, utilisateurMisAJour);
+        UtilisateurModele resultat = utilisateurService.mettreAJour(uuidUtilisateur, utilisateurMisAJour, "tokenDeTest");
 
         // Then
         assertNotNull(resultat);
         assertEquals("Jean-Claude", resultat.getPrenom());
         verify(utilisateurValidator, times(1)).validerPourMiseAJour(utilisateurMisAJour);
-        verify(utilisateurProvider, times(1)).mettreAJour(uuidUtilisateur, utilisateurMisAJour);
+        verify(utilisateurProvider, times(1)).mettreAJour(uuidUtilisateur, utilisateurMisAJour, anyString());
     }
 
     @Test
@@ -256,12 +256,12 @@ class UtilisateurServiceTest {
         // When & Then
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> utilisateurService.mettreAJour(uuidUtilisateur, utilisateur)
+                () -> utilisateurService.mettreAJour(uuidUtilisateur, utilisateur, "tokenDeTest")
         );
 
         assertEquals("L'attribut uuid est obligatoire", exception.getMessage());
         verify(utilisateurValidator, times(1)).validerPourMiseAJour(utilisateur);
-        verify(utilisateurProvider, never()).mettreAJour(any(), any());
+        verify(utilisateurProvider, never()).mettreAJour(any(), any(), anyString());
     }
 
     // ==================== Tests pour supprimerParUuid() ====================

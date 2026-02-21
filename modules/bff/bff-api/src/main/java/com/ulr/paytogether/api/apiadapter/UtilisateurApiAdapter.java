@@ -75,11 +75,11 @@ public class UtilisateurApiAdapter {
     /**
      * Mettre à jour un utilisateur
      */
-    public UtilisateurDTO mettreAJour(UUID uuid, UtilisateurDTO dto) {
+    public UtilisateurDTO mettreAJour(UUID uuid, UtilisateurDTO dto, String token) {
         log.info("ApiAdapter - Mise à jour utilisateur: {}", uuid);
 
         UtilisateurModele modele = mapper.dtoVersModele(dto);
-        UtilisateurModele mis_a_jour = utilisateurService.mettreAJour(uuid, modele);
+        UtilisateurModele mis_a_jour = utilisateurService.mettreAJour(uuid, modele, token);
 
         return mapper.modeleVersDto(mis_a_jour);
     }
@@ -111,5 +111,29 @@ public class UtilisateurApiAdapter {
      */
     public String obtenirUrlLecturePhotoProfil(UUID utilisateurUuid) {
         return utilisateurService.obtenirUrlLecturePhotoProfil(utilisateurUuid);
+    }
+
+    /**
+     * Réinitialiser le mot de passe d'un utilisateur
+     */
+    public void reinitialiserMotDePasse(UUID utilisateurUuid, String nouveauMotDePasse, String token) {
+        log.info("ApiAdapter - Réinitialisation du mot de passe pour l'utilisateur: {}", utilisateurUuid);
+        utilisateurService.reinitialiserMotDePasse(utilisateurUuid, nouveauMotDePasse, token);
+    }
+
+    /**
+     * Activer/Désactiver un utilisateur
+     */
+    public void activerUtilisateur(UUID utilisateurUuid, boolean actif, String token) {
+        log.info("ApiAdapter - Activation/Désactivation de l'utilisateur: {} - actif: {}", utilisateurUuid, actif);
+        utilisateurService.activerUtilisateur(utilisateurUuid, actif, token);
+    }
+
+    /**
+     * Assigner un rôle à un utilisateur
+     */
+    public void assignerRole(UUID utilisateurUuid, String nomRole, String token) {
+        log.info("ApiAdapter - Assignation du rôle {} à l'utilisateur: {}", nomRole, utilisateurUuid);
+        utilisateurService.assignerRole(utilisateurUuid, nomRole, token);
     }
 }

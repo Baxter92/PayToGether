@@ -31,6 +31,9 @@ public class UtilisateurJpa {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID uuid;
 
+    @Column(length = 255, unique = true)
+    private String keycloakId;
+
     @Column(length = 100)
     private String nom;
 
