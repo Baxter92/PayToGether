@@ -31,6 +31,25 @@ build: ## Build l'image Docker
 		.
 	@echo "$(GREEN)✅ Build terminé !$(NC)"
 
+build-no-cache: ## Build l'image Docker sans cache
+	@echo "$(GREEN)🔨 Build de l'image Docker (sans cache)...$(NC)"
+	DOCKER_BUILDKIT=1 docker build \
+		--no-cache \
+		--progress=plain \
+		-f modules/bff/Dockerfile \
+		-t $(IMAGE_NAME):$(IMAGE_TAG) \
+		-t $(FULL_IMAGE) \
+		.
+	@echo "$(GREEN)✅ Build terminé !$(NC)"
+
+clean-buildkit: ## Nettoie le cache Docker BuildKit
+	@echo "$(YELLOW)🧹 Nettoyage du cache BuildKit...$(NC)"
+	docker builder prune -f
+	@echo "$(GREEN)✅ Cache BuildKit nettoyé$(NC)"
+
+rebuild: clean-buildkit build-no-cache ## Nettoie le cache et rebuild complètement
+	@echo "$(GREEN)✅ Rebuild complet terminé !$(NC)"
+
 run: ## Exécute le container
 	@echo "$(GREEN)🚀 Démarrage du container...$(NC)"
 	docker run -d \

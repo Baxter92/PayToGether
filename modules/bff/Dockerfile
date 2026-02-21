@@ -15,6 +15,13 @@ COPY modules/bff/bff-wsclient/pom.xml /workspace/modules/bff/bff-wsclient/
 COPY modules/bff/bff-api/pom.xml /workspace/modules/bff/bff-api/
 COPY modules/bff/bff-configuration/pom.xml /workspace/modules/bff/bff-configuration/
 
+# Créer les répertoires de structure
+RUN mkdir -p /workspace/modules/bff/bff-core/src/main/java && \
+    mkdir -p /workspace/modules/bff/bff-provider/src/main/java && \
+    mkdir -p /workspace/modules/bff/bff-wsclient/src/main/java && \
+    mkdir -p /workspace/modules/bff/bff-api/src/main/java && \
+    mkdir -p /workspace/modules/bff/bff-configuration/src/main/java
+
 # Télécharger les dépendances (layer cachable)
 RUN mvn -B dependency:go-offline -DskipTests
 
