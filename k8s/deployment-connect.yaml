@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: connect-deploiement
+  namespace: paytogether
+  labels:
+    app: connect
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: connect
+  template:
+    metadata:
+      labels:
+        app: connect
+    spec:
+      containers:
+        - name: connect-paytogether
+          image: docker.io/14152021/dealtogether:connect-v1.0.1
+          ports:
+            - containerPort: 8080
