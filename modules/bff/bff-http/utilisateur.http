@@ -1,6 +1,11 @@
+### Variables
+# Le token doit être défini après un login réussi
+@access_token = {{access_token}}
+
 ### 1. Créer un utilisateur (POST)
 POST {{base_url}}/api/utilisateurs
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 {
   "nom": "Dupont",
@@ -15,22 +20,27 @@ Content-Type: application/json
 ### 2. Récupérer tous les utilisateurs (GET)
 GET {{base_url}}/api/utilisateurs
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 3. Récupérer un utilisateur par UUID (GET)
 GET {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 4. Récupérer un utilisateur par email (GET)
 GET {{base_url}}/api/utilisateurs/email/jean.dupont@example.com
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 5. Vérifier si un email existe (GET)
 GET {{base_url}}/api/utilisateurs/existe/jean.dupont@example.com
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 6. Mettre à jour un utilisateur (PUT)
 PUT {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 {
   "nom": "Dupont",
@@ -44,14 +54,17 @@ Content-Type: application/json
 ### 7. Supprimer un utilisateur (DELETE)
 DELETE {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 8. Confirmer l'upload de la photo de profil (PATCH)
 ### Endpoint appelé par le frontend après upload réussi vers MinIO
 PATCH {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000/photo-profil/confirm
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 9. Obtenir l'URL de lecture de la photo de profil (GET)
 ### Génère une URL présignée pour lire la photo depuis MinIO
 GET {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000/photo-profil/url
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 

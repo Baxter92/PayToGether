@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class PubliciteResource {
 
     private final PubliciteApiAdapter publiciteApiAdapter;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<PubliciteDTO> creer(@Valid @RequestBody PubliciteDTO publiciteDTO) {
         log.info("Création d'une publicité: {}", publiciteDTO.getTitre());
@@ -39,6 +41,7 @@ public class PubliciteResource {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<PubliciteDTO>> lireTous() {
         log.debug("Lecture de toutes les publicités");
@@ -53,6 +56,7 @@ public class PubliciteResource {
         return ResponseEntity.ok(publicites);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{uuid}")
     public ResponseEntity<PubliciteDTO> mettreAJour(
             @PathVariable UUID uuid,
@@ -62,6 +66,7 @@ public class PubliciteResource {
         return ResponseEntity.ok(resultat);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{uuid}")
     public ResponseEntity<Void> supprimer(@PathVariable UUID uuid) {
         log.info("Suppression de la publicité: {}", uuid);

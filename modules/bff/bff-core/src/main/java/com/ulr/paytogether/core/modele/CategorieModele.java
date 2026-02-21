@@ -21,6 +21,7 @@ public class CategorieModele {
     private String nom;
     private String description;
     private String icone;
+    private Integer nbDeals;
     private LocalDateTime dateCreation;
     private LocalDateTime dateModification;
 }

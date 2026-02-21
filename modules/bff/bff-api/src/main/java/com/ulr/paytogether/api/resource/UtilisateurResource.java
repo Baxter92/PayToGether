@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
@@ -68,6 +69,7 @@ public class UtilisateurResource {
     /**
      * Récupérer tous les utilisateurs
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<UtilisateurDTO>> lireTous() {
         log.debug("Récupération de tous les utilisateurs");
@@ -177,6 +179,7 @@ public class UtilisateurResource {
     /**
      * Activer/Désactiver un utilisateur
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{uuid}/enable")
     public ResponseEntity<Void> activerUtilisateur(
             @PathVariable UUID uuid,
@@ -197,6 +200,7 @@ public class UtilisateurResource {
     /**
      * Assigner un rôle à un utilisateur
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{uuid}/assign-role")
     public ResponseEntity<Void> assignerRole(
             @PathVariable UUID uuid,

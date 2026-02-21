@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class CategorieResource {
     /**
      * Créer une nouvelle catégorie
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<CategorieDTO> creer(@Valid @RequestBody CategorieDTO categorieDTO) {
         log.info("Création d'une catégorie: {}", categorieDTO.getNom());
@@ -85,6 +87,7 @@ public class CategorieResource {
     /**
      * Mettre à jour une catégorie
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{uuid}")
     public ResponseEntity<CategorieDTO> mettreAJour(
             @PathVariable UUID uuid,
@@ -103,6 +106,7 @@ public class CategorieResource {
     /**
      * Supprimer une catégorie
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{uuid}")
     public ResponseEntity<Void> supprimer(@PathVariable UUID uuid) {
         log.info("Suppression de la catégorie: {}", uuid);

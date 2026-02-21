@@ -23,6 +23,7 @@ public class CategorieMapper {
                 .nom(modele.getNom())
                 .description(modele.getDescription())
                 .icone(modele.getIcone())
+                .nbDeals(modele.getNbDeals())
                 .dateCreation(modele.getDateCreation())
                 .dateModification(modele.getDateModification())
                 .build();

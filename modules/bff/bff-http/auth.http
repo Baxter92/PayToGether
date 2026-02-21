@@ -4,7 +4,6 @@
 @baseUrl = http://localhost:8080/api/auth
 @username = test@example.com
 @password = password123
-@accessToken = REPLACE_WITH_ACCESS_TOKEN
 
 ### =========================================================================================
 ### 1. Login - Authentification d'un utilisateur
@@ -18,19 +17,24 @@ Content-Type: application/json
   "password": "{{password}}"
 }
 
+> {%
+    client.global.set("access_token", response.body.accessToken);
+    client.global.set("refresh_token", response.body.refreshToken);
+%}
+
 ### =========================================================================================
 ### 2. Get Me - Récupérer les informations de l'utilisateur connecté
 ### =========================================================================================
 
 GET {{baseUrl}}/me
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{access_token}}
 
 ### =========================================================================================
 ### 3. Logout - Déconnecter l'utilisateur
 ### =========================================================================================
 
 POST {{baseUrl}}/logout
-Authorization: Bearer {{accessToken}}
+Authorization: Bearer {{access_token}}
 
 ### =========================================================================================
 ### Tests avec erreurs - Login avec identifiants vides (devrait retourner 400)

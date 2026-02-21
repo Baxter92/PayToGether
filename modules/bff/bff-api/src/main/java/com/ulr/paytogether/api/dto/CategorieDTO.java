@@ -32,6 +32,8 @@ public class CategorieDTO {
     @Size(max = 255, message = "L'icône ne doit pas dépasser 255 caractères")
     private String icone;
 
+    private Integer nbDeals;
+
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime dateCreation;
 
