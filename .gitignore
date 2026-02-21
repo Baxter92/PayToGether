@@ -10,7 +10,12 @@
 .snapshots/
 #Testing Output folder
 .output/
+
+### Eclipse ###
 .settings/
+.project
+.classpath
+
 #Extension App-file
 *.app
 #Rapid Application Development File
