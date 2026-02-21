@@ -17,6 +17,6 @@ spec:
     spec:
       containers:
         - name: connect-paytogether
-          image: docker.io/14152021/dealtogether:connect-v1.0.1
+          image: docker.io/14152021/dealtogether:connect-v1.0.0
           ports:
             - containerPort: 8080
