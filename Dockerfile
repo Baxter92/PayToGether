@@ -14,13 +14,15 @@ COPY modules/bff/bff-provider/pom.xml /workspace/modules/bff/bff-provider/
 COPY modules/bff/bff-wsclient/pom.xml /workspace/modules/bff/bff-wsclient/
 COPY modules/bff/bff-api/pom.xml /workspace/modules/bff/bff-api/
 COPY modules/bff/bff-configuration/pom.xml /workspace/modules/bff/bff-configuration/
+COPY modules/front/pom.xml /workspace/modules/front/
 
 # Créer les répertoires de structure
 RUN mkdir -p /workspace/modules/bff/bff-core/src/main/java && \
     mkdir -p /workspace/modules/bff/bff-provider/src/main/java && \
     mkdir -p /workspace/modules/bff/bff-wsclient/src/main/java && \
     mkdir -p /workspace/modules/bff/bff-api/src/main/java && \
-    mkdir -p /workspace/modules/bff/bff-configuration/src/main/java
+    mkdir -p /workspace/modules/bff/bff-configuration/src/main/java && \
+    mkdir -p /workspace/modules/front/src
 
 # Télécharger les dépendances (layer cachable)
 RUN mvn -B dependency:go-offline -DskipTests
@@ -33,7 +35,9 @@ WORKDIR /workspace
 COPY --from=dependencies /root/.m2 /root/.m2
 
 # Copier tout le code source
-COPY modules/bff /workspace
+COPY pom.xml /workspace/
+COPY modules/bff /workspace/modules/bff
+COPY modules/front /workspace/modules/front
 
 # Build avec optimisations
 RUN mvn -B -DskipTests clean package \
