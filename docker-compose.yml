@@ -9,7 +9,7 @@ services:
   bff:
     build:
       context: .
-      dockerfile: modules/bff/Dockerfile
+      dockerfile: Dockerfile
       # Cache les dépendances pour des rebuilds plus rapides
       cache_from:
         - paytogether-bff:latest

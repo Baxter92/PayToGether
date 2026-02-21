@@ -33,7 +33,7 @@ WORKDIR /workspace
 COPY --from=dependencies /root/.m2 /root/.m2
 
 # Copier tout le code source
-COPY . /workspace
+COPY modules/bff /workspace
 
 # Build avec optimisations
 RUN mvn -B -DskipTests clean package \
