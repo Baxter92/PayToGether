@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        Version 1.0.0 - Données initiales
+        Date: 19 février 2026
+        Auteur: Équipe PayToGether
+
+        Contient les données de référence obligatoires:
+        - Catégories de base
+    -->
+
+    <!-- Insertion des catégories par défaut -->
+    <changeSet id="1.0.0-insert-categories-initiales" author="paytogether">
+        <insert tableName="categorie">
+            <column name="uuid" valueComputed="gen_random_uuid()"/>
+            <column name="nom" value="Électronique"/>
+            <column name="description" value="Produits électroniques et high-tech"/>
+            <column name="icone" value="🔌"/>
+            <column name="date_creation" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="date_modification" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="categorie">
+            <column name="uuid" valueComputed="gen_random_uuid()"/>
+            <column name="nom" value="Mode & Vêtements"/>
+            <column name="description" value="Vêtements, chaussures et accessoires"/>
+            <column name="icone" value="👔"/>
+            <column name="date_creation" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="date_modification" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="categorie">
+            <column name="uuid" valueComputed="gen_random_uuid()"/>
+            <column name="nom" value="Alimentation"/>
+            <column name="description" value="Produits alimentaires et boissons"/>
+            <column name="icone" value="🍔"/>
+            <column name="date_creation" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="date_modification" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="categorie">
+            <column name="uuid" valueComputed="gen_random_uuid()"/>
+            <column name="nom" value="Maison & Jardin"/>
+            <column name="description" value="Meubles, décoration et jardinage"/>
+            <column name="icone" value="🏠"/>
+            <column name="date_creation" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="date_modification" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="categorie">
+            <column name="uuid" valueComputed="gen_random_uuid()"/>
+            <column name="nom" value="Sports & Loisirs"/>
+            <column name="description" value="Équipements sportifs et loisirs"/>
+            <column name="icone" value="⚽"/>
+            <column name="date_creation" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="date_modification" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="categorie">
+            <column name="uuid" valueComputed="gen_random_uuid()"/>
+            <column name="nom" value="Beauté & Santé"/>
+            <column name="description" value="Cosmétiques, soins et bien-être"/>
+            <column name="icone" value="💄"/>
+            <column name="date_creation" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="date_modification" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="categorie">
+            <column name="uuid" valueComputed="gen_random_uuid()"/>
+            <column name="nom" value="Services"/>
+            <column name="description" value="Services divers et prestations"/>
+            <column name="icone" value="🛠️"/>
+            <column name="date_creation" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="date_modification" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="categorie">
+            <column name="uuid" valueComputed="gen_random_uuid()"/>
+            <column name="nom" value="Voyage & Tourisme"/>
+            <column name="description" value="Voyages, hôtels et activités touristiques"/>
+            <column name="icone" value="✈️"/>
+            <column name="date_creation" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="date_modification" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <rollback>
+            <delete tableName="categorie">
+                <where>nom IN ('Électronique', 'Mode &amp; Vêtements', 'Alimentation', 'Maison &amp; Jardin', 'Sports &amp; Loisirs', 'Beauté &amp; Santé', 'Services', 'Voyage &amp; Tourisme')</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
+

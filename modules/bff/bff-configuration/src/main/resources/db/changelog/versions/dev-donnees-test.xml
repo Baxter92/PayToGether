@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        Données de test pour l'environnement de développement
+        Date: 19 février 2026
+        Auteur: Équipe PayToGether
+
+        ATTENTION : Ce fichier ne s'exécute QU'EN DÉVELOPPEMENT (context="dev")
+        Les données de ce fichier ne seront jamais appliquées en production.
+    -->
+
+    <!-- Utilisateur de test -->
+    <changeSet id="dev-insert-utilisateur-test" author="paytogether" context="dev">
+        <comment>Création d'un utilisateur de test pour le développement</comment>
+
+        <insert tableName="utilisateur">
+            <column name="uuid" value="00000000-0000-0000-0000-000000000001"/>
+            <column name="nom" value="Test"/>
+            <column name="prenom" value="Utilisateur"/>
+            <column name="email" value="test@paytogether.com"/>
+            <!-- Mot de passe hashé : "Test123!" -->
+            <column name="mot_de_passe" value="$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"/>
+            <column name="statut" value="ACTIF"/>
+            <column name="role" value="UTILISATEUR"/>
+            <column name="date_creation" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="date_modification" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="utilisateur">
+            <column name="uuid" value="00000000-0000-0000-0000-000000000002"/>
+            <column name="nom" value="Admin"/>
+            <column name="prenom" value="Système"/>
+            <column name="email" value="admin@paytogether.com"/>
+            <!-- Mot de passe hashé : "Admin123!" -->
+            <column name="mot_de_passe" value="$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"/>
+            <column name="statut" value="ACTIF"/>
+            <column name="role" value="ADMIN"/>
+            <column name="date_creation" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="date_modification" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="utilisateur">
+            <column name="uuid" value="00000000-0000-0000-0000-000000000003"/>
+            <column name="nom" value="Marchand"/>
+            <column name="prenom" value="Boutique"/>
+            <column name="email" value="marchand@paytogether.com"/>
+            <!-- Mot de passe hashé : "Marchand123!" -->
+            <column name="mot_de_passe" value="$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"/>
+            <column name="statut" value="ACTIF"/>
+            <column name="role" value="MARCHAND"/>
+            <column name="date_creation" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="date_modification" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <rollback>
+            <delete tableName="utilisateur">
+                <where>email IN ('test@paytogether.com', 'admin@paytogether.com', 'marchand@paytogether.com')</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+    <!-- Deals de test -->
+    <changeSet id="dev-insert-deals-test" author="paytogether" context="dev">
+        <comment>Création de deals de test pour le développement</comment>
+
+        <insert tableName="deal">
+            <column name="uuid" value="10000000-0000-0000-0000-000000000001"/>
+            <column name="titre" value="iPhone 15 Pro - Deal Groupé"/>
+            <column name="description" value="Achetez ensemble et économisez 30% sur le dernier iPhone 15 Pro"/>
+            <column name="prix_deal" value="1199.99"/>
+            <column name="prix_part" value="839.99"/>
+            <column name="nb_participants" value="5"/>
+            <column name="date_debut" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="date_fin" valueComputed="CURRENT_TIMESTAMP + INTERVAL '30 days'"/>
+            <column name="statut" value="ACTIF"/>
+            <column name="utilisateur_uuid" value="00000000-0000-0000-0000-000000000003"/>
+            <column name="categorie_uuid" valueComputed="(SELECT uuid FROM categorie WHERE nom = 'Électronique' LIMIT 1)"/>
+            <column name="ville" value="Montreal"/>
+            <column name="pays" value="Canada"/>
+            <column name="date_creation" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="date_modification" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="deal">
+            <column name="uuid" value="10000000-0000-0000-0000-000000000002"/>
+            <column name="titre" value="Pack Fitness - Équipement Complet"/>
+            <column name="description" value="Ensemble complet d'équipement fitness : haltères, tapis, bandes élastiques"/>
+            <column name="prix_deal" value="299.99"/>
+            <column name="prix_part" value="199.99"/>
+            <column name="nb_participants" value="10"/>
+            <column name="date_debut" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="date_fin" valueComputed="CURRENT_TIMESTAMP + INTERVAL '15 days'"/>
+            <column name="statut" value="ACTIF"/>
+            <column name="utilisateur_uuid" value="00000000-0000-0000-0000-000000000003"/>
+            <column name="categorie_uuid" valueComputed="(SELECT uuid FROM categorie WHERE nom = 'Sports &amp; Loisirs' LIMIT 1)"/>
+            <column name="ville" value="Quebec"/>
+            <column name="pays" value="Canada"/>
+            <column name="date_creation" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="date_modification" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <rollback>
+            <delete tableName="deal">
+                <where>titre IN ('iPhone 15 Pro - Deal Groupé', 'Pack Fitness - Équipement Complet')</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+    <!-- Points forts des deals de test -->
+    <changeSet id="dev-insert-deal-points-forts-test" author="paytogether" context="dev">
+        <comment>Ajout des points forts pour les deals de test</comment>
+
+        <insert tableName="deal_points_forts">
+            <column name="deal_uuid" value="10000000-0000-0000-0000-000000000001"/>
+            <column name="point_fort" value="Économie de 30% sur le prix de détail"/>
+        </insert>
+
+        <insert tableName="deal_points_forts">
+            <column name="deal_uuid" value="10000000-0000-0000-0000-000000000001"/>
+            <column name="point_fort" value="Garantie Apple 1 an incluse"/>
+        </insert>
+
+        <insert tableName="deal_points_forts">
+            <column name="deal_uuid" value="10000000-0000-0000-0000-000000000001"/>
+            <column name="point_fort" value="Livraison gratuite à domicile"/>
+        </insert>
+
+        <insert tableName="deal_points_forts">
+            <column name="deal_uuid" value="10000000-0000-0000-0000-000000000002"/>
+            <column name="point_fort" value="Kit complet pour débutants et confirmés"/>
+        </insert>
+
+        <insert tableName="deal_points_forts">
+            <column name="deal_uuid" value="10000000-0000-0000-0000-000000000002"/>
+            <column name="point_fort" value="Matériaux de qualité professionnelle"/>
+        </insert>
+
+        <rollback>
+            <delete tableName="deal_points_forts">
+                <where>deal_uuid IN ('10000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000002')</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+    <!-- Publicités de test -->
+    <changeSet id="dev-insert-publicites-test" author="paytogether" context="dev">
+        <comment>Création de publicités de test pour le développement</comment>
+
+        <insert tableName="publicite">
+            <column name="uuid" value="20000000-0000-0000-0000-000000000001"/>
+            <column name="titre" value="Promo Rentrée - Jusqu'à 50% de réduction"/>
+            <column name="description" value="Profitez de nos offres exceptionnelles pour la rentrée"/>
+            <column name="emplacement_publicite" value="BANNIERE_PRINCIPALE"/>
+            <column name="date_debut" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="date_fin" valueComputed="CURRENT_TIMESTAMP + INTERVAL '60 days'"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="date_creation" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="date_modification" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <rollback>
+            <delete tableName="publicite">
+                <where>titre = 'Promo Rentrée - Jusqu''à 50% de réduction'</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
+

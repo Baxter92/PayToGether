@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        Fichier master des changelogs Liquibase pour PayToGether
+
+        Structure recommandée :
+        - Un fichier par version (ex: v1.0.0, v1.1.0)
+        - Chaque version contient des changements atomiques
+        - Utiliser des tags pour marquer les releases
+    -->
+
+    <!-- Version initiale - Schéma de base -->
+    <include file="db/changelog/versions/v1.0.0-schema-initial.xml"/>
+
+    <!-- Version initiale - Données de référence -->
+    <include file="db/changelog/versions/v1.0.0-donnees-initiales.xml"/>
+
+    <!-- Données de test (uniquement en développement - context="dev") -->
+    <include file="db/changelog/versions/dev-donnees-test.xml"/>
+
+    <!-- Versions futures -->
+    <!-- <include file="db/changelog/versions/v1.1.0-ajout-table-xxx.xml"/> -->
+
+</databaseChangeLog>
+

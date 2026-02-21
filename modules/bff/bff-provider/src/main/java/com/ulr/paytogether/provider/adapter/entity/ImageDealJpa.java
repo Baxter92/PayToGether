@@ -39,6 +39,7 @@ public class ImageDealJpa {
     private Boolean isPrincipal = false;
 
     @Builder.Default
+    @Enumerated(EnumType.STRING)
     private StatutImage statut = StatutImage.PENDING;
 
     @CreationTimestamp

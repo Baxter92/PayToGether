@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        Version 1.0.0 - Schéma initial de PayToGether
+        Date: 19 février 2026
+        Auteur: Équipe PayToGether
+
+        Contient toutes les tables de base du système:
+        - utilisateur
+        - categorie
+        - deal
+        - publicite
+        - images (deal, utilisateur, publicite)
+    -->
+
+    <!-- Table Utilisateur -->
+    <changeSet id="1.0.0-create-table-utilisateur" author="paytogether">
+        <createTable tableName="utilisateur">
+            <column name="uuid" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="nom" type="VARCHAR(100)"/>
+            <column name="prenom" type="VARCHAR(100)"/>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="mot_de_passe" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="statut" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="photo_profil_uuid" type="UUID"/>
+            <column name="date_creation" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_modification" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addDefaultValue tableName="utilisateur" columnName="statut" defaultValue="INACTIF"/>
+        <addDefaultValue tableName="utilisateur" columnName="role" defaultValue="UTILISATEUR"/>
+    </changeSet>
+
+    <!-- Table Image Utilisateur -->
+    <changeSet id="1.0.0-create-table-image-utilisateur" author="paytogether">
+        <createTable tableName="image_utilisateur">
+            <column name="uuid" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="url_image" type="VARCHAR(500)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="utilisateur_uuid" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="statut" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_creation" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_modification" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="image_utilisateur"
+                baseColumnNames="utilisateur_uuid"
+                referencedTableName="utilisateur"
+                referencedColumnNames="uuid"
+                constraintName="fk_image_utilisateur_utilisateur"
+                onDelete="CASCADE"/>
+
+        <addDefaultValue tableName="image_utilisateur" columnName="statut" defaultValue="PENDING"/>
+    </changeSet>
+
+    <!-- Ajouter FK pour photo_profil dans utilisateur -->
+    <changeSet id="1.0.0-add-fk-utilisateur-photo-profil" author="paytogether">
+        <addForeignKeyConstraint
+                baseTableName="utilisateur"
+                baseColumnNames="photo_profil_uuid"
+                referencedTableName="image_utilisateur"
+                referencedColumnNames="uuid"
+                constraintName="fk_utilisateur_photo_profil"
+                onDelete="SET NULL"/>
+    </changeSet>
+
+    <!-- Table Categorie -->
+    <changeSet id="1.0.0-create-table-categorie" author="paytogether">
+        <createTable tableName="categorie">
+            <column name="uuid" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="nom" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="icone" type="VARCHAR(255)"/>
+            <column name="date_creation" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_modification" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Table Deal -->
+    <changeSet id="1.0.0-create-table-deal" author="paytogether">
+        <createTable tableName="deal">
+            <column name="uuid" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="titre" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="prix_deal" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="prix_part" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="nb_participants" type="INTEGER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_debut" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_fin" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="statut" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="utilisateur_uuid" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="categorie_uuid" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_expiration" type="TIMESTAMP"/>
+            <column name="ville" type="VARCHAR(100)"/>
+            <column name="pays" type="VARCHAR(100)"/>
+            <column name="date_creation" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_modification" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="deal"
+                baseColumnNames="utilisateur_uuid"
+                referencedTableName="utilisateur"
+                referencedColumnNames="uuid"
+                constraintName="fk_deal_utilisateur"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                baseTableName="deal"
+                baseColumnNames="categorie_uuid"
+                referencedTableName="categorie"
+                referencedColumnNames="uuid"
+                constraintName="fk_deal_categorie"
+                onDelete="RESTRICT"/>
+    </changeSet>
+
+    <!-- Table de jointure Deal Participants (ManyToMany) -->
+    <changeSet id="1.0.0-create-table-deal-participants" author="paytogether">
+        <createTable tableName="deal_participants">
+            <column name="deal_uuid" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="utilisateur_uuid" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey
+                tableName="deal_participants"
+                columnNames="deal_uuid, utilisateur_uuid"
+                constraintName="pk_deal_participants"/>
+
+        <addForeignKeyConstraint
+                baseTableName="deal_participants"
+                baseColumnNames="deal_uuid"
+                referencedTableName="deal"
+                referencedColumnNames="uuid"
+                constraintName="fk_deal_participants_deal"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                baseTableName="deal_participants"
+                baseColumnNames="utilisateur_uuid"
+                referencedTableName="utilisateur"
+                referencedColumnNames="uuid"
+                constraintName="fk_deal_participants_utilisateur"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+    <!-- Table Deal Points Forts (ElementCollection) -->
+    <changeSet id="1.0.0-create-table-deal-points-forts" author="paytogether">
+        <createTable tableName="deal_points_forts">
+            <column name="deal_uuid" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="point_fort" type="VARCHAR(500)"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="deal_points_forts"
+                baseColumnNames="deal_uuid"
+                referencedTableName="deal"
+                referencedColumnNames="uuid"
+                constraintName="fk_deal_points_forts_deal"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+    <!-- Table Image Deal -->
+    <changeSet id="1.0.0-create-table-image-deal" author="paytogether">
+        <createTable tableName="image_deal">
+            <column name="uuid" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="url_image" type="VARCHAR(500)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="deal_uuid" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_principal" type="BOOLEAN" defaultValueBoolean="false"/>
+            <column name="statut" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_creation" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_modification" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="image_deal"
+                baseColumnNames="deal_uuid"
+                referencedTableName="deal"
+                referencedColumnNames="uuid"
+                constraintName="fk_image_deal_deal"
+                onDelete="CASCADE"/>
+
+        <addDefaultValue tableName="image_deal" columnName="statut" defaultValue="PENDING"/>
+    </changeSet>
+
+    <!-- Table Publicite -->
+    <changeSet id="1.0.0-create-table-publicite" author="paytogether">
+        <createTable tableName="publicite">
+            <column name="uuid" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="titre" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="emplacement_publicite" type="VARCHAR(50)"/>
+            <column name="date_debut" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_fin" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_creation" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_modification" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Table Image (pour Publicite) -->
+    <changeSet id="1.0.0-create-table-image" author="paytogether">
+        <createTable tableName="image">
+            <column name="uuid" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="url_image" type="VARCHAR(500)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="publicite_uuid" type="UUID"/>
+            <column name="statut" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_creation" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_modification" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="image"
+                baseColumnNames="publicite_uuid"
+                referencedTableName="publicite"
+                referencedColumnNames="uuid"
+                constraintName="fk_image_publicite"
+                onDelete="CASCADE"/>
+
+        <addDefaultValue tableName="image" columnName="statut" defaultValue="PENDING"/>
+    </changeSet>
+
+    <!-- Index pour améliorer les performances -->
+    <changeSet id="1.0.0-create-indexes" author="paytogether">
+        <!-- Index sur les colonnes fréquemment recherchées -->
+        <createIndex indexName="idx_utilisateur_email" tableName="utilisateur">
+            <column name="email"/>
+        </createIndex>
+
+        <createIndex indexName="idx_utilisateur_statut" tableName="utilisateur">
+            <column name="statut"/>
+        </createIndex>
+
+        <createIndex indexName="idx_deal_statut" tableName="deal">
+            <column name="statut"/>
+        </createIndex>
+
+        <createIndex indexName="idx_deal_date_debut" tableName="deal">
+            <column name="date_debut"/>
+        </createIndex>
+
+        <createIndex indexName="idx_deal_date_fin" tableName="deal">
+            <column name="date_fin"/>
+        </createIndex>
+
+        <createIndex indexName="idx_deal_utilisateur" tableName="deal">
+            <column name="utilisateur_uuid"/>
+        </createIndex>
+
+        <createIndex indexName="idx_deal_categorie" tableName="deal">
+            <column name="categorie_uuid"/>
+        </createIndex>
+
+        <createIndex indexName="idx_publicite_active" tableName="publicite">
+            <column name="active"/>
+        </createIndex>
+
+        <createIndex indexName="idx_publicite_date_debut" tableName="publicite">
+            <column name="date_debut"/>
+        </createIndex>
+
+        <createIndex indexName="idx_publicite_date_fin" tableName="publicite">
+            <column name="date_fin"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Tag de release v1.0.0 -->
+    <changeSet id="1.0.0-tag-release" author="paytogether">
+        <tagDatabase tag="v1.0.0"/>
+    </changeSet>
+
+</databaseChangeLog>
+
