@@ -17,6 +17,6 @@ spec:
     spec:
       containers:
         - name: bff
-          image: docker.io/14152021/dealtogether:bff-v1.0.1
+          image: docker.io/14152021/dealtogether:bff-v1.0.0
           ports:
             - containerPort: 8080
