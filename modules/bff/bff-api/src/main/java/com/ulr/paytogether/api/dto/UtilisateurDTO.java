@@ -32,6 +32,8 @@ public class UtilisateurDTO {
     @Email(message = "L'email doit être valide")
     private String email;
 
+    private String motDePasse;
+
     private StatutUtilisateur statut;
 
     @NotNull(message = "Le rôle est obligatoire")
