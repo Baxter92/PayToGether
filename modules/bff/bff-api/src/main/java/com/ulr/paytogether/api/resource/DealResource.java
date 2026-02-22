@@ -57,6 +57,7 @@ public class DealResource {
     /**
      * Récupérer tous les deals
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<DealResponseDto>> lireTous() {
         log.debug("Récupération de tous les deals");

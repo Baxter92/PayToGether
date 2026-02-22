@@ -20,10 +20,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CreerUtilisateurDTO {
 
-    @NotBlank(message = "Le nom est obligatoire")
     private String nom;
 
-    @NotBlank(message = "Le prénom est obligatoire")
     private String prenom;
 
     @NotBlank(message = "L'email est obligatoire")

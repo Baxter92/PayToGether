@@ -93,10 +93,6 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
                     // Mettre à jour l'utilisateur dans Keycloak
                     mettreAjourKeycloakUtilisateur(token, utilisateurExistant);
 
-                    // Hacher le mot de passe avec BCrypt si un nouveau mot de passe est fourni
-                    if (utilisateur.getMotDePasse() != null && !utilisateur.getMotDePasse().isEmpty()) {
-                        utilisateurExistant.setMotDePasse(passwordEncoder.encode(utilisateur.getMotDePasse()));
-                    }
                     // Gérer la mise à jour de la photo de profil si nécessaire
                     mettreAJourPhotoProfilSiBesoin(utilisateurExistant, utilisateur);
                     // Sauvegarder et retourner le modèle mis à jour
@@ -113,7 +109,6 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
                 .firstName(sauvegarde.getPrenom())
                 .lastName(sauvegarde.getNom())
                 .username(sauvegarde.getEmail())
-                .email(sauvegarde.getEmail())
                 .build();
         userApiClient.updateUser(token, sauvegarde.getKeycloakId(), userRequest);
     }

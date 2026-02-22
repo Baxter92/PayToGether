@@ -1,9 +1,8 @@
 package com.ulr.paytogether.api.resource;
 
 import com.ulr.paytogether.api.apiadapter.AuthApiAdapter;
-import com.ulr.paytogether.api.dto.LoginDTO;
-import com.ulr.paytogether.api.dto.LoginResponseDTO;
-import com.ulr.paytogether.api.dto.MeResponseDTO;
+import com.ulr.paytogether.api.apiadapter.UtilisateurApiAdapter;
+import com.ulr.paytogether.api.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthResource {
 
     private final AuthApiAdapter apiAdapter;
+    private final UtilisateurApiAdapter utilisateurApiAdapter;
 
     /**
      * Authentifier un utilisateur
@@ -39,6 +39,20 @@ public class AuthResource {
             log.error("Erreur lors de la connexion: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+    }
+
+    /**
+     * Inscription d'un utilisateur
+     */
+    @PostMapping("/register")
+    public ResponseEntity<UtilisateurDTO> register(CreerUtilisateurDTO dto) {
+        log.info("Requête de création de compte ");
+
+        UtilisateurDTO cree = utilisateurApiAdapter.creer(dto);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(cree);
     }
 
     /**

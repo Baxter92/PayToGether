@@ -5,6 +5,7 @@ import com.ulr.paytogether.core.modele.LoginResponseModele;
 import com.ulr.paytogether.core.modele.MeResponseModele;
 import com.ulr.paytogether.core.provider.AuthProvider;
 import com.ulr.paytogether.core.provider.UtilisateurProvider;
+import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
 import com.ulr.paytogether.provider.repository.UtilisateurRepository;
 import com.ulr.paytogether.wsclient.client.apiclient.AuthApiCLient;
 import com.ulr.paytogether.wsclient.client.apiclient.UserApiClient;
@@ -16,6 +17,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Base64;
+import java.util.List;
+import java.util.Optional;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -77,13 +81,13 @@ public class AuthProviderAdapter implements AuthProvider {
             // Extraire l'ID utilisateur du JWT
             String userId = extractUserIdFromToken(token);
 
-            if (!userId.equals(adminUserId) && utilisateurRepository.existsByKeycloakId(userId)) {
+            if (!userId.equals(adminUserId) && !utilisateurRepository.existsByKeycloakId(userId)) {
                 log.warn("Tentative d'authentification pour un utilisateur id qui n'existe pas: {}", userId);
                 throw new RuntimeException("Utilisateur non trouvé. Vérifiez vos identifiants.");
             }
-            String username = utilisateurRepository.findByKeycloakId(userId)
-                    .map(utilisateur -> utilisateur.getEmail())
-                    .orElse(null);
+            Optional<UtilisateurJpa> utilisateurJpaOptional = utilisateurRepository.findByKeycloakId(userId);
+            String username = utilisateurJpaOptional.map(UtilisateurJpa::getEmail).orElse(null);
+            List<String> roles = utilisateurJpaOptional.map(u-> u.getRole().name()).stream().toList();
             if (userId.equals(adminUserId)) {
                 log.info("Authentification de l'administrateur super admin: {}", adminUtilisateur);
                 username = adminUtilisateur;
@@ -100,7 +104,7 @@ public class AuthProviderAdapter implements AuthProvider {
                     .actif(userResponse.isEnabled())
                     .emailVerifie(userResponse.isEmailVerified())
                     .dateCreationTimestamp(userResponse.getCreatedTimestamp())
-                    .roles(userResponse.getRoles())
+                    .roles(roles)
                     .build();
         } catch (RuntimeException e) {
             log.error("Erreur lors de la récupération des informations utilisateur: {}", e.getMessage());
@@ -114,7 +118,7 @@ public class AuthProviderAdapter implements AuthProvider {
 
         try {
             String userId = extractUserIdFromToken(token);
-            if (!userId.equals(adminUserId) && utilisateurRepository.existsByKeycloakId(userId)) {
+            if (!userId.equals(adminUserId) && !utilisateurRepository.existsByKeycloakId(userId)) {
                 log.warn("Tentative de déconnexion pour un utilisateur id qui n'existe pas: {}", userId);
                 throw new RuntimeException("Utilisateur non trouvé. Vérifiez vos identifiants.");
             }

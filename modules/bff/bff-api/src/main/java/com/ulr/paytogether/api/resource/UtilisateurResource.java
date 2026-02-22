@@ -31,6 +31,7 @@ public class UtilisateurResource {
     /**
      * Créer un nouvel utilisateur
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<UtilisateurDTO> creer(@Valid @RequestBody CreerUtilisateurDTO dto) {
         log.info("Création d'un utilisateur avec l'email: {}", dto.getEmail());

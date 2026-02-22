@@ -59,8 +59,10 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorize -> authorize
                         // Endpoints publics
                         .requestMatchers("/api/public/**", "/api/auth/login").permitAll()
+                        .requestMatchers("/api/public/**", "/api/auth/register").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/utilisateurs").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/deals/statut/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/deals/villes").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         // Tous les autres endpoints nécessitent une authentification
                         .anyRequest().authenticated()
@@ -75,6 +77,9 @@ public class SecurityConfiguration {
                             // Ne pas retourner 401 pour les endpoints publics
                             if (path.startsWith("/api/public/") ||
                                 path.startsWith("/api/auth/login") ||
+                                path.startsWith("/api/auth/register") ||
+                                path.startsWith("/api/deals/statut") ||
+                                path.startsWith("/api/deals/villes") ||
                                 path.startsWith("/actuator/") ||
                                 path.startsWith("/swagger-ui/") ||
                                 path.startsWith("/v3/api-docs/") ||
@@ -92,6 +97,9 @@ public class SecurityConfiguration {
                             // Ne pas extraire le token pour les endpoints publics
                             if (path.startsWith("/api/public/") ||
                                 path.startsWith("/api/auth/login") ||
+                                path.startsWith("/api/auth/register") ||
+                                    path.startsWith("/api/deals/statut") ||
+                                    path.startsWith("/api/deals/villes") ||
                                 path.startsWith("/actuator/") ||
                                 path.startsWith("/swagger-ui/") ||
                                 path.startsWith("/v3/api-docs/") ||
