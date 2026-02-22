@@ -17,6 +17,10 @@ spec:
     spec:
       containers:
         - name: bff
-          image: docker.io/14152021/dealtogether:bff-v1.0.4
+          image: docker.io/14152021/dealtogether:bff-v1.0.5
           ports:
             - containerPort: 8080
+          env:
+            # Configuration API Auth (service connect)
+            - name: API_AUTH_URL
+              value: "http://connect-service:8092"
