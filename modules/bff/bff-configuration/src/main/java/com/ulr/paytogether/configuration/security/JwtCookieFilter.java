@@ -49,7 +49,13 @@ public class JwtCookieFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
+        String method = request.getMethod();
         // Ne pas filtrer les endpoints publics
-        return path.startsWith("/api/public/") || path.startsWith("/api/auth/login");
+        return path.startsWith("/api/public/") ||
+               path.startsWith("/api/auth/login") ||
+               path.startsWith("/actuator/") ||
+               path.startsWith("/swagger-ui/") ||
+               path.startsWith("/v3/api-docs/") ||
+               (path.equals("/api/utilisateurs") && "POST".equals(method));
     }
 }

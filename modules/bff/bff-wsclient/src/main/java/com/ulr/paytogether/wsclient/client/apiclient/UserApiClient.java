@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,43 +23,70 @@ public class UserApiClient {
 
     public List<UserResponse> getAllUsers(String token) {
         try {
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Authentication", "Bearer " + token);
-            return (List<UserResponse>) userKeycloackService.get(authApiUrl+"/api/users", headers);
+            Map<String, Object> response = (Map<String, Object>) userKeycloackService.getWithAuth(authApiUrl+"/api/users", token);
+            if (response.containsKey("data")) {
+                List<Map<String, Object>> responseDatas =  (List<Map<String, Object>>) response.get("data");
+                return responseDatas.stream().map(data -> UserResponse.builder()
+                        .id((String) data.get("id"))
+                        .username((String) data.get("username"))
+                        .email((String) data.get("email"))
+                        .enabled((Boolean) data.get("enabled"))
+                        .firstName((String) data.get("firstName"))
+                        .lastName((String) data.get("lastName"))
+                        .build()).toList();
+            }
         } catch (Exception e) {
             log.error("Erreur lors de la récupération des utilisateurs : {}", e.getMessage());
             throw new RuntimeException("Impossible de récupérer les utilisateurs", e);
         }
+        return Collections.emptyList();
     }
 
     public UserResponse getUser(String token, String userId) {
         try {
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Authentication", "Bearer " + token);
-            return (UserResponse) userKeycloackService.get(authApiUrl+"/api/users/"+userId, headers);
+            Map<String, Object> response = (Map<String, Object>) userKeycloackService.getWithAuth(authApiUrl+"/api/users/"+userId, token);
+            if (response.containsKey("data")) {
+                Map<String, Object> data =  (Map<String, Object>) response.get("data");
+                return UserResponse.builder()
+                        .id((String) data.get("id"))
+                        .username((String) data.get("username"))
+                        .email((String) data.get("email"))
+                        .firstName((String) data.get("firstName"))
+                        .lastName((String) data.get("lastName"))
+                        .enabled((Boolean) data.get("enabled"))
+                        .build();
+            }
         } catch (Exception e) {
             log.error("Erreur lors de la récupération de l'utilisateur : {}", e.getMessage());
             throw new RuntimeException("Impossible de récupérer l'utilisateur", e);
         }
+        return UserResponse.builder().build();
     }
 
     public UserResponse createUser(String token, UserRequest user) {
         try {
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Authentication", "Bearer " + token);
-
-            return (UserResponse) userKeycloackService.post(authApiUrl+"/api/users", user, headers);
+            Map<String, Object> response = (Map<String, Object>) userKeycloackService.postWithAuth(authApiUrl+"/api/users", user, token);
+             if (response.containsKey("data")) {
+                Map<String, Object> data =  (Map<String, Object>) response.get("data");
+                return UserResponse.builder()
+                        .id((String) data.get("id"))
+                        .username((String) data.get("username"))
+                        .email((String) data.get("email"))
+                        .firstName((String) data.get("firstName"))
+                        .lastName((String) data.get("lastName"))
+                        .enabled((Boolean) data.get("enabled"))
+                        .build();
+            }
         } catch (Exception e) {
             log.error("Erreur lors de la création de l'utilisateur : {}", e.getMessage());
             throw new RuntimeException("Impossible de créer l'utilisateur", e);
         }
+        return UserResponse.builder().build();
     }
 
     public void assignRoleToUser(String token, String userId, String roleName) {
         try {
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Authentication", "Bearer " + token);
-            userKeycloackService.post(authApiUrl+"/api/users/"+userId+"/roles/"+roleName, null, headers);
+            userKeycloackService.postVoidWithAuth(authApiUrl+"/api/users/"+userId+"/roles/"+roleName, null, token);
         } catch (Exception e) {
             log.error("Erreur lors de l'assignation du rôle à l'utilisateur : {}", e.getMessage());
             throw new RuntimeException("Impossible d'assigner le rôle à l'utilisateur", e);
@@ -67,25 +95,32 @@ public class UserApiClient {
 
     public UserResponse updateUser(String token, String userId, UserRequest user) {
         try {
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Authentication", "Bearer " + token);
-            return (UserResponse) userKeycloackService.put(authApiUrl+"/api/users/"+userId, user, headers);
+            Map<String, Object> response = (Map<String, Object>) userKeycloackService.putWithAuth(authApiUrl+"/api/users/"+userId, user, token);
+             if (response.containsKey("data")) {
+                Map<String, Object> data =  (Map<String, Object>) response.get("data");
+                return UserResponse.builder()
+                        .id((String) data.get("id"))
+                        .username((String) data.get("username"))
+                        .email((String) data.get("email"))
+                        .firstName((String) data.get("firstName"))
+                        .lastName((String) data.get("lastName"))
+                        .enabled((Boolean) data.get("enabled"))
+                        .build();
+            }
         } catch (Exception e) {
             log.error("Erreur lors de la mise à jour de l'utilisateur : {}", e.getMessage());
             throw new RuntimeException("Impossible de mettre à jour l'utilisateur", e);
         }
+        return UserResponse.builder().build();
     }
 
     public void resetPassword(String token, String userId, String newPassword) {
         try {
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Authentication", "Bearer " + token);
-
             Map<String, Object> passwordRequest = new HashMap<>();
             passwordRequest.put("password", newPassword);
             passwordRequest.put("temporary", false);
 
-            userKeycloackService.put(authApiUrl+"/api/users/"+userId+"/reset-password", passwordRequest, headers);
+            userKeycloackService.putVoidWithAuth(authApiUrl+"/api/users/"+userId+"/reset-password", passwordRequest, token);
         } catch (Exception e) {
             log.error("Erreur lors de la réinitialisation du mot de passe : {}", e.getMessage());
             throw new RuntimeException("Impossible de réinitialiser le mot de passe", e);
@@ -94,10 +129,8 @@ public class UserApiClient {
 
     public void enableUser(String token, String userId, boolean enabled) {
         try {
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Authentication", "Bearer " + token);
             var enableEndpoint = enabled ? "/enable" : "/disable";
-            userKeycloackService.put(authApiUrl+"/api/users/"+userId+enableEndpoint, null, headers);
+            userKeycloackService.putVoidWithAuth(authApiUrl+"/api/users/"+userId+enableEndpoint, null, token);
         } catch (Exception e) {
             log.error("Erreur lors de l'activation/désactivation de l'utilisateur : {}", e.getMessage());
             throw new RuntimeException("Impossible de modifier l'état de l'utilisateur", e);
@@ -106,9 +139,7 @@ public class UserApiClient {
 
     public void deleteUser(String token, String userId) {
         try {
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Authentication", "Bearer " + token);
-            userKeycloackService.delete(authApiUrl+"/api/users/"+userId, headers);
+            userKeycloackService.deleteVoidWithAuth(authApiUrl+"/api/users/"+userId, token);
         } catch (Exception e) {
             log.error("Erreur lors de la suppression de l'utilisateur : {}", e.getMessage());
             throw new RuntimeException("Impossible de supprimer l'utilisateur", e);

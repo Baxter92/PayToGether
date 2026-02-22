@@ -13,8 +13,7 @@ Authorization: Bearer {{access_token}}
   "email": "jean.dupont@example.com",
   "motDePasse": "MotDePasse123!",
   "statut": "ACTIF",
-  "role": "VENDEUR",
-  "photoProfil": "photo_profil.jpg"
+  "role": "VENDEUR"
 }
 
 ### 2. Récupérer tous les utilisateurs (GET)

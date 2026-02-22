@@ -17,6 +17,7 @@ import java.util.UUID;
 /**
  * Contrôleur REST pour les publicités
  */
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/publicites")
 @RequiredArgsConstructor

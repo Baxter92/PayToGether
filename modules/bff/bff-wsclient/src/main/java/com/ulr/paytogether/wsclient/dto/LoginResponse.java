@@ -1,15 +1,13 @@
 package com.ulr.paytogether.wsclient.dto;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * DTO pour la réponse de login
  */
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
 public class LoginResponse {
     
     private String accessToken;

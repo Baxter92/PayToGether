@@ -1,8 +1,7 @@
 package com.ulr.paytogether.wsclient.dto;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -10,8 +9,7 @@ import java.util.List;
  * DTO pour la réponse utilisateur
  */
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
 public class UserResponse {
     
     private String id;

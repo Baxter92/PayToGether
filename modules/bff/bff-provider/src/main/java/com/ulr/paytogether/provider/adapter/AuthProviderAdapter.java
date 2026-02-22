@@ -33,15 +33,25 @@ public class AuthProviderAdapter implements AuthProvider {
     private final UtilisateurRepository utilisateurRepository;
     @Value("${api.auth.admin.user}")
     private String adminUtilisateur;
+    @Value("${api.auth.admin.user-id}")
+    private String adminUserId;
 
     @Override
     public LoginResponseModele login(LoginModele login) {
         log.info("Appel à Keycloak pour authentifier l'utilisateur: {}", login.getUsername());
-        if (!login.getUsername().equals(adminUtilisateur + "@hanacalgary.ca") && utilisateurRepository.existsByEmail(login.getUsername())) {
-            log.warn("Tentative d'authentification pour un utilisateur qui n'existe pas: {}", login.getUsername());
-            throw new RuntimeException("Utilisateur non trouvé. Vérifiez vos identifiants.");
+       String nomUtilisateur = login.getUsername();
+        String superAdmin = adminUtilisateur + "@hanacalgary.ca";
+        boolean estSuperAdmin = superAdmin.equals(nomUtilisateur);
+
+        if (estSuperAdmin) {
+            login.setUsername(adminUtilisateur);
         }
 
+        boolean utilisateurExiste = utilisateurRepository.existsByEmail(nomUtilisateur);
+        if (!estSuperAdmin && !utilisateurExiste) {
+            log.warn("Tentative d'authentification pour un utilisateur qui n'existe pas: {}", nomUtilisateur);
+            throw new RuntimeException("Le utilisateur n'existe pas");
+        }
         try {
             LoginResponse response = authApiClient.getToken(login.getUsername(), login.getPassword());
 
@@ -66,12 +76,20 @@ public class AuthProviderAdapter implements AuthProvider {
         try {
             // Extraire l'ID utilisateur du JWT
             String userId = extractUserIdFromToken(token);
-            if (utilisateurRepository.existsByKeycloakId(userId)) {
+
+            if (!userId.equals(adminUserId) && utilisateurRepository.existsByKeycloakId(userId)) {
                 log.warn("Tentative d'authentification pour un utilisateur id qui n'existe pas: {}", userId);
                 throw new RuntimeException("Utilisateur non trouvé. Vérifiez vos identifiants.");
             }
+            String username = utilisateurRepository.findByKeycloakId(userId)
+                    .map(utilisateur -> utilisateur.getEmail())
+                    .orElse(null);
+            if (userId.equals(adminUserId)) {
+                log.info("Authentification de l'administrateur super admin: {}", adminUtilisateur);
+                username = adminUtilisateur;
+            }
             // Récupérer les détails de l'utilisateur depuis Keycloak
-            UserResponse userResponse = userApiClient.getUser(token, userId);
+            UserResponse userResponse = userApiClient.getUser(token, username);
 
             return MeResponseModele.builder()
                     .id(userResponse.getId())
@@ -96,7 +114,7 @@ public class AuthProviderAdapter implements AuthProvider {
 
         try {
             String userId = extractUserIdFromToken(token);
-            if (utilisateurRepository.existsByKeycloakId(userId)) {
+            if (!userId.equals(adminUserId) && utilisateurRepository.existsByKeycloakId(userId)) {
                 log.warn("Tentative de déconnexion pour un utilisateur id qui n'existe pas: {}", userId);
                 throw new RuntimeException("Utilisateur non trouvé. Vérifiez vos identifiants.");
             }
