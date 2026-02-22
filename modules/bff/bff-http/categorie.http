@@ -1,7 +1,11 @@
+### Variables
+# Le token doit être défini après un login réussi
+@access_token = {{access_token}}
 
 ### 1. Créer une catégorie (POST)
 POST {{base_url}}/api/categories
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 {
   "nom": "POISSON",
@@ -12,6 +16,7 @@ Content-Type: application/json
 ### 2. Créer une autre catégorie (POST)
 POST {{base_url}}/api/categories
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 {
   "nom": "VIANDE",
@@ -22,26 +27,32 @@ Content-Type: application/json
 ### 3. Récupérer toutes les catégories (GET)
 GET {{base_url}}/api/categories
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 4. Récupérer une catégorie par UUID (GET)
 GET {{base_url}}/api/categories/123e4567-e89b-12d3-a456-426614174000
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 5. Récupérer une catégorie par nom (GET)
 GET {{base_url}}/api/categories/nom/POISSON
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 6. Vérifier si une catégorie existe par son nom (GET)
 GET {{base_url}}/api/categories/existe/POISSON
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 7. Vérifier si une catégorie inexistante existe (GET)
 GET {{base_url}}/api/categories/existe/FRUITS
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 8. Mettre à jour une catégorie (PUT)
 PUT {{base_url}}/api/categories/123e4567-e89b-12d3-a456-426614174000
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 {
   "nom": "POISSON_FRAIS",
@@ -52,10 +63,12 @@ Content-Type: application/json
 ### 9. Supprimer une catégorie (DELETE)
 DELETE {{base_url}}/api/categories/123e4567-e89b-12d3-a456-426614174000
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 10. Tester validation - Nom manquant (POST)
 POST {{base_url}}/api/categories
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 {
   "description": "Description sans nom",
@@ -65,6 +78,7 @@ Content-Type: application/json
 ### 11. Tester validation - Nom trop long (POST)
 POST {{base_url}}/api/categories
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 {
   "nom": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",

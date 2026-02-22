@@ -261,7 +261,7 @@ class UtilisateurResourceTest {
                 .role(RoleUtilisateur.UTILISATEUR)
                 .build();
 
-        when(apiAdapter.mettreAJour(eq(uuidUtilisateur), any(UtilisateurDTO.class)))
+        when(apiAdapter.mettreAJour(eq(uuidUtilisateur), any(UtilisateurDTO.class), anyString()))
                 .thenReturn(utilisateurMisAJour);
 
         // When & Then
@@ -271,14 +271,14 @@ class UtilisateurResourceTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.prenom").value("Jean-Claude"));
 
-        verify(apiAdapter, times(1)).mettreAJour(eq(uuidUtilisateur), any(UtilisateurDTO.class));
+        verify(apiAdapter, times(1)).mettreAJour(eq(uuidUtilisateur), any(UtilisateurDTO.class), anyString());
     }
 
     @Test
     void testMettreAJour_DevraitRetourner404SiUtilisateurNonTrouve() throws Exception {
         // Given
         UUID uuidInexistant = UUID.randomUUID();
-        when(apiAdapter.mettreAJour(eq(uuidInexistant), any(UtilisateurDTO.class)))
+        when(apiAdapter.mettreAJour(eq(uuidInexistant), any(UtilisateurDTO.class), anyString()))
                 .thenThrow(new RuntimeException("Utilisateur non trouvé"));
 
         // When & Then
@@ -287,7 +287,7 @@ class UtilisateurResourceTest {
                         .content(objectMapper.writeValueAsString(utilisateurDTO)))
                 .andExpect(status().isNotFound());
 
-        verify(apiAdapter, times(1)).mettreAJour(eq(uuidInexistant), any(UtilisateurDTO.class));
+        verify(apiAdapter, times(1)).mettreAJour(eq(uuidInexistant), any(UtilisateurDTO.class), anyString());
     }
 
     // ==================== Tests pour DELETE /api/utilisateurs/{uuid} ====================
@@ -431,7 +431,7 @@ class UtilisateurResourceTest {
     @Test
     void testMettreAJour_DevraitRetournerConflitSiConcurrence() throws Exception {
         // Given
-        when(apiAdapter.mettreAJour(eq(uuidUtilisateur), any(UtilisateurDTO.class)))
+        when(apiAdapter.mettreAJour(eq(uuidUtilisateur), any(UtilisateurDTO.class), anyString()))
                 .thenThrow(new RuntimeException("Conflit de version"));
 
         // When & Then
@@ -439,5 +439,196 @@ class UtilisateurResourceTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(utilisateurDTO)))
                 .andExpect(status().is5xxServerError());
+    }
+
+    // ==================== Tests pour les nouvelles fonctionnalités ====================
+
+    @Test
+    void testReinitialiserMotDePasse_DevraitReinitialiserMotDePasse() throws Exception {
+        // Given
+        String nouveauMotDePasse = "nouveauMotDePasse123";
+        String requestBody = String.format("{\"nouveauMotDePasse\":\"%s\"}", nouveauMotDePasse);
+
+        doNothing().when(apiAdapter).reinitialiserMotDePasse(eq(uuidUtilisateur), eq(nouveauMotDePasse), anyString());
+
+        // When & Then
+        mockMvc.perform(patch("/api/utilisateurs/{uuid}/reset-password", uuidUtilisateur)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk());
+
+        verify(apiAdapter, times(1)).reinitialiserMotDePasse(eq(uuidUtilisateur), eq(nouveauMotDePasse), anyString());
+    }
+
+    @Test
+    void testReinitialiserMotDePasse_DevraitRetournerBadRequestSiMotDePasseVide() throws Exception {
+        // Given
+        String requestBody = "{\"nouveauMotDePasse\":\"\"}";
+
+        // When & Then
+        mockMvc.perform(patch("/api/utilisateurs/{uuid}/reset-password", uuidUtilisateur)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest());
+
+        verify(apiAdapter, never()).reinitialiserMotDePasse(any(), anyString(), anyString());
+    }
+
+    @Test
+    void testReinitialiserMotDePasse_DevraitRetournerBadRequestSiMotDePasseTropCourt() throws Exception {
+        // Given
+        String requestBody = "{\"nouveauMotDePasse\":\"court\"}";
+
+        // When & Then
+        mockMvc.perform(patch("/api/utilisateurs/{uuid}/reset-password", uuidUtilisateur)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest());
+
+        verify(apiAdapter, never()).reinitialiserMotDePasse(any(), anyString(), anyString());
+    }
+
+    @Test
+    void testReinitialiserMotDePasse_DevraitRetournerBadRequestSiUtilisateurNonTrouve() throws Exception {
+        // Given
+        String nouveauMotDePasse = "nouveauMotDePasse123";
+        String requestBody = String.format("{\"nouveauMotDePasse\":\"%s\"}", nouveauMotDePasse);
+
+        doThrow(new IllegalArgumentException("Utilisateur non trouvé"))
+                .when(apiAdapter).reinitialiserMotDePasse(eq(uuidUtilisateur), eq(nouveauMotDePasse), anyString());
+
+        // When & Then
+        mockMvc.perform(patch("/api/utilisateurs/{uuid}/reset-password", uuidUtilisateur)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest());
+
+        verify(apiAdapter, times(1)).reinitialiserMotDePasse(eq(uuidUtilisateur), eq(nouveauMotDePasse), anyString());
+    }
+
+    @Test
+    void testActiverUtilisateur_DevraitActiverUtilisateur() throws Exception {
+        // Given
+        String requestBody = "{\"actif\":true}";
+
+        doNothing().when(apiAdapter).activerUtilisateur(eq(uuidUtilisateur), eq(true), anyString());
+
+        // When & Then
+        mockMvc.perform(patch("/api/utilisateurs/{uuid}/enable", uuidUtilisateur)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk());
+
+        verify(apiAdapter, times(1)).activerUtilisateur(eq(uuidUtilisateur), eq(true), anyString());
+    }
+
+    @Test
+    void testActiverUtilisateur_DevraitDesactiverUtilisateur() throws Exception {
+        // Given
+        String requestBody = "{\"actif\":false}";
+
+        doNothing().when(apiAdapter).activerUtilisateur(eq(uuidUtilisateur), eq(false), anyString());
+
+        // When & Then
+        mockMvc.perform(patch("/api/utilisateurs/{uuid}/enable", uuidUtilisateur)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk());
+
+        verify(apiAdapter, times(1)).activerUtilisateur(eq(uuidUtilisateur), eq(false), anyString());
+    }
+
+    @Test
+    void testActiverUtilisateur_DevraitRetournerNotFoundSiUtilisateurNonTrouve() throws Exception {
+        // Given
+        String requestBody = "{\"actif\":true}";
+
+        doThrow(new IllegalArgumentException("Utilisateur non trouvé"))
+                .when(apiAdapter).activerUtilisateur(eq(uuidUtilisateur), eq(true), anyString());
+
+        // When & Then
+        mockMvc.perform(patch("/api/utilisateurs/{uuid}/enable", uuidUtilisateur)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isNotFound());
+
+        verify(apiAdapter, times(1)).activerUtilisateur(eq(uuidUtilisateur), eq(true), anyString());
+    }
+
+    @Test
+    void testActiverUtilisateur_DevraitRetournerBadRequestSiActifManquant() throws Exception {
+        // Given
+        String requestBody = "{}";
+
+        // When & Then
+        mockMvc.perform(patch("/api/utilisateurs/{uuid}/enable", uuidUtilisateur)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest());
+
+        verify(apiAdapter, never()).activerUtilisateur(any(), anyBoolean(), anyString());
+    }
+
+    @Test
+    void testAssignerRole_DevraitAssignerRole() throws Exception {
+        // Given
+        String nomRole = "VENDEUR";
+        String requestBody = String.format("{\"nomRole\":\"%s\"}", nomRole);
+
+        doNothing().when(apiAdapter).assignerRole(eq(uuidUtilisateur), eq(nomRole), anyString());
+
+        // When & Then
+        mockMvc.perform(patch("/api/utilisateurs/{uuid}/assign-role", uuidUtilisateur)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk());
+
+        verify(apiAdapter, times(1)).assignerRole(eq(uuidUtilisateur), eq(nomRole), anyString());
+    }
+
+    @Test
+    void testAssignerRole_DevraitRetournerBadRequestSiRoleVide() throws Exception {
+        // Given
+        String requestBody = "{\"nomRole\":\"\"}";
+
+        // When & Then
+        mockMvc.perform(patch("/api/utilisateurs/{uuid}/assign-role", uuidUtilisateur)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest());
+
+        verify(apiAdapter, never()).assignerRole(any(), anyString(), anyString());
+    }
+
+    @Test
+    void testAssignerRole_DevraitRetournerBadRequestSiUtilisateurNonTrouve() throws Exception {
+        // Given
+        String nomRole = "VENDEUR";
+        String requestBody = String.format("{\"nomRole\":\"%s\"}", nomRole);
+
+        doThrow(new IllegalArgumentException("Utilisateur non trouvé"))
+                .when(apiAdapter).assignerRole(eq(uuidUtilisateur), eq(nomRole), anyString());
+
+        // When & Then
+        mockMvc.perform(patch("/api/utilisateurs/{uuid}/assign-role", uuidUtilisateur)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest());
+
+        verify(apiAdapter, times(1)).assignerRole(eq(uuidUtilisateur), eq(nomRole), anyString());
+    }
+
+    @Test
+    void testAssignerRole_DevraitRetournerBadRequestSiRoleManquant() throws Exception {
+        // Given
+        String requestBody = "{}";
+
+        // When & Then
+        mockMvc.perform(patch("/api/utilisateurs/{uuid}/assign-role", uuidUtilisateur)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest());
+
+        verify(apiAdapter, never()).assignerRole(any(), anyString(), anyString());
     }
 }

@@ -1,7 +1,11 @@
+### Variables
+# Le token doit être défini après un login réussi
+@access_token = {{access_token}}
 
 ### 1. Créer un deal (POST)
 POST {{base_url}}/api/deals
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 {
   "titre": "Mon super deal",
@@ -43,15 +47,18 @@ Content-Type: application/json
 ### 2. Récupérer tous les deals (GET)
 GET {{base_url}}/api/deals
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 3. Récupérer un deal par UUID (GET)
 GET {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 4. Mettre à jour un deal (PUT)
 
 PUT {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 {
   "titre": "Deal mis à jour",
@@ -83,28 +90,34 @@ Content-Type: application/json
 ### 5. Supprimer un deal (DELETE)
 DELETE {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 6. Récupérer deals par statut (GET)
 GET {{base_url}}/api/deals/statut/PUBLIE
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 7. Récupérer deals par créateur (GET)
 GET {{base_url}}/api/deals/createur/123e4567-e89b-12d3-a456-426614174001
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 8. Récupérer deals par catégorie (GET)
 GET {{base_url}}/api/deals/categorie/123e4567-e89b-12d3-a456-426614174000
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 9. Confirmer l'upload d'une image (PATCH)
 ### Endpoint appelé par le frontend après upload réussi vers MinIO
 PATCH {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000/images/456e7890-e89b-12d3-a456-426614174001/confirm
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 10. Confirmer l'upload de plusieurs images (PATCH)
 ### Endpoint appelé par le frontend après upload réussi vers MinIO
 PATCH {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000/images/456e7890-e89b-12d3-a456-426614174001/confirm
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 {
   "imageIds": [
     "456e7890-e89b-12d3-a456-426614174001",
@@ -116,9 +129,11 @@ Content-Type: application/json
 ### Génère une URL présignée pour lire l'image depuis MinIO
 GET {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000/images/456e7890-e89b-12d3-a456-426614174001/url
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 12. Récupérer les villes (GET)
 ### Génère une URL présignée pour lire l'image depuis MinIO
 GET {{base_url}}/api/deals/villes
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 

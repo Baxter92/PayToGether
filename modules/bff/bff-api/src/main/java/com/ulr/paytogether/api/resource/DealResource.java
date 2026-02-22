@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,6 +32,7 @@ public class DealResource {
     /**
      * Créer un nouveau deal
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'VENDEUR')")
     @PostMapping
     public ResponseEntity<DealResponseDto> creer(@RequestBody DealDTO dto) {
         log.info("Création d'un deal: {}", dto.getTitre());
@@ -73,6 +75,7 @@ public class DealResource {
     /**
      * Récupérer les deals d'un créateur
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'VENDEUR')")
     @GetMapping("/createur/{createurUuid}")
     public ResponseEntity<List<DealResponseDto>> lireParCreateur(@PathVariable UUID createurUuid) {
         log.debug("Récupération des deals du créateur: {}", createurUuid);
@@ -92,6 +95,7 @@ public class DealResource {
      * Mettre à jour un deal
      */
     @PutMapping("/{uuid}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VENDEUR')")
     public ResponseEntity<DealResponseDto> mettreAJour(
             @PathVariable UUID uuid,
             @Valid @RequestBody DealDTO dto) {
@@ -102,6 +106,7 @@ public class DealResource {
     /**
      * Supprimer un deal
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'VENDEUR')")
     @DeleteMapping("/{uuid}")
     public ResponseEntity<Void> supprimer(@PathVariable UUID uuid) {
         log.info("Suppression du deal: {}", uuid);

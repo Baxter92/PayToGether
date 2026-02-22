@@ -1,0 +1,300 @@
+# ===============================================
+# Jenkinsfile - Build Docker optimisé pour Java 21
+# ===============================================
+
+pipeline {
+    agent any
+
+    environment {
+        // Configuration Registry
+        REGISTRY = 'registry.dealtogether.ca'
+        IMAGE_NAME = 'bffpaytogether'
+
+        // Credentials Jenkins
+        REGISTRY_CREDENTIALS = credentials('registry-credentials')
+
+        // Docker BuildKit pour builds optimisés
+        DOCKER_BUILDKIT = '1'
+
+        // Version de l'image
+        IMAGE_TAG = "${env.BRANCH_NAME == 'main' ? 'latest' : env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+    }
+
+    options {
+        // Garder seulement les 10 derniers builds
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+
+        // Timeout du pipeline
+        timeout(time: 30, unit: 'MINUTES')
+
+        // Horodatage dans les logs
+        timestamps()
+    }
+
+    stages {
+        stage('📋 Préparation') {
+            steps {
+                echo "🚀 Démarrage du build - ${IMAGE_NAME}:${IMAGE_TAG}"
+                echo "Branche: ${env.BRANCH_NAME}"
+                echo "Commit: ${env.GIT_COMMIT}"
+
+                // Nettoyage de l'espace de travail
+                cleanWs()
+
+                // Checkout du code
+                checkout scm
+            }
+        }
+
+        stage('🔍 Validation') {
+            steps {
+                script {
+                    echo "Vérification du Dockerfile..."
+
+                    // Vérifier que le Dockerfile existe
+                    sh '''
+                        if [ ! -f "modules/bff/Dockerfile" ]; then
+                            echo "❌ Dockerfile introuvable"
+                            exit 1
+                        fi
+                        echo "✅ Dockerfile trouvé"
+                    '''
+
+                    // Vérifier que les fichiers POM existent
+                    sh '''
+                        for pom in pom.xml \
+                            modules/bff/bff-core/pom.xml \
+                            modules/bff/bff-provider/pom.xml \
+                            modules/bff/bff-wsclient/pom.xml \
+                            modules/bff/bff-api/pom.xml \
+                            modules/bff/bff-configuration/pom.xml
+                        do
+                            if [ ! -f "$pom" ]; then
+                                echo "❌ POM manquant: $pom"
+                                exit 1
+                            fi
+                        done
+                        echo "✅ Tous les fichiers POM présents"
+                    '''
+                }
+            }
+        }
+
+        stage('🔨 Build Docker Image') {
+            steps {
+                script {
+                    echo "Construction de l'image Docker avec BuildKit..."
+
+                    sh """
+                        docker build \
+                            --file modules/bff/Dockerfile \
+                            --tag ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} \
+                            --tag ${REGISTRY}/${IMAGE_NAME}:${env.BRANCH_NAME}-latest \
+                            --build-arg BUILD_DATE=\$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+                            --build-arg VCS_REF=\${GIT_COMMIT} \
+                            --progress=plain \
+                            .
+                    """
+
+                    echo "✅ Image construite avec succès"
+                }
+            }
+        }
+
+        stage('🔍 Scan de sécurité') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    echo "Scan de sécurité de l'image..."
+
+                    // Utiliser Trivy pour scanner les vulnérabilités
+                    sh """
+                        docker run --rm \
+                            -v /var/run/docker.sock:/var/run/docker.sock \
+                            aquasec/trivy:latest image \
+                            --severity HIGH,CRITICAL \
+                            --exit-code 0 \
+                            ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+                    """
+
+                    echo "✅ Scan de sécurité terminé"
+                }
+            }
+        }
+
+        stage('📊 Informations Image') {
+            steps {
+                script {
+                    echo "Informations sur l'image construite:"
+
+                    sh """
+                        echo "==================================="
+                        echo "Taille de l'image:"
+                        docker images ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} --format "table {{.Repository}}\\t{{.Tag}}\\t{{.Size}}"
+                        echo ""
+                        echo "Layers (10 premiers):"
+                        docker history ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} --format "table {{.CreatedBy}}\\t{{.Size}}" | head -11
+                        echo "==================================="
+                    """
+                }
+            }
+        }
+
+        stage('🧪 Tests Image') {
+            steps {
+                script {
+                    echo "Test de démarrage de l'image..."
+
+                    // Démarrer un container temporaire
+                    sh """
+                        # Démarrer le container
+                        docker run -d \
+                            --name bff-test-${BUILD_NUMBER} \
+                            -p 8080:8080 \
+                            -e SPRING_PROFILES_ACTIVE=test \
+                            ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+
+                        # Attendre le démarrage (max 120 secondes)
+                        echo "Attente du démarrage de l'application..."
+                        for i in {1..24}; do
+                            if docker exec bff-test-${BUILD_NUMBER} wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health 2>&1 | grep -q '200 OK'; then
+                                echo "✅ Application démarrée avec succès"
+                                exit 0
+                            fi
+                            echo "Tentative \$i/24..."
+                            sleep 5
+                        done
+
+                        echo "❌ L'application n'a pas démarré dans les temps"
+                        docker logs bff-test-${BUILD_NUMBER}
+                        exit 1
+                    """
+                }
+            }
+            post {
+                always {
+                    // Toujours nettoyer le container de test
+                    sh """
+                        docker stop bff-test-${BUILD_NUMBER} || true
+                        docker rm bff-test-${BUILD_NUMBER} || true
+                    """
+                }
+            }
+        }
+
+        stage('📤 Push vers Registry') {
+            when {
+                anyOf {
+                    branch 'main'
+                    branch 'develop'
+                }
+            }
+            steps {
+                script {
+                    echo "Push de l'image vers le registry..."
+
+                    sh """
+                        # Login au registry
+                        echo \${REGISTRY_CREDENTIALS_PSW} | docker login ${REGISTRY} -u \${REGISTRY_CREDENTIALS_USR} --password-stdin
+
+                        # Push de l'image avec les tags
+                        docker push ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push ${REGISTRY}/${IMAGE_NAME}:${env.BRANCH_NAME}-latest
+
+                        # Si branche main, push également le tag 'latest'
+                        if [ "${env.BRANCH_NAME}" = "main" ]; then
+                            docker tag ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY}/${IMAGE_NAME}:latest
+                            docker push ${REGISTRY}/${IMAGE_NAME}:latest
+                        fi
+
+                        # Logout
+                        docker logout ${REGISTRY}
+                    """
+
+                    echo "✅ Image pushée avec succès vers ${REGISTRY}"
+                }
+            }
+        }
+
+        stage('🚀 Déploiement DEV') {
+            when {
+                branch 'develop'
+            }
+            steps {
+                script {
+                    echo "Déploiement en environnement DEV..."
+
+                    sh """
+                        # Mise à jour du déploiement Kubernetes
+                        kubectl set image deployment/bff-deployment \
+                            bff=${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} \
+                            --namespace=paytogether-dev
+
+                        # Attendre le rollout
+                        kubectl rollout status deployment/bff-deployment \
+                            --namespace=paytogether-dev \
+                            --timeout=5m
+                    """
+
+                    echo "✅ Déploiement DEV réussi"
+                }
+            }
+        }
+
+        stage('🚀 Déploiement PROD') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    // Demander confirmation avant déploiement en production
+                    input message: 'Déployer en PRODUCTION ?', ok: 'Déployer'
+
+                    echo "Déploiement en environnement PRODUCTION..."
+
+                    sh """
+                        # Mise à jour du déploiement Kubernetes
+                        kubectl set image deployment/bff-deployment-prod \
+                            bff=${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} \
+                            --namespace=paytogether-prod
+
+                        # Attendre le rollout
+                        kubectl rollout status deployment/bff-deployment-prod \
+                            --namespace=paytogether-prod \
+                            --timeout=5m
+                    """
+
+                    echo "✅ Déploiement PROD réussi"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "🧹 Nettoyage..."
+
+            // Nettoyer les images locales pour libérer de l'espace
+            sh """
+                docker image prune -f --filter "label=description=BFF PayToGether - Java 21" || true
+            """
+        }
+
+        success {
+            echo "✅ Pipeline terminé avec succès !"
+
+            // Notifications (Slack, email, etc.)
+            // slackSend color: 'good', message: "Build réussi: ${IMAGE_NAME}:${IMAGE_TAG}"
+        }
+
+        failure {
+            echo "❌ Pipeline échoué"
+
+            // Notifications en cas d'échec
+            // slackSend color: 'danger', message: "Build échoué: ${IMAGE_NAME}:${IMAGE_TAG}"
+        }
+    }
+}
+

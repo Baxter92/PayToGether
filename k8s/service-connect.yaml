@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: connect-service
+  namespace: paytogether
+  labels:
+    app: connect
+spec:
+  type: ClusterIP
+  selector:
+    app: connect
+  ports:
+    - protocol: TCP
+      port: 8092
+      targetPort: 8080

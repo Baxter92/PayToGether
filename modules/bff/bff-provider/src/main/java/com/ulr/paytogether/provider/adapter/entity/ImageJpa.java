@@ -32,6 +32,7 @@ public class ImageJpa {
     private String urlImage;
 
     @Builder.Default
+    @Enumerated(EnumType.STRING)
     private StatutImage statut = StatutImage.PENDING;
 
     @ManyToOne

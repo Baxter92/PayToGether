@@ -1,14 +1,15 @@
 package com.ulr.paytogether.api.resource;
 
 import com.ulr.paytogether.api.apiadapter.UtilisateurApiAdapter;
-import com.ulr.paytogether.api.dto.CreerUtilisateurDTO;
-import com.ulr.paytogether.api.dto.UtilisateurDTO;
+import com.ulr.paytogether.api.dto.*;
 import com.ulr.paytogether.core.enumeration.StatutImage;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -68,6 +69,7 @@ public class UtilisateurResource {
     /**
      * Récupérer tous les utilisateurs
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<UtilisateurDTO>> lireTous() {
         log.debug("Récupération de tous les utilisateurs");
@@ -83,11 +85,12 @@ public class UtilisateurResource {
     @PutMapping("/{uuid}")
     public ResponseEntity<UtilisateurDTO> mettreAJour(
             @PathVariable UUID uuid,
-            @Valid @RequestBody UtilisateurDTO dto) {
+            @Valid @RequestBody UtilisateurDTO dto, JwtAuthenticationToken token) {
         log.info("Mise à jour de l'utilisateur: {}", uuid);
 
         try {
-            UtilisateurDTO mis_a_jour = apiAdapter.mettreAJour(uuid, dto);
+            var tokenValue = token.getToken().getTokenValue();
+            UtilisateurDTO mis_a_jour = apiAdapter.mettreAJour(uuid, dto, tokenValue);
             return ResponseEntity.ok(mis_a_jour);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
@@ -150,6 +153,68 @@ public class UtilisateurResource {
         } catch (IllegalArgumentException e) {
             log.error("Erreur lors de la récupération de l'URL de lecture: {}", e.getMessage());
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Réinitialiser le mot de passe d'un utilisateur
+     */
+    @PatchMapping("/{uuid}/reset-password")
+    public ResponseEntity<Void> reinitialiserMotDePasse(
+            @PathVariable UUID uuid,
+            @Valid @RequestBody ReinitialiserMotDePasseDTO dto,
+            JwtAuthenticationToken token) {
+        log.info("Réinitialisation du mot de passe pour l'utilisateur: {}", uuid);
+
+        try {
+            var tokenValue = token.getToken().getTokenValue();
+            apiAdapter.reinitialiserMotDePasse(uuid, dto.getNouveauMotDePasse(), tokenValue);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            log.error("Erreur lors de la réinitialisation du mot de passe: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * Activer/Désactiver un utilisateur
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{uuid}/enable")
+    public ResponseEntity<Void> activerUtilisateur(
+            @PathVariable UUID uuid,
+            @Valid @RequestBody ActiverUtilisateurDTO dto,
+            JwtAuthenticationToken token) {
+        log.info("Activation/Désactivation de l'utilisateur: {} - actif: {}", uuid, dto.getActif());
+
+        try {
+            var tokenValue = token.getToken().getTokenValue();
+            apiAdapter.activerUtilisateur(uuid, dto.getActif(), tokenValue);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            log.error("Erreur lors de l'activation/désactivation: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * Assigner un rôle à un utilisateur
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{uuid}/assign-role")
+    public ResponseEntity<Void> assignerRole(
+            @PathVariable UUID uuid,
+            @Valid @RequestBody AssignerRoleDTO dto,
+            JwtAuthenticationToken token) {
+        log.info("Assignation du rôle {} à l'utilisateur: {}", dto.getNomRole(), uuid);
+
+        try {
+            var tokenValue = token.getToken().getTokenValue();
+            apiAdapter.assignerRole(uuid, dto.getNomRole(), tokenValue);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            log.error("Erreur lors de l'assignation du rôle: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
         }
     }
 }

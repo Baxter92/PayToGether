@@ -17,7 +17,7 @@
 
     <properties>
         <node.version>v20.17.0</node.version>
-        <npm.version>10.8.1</npm.version>
+        <pnpm.version>9.15.6</pnpm.version>
         <frontend.working.directory>${project.basedir}</frontend.working.directory>
     </properties>
 
@@ -33,23 +33,23 @@
                     <workingDirectory>${frontend.working.directory}</workingDirectory>
                 </configuration>
                 <executions>
-                    <!-- Installation de Node et NPM -->
+                    <!-- Installation de Node et PNPM -->
                     <execution>
-                        <id>install-node-and-npm</id>
+                        <id>install-node-and-pnpm</id>
                         <goals>
-                            <goal>install-node-and-npm</goal>
+                            <goal>install-node-and-pnpm</goal>
                         </goals>
                         <configuration>
                             <nodeVersion>${node.version}</nodeVersion>
-                            <npmVersion>${npm.version}</npmVersion>
+                            <pnpmVersion>${pnpm.version}</pnpmVersion>
                         </configuration>
                     </execution>
 
                     <!-- Installation des dépendances -->
                     <execution>
-                        <id>npm-install</id>
+                        <id>pnpm-install</id>
                         <goals>
-                            <goal>npm</goal>
+                            <goal>pnpm</goal>
                         </goals>
                         <configuration>
                             <arguments>install</arguments>
@@ -58,9 +58,9 @@
 
                     <!-- Build du front -->
                     <execution>
-                        <id>npm-build</id>
+                        <id>pnpm-build</id>
                         <goals>
-                            <goal>npm</goal>
+                            <goal>pnpm</goal>
                         </goals>
                         <phase>package</phase>
                         <configuration>

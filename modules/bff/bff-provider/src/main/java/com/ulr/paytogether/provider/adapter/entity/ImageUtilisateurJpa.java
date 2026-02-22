@@ -34,6 +34,7 @@ public class ImageUtilisateurJpa {
     private UtilisateurJpa utilisateurJpa;
 
     @Builder.Default
+    @Enumerated(EnumType.STRING)
     private StatutImage statut = StatutImage.PENDING;
 
     @CreationTimestamp

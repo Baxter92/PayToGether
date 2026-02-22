@@ -1,6 +1,11 @@
+### Variables
+# Le token doit être défini après un login réussi
+@access_token = {{access_token}}
+
 ### 1. Créer une publicité (POST)
 POST {{base_url}}/api/publicites
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 {
   "titre": "New slide",
@@ -21,18 +26,22 @@ Content-Type: application/json
 ### 2. Récupérer toutes les publicités (GET)
 GET {{base_url}}/api/publicites
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 3. Récupérer une publicité par UUID (GET)
 GET {{base_url}}/api/publicites/123e4567-e89b-12d3-a456-426614174000
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 4. Récupérer les publicités actives (GET)
 GET {{base_url}}/api/publicites/actives
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 5. Mettre à jour une publicité (PUT)
 PUT {{base_url}}/api/publicites/123e4567-e89b-12d3-a456-426614174000
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 {
   "titre": "Promotion Mise à Jour",
@@ -53,14 +62,17 @@ Content-Type: application/json
 ### 6. Supprimer une publicité (DELETE)
 DELETE {{base_url}}/api/publicites/123e4567-e89b-12d3-a456-426614174000
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 7. Confirmer l'upload d'une image de publicité (PATCH)
 ### Endpoint appelé par le frontend après upload réussi vers MinIO
 PATCH {{base_url}}/api/publicites/123e4567-e89b-12d3-a456-426614174000/images/456e7890-e89b-12d3-a456-426614174001/confirm
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 ### 8. Obtenir l'URL de lecture d'une image de publicité (GET)
 ### Génère une URL présignée pour lire l'image depuis MinIO
 GET {{base_url}}/api/publicites/123e4567-e89b-12d3-a456-426614174000/images/456e7890-e89b-12d3-a456-426614174001/url
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 

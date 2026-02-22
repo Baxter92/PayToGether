@@ -3,11 +3,75 @@
 > **✅ Build Status : FONCTIONNEL** (mis à jour le 3 février 2026)  
 > Les problèmes de build Maven ont été résolus. Voir [`README_BUILD_FIX.md`](README_BUILD_FIX.md) pour les détails.
 
+> **🔄 Gestion de base de données : LIQUIBASE INTÉGRÉ** (19 février 2026)  
+> Le schéma de base de données est maintenant géré avec Liquibase. Voir [`LIQUIBASE_INTEGRATION.md`](LIQUIBASE_INTEGRATION.md) pour les détails.
+
+> **🐳 Docker Java 21 : OPTIMISÉ** (21 février 2026)  
+> Dockerfile migré vers Java 21 avec optimisations multi-stage, images Alpine et JVM optimisée. Voir [`RECAPITULATIF_DOCKER_JAVA21.md`](RECAPITULATIF_DOCKER_JAVA21.md) pour les détails.
+
 ---
 
-Documentation rapide pour build, tag et push des images sur Docker Hub et pour activer le registry local (kubernetes).
+## 🚀 Quick Start
+
+### Développement local avec Docker
+
+```bash
+# Démarrer la stack complète (BFF + PostgreSQL + MinIO)
+docker-compose up -d
+
+# Vérifier le statut
+curl http://localhost:8080/actuator/health
+```
+
+**👉 Guide complet** : [QUICKSTART_DOCKER.md](QUICKSTART_DOCKER.md)
+
+### Avec Makefile
+
+```bash
+make run-compose  # Démarrer
+make logs         # Voir les logs
+make health       # Health check
+make stop-compose # Arrêter
+```
+
+---
+
+## 📦 Docker - Nouvelles Optimisations Java 21
+
+### Caractéristiques
+
+- ✅ **Java 21** avec Eclipse Temurin
+- ✅ **Images Alpine** (~200 MB vs ~850 MB)
+- ✅ **Multi-stage build** (cache Maven optimisé)
+- ✅ **Utilisateur non-root** (sécurité renforcée)
+- ✅ **JVM optimisée** (G1GC, gestion mémoire container)
+- ✅ **BuildKit** (build 70% plus rapide)
+
+### Résultats
+
+| Métrique | Avant | Après | Gain |
+|----------|-------|-------|------|
+| Taille image | ~850 MB | ~200 MB | **-76%** |
+| Temps démarrage | ~45s | ~15s | **-67%** |
+| Temps build (cache) | ~5 min | ~1 min | **-80%** |
+
+### Build de l'image
+
+```bash
+# Avec script automatisé
+./build-docker.sh
+
+# Avec Makefile
+make build
+
+# Ou manuellement
+DOCKER_BUILDKIT=1 docker build -f modules/bff/Dockerfile -t paytogether-bff:latest .
+```
+
+---
 
 ## Repository Docker Hub
+
 Nous utilisons le repository Docker Hub: `14152021/dealtogether`.
 Les images construites par le pipeline Jenkins sont taggées comme suit:
 - front: `14152021/dealtogether:front-<env>-<commit>`
@@ -15,13 +79,38 @@ Les images construites par le pipeline Jenkins sont taggées comme suit:
 
 Des tags `front-latest` et `bff-latest` sont également poussés pour les branches `dev` et `hml`.
 
+### Registry privé
+
+**Registry** : `registry.dealtogether.ca`
+
+```bash
+# Build et push vers registry privé
+make build
+make push
+
+# Ou manuellement
+docker build -f modules/bff/Dockerfile -t registry.dealtogether.ca/bffpaytogether:latest .
+docker push registry.dealtogether.ca/bffpaytogether:latest
+```
+
+---
+
 ## Pré-requis
+
+- **Docker** : version 20.10+
+- **Docker Compose** : version 2.0+
+- **Mémoire** : minimum 4 GB alloués à Docker
+- **Java** : version 21 (pour développement local sans Docker)
+- **Maven** : version 3.9+
 - Jenkins configuré avec les credentials:
   - `pay2gether` (username/password Docker Hub) utilisé dans le `Jenkinsfile`.
   - `pay2gether` (file) pour le kubeconfig si vous voulez déployer depuis Jenkins.
 - Un cluster Kubernetes avec NGINX Ingress controller installé.
 
+---
+
 ## Build & Push (local)
+
 Exemples de commandes locales (bash/macOS):
 
 1. Construire les images:
@@ -219,3 +308,41 @@ Si vous aviez Traefik installé et que vous voulez le supprimer pour utiliser NG
 helm uninstall traefik -n traefik
 kubectl delete namespace traefik
 ```
+
+---
+
+## 🔄 Gestion de base de données avec Liquibase
+
+PayToGether utilise **Liquibase** pour gérer les versions du schéma de base de données.
+
+### Avantages
+- ✅ Versioning complet du schéma de base de données
+- ✅ Traçabilité de toutes les modifications
+- ✅ Rollback possible en cas de problème
+- ✅ Synchronisation automatique au démarrage
+- ✅ Gestion multi-environnements (dev/hml/prod)
+
+### Documentation
+- 📄 **[LIQUIBASE_INTEGRATION.md](LIQUIBASE_INTEGRATION.md)** - Résumé de l'intégration
+- 📄 **[.github/documentation/LIQUIBASE_GUIDE.md](.github/documentation/LIQUIBASE_GUIDE.md)** - Guide complet
+- 📄 **[.github/documentation/LIQUIBASE_AIDE_MEMOIRE.md](.github/documentation/LIQUIBASE_AIDE_MEMOIRE.md)** - Aide-mémoire rapide
+- 📄 **[.github/documentation/LIQUIBASE_BONNES_PRATIQUES.md](.github/documentation/LIQUIBASE_BONNES_PRATIQUES.md)** - Conventions du projet
+- 📄 **[.github/documentation/EXEMPLE_AJOUT_ENTITE_COMMANDE.md](.github/documentation/EXEMPLE_AJOUT_ENTITE_COMMANDE.md)** - Exemple pratique complet
+
+### Schéma actuel (v1.0.0)
+Le schéma initial comprend :
+- **9 tables principales** : `utilisateur`, `categorie`, `deal`, `publicite`, `image_deal`, `image_utilisateur`, `image`, `deal_participants`, `deal_points_forts`
+- **8 catégories pré-remplies** : Électronique, Mode, Alimentation, Maison, Sports, Beauté, Services, Voyage
+- **15+ index de performance** sur les colonnes critiques
+- **Données de test** pour le développement (utilisateurs, deals, publicités)
+
+### Configuration
+Liquibase est configuré pour s'exécuter automatiquement au démarrage de l'application. La configuration se trouve dans :
+- `modules/bff/bff-configuration/src/main/resources/application.properties`
+- `modules/bff/bff-configuration/src/main/resources/db/changelog/`
+
+### Migration depuis Hibernate DDL Auto
+Si vous aviez une base existante, consultez la section "Migration" dans [LIQUIBASE_INTEGRATION.md](LIQUIBASE_INTEGRATION.md).
+
+---
+

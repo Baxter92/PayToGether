@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        Version X.X.X - [Description du changement]
+        Date: [Date]
+        Auteur: [Votre nom]
+
+        Description détaillée:
+        - [Point 1]
+        - [Point 2]
+    -->
+
+    <!-- Exemple : Créer une nouvelle table -->
+    <changeSet id="X.X.X-create-table-exemple" author="votre-nom">
+        <createTable tableName="exemple">
+            <column name="uuid" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="nom" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="date_creation" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_modification" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="exemple"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Exemple : Ajouter une colonne -->
+    <changeSet id="X.X.X-add-column-table-colonne" author="votre-nom">
+        <addColumn tableName="table_existante">
+            <column name="nouvelle_colonne" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="table_existante" columnName="nouvelle_colonne"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Exemple : Ajouter une clé étrangère -->
+    <changeSet id="X.X.X-add-fk-table1-table2" author="votre-nom">
+        <addForeignKeyConstraint
+                baseTableName="table1"
+                baseColumnNames="table2_uuid"
+                referencedTableName="table2"
+                referencedColumnNames="uuid"
+                constraintName="fk_table1_table2"
+                onDelete="CASCADE"/>
+
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="table1" constraintName="fk_table1_table2"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Exemple : Créer un index -->
+    <changeSet id="X.X.X-create-index-table-colonne" author="votre-nom">
+        <createIndex indexName="idx_table_colonne" tableName="table">
+            <column name="colonne"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex indexName="idx_table_colonne" tableName="table"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Exemple : Insérer des données -->
+    <changeSet id="X.X.X-insert-data-table" author="votre-nom">
+        <insert tableName="table">
+            <column name="uuid" valueComputed="gen_random_uuid()"/>
+            <column name="nom" value="Exemple"/>
+            <column name="date_creation" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="date_modification" valueDate="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <rollback>
+            <delete tableName="table">
+                <where>nom = 'Exemple'</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+    <!-- Exemple : Modifier le type d'une colonne -->
+    <changeSet id="X.X.X-modify-column-type" author="votre-nom">
+        <modifyDataType tableName="table"
+                        columnName="colonne"
+                        newDataType="VARCHAR(500)"/>
+
+        <rollback>
+            <modifyDataType tableName="table"
+                            columnName="colonne"
+                            newDataType="VARCHAR(100)"/>
+        </rollback>
+    </changeSet>
+
+    <!-- Tag de version (si c'est une release) -->
+    <changeSet id="X.X.X-tag-release" author="votre-nom">
+        <tagDatabase tag="vX.X.X"/>
+    </changeSet>
+
+</databaseChangeLog>
+

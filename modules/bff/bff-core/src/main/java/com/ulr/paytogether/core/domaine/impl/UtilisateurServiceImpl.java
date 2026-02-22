@@ -52,9 +52,9 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     }
 
     @Override
-    public UtilisateurModele mettreAJour(UUID uuid, UtilisateurModele utilisateur) {
-        log.info("Mise à jour de l'utilisateur: {}", uuid);
-        return utilisateurProvider.mettreAJour(uuid, utilisateur);
+    public UtilisateurModele mettreAJour(UUID uuid, UtilisateurModele utilisateur, String token) {
+        log.info("Mise à jour de l'utilisateur: {}, token: {}", uuid, token);
+        return utilisateurProvider.mettreAJour(uuid, utilisateur, token);
     }
 
     @Override
@@ -77,5 +77,33 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     @Override
     public String obtenirUrlLecturePhotoProfil(UUID utilisateurUuid) {
         return utilisateurProvider.obtenirUrlLecturePhotoProfil(utilisateurUuid);
+    }
+
+    @Override
+    public void reinitialiserMotDePasse(UUID utilisateurUuid, String nouveauMotDePasse, String token) {
+        log.info("Réinitialisation du mot de passe pour l'utilisateur: {}", utilisateurUuid);
+
+        if (nouveauMotDePasse == null || nouveauMotDePasse.trim().isEmpty()) {
+            throw new IllegalArgumentException("Le nouveau mot de passe ne peut pas être vide");
+        }
+
+        utilisateurProvider.reinitialiserMotDePasse(utilisateurUuid, nouveauMotDePasse, token);
+    }
+
+    @Override
+    public void activerUtilisateur(UUID utilisateurUuid, boolean actif, String token) {
+        log.info("Activation/Désactivation de l'utilisateur: {} - actif: {}", utilisateurUuid, actif);
+        utilisateurProvider.activerUtilisateur(utilisateurUuid, actif, token);
+    }
+
+    @Override
+    public void assignerRole(UUID utilisateurUuid, String nomRole, String token) {
+        log.info("Assignation du rôle {} à l'utilisateur: {}", nomRole, utilisateurUuid);
+
+        if (nomRole == null || nomRole.trim().isEmpty()) {
+            throw new IllegalArgumentException("Le nom du rôle ne peut pas être vide");
+        }
+
+        utilisateurProvider.assignerRole(utilisateurUuid, nomRole, token);
     }
 }

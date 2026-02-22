@@ -17,6 +17,7 @@ public class CategorieJpaMapper {
                 .nom(jpaCategorie.getNom())
                 .description(jpaCategorie.getDescription())
                 .icone(jpaCategorie.getIcone())
+                .nbDeals(jpaCategorie.getDeals().size())
                 .dateCreation(jpaCategorie.getDateCreation())
                 .dateModification(jpaCategorie.getDateModification())
                 .build();

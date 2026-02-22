@@ -1,0 +1,92 @@
+### Tests des API d'Authentification
+
+### Variables
+@username = hanaadmin@hanacalgary.ca
+@password = $2a$10$ZCfYq7kvNvLsuUKmzDWkjebC2QozV9L8whpF6n85BGwtBFABEuD62
+
+### =========================================================================================
+### 1. Login - Authentification d'un utilisateur
+### =========================================================================================
+
+POST {{base_url}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
+
+> {%
+    client.global.set("access_token", response.body.accessToken);
+    client.global.set("refresh_token", response.body.refreshToken);
+%}
+
+### =========================================================================================
+### 2. Get Me - Récupérer les informations de l'utilisateur connecté
+### =========================================================================================
+
+GET {{base_url}}/api/auth/me
+Authorization: Bearer {{access_token}}
+
+### =========================================================================================
+### 3. Logout - Déconnecter l'utilisateur
+### =========================================================================================
+
+POST {{base_url}}/api/auth/logout
+Authorization: Bearer {{access_token}}
+
+### =========================================================================================
+### Tests avec erreurs - Login avec identifiants vides (devrait retourner 400)
+### =========================================================================================
+
+POST {{base_url}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "",
+  "password": ""
+}
+
+### =========================================================================================
+### Tests avec erreurs - Login avec mot de passe vide (devrait retourner 400)
+### =========================================================================================
+
+POST {{base_url}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": ""
+}
+
+### =========================================================================================
+### Tests avec erreurs - Login avec identifiants incorrects (devrait retourner 401)
+### =========================================================================================
+
+POST {{base_url}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "wrong@example.com",
+  "password": "wrongpassword"
+}
+
+### =========================================================================================
+### Tests avec erreurs - Get Me sans token (devrait retourner 401)
+### =========================================================================================
+
+GET {{base_url}}/api/auth/me
+
+### =========================================================================================
+### Tests avec erreurs - Get Me avec token invalide (devrait retourner 401)
+### =========================================================================================
+
+GET {{base_url}}/api/auth/me
+Authorization: Bearer INVALID_TOKEN
+
+### =========================================================================================
+### Tests avec erreurs - Logout sans token (devrait retourner 401)
+### =========================================================================================
+
+POST {{base_url}}/api/auth/logout
+

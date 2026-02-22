@@ -1,0 +1,144 @@
+version: '3.8'
+
+# ===============================================
+# Docker Compose - PayToGether (Environnement de développement)
+# ===============================================
+
+services:
+  # ---- BFF Backend ----
+  bff:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Cache les dépendances pour des rebuilds plus rapides
+      cache_from:
+        - paytogether-bff:latest
+    image: paytogether-bff:latest
+    container_name: paytogether-bff
+    ports:
+      - "8080:8080"
+    environment:
+      # Profil Spring Boot
+      SPRING_PROFILES_ACTIVE: dev
+
+      # Base de données PostgreSQL
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/paytogether
+      SPRING_DATASOURCE_USERNAME: paytogether
+      SPRING_DATASOURCE_PASSWORD: paytogether123
+
+      # MinIO (stockage d'images)
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      MINIO_BUCKET_NAME: paytogether-images
+      MINIO_PRESIGNED_URL_EXPIRATION: 3600
+
+      # Optimisations JVM (peut être overridé)
+      JAVA_OPTS: >-
+        -XX:+UseContainerSupport
+        -XX:MaxRAMPercentage=75.0
+        -XX:InitialRAMPercentage=50.0
+        -XX:+UseG1GC
+        -XX:+UseStringDeduplication
+        -Djava.security.egd=file:/dev/./urandom
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+    networks:
+      - paytogether-network
+
+    restart: unless-stopped
+
+  # ---- PostgreSQL Database ----
+  postgres:
+    image: postgres:16-alpine
+    container_name: paytogether-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: paytogether
+      POSTGRES_USER: paytogether
+      POSTGRES_PASSWORD: paytogether123
+      PGDATA: /var/lib/postgresql/data/pgdata
+
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paytogether"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    networks:
+      - paytogether-network
+
+    restart: unless-stopped
+
+  # ---- MinIO (S3-compatible storage) ----
+  minio:
+    image: minio/minio:latest
+    container_name: paytogether-minio
+    ports:
+      - "9000:9000"  # API
+      - "9001:9001"  # Console Web
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+
+    command: server /data --console-address ":9001"
+
+    volumes:
+      - minio-data:/data
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+    networks:
+      - paytogether-network
+
+    restart: unless-stopped
+
+  # ---- MinIO Client (création du bucket initial) ----
+  minio-init:
+    image: minio/mc:latest
+    container_name: paytogether-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set myminio http://minio:9000 minioadmin minioadmin;
+      mc mb --ignore-existing myminio/paytogether-images;
+      mc anonymous set download myminio/paytogether-images;
+      exit 0;
+      "
+    networks:
+      - paytogether-network
+
+# ---- Volumes persistants ----
+volumes:
+  postgres-data:
+    driver: local
+  minio-data:
+    driver: local
+
+# ---- Réseau Docker ----
+networks:
+  paytogether-network:
+    driver: bridge
+
