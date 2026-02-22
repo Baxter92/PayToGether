@@ -2,6 +2,7 @@ package com.ulr.paytogether.configuration;
 
 import com.ulr.paytogether.configuration.security.DynamicRealmJwtDecoder;
 import com.ulr.paytogether.configuration.security.JwtConverter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
  * Configuration de la sécurité
@@ -30,6 +34,7 @@ public class SecurityConfiguration {
 
     private final JwtConverter jwtConverter;
     private final DynamicRealmJwtDecoder jwtDecoder;
+    private final CorsProperties corsProperties;
 
     /**
      * Configuration de la chaîne de filtres de sécurité
@@ -53,7 +58,7 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         // Endpoints publics
-                        .requestMatchers("/api/public/**", "/api/auth/**").permitAll()
+                        .requestMatchers("/api/public/**", "/api/auth/login").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/utilisateurs").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
@@ -64,10 +69,33 @@ public class SecurityConfiguration {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            String path = request.getRequestURI();
+                            String method = request.getMethod();
+                            // Ne pas retourner 401 pour les endpoints publics
+                            if (path.startsWith("/api/public/") ||
+                                path.startsWith("/api/auth/login") ||
+                                path.startsWith("/actuator/") ||
+                                path.startsWith("/swagger-ui/") ||
+                                path.startsWith("/v3/api-docs/") ||
+                                (path.equals("/api/utilisateurs") && "POST".equals(method))) {
+                                response.setStatus(HttpServletResponse.SC_OK);
+                                return;
+                            }
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\":\"Non autorisé\"}");
+                        })
                         .bearerTokenResolver(request -> {
                             String path = request.getRequestURI();
+                            String method = request.getMethod();
                             // Ne pas extraire le token pour les endpoints publics
-                            if (path.contains("/api/public/") || path.contains("/api/auth/")) {
+                            if (path.startsWith("/api/public/") ||
+                                path.startsWith("/api/auth/login") ||
+                                path.startsWith("/actuator/") ||
+                                path.startsWith("/swagger-ui/") ||
+                                path.startsWith("/v3/api-docs/") ||
+                                (path.equals("/api/utilisateurs") && "POST".equals(method))) {
                                 return null;
                             }
                             return new DefaultBearerTokenResolver().resolve(request);
@@ -90,5 +118,25 @@ public class SecurityConfiguration {
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-}
 
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        log.info("Configuration CORS");
+
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOriginPatterns(corsProperties.getAllowedOrigins());
+        config.setAllowedMethods(corsProperties.getAllowedMethods());
+        config.setAllowedHeaders(corsProperties.getAllowedHeaders());
+        config.setAllowCredentials(corsProperties.isAllowCredentials());
+        config.setMaxAge(corsProperties.getMaxAge());
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+
+        log.info("CORS configuré - Origins: {}, Methods: {}",
+                corsProperties.getAllowedOrigins(),
+                corsProperties.getAllowedMethods());
+
+        return source;
+    }
+}

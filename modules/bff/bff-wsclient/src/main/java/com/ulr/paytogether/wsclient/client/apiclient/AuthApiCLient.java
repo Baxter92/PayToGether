@@ -32,26 +32,34 @@ public class AuthApiCLient {
                     .username(username)
                     .password(password)
                     .build();
-            return (LoginResponse) authKeycloackService.post(authApiUrl, loginRequest);
+
+            Map<String, Object> response = (Map<String, Object>) authKeycloackService.post(authApiUrl+"/api/auth/login", loginRequest);
+            if (response.containsKey("data")) {
+                Map<String, Object> data = (Map<String, Object>) response.get("data");
+                return LoginResponse.builder()
+                        .accessToken((String) data.get("accessToken"))
+                        .refreshToken((String) data.get("refreshToken"))
+                        .tokenType((String) data.get("tokenType"))
+                        .expiresIn((Integer) data.get("expiresIn"))
+                        .build();
+            }
         } catch (Exception e) {
             log.error("Erreur lors de l'obtention du token : {}", e.getMessage());
             throw new RuntimeException("Impossible d'obtenir le token d'authentification", e);
         }
+        return LoginResponse.builder().build();
     }
 
     public LoginResponse loginAdmin(){
         return this.getToken(adminUtilisateur, adminMotDePasse);
     }
 
-    public String getValidToken(String token) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authentication", "Bearer " + token);
-        return authKeycloackService.get(authApiUrl+"/api/auth/validate", headers).toString();
+    public String checkToken(String token) {
+        Map<String, Object> response = (Map<String, Object>) authKeycloackService.getWithAuth(authApiUrl+"/api/auth/validate", token);
+        return response.containsKey("data") ? (String) response.get("data") : null;
     }
 
-    public Void logout(String token) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authentication", "Bearer " + token);
-        return (Void) authKeycloackService.post(authApiUrl+"/api/auth/logout", null, headers);
+    public void logout(String token) {
+        authKeycloackService.postVoidWithAuth(authApiUrl+"/api/auth/logout", null, token);
     }
 }

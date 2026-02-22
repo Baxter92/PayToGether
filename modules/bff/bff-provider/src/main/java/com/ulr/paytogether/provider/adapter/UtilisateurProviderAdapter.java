@@ -46,12 +46,12 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
     public UtilisateurModele sauvegarder(UtilisateurModele utilisateur) {
         UtilisateurJpa entite = mapper.versEntite(utilisateur);
 
+        // Créer l'utilisateur dans Keycloak avant de le sauvegarder localement
+        creerkeycloackutilisateur(entite);
         // Hacher le mot de passe avec BCrypt si présent
         if (entite.getMotDePasse() != null && !entite.getMotDePasse().isEmpty()) {
             entite.setMotDePasse(passwordEncoder.encode(entite.getMotDePasse()));
         }
-
-        creerkeycloackutilisateur(entite);
         if (entite.getPhotoProfil() != null) {
             entite.setPhotoProfilUnique(Tools.DIRECTORY_UTILISATEUR_IMAGES, entite.getPhotoProfil().getUrlImage());
         }
@@ -90,13 +90,13 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
                     // Mettre à jour les champs modifiables
                     mapper.mettreAJour(utilisateurExistant, utilisateur);
 
+                    // Mettre à jour l'utilisateur dans Keycloak
+                    mettreAjourKeycloakUtilisateur(token, utilisateurExistant);
+
                     // Hacher le mot de passe avec BCrypt si un nouveau mot de passe est fourni
                     if (utilisateur.getMotDePasse() != null && !utilisateur.getMotDePasse().isEmpty()) {
                         utilisateurExistant.setMotDePasse(passwordEncoder.encode(utilisateur.getMotDePasse()));
                     }
-
-                    // Mettre à jour l'utilisateur dans Keycloak
-                    mettreAjourKeycloakUtilisateur(token, utilisateurExistant);
                     // Gérer la mise à jour de la photo de profil si nécessaire
                     mettreAJourPhotoProfilSiBesoin(utilisateurExistant, utilisateur);
                     // Sauvegarder et retourner le modèle mis à jour

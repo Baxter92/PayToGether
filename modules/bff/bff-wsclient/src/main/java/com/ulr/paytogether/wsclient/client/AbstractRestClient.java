@@ -1,5 +1,6 @@
 package com.ulr.paytogether.wsclient.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
@@ -53,7 +54,10 @@ public abstract class AbstractRestClient<R, T> {
      */
     public T post(String url, R request, Map<String, String> headers) {
         try {
-            log.debug("POST request to: {}", url);
+            ObjectMapper objectMapper = new ObjectMapper();
+            if (request  != null) {
+                log.debug("POST request (void) to: {} with request: {}", url, objectMapper.writeValueAsString(request));
+            }
 
             RestClient.RequestBodySpec requestSpec = restClient.post()
                 .uri(url)
@@ -67,7 +71,7 @@ public abstract class AbstractRestClient<R, T> {
                 .retrieve()
                 .body(getTypeReference());
 
-            log.debug("POST request successful to: {}", url);
+            log.info("POST request successful to: {}", url);
             return response;
 
         } catch (RestClientResponseException e) {
@@ -137,6 +141,69 @@ public abstract class AbstractRestClient<R, T> {
             log.error("Erreur inattendue lors du POST vers {}: {}", url, e.getMessage(), e);
             throw new RestClientException("Erreur inattendue lors de la requête POST", e);
         }
+    }
+
+    /**
+     * Effectue une requête POST sans corps de réponse (void)
+     *
+     * @param url URL de destination
+     * @param request Corps de la requête
+     */
+    public void postVoid(String url, R request) {
+        postVoid(url, request, new HashMap<>());
+    }
+
+    /**
+     * Effectue une requête POST sans corps de réponse (void) avec des headers personnalisés
+     *
+     * @param url URL de destination
+     * @param request Corps de la requête
+     * @param headers Headers HTTP à ajouter
+     */
+    public void postVoid(String url, R request, Map<String, String> headers) {
+        try {
+            log.debug("POST request (void) to: {}", url);
+            RestClient.RequestBodySpec requestSpec = restClient.post()
+                .uri(url)
+                .contentType(MediaType.APPLICATION_JSON);
+
+            // Ajouter les headers personnalisés
+            headers.forEach(requestSpec::header);
+
+            requestSpec
+                .retrieve()
+                    .toBodilessEntity();
+
+            log.debug("POST request (void) successful to: {}", url);
+
+        } catch (RestClientResponseException e) {
+            log.error("HTTP Error {} lors du POST vers {}: {}",
+                e.getStatusCode().value(), url, e.getResponseBodyAsString());
+            handleError(e);
+            throw new RestClientException("Erreur HTTP lors de la requête POST", e);
+
+        } catch (RestClientException e) {
+            log.error("Erreur RestClient lors du POST vers {}: {}", url, e.getMessage());
+            handleError(e);
+            throw e;
+
+        } catch (Exception e) {
+            log.error("Erreur inattendue lors du POST vers {}: {}", url, e.getMessage(), e);
+            throw new RestClientException("Erreur inattendue lors de la requête POST", e);
+        }
+    }
+
+    /**
+     * Effectue une requête POST sans corps de réponse (void) avec un token d'authentification
+     *
+     * @param url URL de destination
+     * @param request Corps de la requête
+     * @param bearerToken Token d'authentification
+     */
+    public void postVoidWithAuth(String url, R request, String bearerToken) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + bearerToken);
+        postVoid(url, request, headers);
     }
 
     /**
@@ -273,6 +340,57 @@ public abstract class AbstractRestClient<R, T> {
     }
 
     /**
+     * Effectue une requête PUT sans corps de réponse (void)
+     *
+     * @param url URL de destination
+     * @param request Corps de la requête
+     */
+    public void putVoid(String url, R request) {
+        putVoid(url, request, new HashMap<>());
+    }
+
+    /**
+     * Effectue une requête PUT sans corps de réponse (void) avec des headers personnalisés
+     *
+     * @param url URL de destination
+     * @param request Corps de la requête
+     * @param headers Headers HTTP à ajouter
+     */
+    public void putVoid(String url, R request, Map<String, String> headers) {
+        try {
+            log.debug("PUT request (void) to: {}", url);
+
+            RestClient.RequestBodySpec requestSpec = restClient.put()
+                .uri(url)
+                .contentType(MediaType.APPLICATION_JSON);
+
+            // Ajouter les headers personnalisés
+            headers.forEach(requestSpec::header);
+
+            requestSpec
+                .retrieve()
+                    .toBodilessEntity();
+
+            log.debug("PUT request (void) successful to: {}", url);
+
+        } catch (RestClientResponseException e) {
+            log.error("HTTP Error {} lors du PUT vers {}: {}",
+                e.getStatusCode().value(), url, e.getResponseBodyAsString());
+            handleError(e);
+            throw new RestClientException("Erreur HTTP lors de la requête PUT", e);
+
+        } catch (RestClientException e) {
+            log.error("Erreur RestClient lors du PUT vers {}: {}", url, e.getMessage());
+            handleError(e);
+            throw e;
+
+        } catch (Exception e) {
+            log.error("Erreur inattendue lors du PUT vers {}: {}", url, e.getMessage(), e);
+            throw new RestClientException("Erreur inattendue lors de la requête PUT", e);
+        }
+    }
+
+    /**
      * Effectue une requête PUT avec un token d'authentification
      *
      * @param url URL de destination
@@ -284,6 +402,19 @@ public abstract class AbstractRestClient<R, T> {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + bearerToken);
         return put(url, request, headers);
+    }
+
+    /**
+     * Effectue une requête PUT sans corps de réponse (void) avec un token d'authentification
+     *
+     * @param url URL de destination
+     * @param request Corps de la requête
+     * @param bearerToken Token d'authentification
+     */
+    public void putVoidWithAuth(String url, R request, String bearerToken) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + bearerToken);
+        putVoid(url, request, headers);
     }
 
     /**
@@ -338,6 +469,54 @@ public abstract class AbstractRestClient<R, T> {
     }
 
     /**
+     * Effectue une requête DELETE sans corps de réponse (void)
+     *
+     * @param url URL de destination
+     */
+    public void deleteVoid(String url) {
+        deleteVoid(url, new HashMap<>());
+    }
+
+    /**
+     * Effectue une requête DELETE sans corps de réponse (void) avec des headers personnalisés
+     *
+     * @param url URL de destination
+     * @param headers Headers HTTP à ajouter
+     */
+    public void deleteVoid(String url, Map<String, String> headers) {
+        try {
+            log.debug("DELETE request (void) to: {}", url);
+
+            RestClient.RequestHeadersSpec<?> requestSpec = restClient.delete()
+                .uri(url);
+
+            // Ajouter les headers personnalisés
+            headers.forEach(requestSpec::header);
+
+            requestSpec
+                .retrieve()
+                    .toBodilessEntity();
+
+            log.debug("DELETE request (void) successful to: {}", url);
+
+        } catch (RestClientResponseException e) {
+            log.error("HTTP Error {} lors du DELETE vers {}: {}",
+                e.getStatusCode().value(), url, e.getResponseBodyAsString());
+            handleError(e);
+            throw new RestClientException("Erreur HTTP lors de la requête DELETE", e);
+
+        } catch (RestClientException e) {
+            log.error("Erreur RestClient lors du DELETE vers {}: {}", url, e.getMessage());
+            handleError(e);
+            throw e;
+
+        } catch (Exception e) {
+            log.error("Erreur inattendue lors du DELETE vers {}: {}", url, e.getMessage(), e);
+            throw new RestClientException("Erreur inattendue lors de la requête DELETE", e);
+        }
+    }
+
+    /**
      * Effectue une requête DELETE avec un token d'authentification
      *
      * @param url URL de destination
@@ -348,6 +527,18 @@ public abstract class AbstractRestClient<R, T> {
         Map<String, String> headers = new HashMap<>();
         headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + bearerToken);
         return delete(url, headers);
+    }
+
+    /**
+     * Effectue une requête DELETE sans corps de réponse (void) avec un token d'authentification
+     *
+     * @param url URL de destination
+     * @param bearerToken Token d'authentification
+     */
+    public void deleteVoidWithAuth(String url, String bearerToken) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HttpHeaders.AUTHORIZATION, "Bearer " + bearerToken);
+        deleteVoid(url, headers);
     }
 
     /**
