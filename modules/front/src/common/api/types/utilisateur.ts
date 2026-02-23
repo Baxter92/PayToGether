@@ -40,3 +40,18 @@ export interface CreateUtilisateurDTO {
 
 // Backend: UtilisateurDTO utilise en update (PUT /utilisateurs/{uuid})
 export type UpdateUtilisateurDTO = Omit<UtilisateurDTO, "uuid">;
+
+// Backend: ReinitialiserMotDePasseDTO (PATCH /utilisateurs/{uuid}/reset-password)
+export interface ReinitialiserMotDePasseDTO {
+  nouveauMotDePasse: string;
+}
+
+// Backend: ActiverUtilisateurDTO (PATCH /utilisateurs/{uuid}/enable)
+export interface ActiverUtilisateurDTO {
+  actif: boolean;
+}
+
+// Backend: AssignerRoleDTO (PATCH /utilisateurs/{uuid}/assign-role)
+export interface AssignerRoleDTO {
+  nomRole: RoleUtilisateurType;
+}

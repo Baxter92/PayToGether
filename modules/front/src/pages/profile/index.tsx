@@ -62,20 +62,18 @@ export default function Profile() {
           {/* Activity / feed */}
           <div className="bg-white dark:bg-slate-900 rounded-lg p-6 shadow-sm">
             <h3 className="text-md font-semibold mb-3">
-              {t("profile.recentActivity")}
+              {t("recentActivity")}
             </h3>
             <ul className="space-y-2 text-sm text-slate-600">
               <li>
                 •{" "}
-                {t("profile.boughtDeal", {
+                {t("boughtDeal", {
                   deal: "Dîner 2 personnes",
                   days: 2,
                 })}
               </li>
-              <li>
-                • {t("profile.leftReview", { merchant: "ZenSpa", days: 5 })}
-              </li>
-              <li>• {t("profile.savedOffers", { count: 3, days: 7 })}</li>
+              <li>• {t("leftReview", { merchant: "ZenSpa", days: 5 })}</li>
+              <li>• {t("savedOffers", { count: 3, days: 7 })}</li>
             </ul>
           </div>
         </main>

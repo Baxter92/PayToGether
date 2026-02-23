@@ -15,8 +15,8 @@ export default function MyPurchases(): JSX.Element {
     <section>
       <Heading
         level={2}
-        title={t("profile.purchases")}
-        description={t("profile.purchasesDescription")}
+        title={t("purchases")}
+        description={t("purchasesDescription")}
         underline
       />
 

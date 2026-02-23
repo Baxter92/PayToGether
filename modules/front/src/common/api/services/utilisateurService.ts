@@ -1,5 +1,11 @@
 import { createResourceService } from "../module/service/resourceFactory";
-import type { UtilisateurDTO, CreateUtilisateurDTO } from "../types";
+import type {
+  UtilisateurDTO,
+  CreateUtilisateurDTO,
+  ReinitialiserMotDePasseDTO,
+  ActiverUtilisateurDTO,
+  AssignerRoleDTO,
+} from "../types";
 import { apiClient } from "./apiClient";
 
 // Service de base avec méthodes CRUD standard
@@ -31,6 +37,24 @@ export const utilisateurService = {
     apiClient.get<{ url: string }>(
       `/utilisateurs/${utilisateurUuid}/photo-profil/url`,
     ),
+
+  // Réinitialiser le mot de passe
+  resetPassword: (utilisateurUuid: string, dto: ReinitialiserMotDePasseDTO) =>
+    apiClient.patch<void>(`/utilisateurs/${utilisateurUuid}/reset-password`, {
+      body: dto,
+    }),
+
+  // Activer / Désactiver un utilisateur
+  setEnabled: (utilisateurUuid: string, dto: ActiverUtilisateurDTO) =>
+    apiClient.patch<void>(`/utilisateurs/${utilisateurUuid}/enable`, {
+      body: dto,
+    }),
+
+  // Assigner un rôle à un utilisateur
+  assignRole: (utilisateurUuid: string, dto: AssignerRoleDTO) =>
+    apiClient.patch<void>(`/utilisateurs/${utilisateurUuid}/assign-role`, {
+      body: dto,
+    }),
 
   // Créer un utilisateur (avec DTO spécifique)
   create: (dto: CreateUtilisateurDTO) =>
