@@ -1,4 +1,4 @@
-import { useEffect, useState, type JSX } from "react";
+import { useEffect, useState, useCallback, type JSX } from "react";
 import { useI18n } from "@/common/hooks/useI18n";
 import {
   DndContext,
@@ -22,10 +22,16 @@ import { Heading } from "@/common/containers/Heading";
 import { Save, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { SortableSlideCard } from "./components/SortableSlideCard";
-import { useCreatePublicite, usePublicites } from "@/common/api";
+import {
+  useCreatePublicite,
+  useDeletePublicite,
+  usePublicites,
+  useUpdatePublicite,
+} from "@/common/api";
 
 interface HeroSlide {
   id: number;
+  uuid?: string;
   title: string;
   subtitle: string;
   description: string;
@@ -53,134 +59,196 @@ export default function AdminHero(): JSX.Element {
     isPending,
     isUploading,
   } = useCreatePublicite();
+  const { mutateAsync: updatePublicite, isPending: isUpdatingPublicite } =
+    useUpdatePublicite();
+  const { mutateAsync: deletePublicite, isPending: isDeletingPublicite } =
+    useDeletePublicite();
 
-  const sensors = useSensors(useSensor(PointerSensor));
+  // ✅ Désactive le PointerSensor sur les inputs pour éviter les conflits drag
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+  );
 
   useEffect(() => {
     if (!publicitesData) return;
 
-    const mappedSlides = publicitesData.map((publicite, index) => {
-      const parts = (publicite.description ?? "")
-        .split(" • ")
-        .map((part) => part.trim())
-        .filter(Boolean);
+    setSlides(
+      publicitesData.map((publicite, index) => {
+        const parts = (publicite.description ?? "")
+          .split(" • ")
+          .map((p) => p.trim())
+          .filter(Boolean);
 
-      return {
-        id: index + 1,
-        title: publicite.titre,
-        subtitle: parts[0] ?? "",
-        description: parts[1] ?? publicite.description ?? "",
-        buttonText: "Voir l'offre",
-        buttonLink: publicite.lienExterne ?? "/deals",
-        image: publicite.listeImages?.[0]?.urlImage || "/placeholder.svg",
-        gradient: "from-blue-600/50 to-indigo-600/50",
-        textColor: "text-white",
-        badge: parts[2],
-        isActive: Boolean(publicite.active ?? true),
-      };
-    });
-
-    setSlides(mappedSlides);
+        return {
+          id: index + 1,
+          uuid: publicite.uuid,
+          title: publicite.titre,
+          subtitle: parts[0] ?? "",
+          description: parts[1] ?? publicite.description ?? "",
+          buttonText: "Voir l'offre",
+          buttonLink: publicite.lienExterne ?? "/deals",
+          image: publicite.listeImages?.[0]?.urlImage || "/placeholder.svg",
+          gradient: "from-blue-600/50 to-indigo-600/50",
+          textColor: "text-white",
+          badge: parts[2],
+          isActive: Boolean(publicite.active ?? true),
+        };
+      }),
+    );
   }, [publicitesData]);
 
-  const handleSlideChange = (
-    id: number,
-    field: keyof HeroSlide,
-    value: string | boolean,
-  ) => {
-    setSlides((prev) =>
-      prev.map((slide) =>
-        slide.id === id ? { ...slide, [field]: value } : slide,
-      ),
-    );
-  };
-
-  const handleImageUpload = (id: number, file: File) => {
-    if (!file.type.startsWith("image/")) {
-      toast.error(tAdmin("hero.invalidImage"));
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error(tAdmin("hero.imageTooLarge"));
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const base64 = e.target?.result as string;
+  // ✅ useCallback sur tous les handlers pour éviter les re-renders en cascade
+  const handleSlideChange = useCallback(
+    (id: number, field: keyof HeroSlide, value: string | boolean) => {
       setSlides((prev) =>
         prev.map((slide) =>
-          slide.id === id
-            ? { ...slide, image: base64, imageFile: file }
-            : slide,
+          slide.id === id ? { ...slide, [field]: value } : slide,
         ),
       );
-      toast.success(tAdmin("hero.imageUploaded"));
-    };
-    reader.onerror = () => {
-      toast.error(tAdmin("hero.uploadError"));
-    };
-    reader.readAsDataURL(file);
-  };
+    },
+    [],
+  );
 
-  const handleToggleSlide = (id: number) => {
-    setSlides((prev) =>
-      prev.map((slide) =>
-        slide.id === id ? { ...slide, isActive: !slide.isActive } : slide,
-      ),
-    );
-  };
+  const handleImageUpload = useCallback(
+    (id: number, file: File) => {
+      if (!file.type.startsWith("image/")) {
+        toast.error(tAdmin("hero.invalidImage"));
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(tAdmin("hero.imageTooLarge"));
+        return;
+      }
 
-  const handleDeleteSlide = (id: number) => {
-    if (slides.length <= 1) {
-      toast.error(tAdmin("hero.keepAtLeastOne"));
-      return;
-    }
-    setSlides((prev) => prev.filter((slide) => slide.id !== id));
-    toast.success(tAdmin("hero.slideDeleted"));
-  };
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64 = e.target?.result as string;
+        setSlides((prev) =>
+          prev.map((slide) =>
+            slide.id === id
+              ? { ...slide, image: base64, imageFile: file }
+              : slide,
+          ),
+        );
+        toast.success(tAdmin("hero.imageUploaded"));
+      };
+      reader.onerror = () => toast.error(tAdmin("hero.uploadError"));
+      reader.readAsDataURL(file);
+    },
+    [tAdmin],
+  );
 
-  const handleAddSlide = () => {
-    const ids = slides.map((s) => s.id);
-    const newId = ids.length > 0 ? Math.max(...ids) + 1 : 1;
+  const handleToggleSlide = useCallback(
+    async (id: number) => {
+      const targetSlide = slides.find((slide) => slide.id === id);
+      if (!targetSlide) return;
 
-    setSlides((prev) => [
-      ...prev,
-      {
-        id: newId,
-        title: tAdmin("hero.newSlideTitle"),
-        subtitle: tAdmin("hero.newSlideSubtitle"),
-        description: tAdmin("hero.newSlideDescription"),
-        buttonText: tAdmin("hero.newSlideButtonText"),
-        buttonLink: "/deals",
-        image:
-          "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80",
-        gradient: "from-blue-600/50 to-indigo-600/50",
-        textColor: "text-white",
-        badge: tAdmin("hero.newBadge"),
-        isActive: true,
-      },
-    ]);
+      const nextActive = !targetSlide.isActive;
+
+      if (!targetSlide.uuid) {
+        setSlides((prev) =>
+          prev.map((slide) =>
+            slide.id === id ? { ...slide, isActive: nextActive } : slide,
+          ),
+        );
+        return;
+      }
+
+      try {
+        await updatePublicite({
+          id: targetSlide.uuid,
+          data: {
+            active: nextActive,
+          },
+        });
+
+        setSlides((prev) =>
+          prev.map((slide) =>
+            slide.id === id ? { ...slide, isActive: nextActive } : slide,
+          ),
+        );
+      } catch (error) {
+        toast.error("Erreur lors de la mise a jour de la publicite", {
+          description:
+            error instanceof Error ? error.message : "Une erreur est survenue",
+        });
+      }
+    },
+    [slides, updatePublicite],
+  );
+
+  const handleDeleteSlide = useCallback(
+    async (id: number) => {
+      const targetSlide = slides.find((slide) => slide.id === id);
+      if (!targetSlide) return;
+
+      if (slides.length <= 1) {
+        toast.error(tAdmin("hero.keepAtLeastOne"));
+        return;
+      }
+
+      try {
+        if (targetSlide.uuid) {
+          await deletePublicite(targetSlide.uuid);
+        }
+
+        setSlides((prev) => prev.filter((slide) => slide.id !== id));
+        toast.success(tAdmin("hero.slideDeleted"));
+      } catch (error) {
+        toast.error("Erreur lors de la suppression de la publicite", {
+          description:
+            error instanceof Error ? error.message : "Une erreur est survenue",
+        });
+      }
+    },
+    [slides, tAdmin, deletePublicite],
+  );
+
+  const handleAddSlide = useCallback(() => {
+    setSlides((prev) => {
+      const newId =
+        prev.length > 0 ? Math.max(...prev.map((s) => s.id)) + 1 : 1;
+      return [
+        ...prev,
+        {
+          id: newId,
+          title: tAdmin("hero.newSlideTitle"),
+          subtitle: tAdmin("hero.newSlideSubtitle"),
+          description: tAdmin("hero.newSlideDescription"),
+          buttonText: tAdmin("hero.newSlideButtonText"),
+          buttonLink: "/deals",
+          image:
+            "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80",
+          gradient: "from-blue-600/50 to-indigo-600/50",
+          textColor: "text-white",
+          badge: tAdmin("hero.newBadge"),
+          isActive: true,
+        },
+      ];
+    });
     toast.success(tAdmin("hero.slideAdded"));
-  };
+  }, [tAdmin]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (over && active.id !== over.id) {
+        setSlides((items) => {
+          const oldIndex = items.findIndex((item) => item.id === active.id);
+          const newIndex = items.findIndex((item) => item.id === over.id);
+          return arrayMove(items, oldIndex, newIndex);
+        });
+        toast.success(tAdmin("hero.orderUpdated"));
+      }
+    },
+    [tAdmin],
+  );
 
-    if (over && active.id !== over.id) {
-      setSlides((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
-      });
-      toast.success(tAdmin("hero.orderUpdated"));
-    }
-  };
-
-  const handleSave = async () => {
-    const activeSlides = slides.filter((slide) => slide.isActive);
-    const slidesToCreate = activeSlides.filter((slide) => slide.imageFile);
+  const handleSave = useCallback(async () => {
+    const activeSlides = slides.filter((s) => s.isActive);
+    const slidesToCreate = activeSlides.filter((s) => s.imageFile);
 
     if (slidesToCreate.length === 0) {
       toast.error(tAdmin("hero.invalidImage"), {
@@ -234,7 +302,10 @@ export default function AdminHero(): JSX.Element {
           error instanceof Error ? error.message : "Une erreur est survenue",
       });
     }
-  };
+  }, [slides, createPublicite, tAdmin]);
+
+  // ✅ Mémoïser les slide IDs pour éviter un recalcul à chaque render
+  const slideIds = slides.map((s) => s.id);
 
   return (
     <main className="space-y-6">
@@ -256,7 +327,6 @@ export default function AdminHero(): JSX.Element {
         </HStack>
       </div>
 
-      {/* Toggle global */}
       <Card>
         <CardContent className="pt-6">
           <div className="flex items-center justify-between">
@@ -277,7 +347,6 @@ export default function AdminHero(): JSX.Element {
         </CardContent>
       </Card>
 
-      {/* Liste des slides */}
       <VStack spacing={4}>
         <HStack justify="between">
           <h3 className="font-semibold text-lg">
@@ -309,7 +378,7 @@ export default function AdminHero(): JSX.Element {
             onDragEnd={handleDragEnd}
           >
             <SortableContext
-              items={slides.map((s) => s.id)}
+              items={slideIds}
               strategy={verticalListSortingStrategy}
             >
               <VStack spacing={10}>
@@ -322,6 +391,9 @@ export default function AdminHero(): JSX.Element {
                     onToggleSlide={handleToggleSlide}
                     onDeleteSlide={handleDeleteSlide}
                     onImageUpload={handleImageUpload}
+                    isProcessingActions={
+                      isUpdatingPublicite || isDeletingPublicite
+                    }
                   />
                 ))}
               </VStack>

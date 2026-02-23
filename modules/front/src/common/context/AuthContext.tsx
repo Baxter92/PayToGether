@@ -5,13 +5,23 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { authService, type MeResponse } from "../api/services/authService";
+import { localTokenStorage } from "../api/module/client/auth/tokenStorage.web";
+import { HttpError } from "../api/module/client/HttpError";
 
 export interface IUser {
   id: string;
+  username: string;
   email: string;
+  prenom?: string;
+  nom?: string;
+  actif: boolean;
+  emailVerifie: boolean;
+  dateCreationTimestamp: number;
+  roles: string[];
   name: string;
   avatar?: string;
-  role?: "client" | "marchand" | "admin";
+  role: "client" | "marchand" | "admin";
   location?: string;
 }
 
@@ -20,7 +30,7 @@ export interface IAuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<IUser>;
   register: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<IAuthContextType | undefined>(undefined);
@@ -42,95 +52,129 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkAuthStatus();
+    void checkAuthStatus();
   }, []);
 
-  const checkAuthStatus = async () => {
-    try {
-      // Remplacer par: const token = document.cookie.includes('auth_token');
-      // Puis faire un appel API pour valider le token
-      // const response = await fetch('/api/auth/me', { credentials: 'include' });
+  const mapRole = (roles: string[] | undefined): IUser["role"] => {
+    const normalized = (roles ?? []).map((role) => role.toUpperCase());
 
-      setLoading(false);
+    if (
+      normalized.includes("ADMIN") ||
+      normalized.includes("ROLE_ADMIN")
+    ) {
+      return "admin";
+    }
+
+    if (
+      normalized.includes("MARCHAND") ||
+      normalized.includes("ROLE_MARCHAND") ||
+      normalized.includes("MERCHANT") ||
+      normalized.includes("ROLE_MERCHANT")
+    ) {
+      return "marchand";
+    }
+
+    return "client";
+  };
+
+  const mapMeToUser = (me: MeResponse): IUser => {
+    const fullName = `${me.prenom ?? ""} ${me.nom ?? ""}`.trim();
+    const fallbackName = me.username || me.email.split("@")[0];
+    const name = fullName || fallbackName;
+
+    return {
+      id: me.id,
+      username: me.username,
+      email: me.email,
+      prenom: me.prenom,
+      nom: me.nom,
+      actif: me.actif,
+      emailVerifie: me.emailVerifie,
+      dateCreationTimestamp: me.dateCreationTimestamp,
+      roles: me.roles ?? [],
+      name,
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(
+        me.email || me.username || me.id,
+      )}`,
+      role: mapRole(me.roles),
+    };
+  };
+
+  const toAuthErrorMessage = (error: unknown): string => {
+    if (error instanceof HttpError) {
+      if (error.status === 401) return "auth.invalidCredentials";
+      if (error.status >= 500) return "auth.serverError";
+      return "auth.loginError";
+    }
+
+    if (error instanceof Error) return "auth.loginError";
+    return "auth.authError";
+  };
+
+  const checkAuthStatus = async (): Promise<void> => {
+    try {
+      const token = await localTokenStorage.get();
+      if (!token) {
+        setUser(null);
+        return;
+      }
+
+      const me = await authService.me();
+      setUser(mapMeToUser(me));
     } catch (error) {
       console.error("Auth check failed:", error);
+      await localTokenStorage.clear();
+      setUser(null);
+    } finally {
       setLoading(false);
     }
   };
 
   const login = async (email: string, password: string): Promise<IUser> => {
-    try{
-      // Simulation - Remplacer par votre appel API
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      if (!email || password.length < 6) {
-        throw new Error("Identifiants invalides");
+    try {
+      if (!email || !password) {
+        throw new Error("auth.invalidCredentials");
       }
 
-      // const response = await fetch('/api/auth/login', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email, password }),
-      //   credentials: 'include' // Important pour les cookies
-      // });
+      const loginResponse = await authService.login(email, password);
+      if (localTokenStorage.saveTokens) {
+        await localTokenStorage.saveTokens(
+          loginResponse.accessToken,
+          loginResponse.refreshToken,
+        );
+      } else {
+        await localTokenStorage.set(loginResponse.accessToken);
+      }
 
-      const userData: IUser = {
-        id: "1",
-        email,
-        name: email.split("@")[0],
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-        role:
-          email.split("@")[0] === "merchant"
-            ? "marchand"
-            : email.split("@")[0] === "admin"
-              ? "admin"
-              : "client",
-        location: "Douala, Cameroon",
-      };
-
+      const me = await authService.me();
+      const userData = mapMeToUser(me);
       setUser(userData);
       return userData;
     } catch (error) {
-      throw error;
+      throw new Error(toAuthErrorMessage(error));
     }
   };
 
   const register = async (
-    email: string,
-    password: string,
-    name: string
+    _email: string,
+    _password: string,
+    _name: string,
   ): Promise<void> => {
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      if (!email || password.length < 6 || !name) {
-        throw new Error("Données invalides");
-      }
-
-      // const response = await fetch('/api/auth/register', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email, password, name }),
-      //   credentials: 'include'
-      // });
-
-      const userData: IUser = {
-        id: Date.now().toString(),
-        email,
-        name,
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-        role: "client",
-      };
-
-      setUser(userData);
-    } catch (error) {
-      throw error;
-    }
+    throw new Error("Inscription non disponible pour le moment");
   };
 
-  const logout = (): void => {
-    // await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-    setUser(null);
+  const logout = async (): Promise<void> => {
+    try {
+      const token = await localTokenStorage.get();
+      if (token) {
+        await authService.logout();
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      await localTokenStorage.clear();
+      setUser(null);
+    }
   };
 
   const value: IAuthContextType = {
