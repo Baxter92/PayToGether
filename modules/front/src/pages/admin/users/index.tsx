@@ -219,8 +219,6 @@ export default function AdminUsers(): ReactElement {
   };
 
   const handleAssignRole = async (user: UserRow, value: string) => {
-    console.log(user, value);
-
     if (user.role === value) return;
 
     try {
@@ -239,8 +237,6 @@ export default function AdminUsers(): ReactElement {
   };
 
   const handleAssignRoleFromModal = async () => {
-    console.log(selectedUser);
-
     if (!selectedUser) return;
     await handleAssignRole(selectedUser, roleToAssign);
     setOpenAssignRoleModal(false);
