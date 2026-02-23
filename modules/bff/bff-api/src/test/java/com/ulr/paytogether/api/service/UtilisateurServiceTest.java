@@ -91,29 +91,6 @@ class UtilisateurServiceTest {
         verify(utilisateurProvider, never()).sauvegarder(any());
     }
 
-    @Test
-    void testCreer_DevraitLancerExceptionSiNomManquant() {
-        // Given
-        UtilisateurModele utilisateurSansNom = UtilisateurModele.builder()
-                .prenom("Jean")
-                .email("jean@example.com")
-                .motDePasse("motDePasseSecurise123")
-                .role(RoleUtilisateur.UTILISATEUR)
-                .build();
-
-        doThrow(new IllegalArgumentException("L'attribut nom est obligatoire"))
-                .when(utilisateurValidator).validerPourCreation(utilisateurSansNom);
-
-        // When & Then
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> utilisateurService.creer(utilisateurSansNom)
-        );
-
-        assertEquals("L'attribut nom est obligatoire", exception.getMessage());
-        verify(utilisateurProvider, never()).sauvegarder(any());
-    }
-
     // ==================== Tests pour lireParUuid() ====================
 
     @Test

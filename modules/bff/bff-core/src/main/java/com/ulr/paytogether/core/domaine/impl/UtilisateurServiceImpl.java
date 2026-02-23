@@ -1,6 +1,7 @@
 package com.ulr.paytogether.core.domaine.impl;
 
 import com.ulr.paytogether.core.domaine.service.UtilisateurService;
+import com.ulr.paytogether.core.domaine.validator.UtilisateurValidator;
 import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
 import com.ulr.paytogether.core.provider.UtilisateurProvider;
@@ -21,14 +22,13 @@ import java.util.UUID;
 public class UtilisateurServiceImpl implements UtilisateurService {
 
     private final UtilisateurProvider utilisateurProvider;
+    private final UtilisateurValidator utilisateurValidator;
 
     @Override
     public UtilisateurModele creer(UtilisateurModele utilisateur) {
         log.info("Création d'un utilisateur: {}", utilisateur.getEmail());
 
-        if (utilisateurProvider.existeParEmail(utilisateur.getEmail())) {
-            throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà");
-        }
+        utilisateurValidator.validerPourCreation(utilisateur);
 
         return utilisateurProvider.sauvegarder(utilisateur);
     }
@@ -54,6 +54,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     @Override
     public UtilisateurModele mettreAJour(UUID uuid, UtilisateurModele utilisateur, String token) {
         log.info("Mise à jour de l'utilisateur: {}, token: {}", uuid, token);
+        utilisateurValidator.validerPourMiseAJour(utilisateur);
         return utilisateurProvider.mettreAJour(uuid, utilisateur, token);
     }
 

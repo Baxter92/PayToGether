@@ -89,16 +89,6 @@ public class UtilisateurValidator implements Validator {
             throw new IllegalArgumentException("L'utilisateur ne peut pas être null");
         }
 
-        // Validation du nom (obligatoire pour la création)
-        if (utilisateur.getNom() == null || utilisateur.getNom().isBlank()) {
-            throw new IllegalArgumentException("L'attribut nom est obligatoire");
-        }
-
-        // Validation du prénom (obligatoire pour la création)
-        if (utilisateur.getPrenom() == null || utilisateur.getPrenom().isBlank()) {
-            throw new IllegalArgumentException("L'attribut prenom est obligatoire");
-        }
-
         // Validation de l'email (obligatoire et format valide)
         if (utilisateur.getEmail() == null || utilisateur.getEmail().isBlank()) {
             throw new IllegalArgumentException("L'attribut email est obligatoire");
@@ -125,7 +115,17 @@ public class UtilisateurValidator implements Validator {
      * @throws IllegalArgumentException si une validation échoue
      */
     public void validerPourMiseAJour(UtilisateurModele utilisateur) {
-        valider(utilisateur);
+        if (utilisateur == null) {
+            throw new IllegalArgumentException("L'utilisateur ne peut pas être null");
+        }
+
+        // Validation de l'email (obligatoire et format valide)
+        if (utilisateur.getEmail() == null || utilisateur.getEmail().isBlank()) {
+            throw new IllegalArgumentException("L'attribut email est obligatoire");
+        }
+        if (!EMAIL_PATTERN.matcher(utilisateur.getEmail()).matches()) {
+            throw new IllegalArgumentException("L'email doit être valide");
+        }
 
         // Validation de l'UUID (obligatoire pour une mise à jour)
         if (utilisateur.getUuid() == null) {

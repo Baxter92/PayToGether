@@ -8,9 +8,9 @@ Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
-  "nom": "Dupont",
-  "prenom": "Jean",
-  "email": "jean.dupont@example.com",
+  "nom": "Paul",
+  "prenom": "Marc",
+  "email": "paul.marc@example.com",
   "motDePasse": "MotDePasse123!",
   "statut": "ACTIF",
   "role": "VENDEUR"
@@ -66,4 +66,31 @@ Authorization: Bearer {{access_token}}
 GET {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000/photo-profil/url
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
+
+### 10. Assigner un rôle à un utilisateur (PATCH)
+### Endpoint appelé par le frontend après upload réussi vers MinIO
+PATCH {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000/assign-role
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+{
+  "nomRole": "ADMIN"
+}
+
+### 11. Activer/Désactiver un utilisateur (PATCH)
+### Endpoint appelé par le frontend après upload réussi vers MinIO
+PATCH {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000/enable
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+{
+  "nomRole": "ADMIN"
+}
+
+### 12. modifier le mot de passe d'un utilisateur (PATCH)
+### Endpoint appelé par le frontend après upload réussi vers MinIO
+PATCH {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000/reset-password
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+{
+  "nouveauMotDePasse": "ADMIN"
+}
 

@@ -95,7 +95,6 @@ Authorization: Bearer {{access_token}}
 ### 6. Récupérer deals par statut (GET)
 GET {{base_url}}/api/deals/statut/PUBLIE
 Content-Type: application/json
-Authorization: Bearer {{access_token}}
 
 ### 7. Récupérer deals par créateur (GET)
 GET {{base_url}}/api/deals/createur/123e4567-e89b-12d3-a456-426614174001
@@ -135,5 +134,4 @@ Authorization: Bearer {{access_token}}
 ### Génère une URL présignée pour lire l'image depuis MinIO
 GET {{base_url}}/api/deals/villes
 Content-Type: application/json
-Authorization: Bearer {{access_token}}
 

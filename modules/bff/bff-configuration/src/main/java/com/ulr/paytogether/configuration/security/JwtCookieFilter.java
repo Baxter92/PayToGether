@@ -53,6 +53,9 @@ public class JwtCookieFilter extends OncePerRequestFilter {
         // Ne pas filtrer les endpoints publics
         return path.startsWith("/api/public/") ||
                path.startsWith("/api/auth/login") ||
+                path.startsWith("/api/auth/register") ||
+                path.startsWith("/api/deals/statut") ||
+                path.startsWith("/api/deals/villes") ||
                path.startsWith("/actuator/") ||
                path.startsWith("/swagger-ui/") ||
                path.startsWith("/v3/api-docs/") ||
