@@ -68,6 +68,7 @@ Authorization: Bearer {{access_token}}
 PATCH {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000/assign-role
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
+
 {
   "nomRole": "ADMIN"
 }

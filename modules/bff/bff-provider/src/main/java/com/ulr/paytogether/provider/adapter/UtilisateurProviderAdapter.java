@@ -1,5 +1,6 @@
 package com.ulr.paytogether.provider.adapter;
 
+import com.ulr.paytogether.core.enumeration.RoleUtilisateur;
 import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.enumeration.StatutUtilisateur;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
@@ -224,6 +225,10 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
         UtilisateurJpa utilisateur = jpaRepository.findById(utilisateurUuid)
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé pour l'UUID : " + utilisateurUuid));
 
+        RoleUtilisateur role = RoleUtilisateur.valueOf(nomRole);
+        utilisateur.setRole(role);
+        utilisateur.setDateModification(LocalDateTime.now());
+        jpaRepository.save(utilisateur);
         // Assigner le rôle dans Keycloak
         userApiClient.assignRoleToUser(token, utilisateur.getKeycloakId(), nomRole);
     }
