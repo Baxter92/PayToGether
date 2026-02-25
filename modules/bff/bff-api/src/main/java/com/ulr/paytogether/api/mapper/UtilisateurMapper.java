@@ -82,7 +82,7 @@ public class UtilisateurMapper {
                                 .urlImage(dto.getPhotoProfil())
                                 .build()
                         : null)
-                .statut(StatutUtilisateur.ACTIF)
+                .statut(StatutUtilisateur.INACTIF)
                 .role(dto.getRole())
                 .build();
     }

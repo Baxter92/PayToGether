@@ -42,8 +42,8 @@ Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
-  "nom": "Dupont test",
-  "prenom": "Jean-Claude"
+  "nom": "Dupont Ulrich",
+  "prenom": "Jean-Claude Marc"
 }
 
 ### 7. Supprimer un utilisateur (DELETE)
@@ -75,12 +75,12 @@ Authorization: Bearer {{access_token}}
 
 ### 11. Activer/Désactiver un utilisateur (PATCH)
 ### Endpoint appelé par le frontend après upload réussi vers MinIO
-PATCH {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000/enable
+PATCH {{base_url}}/api/utilisateurs/2a5d14a5-adf7-4dc8-9b15-2f7dce94df26/enable
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
-  "nomRole": "ADMIN"
+  "actif": true
 }
 
 ### 12. modifier le mot de passe d'un utilisateur (PATCH)

@@ -45,7 +45,7 @@ public class AuthResource {
      * Inscription d'un utilisateur
      */
     @PostMapping("/register")
-    public ResponseEntity<UtilisateurDTO> register(CreerUtilisateurDTO dto) {
+    public ResponseEntity<UtilisateurDTO> register( @RequestBody CreerUtilisateurDTO dto) {
         log.info("Requête de création de compte ");
 
         UtilisateurDTO cree = utilisateurApiAdapter.creer(dto);
