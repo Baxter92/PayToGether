@@ -1,4 +1,11 @@
 package com.ulr.paytogether.api.dto;
 
-public class MettreUtilisateurDto {
+import lombok.Builder;
+
+@Builder
+public record MettreUtilisateurDto(
+        String nom,
+        String prenom,
+        String photoProfil
+) {
 }

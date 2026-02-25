@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
@@ -118,21 +119,13 @@ public class UtilisateurValidator implements Validator {
      * @param utilisateur le modèle à valider
      * @throws ValidationException si une validation échoue
      */
-    public void validerPourMiseAJour(UtilisateurModele utilisateur) {
+    public void validerPourMiseAJour(UtilisateurModele utilisateur, UUID uuid) {
         if (utilisateur == null) {
             throw new ValidationException("utilisateur.null");
         }
 
-        // Validation de l'email (obligatoire et format valide)
-        if (utilisateur.getEmail() == null || utilisateur.getEmail().isBlank()) {
-            throw new ValidationException("utilisateur.email.obligatoire");
-        }
-        if (!EMAIL_PATTERN.matcher(utilisateur.getEmail()).matches()) {
-            throw new ValidationException("utilisateur.email.format");
-        }
-
         // Validation de l'UUID (obligatoire pour une mise à jour)
-        if (utilisateur.getUuid() == null) {
+        if (uuid == null) {
             throw new ValidationException("utilisateur.uuid.obligatoire");
         }
     }

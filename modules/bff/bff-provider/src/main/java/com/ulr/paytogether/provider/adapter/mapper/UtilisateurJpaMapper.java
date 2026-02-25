@@ -72,17 +72,16 @@ public class UtilisateurJpaMapper {
 
         entite.setNom(modele.getNom());
         entite.setPrenom(modele.getPrenom());
-        entite.setEmail(modele.getEmail());
 
         // Ne mettre à jour le mot de passe que s'il est fourni (sera haché dans l'adapter)
         if (modele.getMotDePasse() != null && !modele.getMotDePasse().isEmpty()) {
             entite.setMotDePasse(modele.getMotDePasse());
         }
-
-        entite.setStatut(modele.getStatut());
-        entite.setRole(modele.getRole());
-        entite.setPhotoProfil(modele.getPhotoProfil() != null
-                ? imageUtilisateurJpaMapper.versEntite(modele.getPhotoProfil())
-                : null);
+        if (modele.getStatut() != null) {
+            entite.setStatut(modele.getStatut());
+        }
+        if (modele.getPhotoProfil() != null) {
+            entite.setPhotoProfil(imageUtilisateurJpaMapper.versEntite(modele.getPhotoProfil()));
+        }
     }
 }

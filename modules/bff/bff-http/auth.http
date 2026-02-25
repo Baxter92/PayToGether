@@ -2,7 +2,7 @@
 
 ### Variables
 @username = jean.dupont@example.com
-@password = MotDePasse123!
+@password = MotDePasse123!@
 
 ### =========================================================================================
 ### 1. Login - Authentification d'un utilisateur

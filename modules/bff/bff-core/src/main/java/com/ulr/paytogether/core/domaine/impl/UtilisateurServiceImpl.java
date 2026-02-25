@@ -54,7 +54,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     @Override
     public UtilisateurModele mettreAJour(UUID uuid, UtilisateurModele utilisateur, String token) {
         log.info("Mise à jour de l'utilisateur: {}, token: {}", uuid, token);
-        utilisateurValidator.validerPourMiseAJour(utilisateur);
+        utilisateurValidator.validerPourMiseAJour(utilisateur, uuid);
         return utilisateurProvider.mettreAJour(uuid, utilisateur, token);
     }
 

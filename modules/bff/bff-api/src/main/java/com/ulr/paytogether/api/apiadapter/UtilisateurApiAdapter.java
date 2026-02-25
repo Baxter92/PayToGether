@@ -1,6 +1,7 @@
 package com.ulr.paytogether.api.apiadapter;
 
 import com.ulr.paytogether.api.dto.CreerUtilisateurDTO;
+import com.ulr.paytogether.api.dto.MettreUtilisateurDto;
 import com.ulr.paytogether.api.dto.UtilisateurDTO;
 import com.ulr.paytogether.api.mapper.UtilisateurMapper;
 import com.ulr.paytogether.core.domaine.service.UtilisateurService;
@@ -75,10 +76,10 @@ public class UtilisateurApiAdapter {
     /**
      * Mettre à jour un utilisateur
      */
-    public UtilisateurDTO mettreAJour(UUID uuid, UtilisateurDTO dto, String token) {
+    public UtilisateurDTO mettreAJour(UUID uuid, MettreUtilisateurDto dto, String token) {
         log.info("ApiAdapter - Mise à jour utilisateur: {}", uuid);
 
-        UtilisateurModele modele = mapper.dtoVersModele(dto);
+        UtilisateurModele modele = mapper.dtoVersModelePourMiseAJour(dto);
         UtilisateurModele mis_a_jour = utilisateurService.mettreAJour(uuid, modele, token);
 
         return mapper.modeleVersDto(mis_a_jour);

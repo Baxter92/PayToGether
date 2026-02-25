@@ -86,7 +86,7 @@ public class UtilisateurResource {
     @PutMapping("/{uuid}")
     public ResponseEntity<UtilisateurDTO> mettreAJour(
             @PathVariable UUID uuid,
-            @RequestBody UtilisateurDTO dto, JwtAuthenticationToken token) {
+            @RequestBody MettreUtilisateurDto dto, JwtAuthenticationToken token) {
         log.info("Mise à jour de l'utilisateur: {}", uuid);
 
         try {

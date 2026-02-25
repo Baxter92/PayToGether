@@ -1,6 +1,7 @@
 package com.ulr.paytogether.api.mapper;
 
 import com.ulr.paytogether.api.dto.CreerUtilisateurDTO;
+import com.ulr.paytogether.api.dto.MettreUtilisateurDto;
 import com.ulr.paytogether.api.dto.UtilisateurDTO;
 import com.ulr.paytogether.core.enumeration.RoleUtilisateur;
 import com.ulr.paytogether.core.enumeration.StatutUtilisateur;
@@ -83,6 +84,22 @@ public class UtilisateurMapper {
                         : null)
                 .statut(StatutUtilisateur.ACTIF)
                 .role(dto.getRole())
+                .build();
+    }
+
+    public UtilisateurModele dtoVersModelePourMiseAJour(MettreUtilisateurDto dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        return UtilisateurModele.builder()
+                .nom(dto.nom())
+                .prenom(dto.prenom())
+                .photoProfil(dto.photoProfil() != null ?
+                        ImageUtilisateurModele.builder()
+                                .urlImage(dto.photoProfil())
+                                .build()
+                        : null)
                 .build();
     }
 }
