@@ -3,6 +3,7 @@ package com.ulr.paytogether.api.resource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ulr.paytogether.api.apiadapter.UtilisateurApiAdapter;
 import com.ulr.paytogether.api.dto.CreerUtilisateurDTO;
+import com.ulr.paytogether.api.dto.MettreUtilisateurDto;
 import com.ulr.paytogether.api.dto.UtilisateurDTO;
 import com.ulr.paytogether.core.enumeration.RoleUtilisateur;
 import com.ulr.paytogether.core.enumeration.StatutUtilisateur;
@@ -261,7 +262,7 @@ class UtilisateurResourceTest {
                 .role(RoleUtilisateur.UTILISATEUR)
                 .build();
 
-        when(apiAdapter.mettreAJour(eq(uuidUtilisateur), any(UtilisateurDTO.class), anyString()))
+        when(apiAdapter.mettreAJour(eq(uuidUtilisateur), any(MettreUtilisateurDto.class), anyString()))
                 .thenReturn(utilisateurMisAJour);
 
         // When & Then
@@ -271,14 +272,14 @@ class UtilisateurResourceTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.prenom").value("Jean-Claude"));
 
-        verify(apiAdapter, times(1)).mettreAJour(eq(uuidUtilisateur), any(UtilisateurDTO.class), anyString());
+        verify(apiAdapter, times(1)).mettreAJour(eq(uuidUtilisateur), any(MettreUtilisateurDto.class), anyString());
     }
 
     @Test
     void testMettreAJour_DevraitRetourner404SiUtilisateurNonTrouve() throws Exception {
         // Given
         UUID uuidInexistant = UUID.randomUUID();
-        when(apiAdapter.mettreAJour(eq(uuidInexistant), any(UtilisateurDTO.class), anyString()))
+        when(apiAdapter.mettreAJour(eq(uuidInexistant), any(MettreUtilisateurDto.class), anyString()))
                 .thenThrow(new RuntimeException("Utilisateur non trouvé"));
 
         // When & Then
@@ -287,7 +288,7 @@ class UtilisateurResourceTest {
                         .content(objectMapper.writeValueAsString(utilisateurDTO)))
                 .andExpect(status().isNotFound());
 
-        verify(apiAdapter, times(1)).mettreAJour(eq(uuidInexistant), any(UtilisateurDTO.class), anyString());
+        verify(apiAdapter, times(1)).mettreAJour(eq(uuidInexistant), any(MettreUtilisateurDto.class), anyString());
     }
 
     // ==================== Tests pour DELETE /api/utilisateurs/{uuid} ====================
@@ -431,7 +432,7 @@ class UtilisateurResourceTest {
     @Test
     void testMettreAJour_DevraitRetournerConflitSiConcurrence() throws Exception {
         // Given
-        when(apiAdapter.mettreAJour(eq(uuidUtilisateur), any(UtilisateurDTO.class), anyString()))
+        when(apiAdapter.mettreAJour(eq(uuidUtilisateur), any(MettreUtilisateurDto.class), anyString()))
                 .thenThrow(new RuntimeException("Conflit de version"));
 
         // When & Then

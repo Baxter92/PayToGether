@@ -211,7 +211,7 @@ class UtilisateurServiceTest {
                 .role(RoleUtilisateur.UTILISATEUR)
                 .build();
 
-        doNothing().when(utilisateurValidator).validerPourMiseAJour(any(UtilisateurModele.class));
+        doNothing().when(utilisateurValidator).validerPourMiseAJour(any(UtilisateurModele.class), any());
         when(utilisateurProvider.mettreAJour(uuidUtilisateur, utilisateurMisAJour, anyString())).thenReturn(utilisateurMisAJour);
 
         // When
@@ -220,7 +220,7 @@ class UtilisateurServiceTest {
         // Then
         assertNotNull(resultat);
         assertEquals("Jean-Claude", resultat.getPrenom());
-        verify(utilisateurValidator, times(1)).validerPourMiseAJour(utilisateurMisAJour);
+        verify(utilisateurValidator, times(1)).validerPourMiseAJour(utilisateurMisAJour, UUID.randomUUID());
         verify(utilisateurProvider, times(1)).mettreAJour(uuidUtilisateur, utilisateurMisAJour, anyString());
     }
 
@@ -228,7 +228,7 @@ class UtilisateurServiceTest {
     void testMettreAJour_DevraitLancerExceptionSiValidationEchoue() {
         // Given
         doThrow(new IllegalArgumentException("L'attribut uuid est obligatoire"))
-                .when(utilisateurValidator).validerPourMiseAJour(any(UtilisateurModele.class));
+                .when(utilisateurValidator).validerPourMiseAJour(any(UtilisateurModele.class), null);
 
         // When & Then
         IllegalArgumentException exception = assertThrows(
@@ -237,7 +237,7 @@ class UtilisateurServiceTest {
         );
 
         assertEquals("L'attribut uuid est obligatoire", exception.getMessage());
-        verify(utilisateurValidator, times(1)).validerPourMiseAJour(utilisateur);
+        verify(utilisateurValidator, times(1)).validerPourMiseAJour(utilisateur, null);
         verify(utilisateurProvider, never()).mettreAJour(any(), any(), anyString());
     }
 

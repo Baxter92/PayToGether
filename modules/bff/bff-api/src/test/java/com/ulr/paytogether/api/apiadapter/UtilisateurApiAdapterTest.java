@@ -1,6 +1,7 @@
 package com.ulr.paytogether.api.apiadapter;
 
 import com.ulr.paytogether.api.dto.CreerUtilisateurDTO;
+import com.ulr.paytogether.api.dto.MettreUtilisateurDto;
 import com.ulr.paytogether.api.dto.UtilisateurDTO;
 import com.ulr.paytogether.api.mapper.UtilisateurMapper;
 import com.ulr.paytogether.core.domaine.service.UtilisateurService;
@@ -170,31 +171,33 @@ class UtilisateurApiAdapterTest {
     @Test
     void testMettreAJour_DevraitMettreAJourUtilisateur() {
         // Given
-        UtilisateurDTO utilisateurModifieDTO = UtilisateurDTO.builder()
-                .uuid(uuidUtilisateur)
+        MettreUtilisateurDto mettreUtilisateurDto = MettreUtilisateurDto.builder()
                 .nom("Durand")
                 .prenom("Jacques")
-                .email("jacques.durand@example.com")
                 .build();
         UtilisateurModele utilisateurModifieModele = UtilisateurModele.builder()
-                .uuid(uuidUtilisateur)
                 .nom("Durand")
                 .prenom("Jacques")
-                .email("jacques.durand@example.com")
                 .build();
 
-        when(mapper.dtoVersModele(utilisateurModifieDTO)).thenReturn(utilisateurModifieModele);
+        UtilisateurDTO utilisateurModifieDTO = UtilisateurDTO.builder()
+                .uuid(UUID.randomUUID())
+                .nom("Durand")
+                .prenom("Jacques")
+                .build();
+
+        when(mapper.dtoVersModelePourMiseAJour(mettreUtilisateurDto)).thenReturn(utilisateurModifieModele);
         when(utilisateurService.mettreAJour(eq(uuidUtilisateur), any(UtilisateurModele.class), anyString()))
                 .thenReturn(utilisateurModifieModele);
         when(mapper.modeleVersDto(utilisateurModifieModele)).thenReturn(utilisateurModifieDTO);
 
         // When
-        UtilisateurDTO resultat = apiAdapter.mettreAJour(uuidUtilisateur, utilisateurModifieDTO, "token");
+        UtilisateurDTO resultat = apiAdapter.mettreAJour(uuidUtilisateur, mettreUtilisateurDto, "token");
 
         // Then
         assertNotNull(resultat);
         assertEquals("Durand", resultat.getNom());
-        verify(mapper, times(1)).dtoVersModele(utilisateurModifieDTO);
+        verify(mapper, times(1)).dtoVersModelePourMiseAJour(mettreUtilisateurDto);
         verify(utilisateurService, times(1)).mettreAJour(eq(uuidUtilisateur), any(UtilisateurModele.class), anyString());
         verify(mapper, times(1)).modeleVersDto(utilisateurModifieModele);
     }
