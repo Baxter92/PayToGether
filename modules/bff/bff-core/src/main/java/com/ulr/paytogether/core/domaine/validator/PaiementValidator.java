@@ -1,5 +1,6 @@
 package com.ulr.paytogether.core.domaine.validator;
 
+import com.ulr.paytogether.core.enumeration.StatutPaiement;
 import com.ulr.paytogether.core.exception.ValidationException;
 import com.ulr.paytogether.core.modele.PaiementModele;
 import org.springframework.stereotype.Component;
@@ -32,19 +33,10 @@ public class PaiementValidator {
             throw new ValidationException("paiement.montant.positif");
         }
 
-        // Validation de la méthode de paiement (obligatoire)
-        if (paiement.getMethode() == null) {
-            throw new ValidationException("paiement.methode.obligatoire");
-        }
 
         // Validation du statut (obligatoire)
         if (paiement.getStatut() == null) {
             throw new ValidationException("paiement.statut.obligatoire");
-        }
-
-        // Validation du type de paiement (obligatoire)
-        if (paiement.getType() == null) {
-            throw new ValidationException("paiement.type.obligatoire");
         }
 
         // Validation de l'utilisateur (obligatoire)
@@ -90,14 +82,10 @@ public class PaiementValidator {
         }
 
         // Vérifier que le paiement est réussi
-        if (paiement.getStatut() != com.ulr.paytogether.core.enumeration.StatutPaiement.REUSSI) {
+        if (paiement.getStatut() != StatutPaiement.CONFIRME) {
             throw new ValidationException("paiement.doit.etre.reussi");
         }
 
-        // Vérifier que le paiement n'est pas déjà remboursé
-        if (paiement.getStatut() == com.ulr.paytogether.core.enumeration.StatutPaiement.REMBOURSE) {
-            throw new ValidationException("paiement.deja.rembourse");
-        }
     }
 
     /**
