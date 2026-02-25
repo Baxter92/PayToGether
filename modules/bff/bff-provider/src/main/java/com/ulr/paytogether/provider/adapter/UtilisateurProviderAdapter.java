@@ -90,6 +90,7 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
                 .map(utilisateurExistant -> {
                     // Mettre à jour les champs modifiables
                     mapper.mettreAJour(utilisateurExistant, utilisateur);
+                    utilisateurExistant.setUuid(uuid);
 
                     // Mettre à jour l'utilisateur dans Keycloak
                     mettreAjourKeycloakUtilisateur(token, utilisateurExistant);
@@ -109,7 +110,6 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
         UserRequest userRequest = UserRequest.builder()
                 .firstName(sauvegarde.getPrenom())
                 .lastName(sauvegarde.getNom())
-                .username(sauvegarde.getEmail())
                 .build();
         userApiClient.updateUser(token, sauvegarde.getKeycloakId(), userRequest);
     }

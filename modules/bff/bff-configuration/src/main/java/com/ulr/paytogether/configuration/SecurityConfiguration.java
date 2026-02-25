@@ -82,8 +82,7 @@ public class SecurityConfiguration {
                                 path.startsWith("/api/deals/villes") ||
                                 path.startsWith("/actuator/") ||
                                 path.startsWith("/swagger-ui/") ||
-                                path.startsWith("/v3/api-docs/") ||
-                                (path.equals("/api/utilisateurs") && "POST".equals(method))) {
+                                path.startsWith("/v3/api-docs/")) {
                                 response.setStatus(HttpServletResponse.SC_OK);
                                 return;
                             }
@@ -102,8 +101,7 @@ public class SecurityConfiguration {
                                     path.startsWith("/api/deals/villes") ||
                                 path.startsWith("/actuator/") ||
                                 path.startsWith("/swagger-ui/") ||
-                                path.startsWith("/v3/api-docs/") ||
-                                (path.equals("/api/utilisateurs") && "POST".equals(method))) {
+                                path.startsWith("/v3/api-docs/")) {
                                 return null;
                             }
                             return new DefaultBearerTokenResolver().resolve(request);

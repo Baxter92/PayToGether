@@ -58,7 +58,6 @@ public class JwtCookieFilter extends OncePerRequestFilter {
                 path.startsWith("/api/deals/villes") ||
                path.startsWith("/actuator/") ||
                path.startsWith("/swagger-ui/") ||
-               path.startsWith("/v3/api-docs/") ||
-               (path.equals("/api/utilisateurs") && "POST".equals(method));
+               path.startsWith("/v3/api-docs/");
     }
 }

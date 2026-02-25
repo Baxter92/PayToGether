@@ -9,8 +9,8 @@ Authorization: Bearer {{access_token}}
 
 {
   "nom": "Paul",
-  "prenom": "Marc",
-  "email": "paul.marc@example.com",
+  "prenom": "Test",
+  "email": "paul.test@example.com",
   "motDePasse": "MotDePasse123!",
   "statut": "ACTIF",
   "role": "VENDEUR"
@@ -42,7 +42,7 @@ Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
-  "nom": "Dupont M",
+  "nom": "Dupont test",
   "prenom": "Jean-Claude"
 }
 

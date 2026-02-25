@@ -95,12 +95,13 @@ public class AuthProviderAdapter implements AuthProvider {
             // Récupérer les détails de l'utilisateur depuis Keycloak
             UserResponse userResponse = userApiClient.getUser(token, username);
 
+            UtilisateurJpa utilisateurJpa = utilisateurJpaOptional.orElse(null);
             return MeResponseModele.builder()
-                    .id(userResponse.getId())
+                    .id(utilisateurJpa != null ? utilisateurJpa.getUuid().toString() : userResponse.getId())
                     .username(userResponse.getUsername())
                     .email(userResponse.getEmail())
-                    .prenom(userResponse.getFirstName())
-                    .nom(userResponse.getLastName())
+                    .prenom(utilisateurJpa != null ? utilisateurJpa.getPrenom() : userResponse.getFirstName())
+                    .nom(utilisateurJpa != null ? utilisateurJpa.getNom() : userResponse.getLastName())
                     .actif(userResponse.isEnabled())
                     .emailVerifie(userResponse.isEmailVerified())
                     .dateCreationTimestamp(userResponse.getCreatedTimestamp())
