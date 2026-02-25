@@ -39,7 +39,7 @@ export interface CreateUtilisateurDTO {
 }
 
 // Backend: UtilisateurDTO utilise en update (PUT /utilisateurs/{uuid})
-export type UpdateUtilisateurDTO = Omit<UtilisateurDTO, "uuid">;
+export type UpdateUtilisateurDTO = Partial<Omit<UtilisateurDTO, "uuid">>;
 
 // Backend: ReinitialiserMotDePasseDTO (PATCH /utilisateurs/{uuid}/reset-password)
 export interface ReinitialiserMotDePasseDTO {

@@ -37,5 +37,6 @@
   "firstNameLabel": "Prénom",
   "lastNameLabel": "Nom",
   "phoneLabel": "Téléphone",
-  "changePassword": "Modifier le mot de passe"
+  "changePassword": "Modifier le mot de passe",
+  "changePasswordDescription": "Définissez un nouveau mot de passe pour votre compte."
 }

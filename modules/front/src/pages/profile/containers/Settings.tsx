@@ -3,7 +3,10 @@ import { useI18n } from "@hooks/useI18n";
 import Form, { type IFieldConfig } from "@/common/containers/Form";
 import { Heading } from "@/common/containers/Heading";
 import { useAuth } from "@/common/context/AuthContext";
-import { useResetUserPassword } from "@/common/api/hooks/useUtilisateurs";
+import {
+  useResetUserPassword,
+  useUpdateUser,
+} from "@/common/api/hooks/useUtilisateurs";
 import { Button } from "@/common/components/ui/button";
 import {
   Dialog,
@@ -14,45 +17,67 @@ import {
 } from "@/common/components/ui/dialog";
 import { toast } from "sonner";
 import * as z from "zod";
+import type { UpdateUtilisateurDTO } from "@/common/api";
 
 type PasswordFormValues = {
   nouveauMotDePasse: string;
 };
 
 export default function Settings() {
-  const { t } = useI18n("profile");
-  const { user } = useAuth();
+  const { t } = useI18n();
+  const { user, logout } = useAuth();
   const [openChangePasswordModal, setOpenChangePasswordModal] = useState(false);
   const { mutateAsync: resetUserPassword, isPending: isResettingPassword } =
     useResetUserPassword();
+  const { mutateAsync: updateUser, isPending: isUpdatingUser } =
+    useUpdateUser();
 
   const fields: IFieldConfig[] = [
     {
       name: "email",
-      label: t("emailLabel"),
+      label: t("profile:emailLabel"),
       type: "email",
       placeholder: "Email",
       readOnly: true,
     },
     {
-      name: "firstName",
-      label: t("firstNameLabel"),
+      name: "prenom",
+      label: t("profile:firstNameLabel"),
       type: "text",
-      placeholder: t("firstNameLabel"),
+      placeholder: t("profile:firstNameLabel"),
     },
     {
-      name: "lastName",
-      label: t("lastNameLabel"),
+      name: "nom",
+      label: t("profile:lastNameLabel"),
       type: "text",
-      placeholder: t("lastNameLabel"),
+      placeholder: t("profile:lastNameLabel"),
     },
-    {
-      name: "phone",
-      label: t("phoneLabel"),
-      type: "text",
-      placeholder: t("phoneLabel"),
-    },
+    // {
+    //   name: "phone",
+    //   label: t("profile:phoneLabel"),
+    //   type: "text",
+    //   placeholder: t("profile:phoneLabel"),
+    // },
   ];
+
+  const handleUpdateUser = async (data: UpdateUtilisateurDTO) => {
+    if (!user?.id) {
+      logout();
+      return;
+    }
+    // delete data?.email;
+    try {
+      await updateUser({
+        id: user.id,
+        data,
+      });
+      toast.success("Profil mis à jour");
+    } catch (err: any) {
+      toast.error("Erreur lors de la mise à jour du profil", {
+        description: err?.message ?? "Une erreur est survenue",
+      });
+    }
+  };
 
   const handleChangePassword = async (data: PasswordFormValues) => {
     if (!user?.id) {
@@ -78,29 +103,31 @@ export default function Settings() {
     <section>
       <Heading
         level={2}
-        title={t("settingsTitle")}
-        description={t("settingsDescription")}
+        title={t("profile:settingsTitle")}
+        description={t("profile:settingsDescription")}
         underline
       />
       <Form
         fields={fields}
         schema={z.object({
           email: z.email(),
-          firstName: z.string(),
-          lastName: z.string(),
-          phone: z.string(),
+          prenom: z.string(),
+          nom: z.string(),
         })}
         defaultValues={{
           email: user?.email,
-          firstName: user?.name,
-          lastName: user?.name,
+          prenom: user?.prenom,
+          nom: user?.nom,
         }}
-        onSubmit={(data) => console.log(data)}
+        onSubmit={async ({ data }) => {
+          await handleUpdateUser(data as UpdateUtilisateurDTO);
+        }}
+        isLoading={isUpdatingUser}
       />
 
       <div className="mt-6">
         <Button onClick={() => setOpenChangePasswordModal(true)}>
-          {t("changePassword")}
+          {t("profile:changePassword")}
         </Button>
       </div>
 
@@ -110,9 +137,9 @@ export default function Settings() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("changePassword")}</DialogTitle>
+            <DialogTitle>{t("profile:changePassword")}</DialogTitle>
             <DialogDescription>
-              Définissez un nouveau mot de passe.
+              {t("profile:changePasswordDescription")}
             </DialogDescription>
           </DialogHeader>
 
@@ -120,9 +147,9 @@ export default function Settings() {
             fields={[
               {
                 name: "nouveauMotDePasse",
-                label: t("changePassword"),
+                label: t("profile:changePassword"),
                 type: "password",
-                placeholder: t("auth.password"),
+                placeholder: t("auth:password"),
               },
             ]}
             schema={z.object({
@@ -132,7 +159,7 @@ export default function Settings() {
             onSubmit={async ({ data }) => {
               await handleChangePassword(data);
             }}
-            submitLabel={t("changePassword")}
+            submitLabel={t("profile:changePassword")}
             isLoading={isResettingPassword}
             showResetButton={false}
           />
