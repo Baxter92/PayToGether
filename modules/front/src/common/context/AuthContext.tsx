@@ -27,6 +27,8 @@ export interface IUser {
 
 export interface IAuthContextType {
   user: IUser | null;
+  roles: string[];
+  role: IUser["role"] | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<IUser>;
   register: (email: string, password: string, name: string) => Promise<void>;
@@ -49,6 +51,9 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<IUser | null>(null);
+  const [roles, setRoles] = useState<string[]>([]);
+  const [role, setRole] = useState<IUser["role"] | null>(null);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -58,10 +63,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const mapRole = (roles: string[] | undefined): IUser["role"] => {
     const normalized = (roles ?? []).map((role) => role.toUpperCase());
 
-    if (
-      normalized.includes("ADMIN") ||
-      normalized.includes("ROLE_ADMIN")
-    ) {
+    if (normalized.includes("ADMIN") || normalized.includes("ROLE_ADMIN")) {
       return "admin";
     }
 
@@ -102,8 +104,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const toAuthErrorMessage = (error: unknown): string => {
     if (error instanceof HttpError) {
-      if (error.status === 401) return "auth.invalidCredentials";
-      if (error.status >= 500) return "auth.serverError";
+      if (error.status === 401) return "auth:invalidCredentials";
+      if (error.status >= 500) return "auth:serverError";
       return "auth.loginError";
     }
 
@@ -120,11 +122,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
 
       const me = await authService.me();
-      setUser(mapMeToUser(me));
+      const userData = mapMeToUser(me);
+      setUser(userData);
+      setRoles(userData.roles);
+      setRole(userData.role);
     } catch (error) {
       console.error("Auth check failed:", error);
       await localTokenStorage.clear();
       setUser(null);
+      setRoles([]);
+      setRole(null);
     } finally {
       setLoading(false);
     }
@@ -133,7 +140,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const login = async (email: string, password: string): Promise<IUser> => {
     try {
       if (!email || !password) {
-        throw new Error("auth.invalidCredentials");
+        throw new Error("auth:invalidCredentials");
       }
 
       const loginResponse = await authService.login(email, password);
@@ -149,6 +156,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const me = await authService.me();
       const userData = mapMeToUser(me);
       setUser(userData);
+      setRoles(userData.roles);
+      setRole(userData.role);
       return userData;
     } catch (error) {
       throw new Error(toAuthErrorMessage(error));
@@ -183,6 +192,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     login,
     register,
     logout,
+    roles,
+    role,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

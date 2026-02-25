@@ -8,7 +8,7 @@ import { useI18n } from "@hooks/useI18n";
 export default function Register() {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const { t } = useI18n();
+  const { t } = useI18n("auth");
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -24,12 +24,12 @@ export default function Register() {
     setError("");
 
     if (password !== confirmPassword) {
-      setError(t("auth.passwordMismatch"));
+      setError(t("passwordMismatch"));
       return;
     }
 
     if (password.length < 6) {
-      setError(t("auth.passwordTooShort"));
+      setError(t("passwordTooShort"));
       return;
     }
 
@@ -39,7 +39,7 @@ export default function Register() {
       await login(email, password);
       navigate(PATHS.HOME, { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("auth.registerError"));
+      setError(err instanceof Error ? err.message : t("registerError"));
     } finally {
       setLoading(false);
     }
@@ -52,14 +52,16 @@ export default function Register() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
             <UserPlus className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">{t("auth.registerTitle")}</h1>
-          <p className="text-gray-600 mt-2">{t("auth.registerSubtitle")}</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {t("registerTitle")}
+          </h1>
+          <p className="text-gray-600 mt-2">{t("registerSubtitle")}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("auth.fullName")}
+              {t("fullName")}
             </label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -68,7 +70,7 @@ export default function Register() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                placeholder={t("auth.fullNamePlaceholder")}
+                placeholder={t("fullNamePlaceholder")}
                 required
               />
             </div>
@@ -76,7 +78,7 @@ export default function Register() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("auth.email")}
+              {t("email")}
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -85,7 +87,7 @@ export default function Register() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                placeholder={t("auth.emailPlaceholder")}
+                placeholder={t("emailPlaceholder")}
                 required
               />
             </div>
@@ -93,7 +95,7 @@ export default function Register() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("auth.password")}
+              {t("password")}
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -102,7 +104,7 @@ export default function Register() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-11 pr-11 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                placeholder={t("auth.passwordPlaceholder")}
+                placeholder={t("passwordPlaceholder")}
                 required
                 minLength={6}
               />
@@ -111,14 +113,18 @@ export default function Register() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
               </button>
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("auth.confirmPassword")}
+              {t("confirmPassword")}
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -127,7 +133,7 @@ export default function Register() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full pl-11 pr-11 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                placeholder={t("auth.passwordPlaceholder")}
+                placeholder={t("passwordPlaceholder")}
                 required
                 minLength={6}
               />
@@ -136,7 +142,11 @@ export default function Register() {
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
-                {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                {showConfirmPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
               </button>
             </div>
           </div>
@@ -157,21 +167,24 @@ export default function Register() {
             ) : (
               <>
                 <UserPlus className="w-5 h-5" />
-                {t("auth.registerButton")}
+                {t("registerButton")}
               </>
             )}
           </button>
         </form>
 
         <div className="mt-6 text-center">
-          <Link to={PATHS.LOGIN} className="text-primary hover:text-primary/80 text-sm font-medium">
-            {t("auth.hasAccountSignIn")}
+          <Link
+            to={PATHS.LOGIN}
+            className="text-primary hover:text-primary/80 text-sm font-medium"
+          >
+            {t("hasAccountSignIn")}
           </Link>
         </div>
 
         <div className="mt-6 pt-6 border-t border-gray-200">
           <p className="text-xs text-gray-500 text-center">
-            {t("auth.termsNotice")}
+            {t("termsNotice")}
           </p>
         </div>
       </div>

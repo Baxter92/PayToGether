@@ -65,7 +65,7 @@ export default function Settings() {
       logout();
       return;
     }
-    // delete data?.email;
+    delete data?.email;
     try {
       await updateUser({
         id: user.id,
