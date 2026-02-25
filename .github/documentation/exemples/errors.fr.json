@@ -1,0 +1,284 @@
+{
+  "errors": {
+    "validation": {
+      "champ": {
+        "invalide": "Ce champ est invalide"
+      }
+    },
+    "erreur": {
+      "interne": "Une erreur interne s'est produite. Veuillez réessayer."
+    },
+    "deal": {
+      "null": "Le deal ne peut pas être vide",
+      "uuid": {
+        "obligatoire": "L'identifiant du deal est obligatoire"
+      },
+      "titre": {
+        "obligatoire": "Le titre du deal est obligatoire"
+      },
+      "prixDeal": {
+        "obligatoire": "Le prix du deal est obligatoire",
+        "positif": "Le prix du deal doit être supérieur à zéro"
+      },
+      "prixPart": {
+        "obligatoire": "Le prix par part est obligatoire",
+        "positif": "Le prix par part doit être supérieur à zéro"
+      },
+      "nbParticipants": {
+        "obligatoire": "Le nombre de participants est obligatoire",
+        "positif": "Le nombre de participants doit être supérieur à zéro"
+      },
+      "dateFin": {
+        "obligatoire": "La date de fin est obligatoire",
+        "coherence": "La date de fin doit être postérieure à la date de début"
+      },
+      "statut": {
+        "obligatoire": "Le statut du deal est obligatoire"
+      },
+      "createurUuid": {
+        "obligatoire": "Le créateur du deal est obligatoire"
+      },
+      "categorieUuid": {
+        "obligatoire": "La catégorie du deal est obligatoire"
+      },
+      "listeImages": {
+        "obligatoire": "Au moins une image est requise pour le deal"
+      },
+      "ville": {
+        "obligatoire": "La ville est obligatoire"
+      },
+      "description": {
+        "longueur": "La description ne peut pas dépasser {{0}} caractères"
+      },
+      "non": {
+        "trouve": "Deal non trouvé : {{0}}"
+      }
+    },
+    "utilisateur": {
+      "null": "L'utilisateur ne peut pas être vide",
+      "uuid": {
+        "obligatoire": "L'identifiant de l'utilisateur est obligatoire"
+      },
+      "email": {
+        "obligatoire": "L'adresse email est obligatoire",
+        "format": "Le format de l'email est invalide",
+        "existe": "Cet email est déjà utilisé : {{0}}"
+      },
+      "motDePasse": {
+        "obligatoire": "Le mot de passe est obligatoire",
+        "longueur": "Le mot de passe doit contenir au moins {{0}} caractères"
+      },
+      "role": {
+        "obligatoire": "Le rôle de l'utilisateur est obligatoire"
+      },
+      "nom": {
+        "obligatoire": "Le nom est obligatoire"
+      },
+      "prenom": {
+        "obligatoire": "Le prénom est obligatoire"
+      },
+      "non": {
+        "trouve": "Utilisateur non trouvé : {{0}}"
+      }
+    },
+    "categorie": {
+      "null": "La catégorie ne peut pas être vide",
+      "uuid": {
+        "obligatoire": "L'identifiant de la catégorie est obligatoire"
+      },
+      "nom": {
+        "obligatoire": "Le nom de la catégorie est obligatoire",
+        "longueur": "Le nom ne peut pas dépasser {{0}} caractères"
+      },
+      "non": {
+        "trouve": "Catégorie non trouvée : {{0}}"
+      }
+    },
+    "publicite": {
+      "null": "La publicité ne peut pas être vide",
+      "uuid": {
+        "obligatoire": "L'identifiant de la publicité est obligatoire"
+      },
+      "titre": {
+        "obligatoire": "Le titre de la publicité est obligatoire",
+        "longueur": "Le titre ne peut pas dépasser {{0}} caractères"
+      },
+      "description": {
+        "longueur": "La description ne peut pas dépasser {{0}} caractères"
+      },
+      "lienExterne": {
+        "obligatoire": "Le lien externe est obligatoire"
+      },
+      "dateDebut": {
+        "obligatoire": "La date de début est obligatoire"
+      },
+      "dateFin": {
+        "obligatoire": "La date de fin est obligatoire",
+        "coherence": "La date de fin doit être postérieure à la date de début"
+      },
+      "listeImages": {
+        "obligatoire": "Au moins une image est requise pour la publicité"
+      },
+      "deja": {
+        "active": "La publicité est déjà active",
+        "inactive": "La publicité est déjà inactive"
+      },
+      "expiree": {
+        "impossible": {
+          "activation": "Impossible d'activer une publicité expirée"
+        }
+      },
+      "non": {
+        "trouve": "Publicité non trouvée : {{0}}"
+      }
+    },
+    "commande": {
+      "null": "La commande ne peut pas être vide",
+      "uuid": {
+        "obligatoire": "L'identifiant de la commande est obligatoire"
+      },
+      "montantTotal": {
+        "obligatoire": "Le montant total de la commande est obligatoire",
+        "positif": "Le montant total doit être supérieur à zéro"
+      },
+      "statut": {
+        "obligatoire": "Le statut de la commande est obligatoire"
+      },
+      "utilisateurUuid": {
+        "obligatoire": "L'utilisateur de la commande est obligatoire"
+      },
+      "dealUuid": {
+        "obligatoire": "Le deal de la commande est obligatoire"
+      },
+      "deja": {
+        "annulee": "Cette commande est déjà annulée"
+      },
+      "doit": {
+        "etre": {
+          "en": {
+            "cours": "La commande doit être en cours pour être confirmée"
+          },
+          "confirmee": "La commande doit être confirmée pour être payée"
+        }
+      },
+      "non": {
+        "trouve": "Commande non trouvée : {{0}}"
+      }
+    },
+    "commentaire": {
+      "null": "Le commentaire ne peut pas être vide",
+      "uuid": {
+        "obligatoire": "L'identifiant du commentaire est obligatoire"
+      },
+      "contenu": {
+        "obligatoire": "Le contenu du commentaire est obligatoire",
+        "longueur": {
+          "min": "Le contenu doit contenir au moins {{0}} caractère",
+          "max": "Le contenu ne peut pas dépasser {{0}} caractères"
+        }
+      },
+      "utilisateurUuid": {
+        "obligatoire": "L'utilisateur du commentaire est obligatoire"
+      },
+      "dealUuid": {
+        "obligatoire": "Le deal du commentaire est obligatoire"
+      },
+      "non": {
+        "trouve": "Commentaire non trouvé : {{0}}"
+      }
+    },
+    "adresse": {
+      "null": "L'adresse ne peut pas être vide",
+      "uuid": {
+        "obligatoire": "L'identifiant de l'adresse est obligatoire"
+      },
+      "rue": {
+        "obligatoire": "La rue est obligatoire",
+        "longueur": "La rue ne peut pas dépasser {{0}} caractères"
+      },
+      "ville": {
+        "obligatoire": "La ville est obligatoire",
+        "longueur": "La ville ne peut pas dépasser {{0}} caractères"
+      },
+      "province": {
+        "obligatoire": "La province est obligatoire",
+        "longueur": "La province ne peut pas dépasser {{0}} caractères"
+      },
+      "codePostal": {
+        "obligatoire": "Le code postal est obligatoire",
+        "format": "Le format du code postal est invalide (format attendu : A1A 1A1)"
+      },
+      "pays": {
+        "obligatoire": "Le pays est obligatoire"
+      },
+      "utilisateurUuid": {
+        "obligatoire": "L'utilisateur de l'adresse est obligatoire"
+      },
+      "non": {
+        "trouve": "Adresse non trouvée : {{0}}"
+      }
+    },
+    "paiement": {
+      "null": "Le paiement ne peut pas être vide",
+      "uuid": {
+        "obligatoire": "L'identifiant du paiement est obligatoire"
+      },
+      "montant": {
+        "obligatoire": "Le montant du paiement est obligatoire",
+        "positif": "Le montant doit être supérieur à zéro"
+      },
+      "methode": {
+        "obligatoire": "La méthode de paiement est obligatoire"
+      },
+      "statut": {
+        "obligatoire": "Le statut du paiement est obligatoire"
+      },
+      "type": {
+        "obligatoire": "Le type de paiement est obligatoire"
+      },
+      "utilisateurUuid": {
+        "obligatoire": "L'utilisateur du paiement est obligatoire"
+      },
+      "commandeUuid": {
+        "obligatoire": "La commande du paiement est obligatoire"
+      },
+      "doit": {
+        "etre": {
+          "reussi": "Le paiement doit être réussi pour être remboursé",
+          "en": {
+            "attente": "Le paiement doit être en attente pour être confirmé"
+          }
+        }
+      },
+      "deja": {
+        "rembourse": "Ce paiement a déjà été remboursé"
+      },
+      "non": {
+        "trouve": "Paiement non trouvé : {{0}}"
+      }
+    },
+    "image": {
+      "upload": {
+        "echec": "Échec de l'upload de l'image"
+      },
+      "generation": {
+        "url": {
+          "echec": "Échec de la génération de l'URL présignée"
+        }
+      },
+      "lecture": {
+        "echec": "Échec de la lecture de l'image"
+      },
+      "suppression": {
+        "echec": "Échec de la suppression de l'image"
+      },
+      "format": {
+        "invalide": "Format d'image invalide"
+      },
+      "taille": {
+        "depassee": "La taille de l'image dépasse la limite autorisée"
+      }
+    }
+  }
+}
+

@@ -117,7 +117,7 @@ public class UserApiClient {
     public void resetPassword(String token, String userId, String newPassword) {
         try {
             Map<String, Object> passwordRequest = new HashMap<>();
-            passwordRequest.put("password", newPassword);
+            passwordRequest.put("newPassword", newPassword);
             passwordRequest.put("temporary", false);
 
             userKeycloackService.putVoidWithAuth(authApiUrl+"/api/users/"+userId+"/reset-password", passwordRequest, token);

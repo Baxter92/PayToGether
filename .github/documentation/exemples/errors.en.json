@@ -1,0 +1,284 @@
+{
+  "errors": {
+    "validation": {
+      "champ": {
+        "invalide": "This field is invalid"
+      }
+    },
+    "erreur": {
+      "interne": "An internal error occurred. Please try again."
+    },
+    "deal": {
+      "null": "Deal cannot be empty",
+      "uuid": {
+        "obligatoire": "Deal identifier is required"
+      },
+      "titre": {
+        "obligatoire": "Deal title is required"
+      },
+      "prixDeal": {
+        "obligatoire": "Deal price is required",
+        "positif": "Deal price must be greater than zero"
+      },
+      "prixPart": {
+        "obligatoire": "Price per share is required",
+        "positif": "Price per share must be greater than zero"
+      },
+      "nbParticipants": {
+        "obligatoire": "Number of participants is required",
+        "positif": "Number of participants must be greater than zero"
+      },
+      "dateFin": {
+        "obligatoire": "End date is required",
+        "coherence": "End date must be after start date"
+      },
+      "statut": {
+        "obligatoire": "Deal status is required"
+      },
+      "createurUuid": {
+        "obligatoire": "Deal creator is required"
+      },
+      "categorieUuid": {
+        "obligatoire": "Deal category is required"
+      },
+      "listeImages": {
+        "obligatoire": "At least one image is required for the deal"
+      },
+      "ville": {
+        "obligatoire": "City is required"
+      },
+      "description": {
+        "longueur": "Description cannot exceed {{0}} characters"
+      },
+      "non": {
+        "trouve": "Deal not found: {{0}}"
+      }
+    },
+    "utilisateur": {
+      "null": "User cannot be empty",
+      "uuid": {
+        "obligatoire": "User identifier is required"
+      },
+      "email": {
+        "obligatoire": "Email address is required",
+        "format": "Email format is invalid",
+        "existe": "This email is already in use: {{0}}"
+      },
+      "motDePasse": {
+        "obligatoire": "Password is required",
+        "longueur": "Password must contain at least {{0}} characters"
+      },
+      "role": {
+        "obligatoire": "User role is required"
+      },
+      "nom": {
+        "obligatoire": "Last name is required"
+      },
+      "prenom": {
+        "obligatoire": "First name is required"
+      },
+      "non": {
+        "trouve": "User not found: {{0}}"
+      }
+    },
+    "categorie": {
+      "null": "Category cannot be empty",
+      "uuid": {
+        "obligatoire": "Category identifier is required"
+      },
+      "nom": {
+        "obligatoire": "Category name is required",
+        "longueur": "Name cannot exceed {{0}} characters"
+      },
+      "non": {
+        "trouve": "Category not found: {{0}}"
+      }
+    },
+    "publicite": {
+      "null": "Advertisement cannot be empty",
+      "uuid": {
+        "obligatoire": "Advertisement identifier is required"
+      },
+      "titre": {
+        "obligatoire": "Advertisement title is required",
+        "longueur": "Title cannot exceed {{0}} characters"
+      },
+      "description": {
+        "longueur": "Description cannot exceed {{0}} characters"
+      },
+      "lienExterne": {
+        "obligatoire": "External link is required"
+      },
+      "dateDebut": {
+        "obligatoire": "Start date is required"
+      },
+      "dateFin": {
+        "obligatoire": "End date is required",
+        "coherence": "End date must be after start date"
+      },
+      "listeImages": {
+        "obligatoire": "At least one image is required for the advertisement"
+      },
+      "deja": {
+        "active": "Advertisement is already active",
+        "inactive": "Advertisement is already inactive"
+      },
+      "expiree": {
+        "impossible": {
+          "activation": "Cannot activate an expired advertisement"
+        }
+      },
+      "non": {
+        "trouve": "Advertisement not found: {{0}}"
+      }
+    },
+    "commande": {
+      "null": "Order cannot be empty",
+      "uuid": {
+        "obligatoire": "Order identifier is required"
+      },
+      "montantTotal": {
+        "obligatoire": "Total amount is required",
+        "positif": "Total amount must be greater than zero"
+      },
+      "statut": {
+        "obligatoire": "Order status is required"
+      },
+      "utilisateurUuid": {
+        "obligatoire": "Order user is required"
+      },
+      "dealUuid": {
+        "obligatoire": "Order deal is required"
+      },
+      "deja": {
+        "annulee": "This order is already cancelled"
+      },
+      "doit": {
+        "etre": {
+          "en": {
+            "cours": "Order must be in progress to be confirmed"
+          },
+          "confirmee": "Order must be confirmed to be paid"
+        }
+      },
+      "non": {
+        "trouve": "Order not found: {{0}}"
+      }
+    },
+    "commentaire": {
+      "null": "Comment cannot be empty",
+      "uuid": {
+        "obligatoire": "Comment identifier is required"
+      },
+      "contenu": {
+        "obligatoire": "Comment content is required",
+        "longueur": {
+          "min": "Content must contain at least {{0}} character",
+          "max": "Content cannot exceed {{0}} characters"
+        }
+      },
+      "utilisateurUuid": {
+        "obligatoire": "Comment user is required"
+      },
+      "dealUuid": {
+        "obligatoire": "Comment deal is required"
+      },
+      "non": {
+        "trouve": "Comment not found: {{0}}"
+      }
+    },
+    "adresse": {
+      "null": "Address cannot be empty",
+      "uuid": {
+        "obligatoire": "Address identifier is required"
+      },
+      "rue": {
+        "obligatoire": "Street is required",
+        "longueur": "Street cannot exceed {{0}} characters"
+      },
+      "ville": {
+        "obligatoire": "City is required",
+        "longueur": "City cannot exceed {{0}} characters"
+      },
+      "province": {
+        "obligatoire": "Province is required",
+        "longueur": "Province cannot exceed {{0}} characters"
+      },
+      "codePostal": {
+        "obligatoire": "Postal code is required",
+        "format": "Postal code format is invalid (expected format: A1A 1A1)"
+      },
+      "pays": {
+        "obligatoire": "Country is required"
+      },
+      "utilisateurUuid": {
+        "obligatoire": "Address user is required"
+      },
+      "non": {
+        "trouve": "Address not found: {{0}}"
+      }
+    },
+    "paiement": {
+      "null": "Payment cannot be empty",
+      "uuid": {
+        "obligatoire": "Payment identifier is required"
+      },
+      "montant": {
+        "obligatoire": "Payment amount is required",
+        "positif": "Amount must be greater than zero"
+      },
+      "methode": {
+        "obligatoire": "Payment method is required"
+      },
+      "statut": {
+        "obligatoire": "Payment status is required"
+      },
+      "type": {
+        "obligatoire": "Payment type is required"
+      },
+      "utilisateurUuid": {
+        "obligatoire": "Payment user is required"
+      },
+      "commandeUuid": {
+        "obligatoire": "Payment order is required"
+      },
+      "doit": {
+        "etre": {
+          "reussi": "Payment must be successful to be refunded",
+          "en": {
+            "attente": "Payment must be pending to be confirmed"
+          }
+        }
+      },
+      "deja": {
+        "rembourse": "This payment has already been refunded"
+      },
+      "non": {
+        "trouve": "Payment not found: {{0}}"
+      }
+    },
+    "image": {
+      "upload": {
+        "echec": "Image upload failed"
+      },
+      "generation": {
+        "url": {
+          "echec": "Failed to generate presigned URL"
+        }
+      },
+      "lecture": {
+        "echec": "Image reading failed"
+      },
+      "suppression": {
+        "echec": "Image deletion failed"
+      },
+      "format": {
+        "invalide": "Invalid image format"
+      },
+      "taille": {
+        "depassee": "Image size exceeds the allowed limit"
+      }
+    }
+  }
+}
+

@@ -13,6 +13,8 @@ public interface CommentaireProvider {
 
     CommentaireModele sauvegarder(CommentaireModele commentaire);
 
+    CommentaireModele mettreAJour(UUID uuid, CommentaireModele commentaire);
+
     Optional<CommentaireModele> trouverParUuid(UUID uuid);
 
     List<CommentaireModele> trouverParDeal(UUID dealUuid);

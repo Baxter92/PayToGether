@@ -24,15 +24,18 @@ Le projet PayToGether utilise une **architecture hexagonale** (ports & adapters)
   - `modele/` : Modèles métier (suffixe `Modele`, ex: `DealModele`, `UtilisateurModele`)
   - `domaine/service/` : Interfaces de service (ex: `DealService`, `UtilisateurService`)
   - `domaine/impl/` : Implémentations des services (suffixe `ServiceImpl`)
-  - `domaine/validator/` : Validateurs métier (ex: `DealValidator`)
+  - `domaine/validator/` : **Validateurs métier avec toutes les règles** (ex: `DealValidator`)
   - `provider/` : Interfaces des ports (ex: `DealProvider`, `UtilisateurProvider`)
   - `enumeration/` : Énumérations métier (ex: `StatutDeal`, `StatutImage`)
+  - `exception/` : **Exceptions métier personnalisées avec codes traduisibles**
 
 **Règles** :
 - ✅ Aucune dépendance technique (pas de JPA, Spring Web, etc.)
 - ✅ Modèles avec suffixe `Modele`
 - ✅ Services utilisent uniquement les interfaces Provider
-- ✅ Validation métier avant appel au Provider
+- ✅ **Toutes les règles métier sont dans les Validators**
+- ✅ **Toutes les exceptions utilisent des codes d'erreur traduisibles**
+- ✅ Validation métier OBLIGATOIRE avant appel au Provider
 
 #### 2. **BFF-PROVIDER** (Adaptateurs techniques - Partie droite)
 - **Rôle** : Implémentation de la persistance et des services externes
@@ -103,6 +106,330 @@ Le projet PayToGether utilise une **architecture hexagonale** (ports & adapters)
 
 **ApiAdapter** :
 - `creer()`, `trouverParUuid()`, `trouverTous()`, `mettreAJour()`, `supprimer()`
+
+**Validator** :
+- `valider()`, `validerPourCreation()`, `validerPourMiseAJour()`
+
+---
+
+## 🛡️ Validators et Exceptions Métier
+
+### Principe fondamental
+**TOUTES les règles métier DOIVENT être définies dans les Validators (bff-core/domaine/validator/)**
+
+Les Validators sont responsables de :
+- ✅ Validation des champs obligatoires
+- ✅ Validation des formats (email, code postal, etc.)
+- ✅ Validation des longueurs min/max
+- ✅ Validation des valeurs (positives, cohérence des dates, etc.)
+- ✅ Validation des règles métier complexes (statuts, transitions d'état)
+
+### Structure des Validators
+
+#### Validator de base
+```java
+@Component
+public class {Entité}Validator {
+    
+    // Constantes de validation
+    private static final int MAX_LENGTH = 100;
+    
+    /**
+     * Validation complète pour création
+     * @throws ValidationException avec code traduisible
+     */
+    public void valider({Entité}Modele entite) {
+        if (entite == null) {
+            throw new ValidationException("entite.null");
+        }
+        
+        // Validations des champs
+        if (entite.getNom() == null || entite.getNom().isBlank()) {
+            throw new ValidationException("entite.nom.obligatoire");
+        }
+        
+        if (entite.getNom().length() > MAX_LENGTH) {
+            throw new ValidationException("entite.nom.longueur", MAX_LENGTH);
+        }
+    }
+    
+    /**
+     * Validation pour mise à jour (inclut UUID)
+     */
+    public void validerPourMiseAJour({Entité}Modele entite) {
+        if (entite == null) {
+            throw new ValidationException("entite.null");
+        }
+        
+        if (entite.getUuid() == null) {
+            throw new ValidationException("entite.uuid.obligatoire");
+        }
+        
+        valider(entite);
+    }
+    
+    /**
+     * Validations métier spécifiques (transitions d'état, etc.)
+     */
+    public void validerActivation({Entité}Modele entite) {
+        if (entite.getStatut() == Statut.ACTIVE) {
+            throw new ValidationException("entite.deja.active");
+        }
+    }
+}
+```
+
+### Validators obligatoires par entité
+
+Pour chaque entité métier, créer un Validator dans `bff-core/domaine/validator/` :
+- ✅ `DealValidator` : Validation des deals
+- ✅ `UtilisateurValidator` : Validation des utilisateurs
+- ✅ `CategorieValidator` : Validation des catégories
+- ✅ `PubliciteValidator` : Validation des publicités
+- ✅ `CommandeValidator` : Validation des commandes
+- ✅ `CommentaireValidator` : Validation des commentaires
+- ✅ `AdresseValidator` : Validation des adresses
+- ✅ `PaiementValidator` : Validation des paiements
+
+### Hiérarchie des Exceptions
+
+Toutes les exceptions métier héritent de `BusinessException` et utilisent des **codes d'erreur traduisibles**.
+
+#### BusinessException (base)
+```java
+@Getter
+public class BusinessException extends RuntimeException {
+    private final String errorCode;
+    private final Object[] params;
+    
+    public BusinessException(String errorCode) {
+        super(errorCode);
+        this.errorCode = errorCode;
+        this.params = new Object[0];
+    }
+    
+    public BusinessException(String errorCode, Object... params) {
+        super(errorCode);
+        this.errorCode = errorCode;
+        this.params = params;
+    }
+}
+```
+
+#### Exceptions spécialisées
+
+##### ValidationException
+```java
+public class ValidationException extends BusinessException {
+    public ValidationException(String errorCode) {
+        super(errorCode);
+    }
+    
+    public ValidationException(String errorCode, Object... params) {
+        super(errorCode, params);
+    }
+}
+```
+
+**Utilisation** :
+```java
+throw new ValidationException("deal.titre.obligatoire");
+throw new ValidationException("deal.description.longueur", 5000);
+```
+
+##### ResourceNotFoundException
+```java
+public class ResourceNotFoundException extends BusinessException {
+    public static ResourceNotFoundException parUuid(String resourceType, UUID uuid) {
+        return new ResourceNotFoundException(resourceType + ".non.trouve", uuid.toString());
+    }
+}
+```
+
+**Utilisation** :
+```java
+throw ResourceNotFoundException.parUuid("deal", dealUuid);
+```
+
+##### DuplicateResourceException
+```java
+public class DuplicateResourceException extends BusinessException {
+    public static DuplicateResourceException emailExistant(String email) {
+        return new DuplicateResourceException("utilisateur.email.existe", email);
+    }
+}
+```
+
+**Utilisation** :
+```java
+throw DuplicateResourceException.emailExistant("test@example.com");
+```
+
+##### ForbiddenOperationException
+```java
+public class ForbiddenOperationException extends BusinessException {
+    // Pour les opérations interdites selon les règles métier
+}
+```
+
+**Utilisation** :
+```java
+throw new ForbiddenOperationException("commande.deja.annulee");
+```
+
+##### FileStorageException
+```java
+public class FileStorageException extends BusinessException {
+    // Pour les erreurs MinIO/stockage de fichiers
+}
+```
+
+**Utilisation** :
+```java
+throw new FileStorageException("image.upload.echec", nomFichier);
+```
+
+### Format des codes d'erreur
+
+**Pattern** : `{entité}.{attribut}.{type}`
+
+**Exemples** :
+- `deal.titre.obligatoire` : Champ obligatoire
+- `utilisateur.email.format` : Format invalide
+- `commande.deja.annulee` : Règle métier
+- `deal.non.trouve` : Ressource non trouvée
+- `utilisateur.email.existe` : Duplication
+
+**Avec paramètres** :
+- `deal.description.longueur` → "La description ne peut pas dépasser {0} caractères"
+- `utilisateur.motDePasse.longueur` → "Le mot de passe doit contenir au moins {0} caractères"
+
+### Utilisation dans les Services
+
+Les Services **DOIVENT TOUJOURS** appeler le Validator avant de faire appel au Provider :
+
+```java
+@Service
+@RequiredArgsConstructor
+public class DealServiceImpl implements DealService {
+    
+    private final DealProvider dealProvider;
+    private final DealValidator dealValidator;
+    
+    @Override
+    public DealModele creer(DealModele deal) {
+        // ✅ OBLIGATOIRE : Validation avant création
+        dealValidator.valider(deal);
+        
+        return dealProvider.sauvegarder(deal);
+    }
+    
+    @Override
+    public DealModele mettreAJour(UUID uuid, DealModele deal) {
+        // ✅ OBLIGATOIRE : Validation avant mise à jour
+        dealValidator.validerPourMiseAJour(deal);
+        
+        return dealProvider.mettreAJour(uuid, deal);
+    }
+}
+```
+
+### Gestion des erreurs côté API (bff-api)
+
+Les exceptions sont automatiquement interceptées par un `@ControllerAdvice` et transformées en réponses HTTP appropriées :
+
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(ValidationException ex) {
+        ErrorResponse error = new ErrorResponse(
+            ex.getErrorCode(),
+            ex.getParams(),
+            HttpStatus.BAD_REQUEST.value()
+        );
+        return ResponseEntity.badRequest().body(error);
+    }
+    
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        ErrorResponse error = new ErrorResponse(
+            ex.getErrorCode(),
+            ex.getParams(),
+            HttpStatus.NOT_FOUND.value()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+    
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateResourceException(DuplicateResourceException ex) {
+        ErrorResponse error = new ErrorResponse(
+            ex.getErrorCode(),
+            ex.getParams(),
+            HttpStatus.CONFLICT.value()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+}
+```
+
+### Traduction côté Frontend
+
+Le frontend reçoit le code d'erreur et les paramètres, puis les traduit selon la langue de l'utilisateur :
+
+**Réponse API** :
+```json
+{
+  "errorCode": "deal.description.longueur",
+  "params": [5000],
+  "status": 400
+}
+```
+
+**Traduction française** :
+```json
+{
+  "errors": {
+    "deal": {
+      "description": {
+        "longueur": "La description ne peut pas dépasser {{0}} caractères"
+      }
+    }
+  }
+}
+```
+
+**Traduction anglaise** :
+```json
+{
+  "errors": {
+    "deal": {
+      "description": {
+        "longueur": "Description cannot exceed {{0}} characters"
+      }
+    }
+  }
+}
+```
+
+### Checklist pour créer un nouveau Validator
+
+- [ ] Créer `{Entité}Validator` dans `bff-core/domaine/validator/`
+- [ ] Annoter avec `@Component`
+- [ ] Définir les constantes de validation (MAX_LENGTH, MIN_LENGTH, etc.)
+- [ ] Créer la méthode `valider({Entité}Modele)`
+- [ ] Créer la méthode `validerPourMiseAJour({Entité}Modele)` si nécessaire
+- [ ] Créer les méthodes de validation métier spécifiques
+- [ ] Utiliser **uniquement** des `ValidationException` avec codes traduisibles
+- [ ] Injecter le Validator dans le ServiceImpl correspondant
+- [ ] Appeler le Validator dans **toutes** les méthodes du Service
+- [ ] Documenter les codes d'erreur dans `CODES_ERREUR_TRADUISIBLES.md`
+
+### Documentation complète
+
+- **Liste complète des codes d'erreur** : `.github/documentation/CODES_ERREUR_TRADUISIBLES.md`
+- **Environ 80+ codes d'erreur** couvrant toutes les entités
 
 ---
 
@@ -781,10 +1108,17 @@ Base de données (PostgreSQL)
 ### 1. BFF-CORE
 - [ ] Créer `{Entité}Modele` dans `modele/`
 - [ ] Créer énumérations si nécessaire dans `enumeration/`
+- [ ] **Créer `{Entité}Validator` dans `domaine/validator/` (OBLIGATOIRE)**
+  - [ ] Méthode `valider({Entité}Modele)` avec toutes les règles métier
+  - [ ] Méthode `validerPourMiseAJour({Entité}Modele)` si nécessaire
+  - [ ] Méthodes de validation métier spécifiques (transitions d'état, etc.)
+  - [ ] Utiliser **uniquement** `ValidationException` avec codes traduisibles
 - [ ] Créer interface `{Entité}Provider` dans `provider/`
 - [ ] Créer interface `{Entité}Service` dans `domaine/service/`
 - [ ] Créer `{Entité}ServiceImpl` dans `domaine/impl/`
-- [ ] Créer `{Entité}Validator` dans `domaine/validator/` si validation complexe
+  - [ ] Injecter le `{Entité}Validator`
+  - [ ] Appeler `validator.valider()` dans TOUTES les méthodes métier
+- [ ] **Documenter les codes d'erreur dans `CODES_ERREUR_TRADUISIBLES.md`**
 
 ### 2. BFF-PROVIDER
 - [ ] Créer `{Entité}Jpa` dans `adapter/entity/`
@@ -882,18 +1216,37 @@ Chaque module a son `pom.xml` avec dépendances spécifiques.
 
 ## 🎯 Règles d'or
 
+### Architecture et structure
 1. ✅ **Toujours** respecter l'architecture hexagonale
 2. ✅ **Jamais** de dépendance technique dans bff-core
-3. ✅ **Toujours** valider dans le Service avant d'appeler le Provider
-4. ✅ **Toujours** utiliser des suffixes explicites (`Modele`, `Jpa`, `DTO`)
-5. ✅ **Toujours** mapper entre les couches (ne pas exposer les entités JPA)
-6. ✅ **Toujours** générer les URL présignées pour images avec statut PENDING
-7. ✅ **Toujours** ajouter timestamp unique aux noms de fichiers
-8. ✅ **Toujours** utiliser FileManager pour MinIO
-9. ✅ **Toujours** créer les tests unitaires
-10. ✅ **Toujours** documenter les endpoints dans fichiers .http
+3. ✅ **Toujours** utiliser des suffixes explicites (`Modele`, `Jpa`, `DTO`)
+4. ✅ **Toujours** mapper entre les couches (ne pas exposer les entités JPA)
+
+### Validation et Exceptions
+5. ✅ **TOUTES les règles métier doivent être dans les Validators** (bff-core/domaine/validator/)
+6. ✅ **TOUJOURS** valider dans le Service avant d'appeler le Provider
+7. ✅ **TOUJOURS** utiliser des exceptions avec codes d'erreur traduisibles (ValidationException, ResourceNotFoundException, etc.)
+8. ✅ **JAMAIS** utiliser IllegalArgumentException ou RuntimeException directement
+9. ✅ **TOUJOURS** créer un Validator pour chaque entité métier
+10. ✅ **TOUJOURS** documenter les nouveaux codes d'erreur dans CODES_ERREUR_TRADUISIBLES.md
+
+### Gestion des images (MinIO)
+11. ✅ **Toujours** générer les URL présignées pour images avec statut PENDING
+12. ✅ **Toujours** ajouter timestamp unique aux noms de fichiers
+13. ✅ **Toujours** utiliser FileManager pour MinIO
+14. ✅ **Toujours** suivre le pattern : Frontend → MinIO (direct) → Backend (confirmation)
+
+### Tests et Documentation
+15. ✅ **Toujours** créer les tests unitaires (minimum 10+ par ServiceImpl)
+16. ✅ **Toujours** documenter les endpoints dans fichiers .http
+17. ✅ **Toujours** demander confirmation avant de créer de la documentation
+
+### Codes d'erreur traduisibles
+18. ✅ **Format** : `{entité}.{attribut}.{type}` (ex: `deal.titre.obligatoire`)
+19. ✅ **Avec paramètres** : `new ValidationException("deal.description.longueur", 5000)`
+20. ✅ **ResourceNotFoundException** : `ResourceNotFoundException.parUuid("deal", uuid)`
 
 ---
 
-**Date de dernière mise à jour** : 9 février 2026  
+**Date de dernière mise à jour** : 25 février 2026  
 **Auteur** : Équipe PayToGether

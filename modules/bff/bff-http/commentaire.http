@@ -1,0 +1,94 @@
+### Variables
+@baseUrl = http://localhost:8080/api
+@commentaireUuid =
+@dealUuid =
+@utilisateurUuid =
+
+###
+# Créer un nouveau commentaire
+POST {{baseUrl}}/commentaires
+Content-Type: application/json
+
+{
+  "contenu": "Excellent deal ! Je recommande vivement ce produit.",
+  "note": 5,
+  "utilisateurUuid": "{{utilisateurUuid}}",
+  "dealUuid": "{{dealUuid}}"
+}
+
+###
+# Récupérer un commentaire par UUID
+GET {{baseUrl}}/commentaires/{{commentaireUuid}}
+
+###
+# Récupérer tous les commentaires d'un deal
+GET {{baseUrl}}/commentaires/deal/{{dealUuid}}
+
+###
+# Mettre à jour un commentaire
+PUT {{baseUrl}}/commentaires/{{commentaireUuid}}
+Content-Type: application/json
+
+{
+  "contenu": "Très bon deal, mais la livraison était un peu longue.",
+  "note": 4,
+  "utilisateurUuid": "{{utilisateurUuid}}",
+  "dealUuid": "{{dealUuid}}"
+}
+
+###
+# Supprimer un commentaire
+DELETE {{baseUrl}}/commentaires/{{commentaireUuid}}
+
+###
+# Test d'erreur - Commentaire sans contenu (validation)
+POST {{baseUrl}}/commentaires
+Content-Type: application/json
+
+{
+  "contenu": "",
+  "note": 5,
+  "utilisateurUuid": "{{utilisateurUuid}}",
+  "dealUuid": "{{dealUuid}}"
+}
+
+###
+# Test d'erreur - Note invalide (< 1)
+POST {{baseUrl}}/commentaires
+Content-Type: application/json
+
+{
+  "contenu": "Commentaire de test",
+  "note": 0,
+  "utilisateurUuid": "{{utilisateurUuid}}",
+  "dealUuid": "{{dealUuid}}"
+}
+
+###
+# Test d'erreur - Note invalide (> 5)
+POST {{baseUrl}}/commentaires
+Content-Type: application/json
+
+{
+  "contenu": "Commentaire de test",
+  "note": 6,
+  "utilisateurUuid": "{{utilisateurUuid}}",
+  "dealUuid": "{{dealUuid}}"
+}
+
+###
+# Test d'erreur - Contenu trop long (> 2000 caractères)
+POST {{baseUrl}}/commentaires
+Content-Type: application/json
+
+{
+  "contenu": "Lorem ipsum dolor sit amet, consectetur adipiscing elit... (contenu de plus de 2000 caractères)",
+  "note": 5,
+  "utilisateurUuid": "{{utilisateurUuid}}",
+  "dealUuid": "{{dealUuid}}"
+}
+
+###
+# Test d'erreur - Commentaire inexistant (404)
+GET {{baseUrl}}/commentaires/00000000-0000-0000-0000-000000000000
+

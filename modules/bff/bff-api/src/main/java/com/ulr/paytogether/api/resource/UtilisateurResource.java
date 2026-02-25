@@ -33,7 +33,7 @@ public class UtilisateurResource {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<UtilisateurDTO> creer(@Valid @RequestBody CreerUtilisateurDTO dto) {
+    public ResponseEntity<UtilisateurDTO> creer(@RequestBody CreerUtilisateurDTO dto) {
         log.info("Création d'un utilisateur avec l'email: {}", dto.getEmail());
 
         UtilisateurDTO cree = apiAdapter.creer(dto);
@@ -86,7 +86,7 @@ public class UtilisateurResource {
     @PutMapping("/{uuid}")
     public ResponseEntity<UtilisateurDTO> mettreAJour(
             @PathVariable UUID uuid,
-            @Valid @RequestBody UtilisateurDTO dto, JwtAuthenticationToken token) {
+            @RequestBody UtilisateurDTO dto, JwtAuthenticationToken token) {
         log.info("Mise à jour de l'utilisateur: {}", uuid);
 
         try {
@@ -94,6 +94,7 @@ public class UtilisateurResource {
             UtilisateurDTO mis_a_jour = apiAdapter.mettreAJour(uuid, dto, tokenValue);
             return ResponseEntity.ok(mis_a_jour);
         } catch (RuntimeException e) {
+            log.error("Erreur lors de la mise à jour de l'utilisateur: {}", e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }

@@ -22,7 +22,7 @@ Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 ### 3. Récupérer un utilisateur par UUID (GET)
-GET {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000
+GET {{base_url}}/api/utilisateurs/2a5d14a5-adf7-4dc8-9b15-2f7dce94df26
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
@@ -37,17 +37,17 @@ Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 ### 6. Mettre à jour un utilisateur (PUT)
-PUT {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000
+PUT {{base_url}}/api/utilisateurs/2a5d14a5-adf7-4dc8-9b15-2f7dce94df26
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
+  "uuid": "2a5d14a5-adf7-4dc8-9b15-2f7dce94df26",
   "nom": "Dupont",
-  "prenom": "Jean-Claude",
+  "prenom": "Jean-Claude test",
   "email": "jean.dupont@example.com",
   "statut": "ACTIF",
-  "role": "VENDEUR",
-  "photoProfil": "photo_profil_updated.jpg"
+  "role": "VENDEUR"
 }
 
 ### 7. Supprimer un utilisateur (DELETE)
@@ -81,16 +81,18 @@ Authorization: Bearer {{access_token}}
 PATCH {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000/enable
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
+
 {
   "nomRole": "ADMIN"
 }
 
 ### 12. modifier le mot de passe d'un utilisateur (PATCH)
 ### Endpoint appelé par le frontend après upload réussi vers MinIO
-PATCH {{base_url}}/api/utilisateurs/123e4567-e89b-12d3-a456-426614174000/reset-password
+PATCH {{base_url}}/api/utilisateurs/2a5d14a5-adf7-4dc8-9b15-2f7dce94df26/reset-password
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
+
 {
-  "nouveauMotDePasse": "ADMIN"
+  "nouveauMotDePasse": "MotDePasse123!@"
 }
 

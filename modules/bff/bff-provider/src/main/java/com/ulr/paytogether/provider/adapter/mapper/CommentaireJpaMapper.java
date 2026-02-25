@@ -36,4 +36,16 @@ public class CommentaireJpaMapper {
                 .dateModification(modele.getDateModification())
                 .build();
     }
+
+    /**
+     * Met à jour une entité JPA existante avec les données du modèle
+     */
+    public void mettreAJour(CommentaireJpa jpa, CommentaireModele modele) {
+        if (jpa == null || modele == null) return;
+
+        jpa.setContenu(modele.getContenu());
+        jpa.setNote(modele.getNote());
+
+        // Ne pas mettre à jour les relations ni les dates (gérées par JPA)
+    }
 }

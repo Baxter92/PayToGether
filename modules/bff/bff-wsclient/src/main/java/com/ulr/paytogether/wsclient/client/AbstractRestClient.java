@@ -170,9 +170,16 @@ public abstract class AbstractRestClient<R, T> {
             // Ajouter les headers personnalisés
             headers.forEach(requestSpec::header);
 
-            requestSpec
-                .retrieve()
-                    .toBodilessEntity();
+            RestClient.ResponseSpec responseSpec ;
+
+            if (request != null) {
+                responseSpec = requestSpec.body(request).retrieve();
+            }else {
+                responseSpec = requestSpec.retrieve();
+            }
+
+            responseSpec
+            .toBodilessEntity();
 
             log.debug("POST request (void) successful to: {}", url);
 
@@ -367,8 +374,13 @@ public abstract class AbstractRestClient<R, T> {
             // Ajouter les headers personnalisés
             headers.forEach(requestSpec::header);
 
-            requestSpec
-                .retrieve()
+            RestClient.ResponseSpec responseSpec ;
+            if (request != null) {
+                responseSpec = requestSpec.body(request).retrieve();
+            } else {
+                responseSpec = requestSpec.retrieve();
+            }
+            responseSpec
                     .toBodilessEntity();
 
             log.debug("PUT request (void) successful to: {}", url);
