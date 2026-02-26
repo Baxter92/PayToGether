@@ -6,10 +6,10 @@ import { PATHS } from "@/common/constants/path";
 import { useI18n } from "@hooks/useI18n";
 
 export default function Login() {
-  const { t } = useI18n();
+  const { t, i18n } = useI18n("auth");
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, user, loading: userLoading } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,13 +19,17 @@ export default function Login() {
 
   const from = (location.state as any)?.from?.pathname || "/";
 
+  if (user) {
+    navigate(from, { replace: true });
+  }
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      const user = await login(email, password);
+      await login(email, password);
 
       if (from.includes("/checkout")) {
         navigate(from.replace(/\/checkout$/, ""), { replace: true });
@@ -35,27 +39,33 @@ export default function Login() {
         navigate(from, { replace: true });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("auth.loginError"));
+      if (err instanceof Error) {
+        setError(i18n.exists(err.message) ? t(err.message) : err.message);
+      } else {
+        setError(t("loginError"));
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
             <Lock className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">{t("auth.loginTitle")}</h1>
-          <p className="text-gray-600 mt-2">{t("auth.loginSubtitle")}</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {t("loginTitle")}
+          </h1>
+          <p className="text-gray-600 mt-2">{t("loginSubtitle")}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("auth.email")}
+              {t("email")}
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -64,7 +74,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                placeholder={t("auth.emailPlaceholder")}
+                placeholder={t("emailPlaceholder")}
                 required
               />
             </div>
@@ -72,7 +82,7 @@ export default function Login() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("auth.password")}
+              {t("password")}
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -81,7 +91,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-11 pr-11 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                placeholder={t("auth.passwordPlaceholder")}
+                placeholder={t("passwordPlaceholder")}
                 required
                 minLength={6}
               />
@@ -90,7 +100,11 @@ export default function Login() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
               </button>
             </div>
           </div>
@@ -103,34 +117,40 @@ export default function Login() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || userLoading}
             className="w-full bg-primary hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {loading ? (
+            {loading || userLoading ? (
               <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
             ) : (
               <>
                 <LogIn className="w-5 h-5" />
-                {t("auth.loginButton")}
+                {t("loginButton")}
               </>
             )}
           </button>
         </form>
 
         <div className="mt-4 text-center">
-          <Link to={PATHS.FORGOT_PASSWORD} className="text-sm text-gray-600 hover:text-primary">
-            {t("auth.forgotPassword")}
+          <Link
+            to={PATHS.FORGOT_PASSWORD}
+            className="text-sm text-gray-600 hover:text-primary"
+          >
+            {t("forgotPassword")}
           </Link>
         </div>
 
         <div className="mt-4 text-center">
-          <Link to={PATHS.REGISTER} className="text-primary hover:text-primary/80 text-sm font-medium">
-            {t("auth.noAccount")} {t("auth.signUp")}
+          <Link
+            to={PATHS.REGISTER}
+            className="text-primary hover:text-primary/80 text-sm font-medium"
+          >
+            {t("noAccount")} {t("signUp")}
           </Link>
         </div>
 
         <div className="mt-6 pt-6 border-t border-gray-200">
-          <p className="text-xs text-gray-500 text-center">{t("auth.demoHint")}</p>
+          <p className="text-xs text-gray-500 text-center">{t("demoHint")}</p>
         </div>
       </div>
     </div>

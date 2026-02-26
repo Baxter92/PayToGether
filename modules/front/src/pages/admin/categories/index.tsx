@@ -235,7 +235,7 @@ export default function AdminCategories(): ReactElement {
                     </div>
 
                     <div className="text-right">
-                      <span className="font-medium">0</span>
+                      <span className="font-medium">{category.nbDeals}</span>
                       <span className="text-sm text-muted-foreground ml-1">
                         deals
                       </span>

@@ -22,7 +22,9 @@ import {
   useCategories,
   useCreateDeal,
   useUsers,
+  useUpdateDeal,
   type CreateDealDTO,
+  type DealDTO,
 } from "@/common/api";
 import type { ImageResponse } from "@/common/api/hooks/useImageUpload";
 import { toast } from "sonner";
@@ -40,7 +42,11 @@ const CROP_ASPECT = 4 / 3;
    Helpers
 ============================== */
 
-const buildPayload = (formData: any, now: string): CreateDealDTO => {
+const buildPayload = (
+  formData: any,
+  now: string,
+  connectedMerchantUuid?: string,
+): CreateDealDTO => {
   const expiration = formData.expiryDate
     ? new Date(formData.expiryDate).toISOString().slice(0, 19)
     : now;
@@ -63,7 +69,7 @@ const buildPayload = (formData: any, now: string): CreateDealDTO => {
     dateFin: expiration,
     dateExpiration: expiration,
     statut: formData.status,
-    createurUuid: String(formData.merchantId ?? ""),
+    createurUuid: String(connectedMerchantUuid ?? formData.merchantId ?? ""),
     categorieUuid: String(formData.categoryId ?? ""),
     listePointsForts: String(formData.highlights ?? "")
       .split("\n")
@@ -547,10 +553,14 @@ export function CreateDealModal({
   open,
   onClose,
   onSuccess,
+  initialData,
+  connectedMerchantUuid,
 }: {
   open: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  initialData?: DealDTO | null;
+  connectedMerchantUuid?: string;
 }) {
   const { data: categoriesData } = useCategories();
   const { data: usersData } = useUsers();
@@ -561,6 +571,8 @@ export function CreateDealModal({
     progress,
     hasErrors,
   } = useCreateDeal();
+
+  const { mutateAsync: updateDeal, isPending: isUpdating } = useUpdateDeal();
 
   const categoryItems = useMemo(
     () => (categoriesData ?? []).map((c) => ({ label: c.nom, value: c.uuid })),
@@ -586,6 +598,7 @@ export function CreateDealModal({
     ],
     [],
   );
+  const hideMerchantField = Boolean(connectedMerchantUuid);
 
   // Calculer la progression globale des uploads
   const uploadProgress = useMemo(() => {
@@ -611,27 +624,53 @@ export function CreateDealModal({
     async ({ data }: { data: any }) => {
       try {
         const now = new Date().toISOString().slice(0, 19);
-        await createDeal(buildPayload(data, now));
 
-        if (hasErrors) {
-          toast.warning("Deal créé avec des erreurs d'upload", {
-            description: "Certaines images n'ont pas pu être téléchargées",
-          });
+        if (initialData) {
+          // Update existing deal
+          const payload = buildPayload(
+            data,
+            now,
+            connectedMerchantUuid,
+          ) as unknown as Partial<DealDTO>;
+          await updateDeal({ id: initialData.uuid, data: payload });
+          toast.success("✅ Deal mis à jour avec succès");
         } else {
-          toast.success("✨ Deal créé avec succès!", {
-            description: "Toutes les images ont été téléchargées",
-          });
+          // Create new deal
+          await createDeal(buildPayload(data, now, connectedMerchantUuid));
+
+          if (hasErrors) {
+            toast.warning("Deal créé avec des erreurs d'upload", {
+              description: "Certaines images n'ont pas pu être téléchargées",
+            });
+          } else {
+            toast.success("✨ Deal créé avec succès!", {
+              description: "Toutes les images ont été téléchargées",
+            });
+          }
         }
 
         onSuccess?.();
         onClose();
       } catch (error: any) {
-        toast.error("❌ Erreur lors de la création du deal", {
-          description: error?.response?.data?.message || error?.message,
-        });
+        toast.error(
+          initialData
+            ? "❌ Erreur lors de la mise à jour du deal"
+            : "❌ Erreur lors de la création du deal",
+          {
+            description: error?.response?.data?.message || error?.message,
+          },
+        );
       }
     },
-    [createDeal, onSuccess, onClose, hasErrors],
+    [
+      createDeal,
+      updateDeal,
+      onSuccess,
+      onClose,
+      hasErrors,
+      initialData,
+      connectedMerchantUuid,
+    ],
   );
 
   const formGroups: IFieldGroup[] = useMemo(
@@ -765,6 +804,7 @@ export function CreateDealModal({
         description: "Qui propose cette offre ?",
         columns: 1,
         className: "bg-white rounded-xl shadow-sm border border-gray-100 p-6",
+        hidden: hideMerchantField,
         fields: [
           {
             type: "select" as const,
@@ -790,8 +830,34 @@ export function CreateDealModal({
         ],
       },
     ],
-    [categoryItems, statusItems, userItems],
+    [categoryItems, statusItems, userItems, hideMerchantField],
   );
+
+  const defaultValues = useMemo(() => {
+    if (initialData) {
+      return {
+        title: initialData.titre,
+        description: initialData.description,
+        categoryId: initialData.categorieUuid,
+        status: initialData.statut,
+        price: initialData.prixPart,
+        originalPrice: initialData.prixDeal,
+        partsTotal: initialData.nbParticipants,
+        expiryDate: initialData.dateExpiration,
+        location: initialData.ville
+          ? `${initialData.ville}, ${initialData.pays}`
+          : undefined,
+        highlights: (initialData.listePointsForts || []).join("\n"),
+        merchantId: connectedMerchantUuid ?? initialData.createurUuid,
+      };
+    }
+
+    if (connectedMerchantUuid) {
+      return { merchantId: connectedMerchantUuid };
+    }
+
+    return undefined;
+  }, [initialData, connectedMerchantUuid]);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -806,11 +872,12 @@ export function CreateDealModal({
             </div>
             <div className="flex-1">
               <h2 className="text-xl font-bold text-gray-900">
-                Créer un nouveau deal
+                {initialData ? "Modifier le deal" : "Créer un nouveau deal"}
               </h2>
               <p className="text-sm text-gray-600 font-normal mt-0.5">
-                Remplissez les informations pour publier votre offre
-                exceptionnelle
+                {initialData
+                  ? "Mettre à jour les informations de l'offre"
+                  : "Remplissez les informations pour publier votre offre exceptionnelle"}
               </p>
             </div>
           </div>
@@ -865,15 +932,20 @@ export function CreateDealModal({
           <Form<CreateDealDTO>
             groups={formGroups}
             schema={dealSchema}
+            defaultValues={defaultValues}
             submitLabel={
-              isCreating || isUploading
+              isCreating || isUploading || isUpdating
                 ? isUploading
                   ? "⏳ Upload des images..."
-                  : "⏳ Création en cours..."
-                : "✨ Créer le deal"
+                  : isUpdating
+                    ? "⏳ Mise à jour en cours..."
+                    : "⏳ Création en cours..."
+                : initialData
+                  ? "🔁 Mettre à jour"
+                  : "✨ Créer le deal"
             }
             onSubmit={handleSubmit}
-            isLoading={isCreating || isUploading}
+            isLoading={isCreating || isUploading || isUpdating}
           />
         </div>
       </DialogContent>

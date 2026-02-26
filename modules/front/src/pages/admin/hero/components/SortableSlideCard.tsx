@@ -1,4 +1,4 @@
-import { useRef, type JSX } from "react";
+import { memo, useRef, useCallback, type JSX } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useI18n } from "@/common/hooks/useI18n";
@@ -41,20 +41,23 @@ interface SortableSlideCardProps {
   onSlideChange: (
     id: number,
     field: keyof HeroSlide,
-    value: string | boolean
+    value: string | boolean,
   ) => void;
-  onToggleSlide: (id: number) => void;
-  onDeleteSlide: (id: number) => void;
+  onToggleSlide: (id: number) => void | Promise<void>;
+  onDeleteSlide: (id: number) => void | Promise<void>;
   onImageUpload: (id: number, file: File) => void;
+  isProcessingActions?: boolean;
 }
 
-export function SortableSlideCard({
+// ✅ memo = re-render seulement si les props changent réellement
+export const SortableSlideCard = memo(function SortableSlideCard({
   slide,
   index,
   onSlideChange,
   onToggleSlide,
   onDeleteSlide,
   onImageUpload,
+  isProcessingActions = false,
 }: SortableSlideCardProps): JSX.Element {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { t: tAdmin } = useI18n("admin");
@@ -73,6 +76,58 @@ export function SortableSlideCard({
     transform: CSS.Transform.toString(transform),
     transition,
   };
+
+  // ✅ Handlers locaux stables grâce à useCallback + id capturé en closure
+  const handleToggle = useCallback(
+    () => onToggleSlide(slide.id),
+    [onToggleSlide, slide.id],
+  );
+  const handleDelete = useCallback(
+    () => onDeleteSlide(slide.id),
+    [onDeleteSlide, slide.id],
+  );
+  const handleImageClick = useCallback(() => fileInputRef.current?.click(), []);
+
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) onImageUpload(slide.id, file);
+      e.target.value = "";
+    },
+    [onImageUpload, slide.id],
+  );
+
+  // ✅ Un handler par champ pour éviter des closures inline dans le JSX
+  const handleTitleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      onSlideChange(slide.id, "title", e.target.value),
+    [onSlideChange, slide.id],
+  );
+  const handleSubtitleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      onSlideChange(slide.id, "subtitle", e.target.value),
+    [onSlideChange, slide.id],
+  );
+  const handleDescriptionChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      onSlideChange(slide.id, "description", e.target.value),
+    [onSlideChange, slide.id],
+  );
+  const handleButtonTextChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      onSlideChange(slide.id, "buttonText", e.target.value),
+    [onSlideChange, slide.id],
+  );
+  const handleButtonLinkChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      onSlideChange(slide.id, "buttonLink", e.target.value),
+    [onSlideChange, slide.id],
+  );
+  const handleBadgeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      onSlideChange(slide.id, "badge", e.target.value),
+    [onSlideChange, slide.id],
+  );
 
   return (
     <Card
@@ -107,10 +162,11 @@ export function SortableSlideCard({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => onToggleSlide(slide.id)}
+              onClick={handleToggle}
               title={
                 slide.isActive ? tAdmin("hero.disable") : tAdmin("hero.enable")
               }
+              disabled={isProcessingActions}
             >
               {slide.isActive ? (
                 <Eye className="h-4 w-4" />
@@ -121,17 +177,18 @@ export function SortableSlideCard({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => onDeleteSlide(slide.id)}
+              onClick={handleDelete}
               className="text-destructive hover:text-destructive"
+              disabled={isProcessingActions}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
           </HStack>
         </HStack>
       </CardHeader>
+
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Preview image */}
           <div className="space-y-2">
             <Label>{tAdmin("hero.backgroundImage")}</Label>
             <div className="relative aspect-video rounded-lg overflow-hidden bg-muted group">
@@ -139,10 +196,12 @@ export function SortableSlideCard({
                 src={slide.image}
                 alt={slide.title}
                 className="w-full h-full object-cover"
+                // ✅ Évite le layout shift et force le navigateur à ne pas re-décoder si src identique
+                loading="lazy"
               />
               <div
                 className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={handleImageClick}
               >
                 <VStack spacing={2} className="text-white" align="center">
                   <Upload className="h-8 w-8" />
@@ -156,18 +215,14 @@ export function SortableSlideCard({
                 accept="image/*"
                 className="hidden"
                 ref={fileInputRef}
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) onImageUpload(slide.id, file);
-                  e.target.value = "";
-                }}
+                onChange={handleFileChange}
               />
             </div>
             <HStack spacing={2}>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={handleImageClick}
                 className="flex-1"
               >
                 <ImageIcon className="h-4 w-4 mr-2" />
@@ -176,47 +231,38 @@ export function SortableSlideCard({
             </HStack>
           </div>
 
-          {/* Form fields */}
           <VStack spacing={10} className="items-stretch">
             <Input
               label={tAdmin("hero.title")}
               value={slide.title}
-              onChange={(e) => onSlideChange(slide.id, "title", e.target.value)}
+              onChange={handleTitleChange}
             />
             <Input
               label={tAdmin("hero.subtitle")}
               value={slide.subtitle}
-              onChange={(e) =>
-                onSlideChange(slide.id, "subtitle", e.target.value)
-              }
+              onChange={handleSubtitleChange}
             />
             <Input
               label={tAdmin("hero.description")}
               value={slide.description}
-              onChange={(e) =>
-                onSlideChange(slide.id, "description", e.target.value)
-              }
+              onChange={handleDescriptionChange}
             />
             <div className="grid grid-cols-2 gap-3">
               <Input
                 label={tAdmin("hero.buttonText")}
                 value={slide.buttonText}
-                onChange={(e) =>
-                  onSlideChange(slide.id, "buttonText", e.target.value)
-                }
+                onChange={handleButtonTextChange}
               />
               <Input
                 label={tAdmin("hero.buttonLink")}
                 value={slide.buttonLink}
-                onChange={(e) =>
-                  onSlideChange(slide.id, "buttonLink", e.target.value)
-                }
+                onChange={handleButtonLinkChange}
               />
             </div>
             <Input
               label={tAdmin("hero.badge")}
               value={slide.badge || ""}
-              onChange={(e) => onSlideChange(slide.id, "badge", e.target.value)}
+              onChange={handleBadgeChange}
               placeholder={tAdmin("hero.badgePlaceholder")}
             />
           </VStack>
@@ -224,4 +270,4 @@ export function SortableSlideCard({
       </CardContent>
     </Card>
   );
-}
+});

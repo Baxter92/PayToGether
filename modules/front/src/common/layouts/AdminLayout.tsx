@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import {
   SidebarProvider,
   SidebarInset,
@@ -7,8 +7,25 @@ import {
 } from "@/common/components/ui/sidebar";
 import LanguageSelector from "@/common/components/LanguageSelector";
 import { AdminSidebar } from "@/pages/admin/components/AdminSidebar";
+import { useAuth } from "../context/AuthContext";
+import { PATHS } from "../constants/path";
 
 export function AdminLayout(): ReactElement {
+  const { user, role, roles, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-500 border-t-transparent" />
+      </div>
+    );
+  }
+  if (!user && !loading) {
+    return <Navigate to={PATHS.LOGIN} replace />;
+  }
+  if (role !== "ADMIN" && !roles.includes("ADMIN")) {
+    return <Navigate to={PATHS.HOME} replace />;
+  }
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">

@@ -27,7 +27,19 @@ import { Progress } from "@/common/components/ui/progress";
 import { formatCurrency } from "@/common/utils/formatCurrency";
 import { Badge } from "@/common/components/ui/badge";
 import { CreateDealModal } from "@/pages/profile/components/CreateDealModal";
-import { useDealVilles, useGetDealImageUrl } from "@/common/api";
+import {
+  useDealVilles,
+  useGetDealImageUrl,
+  useDeal,
+  useUpdateDeal,
+} from "@/common/api";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/common/components/ui/dialog";
+import { toast } from "sonner";
+import { useAuth } from "@/common/context/AuthContext";
 
 /** Déclare le type de filtre */
 interface DealFilters {
@@ -62,6 +74,7 @@ interface IDealsListProps {
   title?: string;
   tableProps?: Partial<IDataTableProps<any, any>>;
   isAdmin?: boolean;
+  onDealUpdated?: () => void;
 }
 
 /** Debounce hook simple */
@@ -118,7 +131,10 @@ function MobileFilterSheet({
 }
 
 function DealTableProductCell({ deal }: { deal: any }) {
-  const { data: imageUrl } = useGetDealImageUrl(deal?.id, deal?.image?.imageUuid);
+  const { data: imageUrl } = useGetDealImageUrl(
+    deal?.id,
+    deal?.image?.imageUuid,
+  );
 
   return (
     <div className="flex items-center gap-3">
@@ -160,9 +176,11 @@ export default function DealsList({
   description,
   tableProps,
   isAdmin = false,
+  onDealUpdated,
 }: IDealsListProps) {
   const { t: tFilters } = useI18n("filters");
   const { t: tTable } = useI18n("table");
+  const { user } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<DealFilters>({
     category: "all",
@@ -175,8 +193,20 @@ export default function DealsList({
 
   const [view, setView] = useState<"grid" | "list">(viewMode);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [editingDealUuid, setEditingDealUuid] = useState<string | null>(null);
+  const [statusModalOpen, setStatusModalOpen] = useState(false);
+  const [statusTarget, setStatusTarget] = useState<{
+    id: string;
+    title: string;
+    nextStatus: "PUBLIE" | "BROUILLON";
+  } | null>(null);
 
   const { data: cities } = useDealVilles();
+  const { mutateAsync: updateDeal, isPending: isUpdatingDeal } =
+    useUpdateDeal();
+
+  // Fetch selected deal details when editing
+  const { data: editingDealData } = useDeal(editingDealUuid ?? "");
 
   // Mobile sheet state
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -611,20 +641,49 @@ export default function DealsList({
                           actionsRow: (props: any) => [
                             ...(tableProps?.actionsRow?.(props) || []),
                             {
-                              leftIcon:
-                                props.row.original.status === "published" ? (
-                                  <FileEdit />
-                                ) : (
-                                  <Globe />
-                                ),
-                              tooltip:
-                                props.row.original.status === "published"
-                                  ? "Mettre en brouillon"
-                                  : "Publier",
+                              leftIcon: ["PUBLIE", "PUBLISHED"].includes(
+                                String(
+                                  props.row.original.status ?? "",
+                                ).toUpperCase(),
+                              ) ? (
+                                <FileEdit />
+                              ) : (
+                                <Globe />
+                              ),
+                              tooltip: ["PUBLIE", "PUBLISHED"].includes(
+                                String(
+                                  props.row.original.status ?? "",
+                                ).toUpperCase(),
+                              )
+                                ? "Remettre en brouillon"
+                                : "Publier",
+                              onClick: () => {
+                                const row = props.row.original;
+                                const currentStatus = String(
+                                  row.status ?? "",
+                                ).toUpperCase();
+                                const isPublished = [
+                                  "PUBLIE",
+                                  "PUBLISHED",
+                                ].includes(currentStatus);
+
+                                setStatusTarget({
+                                  id: row.id || row.uuid,
+                                  title: row.title || "ce deal",
+                                  nextStatus: isPublished
+                                    ? "BROUILLON"
+                                    : "PUBLIE",
+                                });
+                                setStatusModalOpen(true);
+                              },
                             },
                             {
                               leftIcon: <Edit2 className="w-4 h-4" />,
                               onClick: () => {
+                                const uuid =
+                                  props.row.original.id ||
+                                  props.row.original.uuid;
+                                setEditingDealUuid(uuid);
                                 setCreateModalOpen(true);
                               },
                             },
@@ -647,8 +706,67 @@ export default function DealsList({
         </div>
         <CreateDealModal
           open={createModalOpen}
-          onClose={() => setCreateModalOpen(false)}
+          onClose={() => {
+            setCreateModalOpen(false);
+            setEditingDealUuid(null);
+          }}
+          initialData={editingDealData ?? null}
+          onSuccess={onDealUpdated}
+          connectedMerchantUuid={user?.id}
         />
+
+        <Dialog open={statusModalOpen} onOpenChange={setStatusModalOpen}>
+          <DialogContent size="default" className="max-w-md">
+            <DialogTitle>
+              {statusTarget?.nextStatus === "PUBLIE"
+                ? "Publier le deal"
+                : "Remettre le deal en brouillon"}
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              {statusTarget?.nextStatus === "PUBLIE"
+                ? `Voulez-vous publier "${statusTarget?.title ?? "ce deal"}" ?`
+                : `Voulez-vous remettre "${statusTarget?.title ?? "ce deal"}" en brouillon ?`}
+            </p>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setStatusModalOpen(false)}
+                disabled={isUpdatingDeal}
+              >
+                Annuler
+              </Button>
+              <Button
+                type="button"
+                loading={isUpdatingDeal}
+                onClick={async () => {
+                  if (!statusTarget?.id) return;
+                  try {
+                    await updateDeal({
+                      id: statusTarget.id,
+                      data: { statut: statusTarget.nextStatus },
+                    });
+                    toast.success(
+                      statusTarget.nextStatus === "PUBLIE"
+                        ? "Deal publié avec succès"
+                        : "Deal remis en brouillon",
+                    );
+                    setStatusModalOpen(false);
+                    setStatusTarget(null);
+                    onDealUpdated?.();
+                  } catch (error: any) {
+                    toast.error("Erreur lors de la mise à jour du statut", {
+                      description:
+                        error?.response?.data?.message || error?.message,
+                    });
+                  }
+                }}
+              >
+                Confirmer
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </VStack>
 
       {/* Mobile bottom sheet for filters */}

@@ -327,8 +327,10 @@ export function ViewDetailDealModal({
 
   const viewDetailDealFormGroups: IFieldGroup[] = [
     {
-      title: "Informations générales",
+      title: "📋 Informations générales",
+      description: "Vue complète de l'offre publiée",
       columns: 2,
+      className: "bg-white rounded-xl shadow-sm border border-gray-100 p-6",
       fields: [
         {
           type: "text",
@@ -363,8 +365,10 @@ export function ViewDetailDealModal({
       ],
     },
     {
-      title: "Tarification",
+      title: "💰 Tarification",
+      description: "Structure de prix de l'offre",
       columns: 3,
+      className: "bg-white rounded-xl shadow-sm border border-gray-100 p-6",
       fields: [
         {
           type: "number",
@@ -385,8 +389,10 @@ export function ViewDetailDealModal({
       ],
     },
     {
-      title: "Disponibilité",
+      title: "📅 Disponibilité",
+      description: "Parts et date limite du deal",
       columns: 3,
+      className: "bg-white rounded-xl shadow-sm border border-gray-100 p-6",
       fields: [
         {
           type: "number",
@@ -409,7 +415,10 @@ export function ViewDetailDealModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent size="xl" className="p-0 h-[90vh] overflow-hidden">
+      <DialogContent
+        size="xl"
+        className="p-0 h-[90vh] overflow-hidden bg-white bg-gradient-to-br from-gray-50 to-blue-50"
+      >
         <DialogTitle className="px-6 py-4 border-b font-semibold">
           Détails du deal
         </DialogTitle>
@@ -445,13 +454,15 @@ export function ViewDetailDealModal({
 
             <TabsContent
               value="details"
-              className="px-6 py-4 h-[calc(90vh-72px)] overflow-y-auto"
+              className="px-6 py-6 h-[calc(90vh-72px)] overflow-y-auto"
             >
-              <Form<CreateDealInput>
-                form={form}
-                groups={viewDetailDealFormGroups}
-                readOnly
-              />
+              <div className="space-y-6">
+                <Form<CreateDealInput>
+                  form={form}
+                  groups={viewDetailDealFormGroups}
+                  readOnly
+                />
+              </div>
             </TabsContent>
 
             <TabsContent value="participants" className="px-6 py-4">

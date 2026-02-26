@@ -1,6 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { utilisateurService } from "../services/utilisateurService";
-import type { CreateUtilisateurDTO, UtilisateurDTO } from "../types";
+import type {
+  CreateUtilisateurDTO,
+  UtilisateurDTO,
+  ReinitialiserMotDePasseDTO,
+  ActiverUtilisateurDTO,
+  AssignerRoleDTO,
+} from "../types";
 import { createResourceHooks } from "./factories/createResourceHooks";
 
 const utilisateurHooks = createResourceHooks<
@@ -60,5 +66,46 @@ export const useGetUserPhotoUrl = (utilisateurUuid: string) => {
     queryKey: [...userKeys.detail(utilisateurUuid), "photo-url"],
     queryFn: () => utilisateurService.getPhotoUrl(utilisateurUuid),
     enabled: !!utilisateurUuid,
+  });
+};
+
+export const useResetUserPassword = () => {
+  return useMutation<void, Error, { utilisateurUuid: string; data: ReinitialiserMotDePasseDTO }>({
+    mutationFn: ({ utilisateurUuid, data }) =>
+      utilisateurService.resetPassword(utilisateurUuid, data),
+  });
+};
+
+export const useSetUserEnabled = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, { utilisateurUuid: string; data: ActiverUtilisateurDTO }>({
+    mutationFn: ({ utilisateurUuid, data }) =>
+      utilisateurService.setEnabled(utilisateurUuid, data),
+    onSuccess: (_, { utilisateurUuid }) => {
+      queryClient.invalidateQueries({
+        queryKey: userKeys.detail(utilisateurUuid),
+      });
+      queryClient.invalidateQueries({
+        queryKey: userKeys.lists(),
+      });
+    },
+  });
+};
+
+export const useAssignUserRole = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, { utilisateurUuid: string; data: AssignerRoleDTO }>({
+    mutationFn: ({ utilisateurUuid, data }) =>
+      utilisateurService.assignRole(utilisateurUuid, data),
+    onSuccess: (_, { utilisateurUuid }) => {
+      queryClient.invalidateQueries({
+        queryKey: userKeys.detail(utilisateurUuid),
+      });
+      queryClient.invalidateQueries({
+        queryKey: userKeys.lists(),
+      });
+    },
   });
 };

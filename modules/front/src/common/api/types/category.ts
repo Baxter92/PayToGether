@@ -5,6 +5,7 @@ export interface CategoryDTO {
   icone: string;
   dateCreation: string;
   dateModification: string;
+  nbDeals: number;
 }
 
 export interface CreateCategoryDTO {

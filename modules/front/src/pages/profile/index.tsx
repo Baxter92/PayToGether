@@ -15,11 +15,14 @@ import { useAuth } from "@/common/context/AuthContext";
 
 export default function Profile() {
   const { t } = useI18n("profile");
-  const { user } = useAuth();
+  const { roles, role } = useAuth();
   const [activeTab, setActiveTab] =
     useState<(typeof PROFILE_TABS)[number]["key"]>("overview");
 
-  const isMerchant = useMemo(() => user?.role === "marchand", [user]);
+  const isMerchant = useMemo(
+    () => role === "VENDEUR" || roles.includes("VENDEUR"),
+    [role, roles],
+  );
   return (
     <div className="max-w-6xl mx-auto p-6">
       {/* Header */}
@@ -62,20 +65,18 @@ export default function Profile() {
           {/* Activity / feed */}
           <div className="bg-white dark:bg-slate-900 rounded-lg p-6 shadow-sm">
             <h3 className="text-md font-semibold mb-3">
-              {t("profile.recentActivity")}
+              {t("recentActivity")}
             </h3>
             <ul className="space-y-2 text-sm text-slate-600">
               <li>
                 •{" "}
-                {t("profile.boughtDeal", {
+                {t("boughtDeal", {
                   deal: "Dîner 2 personnes",
                   days: 2,
                 })}
               </li>
-              <li>
-                • {t("profile.leftReview", { merchant: "ZenSpa", days: 5 })}
-              </li>
-              <li>• {t("profile.savedOffers", { count: 3, days: 7 })}</li>
+              <li>• {t("leftReview", { merchant: "ZenSpa", days: 5 })}</li>
+              <li>• {t("savedOffers", { count: 3, days: 7 })}</li>
             </ul>
           </div>
         </main>

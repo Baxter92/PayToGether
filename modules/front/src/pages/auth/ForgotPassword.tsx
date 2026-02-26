@@ -5,7 +5,7 @@ import { PATHS } from "@/common/constants/path";
 import { useI18n } from "@hooks/useI18n";
 
 export default function ForgotPassword() {
-  const { t } = useI18n();
+  const { t } = useI18n("auth");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -20,7 +20,7 @@ export default function ForgotPassword() {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       setSent(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("auth.errorOccurred"));
+      setError(err instanceof Error ? err.message : t("errorOccurred"));
     } finally {
       setLoading(false);
     }
@@ -33,14 +33,21 @@ export default function ForgotPassword() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
             <CheckCircle className="w-8 h-8 text-green-600" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">{t("auth.emailSent")}</h1>
-          <p className="text-gray-600 mb-6" dangerouslySetInnerHTML={{ __html: t("auth.emailSentMessage", { email }) }} />
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            {t("emailSent")}
+          </h1>
+          <p
+            className="text-gray-600 mb-6"
+            dangerouslySetInnerHTML={{
+              __html: t("emailSentMessage", { email }),
+            }}
+          />
           <Link
             to={PATHS.LOGIN}
             className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
-            {t("auth.backToLogin")}
+            {t("backToLogin")}
           </Link>
         </div>
       </div>
@@ -54,14 +61,16 @@ export default function ForgotPassword() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
             <Mail className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">{t("auth.forgotPasswordTitle")}</h1>
-          <p className="text-gray-600 mt-2">{t("auth.forgotPasswordSubtitle")}</p>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {t("forgotPasswordTitle")}
+          </h1>
+          <p className="text-gray-600 mt-2">{t("forgotPasswordSubtitle")}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t("auth.email")}
+              {t("email")}
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -70,7 +79,7 @@ export default function ForgotPassword() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                placeholder={t("auth.emailPlaceholder")}
+                placeholder={t("emailPlaceholder")}
                 required
               />
             </div>
@@ -92,7 +101,7 @@ export default function ForgotPassword() {
             ) : (
               <>
                 <Send className="w-5 h-5" />
-                {t("auth.sendLink")}
+                {t("sendLink")}
               </>
             )}
           </button>
@@ -104,7 +113,7 @@ export default function ForgotPassword() {
             className="inline-flex items-center gap-2 text-primary hover:text-primary/80 text-sm font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
-            {t("auth.backToLogin")}
+            {t("backToLogin")}
           </Link>
         </div>
       </div>

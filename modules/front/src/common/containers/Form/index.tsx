@@ -223,7 +223,10 @@ const Form = <T extends FieldValues>({
             <Select
               {...field}
               value={f.value}
-              onValueChange={f.onChange}
+              onValueChange={(value) => {
+                f.onChange(value);
+                field.onValueChange?.(value);
+              }}
               disabled={isDisabled}
               triggerClassName="w-full"
               error={error}

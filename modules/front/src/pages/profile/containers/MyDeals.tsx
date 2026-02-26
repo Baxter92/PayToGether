@@ -1,6 +1,6 @@
 import { HStack } from "@/common/components";
 import { Button } from "@/common/components/ui/button";
-import { useDeals } from "@/common/api";
+import { useDealsByCreateur } from "@/common/api";
 import { mapDealToView } from "@/common/api/mappers/catalog";
 import DealsList from "@/common/containers/DealList";
 import { Heading } from "@/common/containers/Heading";
@@ -8,10 +8,12 @@ import { Plus } from "lucide-react";
 import { useState, type JSX } from "react";
 import { CreateDealModal } from "../components/CreateDealModal";
 import type { IColumnFilter } from "@/common/components/DataTable";
+import { useAuth } from "@/common/context/AuthContext";
 
 export default function MyDeals(): JSX.Element {
   const [addDealModalOpen, setAddDealModalOpen] = useState(false);
-  const { data: dealsData, refetch } = useDeals();
+  const { user } = useAuth();
+  const { data: dealsData, refetch } = useDealsByCreateur(user?.id || "");
   const deals = (dealsData ?? []).map(mapDealToView);
 
   // Configuration des filtres pour le DataTable
@@ -23,7 +25,7 @@ export default function MyDeals(): JSX.Element {
       options: [
         { label: "Climatiseurs", value: "clim" },
         { label: "Ventilateurs", value: "ventilo" },
-        { label: "Électroménager", value: "electromenager" }
+        { label: "Électroménager", value: "electromenager" },
       ],
     },
     {
@@ -32,14 +34,14 @@ export default function MyDeals(): JSX.Element {
       type: "select",
       options: [
         { label: "Yaoundé", value: "yaounde" },
-        { label: "Douala", value: "douala" }
+        { label: "Douala", value: "douala" },
       ],
     },
     {
       id: "groupPrice",
       label: "Prix max",
       type: "number",
-    }
+    },
   ];
 
   return (
@@ -76,6 +78,7 @@ export default function MyDeals(): JSX.Element {
         open={addDealModalOpen}
         onClose={() => setAddDealModalOpen(false)}
         onSuccess={() => refetch()}
+        connectedMerchantUuid={user?.id}
       />
     </section>
   );
