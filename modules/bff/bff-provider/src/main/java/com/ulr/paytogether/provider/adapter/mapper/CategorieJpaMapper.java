@@ -4,6 +4,9 @@ import com.ulr.paytogether.core.modele.CategorieModele;
 import com.ulr.paytogether.provider.adapter.entity.CategorieJpa;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Optional;
+
 @Component
 public class CategorieJpaMapper {
 
@@ -17,7 +20,7 @@ public class CategorieJpaMapper {
                 .nom(jpaCategorie.getNom())
                 .description(jpaCategorie.getDescription())
                 .icone(jpaCategorie.getIcone())
-                .nbDeals(jpaCategorie.getDeals().size())
+                .nbDeals(Optional.ofNullable(jpaCategorie.getDeals()).map(List::size).orElse(0))
                 .dateCreation(jpaCategorie.getDateCreation())
                 .dateModification(jpaCategorie.getDateModification())
                 .build();
