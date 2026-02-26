@@ -23,11 +23,7 @@ export function AdminLayout(): ReactElement {
   if (!user && !loading) {
     return <Navigate to={PATHS.LOGIN} replace />;
   }
-  if (
-    role !== "admin" &&
-    !roles.includes("admin") &&
-    !roles.includes("ADMIN")
-  ) {
+  if (role !== "ADMIN" && !roles.includes("ADMIN")) {
     return <Navigate to={PATHS.HOME} replace />;
   }
   return (

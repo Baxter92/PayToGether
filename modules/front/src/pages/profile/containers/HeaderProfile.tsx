@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useI18n } from "@hooks/useI18n";
 import { HStack } from "@/common/components";
 import { Avatar, AvatarFallback } from "@/common/components/ui/avatar";
@@ -71,7 +71,12 @@ export default function HeaderProfile({
   onTabChange?: (key: (typeof PROFILE_TABS)[number]["key"]) => void;
 }): JSX.Element {
   const { t } = useI18n("profile");
-  const { user } = useAuth();
+  const { role, roles, user } = useAuth();
+
+  const isMerchant = useMemo(
+    () => role === "VENDEUR" || roles.includes("VENDEUR"),
+    [role, roles],
+  );
 
   useEffect(() => {
     // 1. Lire le hash au chargement
@@ -117,8 +122,7 @@ export default function HeaderProfile({
             {user?.name?.capitalizeWords?.()}
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-300">
-            {user?.role === "marchand" ? t("merchant") : t("client")} •{" "}
-            {user?.location}
+            {isMerchant ? t("merchant") : t("client")} • {user?.location}
           </p>
           <p className="text-sm text-slate-500 dark:text-slate-300 mt-1">
             {user?.email}
@@ -128,7 +132,7 @@ export default function HeaderProfile({
 
       <HStack spacing={8} wrap>
         {PROFILE_TABS.map(({ labelKey, key, icon: Icon, merchant }) => {
-          if (merchant && user?.role === "marchand") {
+          if (merchant && isMerchant) {
             return (
               <Button
                 key={key}

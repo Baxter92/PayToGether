@@ -4,9 +4,13 @@ import Grid from "@/common/components/Grid";
 import { Button } from "@/common/components/ui/button";
 import { Heading } from "@/common/containers/Heading";
 import { type JSX } from "react";
+import { useAuth } from "@/common/context/AuthContext";
+import { useDealsByCreateur } from "@/common/api";
 
 export default function AsideStats(): JSX.Element {
   const { t } = useI18n("profile");
+  const { user } = useAuth();
+  const { data: dealsData } = useDealsByCreateur(user?.id ?? "");
 
   return (
     <aside className="space-y-4 lg:col-span-1">
@@ -32,7 +36,7 @@ export default function AsideStats(): JSX.Element {
           />
           <Heading
             level={6}
-            title="2"
+            title={dealsData?.length ?? 0}
             description="Deals"
             align="center"
             spacing={0}

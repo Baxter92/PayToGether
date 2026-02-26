@@ -15,11 +15,14 @@ import { useAuth } from "@/common/context/AuthContext";
 
 export default function Profile() {
   const { t } = useI18n("profile");
-  const { user } = useAuth();
+  const { roles, role } = useAuth();
   const [activeTab, setActiveTab] =
     useState<(typeof PROFILE_TABS)[number]["key"]>("overview");
 
-  const isMerchant = useMemo(() => user?.role === "marchand", [user]);
+  const isMerchant = useMemo(
+    () => role === "VENDEUR" || roles.includes("VENDEUR"),
+    [role, roles],
+  );
   return (
     <div className="max-w-6xl mx-auto p-6">
       {/* Header */}

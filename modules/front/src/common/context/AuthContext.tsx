@@ -8,6 +8,7 @@ import {
 import { authService, type MeResponse } from "../api/services/authService";
 import { localTokenStorage } from "../api/module/client/auth/tokenStorage.web";
 import { HttpError } from "../api/module/client/HttpError";
+import type { RoleUtilisateurType } from "../api";
 
 export interface IUser {
   id: string;
@@ -18,16 +19,16 @@ export interface IUser {
   actif: boolean;
   emailVerifie: boolean;
   dateCreationTimestamp: number;
-  roles: string[];
+  roles: RoleUtilisateurType[];
   name: string;
   avatar?: string;
-  role: "client" | "marchand" | "admin";
+  role: RoleUtilisateurType;
   location?: string;
 }
 
 export interface IAuthContextType {
   user: IUser | null;
-  roles: string[];
+  roles: RoleUtilisateurType[];
   role: IUser["role"] | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<IUser>;
@@ -51,7 +52,7 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<IUser | null>(null);
-  const [roles, setRoles] = useState<string[]>([]);
+  const [roles, setRoles] = useState<RoleUtilisateurType[]>([]);
   const [role, setRole] = useState<IUser["role"] | null>(null);
 
   const [loading, setLoading] = useState(true);
@@ -64,7 +65,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const normalized = (roles ?? []).map((role) => role.toUpperCase());
 
     if (normalized.includes("ADMIN") || normalized.includes("ROLE_ADMIN")) {
-      return "admin";
+      return "ADMIN";
     }
 
     if (
@@ -73,10 +74,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       normalized.includes("MERCHANT") ||
       normalized.includes("ROLE_MERCHANT")
     ) {
-      return "marchand";
+      return "VENDEUR";
     }
 
-    return "client";
+    return "UTILISATEUR";
   };
 
   const mapMeToUser = (me: MeResponse): IUser => {
