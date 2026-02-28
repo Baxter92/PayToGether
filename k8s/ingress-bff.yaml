@@ -5,25 +5,25 @@ metadata:
   namespace: paytogether
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
-    nginx.ingress.kubernetes.io/use-regex: "true"
+#    nginx.ingress.kubernetes.io/rewrite-target: /$1
+#    nginx.ingress.kubernetes.io/use-regex: "true"
 
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - bff.dealtogether.ca
+      - devbff.dealtogether.ca
       secretName: bff-tls
   rules:
-    - host: bff.dealtogether.ca
-      http:
-        paths:
-          - path: /
-            #pathType: ImplementationSpecific
-            pathType: Prefix
-            backend:
-              service:
-                name: bff-service
-                port:
-                  number: 8090
+  - host: devbff.dealtogether.ca
+    http:
+      paths:
+      - path: /
+      #pathType: ImplementationSpecific
+        pathType: Prefix
+        backend:
+           service:
+              name: bffprod-service
+              port:
+                number: 8193
 
