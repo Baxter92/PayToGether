@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minio-ingress
+  namespace: paytogether
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # Permet l'upload de fichiers volumineux (100 MB max)
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    # Timeout pour les uploads longs
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - registry.dealtogether.ca
+      secretName: minio-tls
+  rules:
+    - host: registry.dealtogether.ca
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: minio-service
+                port:
+                  number: 9005
+

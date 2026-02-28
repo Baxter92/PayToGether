@@ -63,6 +63,8 @@ public class SecurityConfiguration {
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/deals/statut/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/deals/villes").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/deals/**/images/**/url").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/categories").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         // Tous les autres endpoints nécessitent une authentification
                         .anyRequest().authenticated()
@@ -80,6 +82,8 @@ public class SecurityConfiguration {
                                 path.startsWith("/api/auth/register") ||
                                 path.startsWith("/api/deals/statut") ||
                                 path.startsWith("/api/deals/villes") ||
+                                path.startsWith("/api/deals/**/images/**/url") ||
+                                path.startsWith("/api/categories") ||
                                 path.startsWith("/actuator/") ||
                                 path.startsWith("/swagger-ui/") ||
                                 path.startsWith("/v3/api-docs/")) {
