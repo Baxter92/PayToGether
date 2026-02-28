@@ -2,6 +2,7 @@ package com.ulr.paytogether.api.mapper;
 
 import com.ulr.paytogether.api.dto.DealDTO;
 import com.ulr.paytogether.api.dto.DealResponseDto;
+import com.ulr.paytogether.api.dto.MiseAJourDealDTO;
 import com.ulr.paytogether.core.modele.CategorieModele;
 import com.ulr.paytogether.core.modele.DealModele;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
@@ -90,7 +91,7 @@ public class DealMapper {
     /**
      * Convertit un MiseAJourDealDTO en DealModele (sans statut et sans images)
      */
-    public DealModele versEntite(com.ulr.paytogether.api.dto.MiseAJourDealDTO dto) {
+    public DealModele versEntite(MiseAJourDealDTO dto) {
         if (dto == null) {
             return null;
         }
@@ -109,6 +110,10 @@ public class DealMapper {
                 .categorie(dto.getCategorieUuid() != null ? CategorieModele.builder()
                         .uuid(dto.getCategorieUuid())
                         .build() : null)
+                .listeImages(dto.getListeImages() != null ?
+                    dto.getListeImages().stream()
+                        .map(imageDealMapper::dtoVersModele)
+                        .toList() : null)
                 .listePointsForts(dto.getListePointsForts())
                 .dateExpiration(dto.getDateExpiration())
                 .ville(dto.getVille())

@@ -8,12 +8,12 @@ Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
-  "nom": "Paul",
+  "nom": "Admin",
   "prenom": "Test",
-  "email": "paul.test@example.com",
+  "email": "admin.test@hana.com",
   "motDePasse": "MotDePasse123!",
   "statut": "ACTIF",
-  "role": "VENDEUR"
+  "role": "ADMIN"
 }
 
 ### 2. Récupérer tous les utilisateurs (GET)

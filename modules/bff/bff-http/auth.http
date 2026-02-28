@@ -1,9 +1,8 @@
 ### Tests des API d'Authentification
 
 ### Variables
-@username = hanaadmin@hanacalgary.ca
-@password = $2a$10$ZCfYq7kvNvLsuUKmzDWkjebC2QozV9L8whpF6n85BGwtBFABEuD62
-
+@username = admin.test@hana.com
+@password = MotDePasse123!
 ### =========================================================================================
 ### 1. Login - Authentification d'un utilisateur
 ### =========================================================================================

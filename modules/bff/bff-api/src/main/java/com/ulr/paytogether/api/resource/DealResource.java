@@ -99,7 +99,7 @@ public class DealResource {
     @PreAuthorize("hasAnyRole('ADMIN', 'VENDEUR')")
     public ResponseEntity<DealResponseDto> mettreAJour(
             @PathVariable UUID uuid,
-            @Valid @RequestBody MiseAJourDealDTO dto) {
+            @RequestBody MiseAJourDealDTO dto) {
         log.info("Mise à jour des informations du deal: {}", uuid);
         return ResponseEntity.ok(dealApiAdapter.mettreAJour(uuid, dto));
     }
@@ -111,7 +111,7 @@ public class DealResource {
     @PreAuthorize("hasAnyRole('ADMIN', 'VENDEUR')")
     public ResponseEntity<DealResponseDto> mettreAJourStatut(
             @PathVariable UUID uuid,
-            @Valid @RequestBody MiseAJourStatutDealDTO dto) {
+            @RequestBody MiseAJourStatutDealDTO dto) {
         log.info("Mise à jour du statut du deal {} vers {}", uuid, dto.getStatut());
         return ResponseEntity.ok(dealApiAdapter.mettreAJourStatut(uuid, dto.getStatut()));
     }
@@ -124,7 +124,7 @@ public class DealResource {
     @PreAuthorize("hasAnyRole('ADMIN', 'VENDEUR')")
     public ResponseEntity<DealResponseDto> mettreAJourImages(
             @PathVariable UUID uuid,
-            @Valid @RequestBody MiseAJourImagesDealDTO dto) {
+            @RequestBody MiseAJourImagesDealDTO dto) {
         log.info("Mise à jour des images du deal: {}", uuid);
         return ResponseEntity.ok(dealApiAdapter.mettreAJourImages(uuid, dto));
     }

@@ -82,10 +82,8 @@ public class DealJpaMapper {
         entite.setNbParticipants(modele.getNbParticipants());
         entite.setDateDebut(modele.getDateDebut());
         entite.setDateFin(modele.getDateFin());
-        entite.setStatut(modele.getStatut());
         entite.setMarchandJpa(modele.getCreateur() != null ? utilisateurJpaMapper.versEntite(modele.getCreateur()) : null);
         entite.setCategorieJpa(modele.getCategorie() != null ? categorieJpaMapper.versEntite(modele.getCategorie()) : null);
-        entite.setImageDealJpas(modele.getListeImages() != null ? modele.getListeImages().stream().map(imageMapper::versEntite).toList() : null);
         entite.setListePointsForts(modele.getListePointsForts());
         entite.setDateExpiration(modele.getDateExpiration());
         entite.setVille(modele.getVille());

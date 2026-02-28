@@ -5,6 +5,9 @@ import com.ulr.paytogether.provider.adapter.entity.DealJpa;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
 import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -36,4 +39,12 @@ public interface DealRepository extends JpaRepository<DealJpa, UUID> {
      * @return la liste des deals
      */
     List<DealJpa> findByCategorieJpa(CategorieJpa categorieJpa);
+
+    /**
+     * Supprime tous les points forts d'un deal
+     * @param deal_uuid l'UUID du deal
+     */
+    @Modifying
+    @Query(value = "DELETE FROM public.deal_points_forts WHERE deal_uuid = :deal_uuid", nativeQuery = true)
+    void deleteAllPointsForts(@Param("deal_uuid") UUID deal_uuid);
 }

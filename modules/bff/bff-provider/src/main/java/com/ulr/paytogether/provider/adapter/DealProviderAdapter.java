@@ -12,14 +12,16 @@ import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
 import com.ulr.paytogether.provider.adapter.mapper.DealJpaMapper;
 import com.ulr.paytogether.provider.repository.CategorieRepository;
 import com.ulr.paytogether.provider.repository.DealRepository;
+import com.ulr.paytogether.provider.repository.ImageDealRepository;
 import com.ulr.paytogether.provider.repository.UtilisateurRepository;
 import com.ulr.paytogether.provider.utils.FileManager;
 import com.ulr.paytogether.provider.utils.Tools;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,18 +30,19 @@ import java.util.stream.Collectors;
  * Implémente le port DealProvider défini dans bff-core
  * Fait le pont entre le domaine métier et la couche de persistence JPA
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DealProviderAdapter implements DealProvider {
 
     private final DealRepository jpaRepository;
+    private final ImageDealRepository imageDealRepository;
     private final UtilisateurRepository utilisateurRepository;
     private final CategorieRepository categorieRepository;
     private final DealJpaMapper mapper;
     private final FileManager fileManager;
 
 
-    @Transactional(rollbackOn = Exception.class)
     @Override
     public DealModele sauvegarder(DealModele deal) {
         DealJpa entite = mapper.versEntite(deal);
@@ -48,7 +51,6 @@ public class DealProviderAdapter implements DealProvider {
         if (deal.getListeImages() != null && !deal.getListeImages().isEmpty()) {
             List<ImageDealJpa> imageDealJpas = deal.getListeImages().stream()
                     .map(imageDealModele -> ImageDealJpa.builder()
-                            .uuid(imageDealModele.getUuid())
                             .urlImage(FilenameUtils.getBaseName(imageDealModele.getUrlImage())
                                     + "_" + System.currentTimeMillis()
                                     + "." + FilenameUtils.getExtension(imageDealModele.getUrlImage()))
@@ -65,6 +67,7 @@ public class DealProviderAdapter implements DealProvider {
 
         setPresignUrl(modeleSauvegarde);
 
+        log.info("🎉 Sauvegarde complète terminée");
         return modeleSauvegarde;
     }
 
@@ -123,7 +126,6 @@ public class DealProviderAdapter implements DealProvider {
                 .collect(Collectors.toList());
     }
 
-    @Transactional(rollbackOn = Exception.class)
     @Override
     public DealModele mettreAJour(UUID uuid, DealModele deal) {
         DealJpa entite = jpaRepository.findById(uuid)
@@ -138,23 +140,24 @@ public class DealProviderAdapter implements DealProvider {
 
     @Override
     public void supprimerParUuid(UUID uuid) {
-        jpaRepository.deleteById(uuid);
+        DealJpa deal = jpaRepository.findById(uuid)
+                .orElseThrow(() -> new IllegalArgumentException("Deal non trouvé pour l'UUID : " + uuid));
+        jpaRepository.deleteAllPointsForts(uuid);
+        jpaRepository.delete(deal);
     }
 
-    @Transactional(rollbackOn = Exception.class)
     @Override
     public DealModele mettreAJourStatut(UUID uuid, StatutDeal statut) {
         DealJpa deal = jpaRepository.findById(uuid)
                 .orElseThrow(() -> new IllegalArgumentException("Deal non trouvé pour l'UUID : " + uuid));
 
         deal.setStatut(statut);
-        deal.setDateModification(java.time.LocalDateTime.now());
+        deal.setDateModification(LocalDateTime.now());
 
         DealJpa sauvegarde = jpaRepository.save(deal);
         return mapper.versModele(sauvegarde);
     }
 
-    @Transactional(rollbackOn = Exception.class)
     @Override
     public DealModele mettreAJourImages(UUID uuid, DealModele dealAvecNouvellesImages) {
         DealJpa deal = jpaRepository.findById(uuid)
@@ -245,6 +248,7 @@ public class DealProviderAdapter implements DealProvider {
         // Remplacer la liste des images par uniquement les nouvelles images avec presignUrl
         modeleSauvegarde.setListeImages(nouvellesImagesAvecPresign);
 
+        log.info("🎉 mettreAJourImages() terminé avec succès");
         return modeleSauvegarde;
     }
 
@@ -282,5 +286,111 @@ public class DealProviderAdapter implements DealProvider {
                 .findFirst()
                 .map(image -> fileManager.generatePresignedUrlForRead(Tools.DIRECTORY_DEALS_IMAGES+image.getUrlImage()))
                 .orElseThrow(() -> new IllegalArgumentException("Image non trouvée pour l'UUID : " + imageUuid));
+    }
+
+    @Override
+    public void supprimerImagesNonPresentes(UUID dealUuid, List<UUID> uuidsAConserver) {
+        DealJpa deal = jpaRepository.findById(dealUuid)
+                .orElseThrow(() -> new IllegalArgumentException("Deal non trouvé pour l'UUID : " + dealUuid));
+
+        if (deal.getImageDealJpas() != null && !deal.getImageDealJpas().isEmpty()) {
+            deal.getImageDealJpas().removeIf(imageJpa ->
+                !uuidsAConserver.contains(imageJpa.getUuid())
+            );
+            jpaRepository.save(deal);
+            log.info("Images supprimées pour le deal {} - UUIDs conservés : {}", dealUuid, uuidsAConserver);
+        }
+    }
+
+    @Override
+    public ImageDealModele ajouterImage(UUID dealUuid, ImageDealModele image) {
+        DealJpa deal = jpaRepository.findById(dealUuid)
+                .orElseThrow(() -> new IllegalArgumentException("Deal non trouvé pour l'UUID : " + dealUuid));
+
+        // Créer la nouvelle image avec un nom unique
+        ImageDealJpa nouvelleImage = ImageDealJpa.builder()
+                .urlImage(FilenameUtils.getBaseName(image.getUrlImage())
+                        + "_" + System.currentTimeMillis()
+                        + "." + FilenameUtils.getExtension(image.getUrlImage()))
+                .isPrincipal(image.getIsPrincipal())
+                .statut(StatutImage.PENDING)
+                .dealJpa(deal)
+                .build();
+
+        ImageDealJpa nouvelleImageJpa = imageDealRepository.save(nouvelleImage);
+
+        if (deal.getImageDealJpas() == null) {
+            deal.setImageDealJpas(new ArrayList<>());
+        }
+        deal.getImageDealJpas().add(nouvelleImageJpa);
+        log.info("Nouvelle image ajoutée pour le deal {} - UUID : {}", dealUuid, nouvelleImageJpa.getUuid());
+
+        // Créer le modèle et générer l'URL présignée
+        ImageDealModele imageModele = ImageDealModele.builder()
+                .uuid(nouvelleImageJpa.getUuid())
+                .urlImage(nouvelleImageJpa.getUrlImage())
+                .isPrincipal(nouvelleImageJpa.getIsPrincipal())
+                .statut(StatutImage.PENDING)
+                .dealUuid(dealUuid)
+                .build();
+
+        String presignUrl = fileManager.generatePresignedUrl(Tools.DIRECTORY_DEALS_IMAGES, nouvelleImage.getUrlImage());
+        imageModele.setPresignUrl(presignUrl);
+
+        return imageModele;
+    }
+
+    @Override
+    public ImageDealModele mettreAJourImageExistante(UUID dealUuid, UUID imageUuid, ImageDealModele image) {
+        DealJpa deal = jpaRepository.findById(dealUuid)
+                .orElseThrow(() -> new IllegalArgumentException("Deal non trouvé pour l'UUID : " + dealUuid));
+
+        ImageDealJpa imageExistante = deal.getImageDealJpas().stream()
+                .filter(img -> img.getUuid().equals(imageUuid))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Image non trouvée pour l'UUID : " + imageUuid));
+
+        // Mettre à jour uniquement les champs modifiables (isPrincipal, statut)
+        boolean modifie = false;
+
+        if (image.getIsPrincipal() != null && !image.getIsPrincipal().equals(imageExistante.getIsPrincipal())) {
+            imageExistante.setIsPrincipal(image.getIsPrincipal());
+            modifie = true;
+        }
+
+        if (image.getStatut() != null && !image.getStatut().equals(imageExistante.getStatut())) {
+            imageExistante.setStatut(image.getStatut());
+            modifie = true;
+        }
+
+        if (modifie) {
+            imageExistante.setDateModification(java.time.LocalDateTime.now());
+            imageDealRepository.save(imageExistante);
+            log.info("Image {} du deal {} mise à jour", imageUuid, dealUuid);
+        }
+
+        return ImageDealModele.builder()
+                .uuid(imageExistante.getUuid())
+                .urlImage(imageExistante.getUrlImage())
+                .isPrincipal(imageExistante.getIsPrincipal())
+                .statut(imageExistante.getStatut())
+                .dealUuid(dealUuid)
+                .build();
+    }
+
+    @Override
+    public Optional<ImageDealModele> trouverImageParUuid(UUID dealUuid, UUID imageUuid) {
+        return jpaRepository.findById(dealUuid)
+                .flatMap(deal -> deal.getImageDealJpas().stream()
+                        .filter(img -> img.getUuid().equals(imageUuid))
+                        .findFirst()
+                        .map(imageJpa -> ImageDealModele.builder()
+                                .uuid(imageJpa.getUuid())
+                                .urlImage(imageJpa.getUrlImage())
+                                .isPrincipal(imageJpa.getIsPrincipal())
+                                .statut(imageJpa.getStatut())
+                                .dealUuid(dealUuid)
+                                .build())
+                );
     }
 }

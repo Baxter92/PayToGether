@@ -3,6 +3,7 @@ package com.ulr.paytogether.core.provider;
 import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.modele.DealModele;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
+import com.ulr.paytogether.core.modele.ImageDealModele;
 
 import java.util.List;
 import java.util.Optional;
@@ -32,7 +33,7 @@ public interface DealProvider {
     /**
      * Mettre à jour uniquement le statut d'un deal
      */
-    DealModele mettreAJourStatut(UUID uuid, com.ulr.paytogether.core.enumeration.StatutDeal statut);
+    DealModele mettreAJourStatut(UUID uuid, StatutDeal statut);
 
     /**
      * Mettre à jour uniquement les images d'un deal
@@ -48,4 +49,24 @@ public interface DealProvider {
      * Obtenir l'URL de lecture d'une image d'un deal
      */
     String obtenirUrlLectureImage(UUID dealUuid, UUID imageUuid);
+
+    /**
+     * Supprimer les images d'un deal dont les UUID ne sont pas dans la liste fournie
+     */
+    void supprimerImagesNonPresentes(UUID dealUuid, List<UUID> uuidsAConserver);
+
+    /**
+     * Ajouter une nouvelle image à un deal
+     */
+    ImageDealModele ajouterImage(UUID dealUuid, ImageDealModele image);
+
+    /**
+     * Mettre à jour une image existante (statut, isPrincipal)
+     */
+    ImageDealModele mettreAJourImageExistante(UUID dealUuid, UUID imageUuid, ImageDealModele image);
+
+    /**
+     * Récupérer une image par son UUID et celui du deal
+     */
+    Optional<ImageDealModele> trouverImageParUuid(UUID dealUuid, UUID imageUuid);
 }

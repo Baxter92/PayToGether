@@ -1,6 +1,7 @@
 package com.ulr.paytogether.core.domaine.validator;
 
 
+import com.ulr.paytogether.core.enumeration.StatutDeal;
 import com.ulr.paytogether.core.exception.ValidationException;
 import com.ulr.paytogether.core.modele.DealModele;
 import org.springframework.stereotype.Component;
@@ -298,23 +299,19 @@ public class DealValidator implements Validator {
         switch (statutActuel) {
             case BROUILLON:
                 // Depuis BROUILLON : peut aller vers PUBLIE uniquement
-                if (nouveauStatut != com.ulr.paytogether.core.enumeration.StatutDeal.PUBLIE &&
-                    nouveauStatut != com.ulr.paytogether.core.enumeration.StatutDeal.BROUILLON) {
+                if (nouveauStatut != StatutDeal.PUBLIE &&
+                    nouveauStatut != StatutDeal.BROUILLON) {
                     throw new ValidationException("deal.statut.transition.invalide", statutActuel, nouveauStatut);
                 }
                 break;
 
             case PUBLIE:
                 // Depuis PUBLIE : peut aller vers EXPIRE ou rester PUBLIE
-                if (nouveauStatut != com.ulr.paytogether.core.enumeration.StatutDeal.EXPIRE &&
-                    nouveauStatut != com.ulr.paytogether.core.enumeration.StatutDeal.PUBLIE) {
-                    throw new ValidationException("deal.statut.transition.invalide", statutActuel, nouveauStatut);
-                }
                 break;
 
             case EXPIRE:
                 // Depuis EXPIRE : aucune transition autorisée (état final)
-                if (nouveauStatut != com.ulr.paytogether.core.enumeration.StatutDeal.EXPIRE) {
+                if (nouveauStatut != StatutDeal.EXPIRE) {
                     throw new ValidationException("deal.statut.expire.immuable");
                 }
                 break;

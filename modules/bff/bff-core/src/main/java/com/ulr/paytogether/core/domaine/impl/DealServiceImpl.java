@@ -10,15 +10,15 @@ import com.ulr.paytogether.core.modele.ImageDealModele;
 import com.ulr.paytogether.core.provider.DealProvider;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DealServiceImpl implements DealService {
@@ -26,6 +26,7 @@ public class DealServiceImpl implements DealService {
     private final DealProvider dealProvider;
     private final DealValidator dealValidator;
 
+    @Transactional
     @Override
     public DealModele creer(DealModele deal) {
         // Validation du deal avant création
@@ -59,6 +60,7 @@ public class DealServiceImpl implements DealService {
         return dealProvider.trouverParCategorie(categorieUuid);
     }
 
+    @Transactional
     @Override
     public DealModele mettreAJour(UUID uuid, DealModele deal) {
         // Validation partielle du deal avant mise à jour (sans statut)
@@ -68,27 +70,52 @@ public class DealServiceImpl implements DealService {
         List<ImageDealModele> listeImages = deal.getListeImages();
         boolean aDesImagesToUpdate = listeImages != null && !listeImages.isEmpty();
 
-        // 1. Mise à jour des informations générales du deal
+        // Mettre à jour le deal sans les images
         DealModele dealMisAJour = dealProvider.mettreAJour(uuid, deal);
 
-        // 2. Si des images sont présentes : traitement intelligent
+        // Si des images sont présentes : traiter les images séparément
         if (aDesImagesToUpdate) {
-            // Valider les images
+            // 1. Valider les images
             dealValidator.validerImages(deal);
 
-            // Mettre à jour les images (ajout/modification/suppression)
-            DealModele dealAvecNouvellesImages = dealProvider.mettreAJourImages(uuid, deal);
+            // 2. Collecter les UUIDs des images envoyées dans le DTO
+            List<UUID> uuidsEnvoyes = listeImages.stream()
+                    .map(ImageDealModele::getUuid)
+                    .filter(Objects::nonNull)
+                    .toList();
 
-            // Retourner le deal avec UNIQUEMENT les nouvelles images (avec presignUrl)
-            dealMisAJour.setListeImages(dealAvecNouvellesImages.getListeImages());
-        }else {
-            // Si aucune image à mettre à jour, s'assurer que la liste d'images du deal retourné est vide
+            // 3. Supprimer les images en BD dont l'UUID n'est PAS dans le DTO
+            dealProvider.supprimerImagesNonPresentes(uuid, uuidsEnvoyes);
+
+            // 4. Liste pour stocker uniquement les nouvelles images créées
+            List<ImageDealModele> nouvellesImagesCreees = new ArrayList<>();
+
+            // 5. Parcourir les images du DTO
+            for (ImageDealModele imageModele : listeImages) {
+                if (imageModele.getUuid() == null) {
+                    // 5.1. AJOUTER nouvelle image (UUID null)
+                    ImageDealModele nouvelleImage = dealProvider.ajouterImage(uuid, imageModele);
+                    nouvellesImagesCreees.add(nouvelleImage);
+                } else {
+                    // 5.2. METTRE À JOUR image existante (si elle existe)
+                    Optional<ImageDealModele> imageExistante = dealProvider.trouverImageParUuid(uuid, imageModele.getUuid());
+                    if (imageExistante.isPresent()) {
+                        dealProvider.mettreAJourImageExistante(uuid, imageModele.getUuid(), imageModele);
+                    }
+                }
+            }
+
+            // 6. Retourner le deal avec UNIQUEMENT les nouvelles images créées
+            dealMisAJour.setListeImages(nouvellesImagesCreees);
+        } else {
+            // Pas d'images à traiter
             dealMisAJour.setListeImages(List.of());
         }
 
         return dealMisAJour;
     }
 
+    @Transactional
     @Override
     public DealModele mettreAJourStatut(UUID uuid, StatutDeal nouveauStatut) {
         // Récupérer le deal existant
@@ -103,6 +130,7 @@ public class DealServiceImpl implements DealService {
         return dealProvider.mettreAJourStatut(uuid, nouveauStatut);
     }
 
+    @Transactional
     @Override
     public DealModele mettreAJourImages(UUID uuid, DealModele deal) {
         // Vérifier que le deal existe
@@ -117,6 +145,7 @@ public class DealServiceImpl implements DealService {
         return dealProvider.mettreAJourImages(uuid, deal);
     }
 
+    @Transactional
     @Override
     public void supprimerParUuid(UUID uuid) {
         dealProvider.supprimerParUuid(uuid);
@@ -130,6 +159,7 @@ public class DealServiceImpl implements DealService {
                 .collect(Collectors.toSet());
     }
 
+    @Transactional
     @Override
     public void mettreAJourStatutImage(UUID dealUuid, UUID imageUuid, StatutImage statut) {
         dealProvider.mettreAJourStatutImage(dealUuid, imageUuid, statut);

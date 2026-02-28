@@ -8,7 +8,7 @@ Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
-  "titre": "Mon super deal",
+  "titre": "Mon super deal4",
   "description": "Deal incroyable à ne pas manquer !",
   "prixDeal": 1200.00,
   "prixPart": 12.00,
@@ -16,10 +16,8 @@ Authorization: Bearer {{access_token}}
   "dateDebut": "2026-02-09T10:00:00",
   "dateFin": "2026-12-31T23:59:59",
   "dateExpiration": "2026-12-31T23:59:59",
-  "categorieUuid": "b1ce033d-7822-4ba8-8b7c-8bf4b1d4dd03",
-  "categorieNom": "POISSON",
-  "createurUuid": "cac47426-a5fa-4326-b9e3-dce32b39a41c",
-  "createurNom": "Jean Dupont",
+  "categorieUuid": "9b358044-7928-47c0-a79f-9e966517fc41",
+  "createurUuid": "545128a4-0b6c-4694-abdd-6952549381b5",
   "statut": "BROUILLON",
   "ville": "Alberta",
   "pays": "Canada",
@@ -57,12 +55,12 @@ Authorization: Bearer {{access_token}}
 ### 4. Mettre à jour un deal (PUT) - Sans images
 # Si listeImages n'est pas présente, les images du deal ne sont pas modifiées
 
-PUT {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000
+PUT {{base_url}}/api/deals/200caba0-7b65-4e01-9a9e-7fcc099e7a7d
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
-  "titre": "Deal mis à jour",
+  "titre": "Deal mis à jour4",
   "description": "Description modifiée",
   "prixDeal": 1500.00,
   "prixPart": 15.00,
@@ -70,12 +68,13 @@ Authorization: Bearer {{access_token}}
   "dateDebut": "2026-02-09T10:00:00",
   "dateFin": "2026-12-31T23:59:59",
   "dateExpiration": "2026-12-31T23:59:59",
-  "categorieUuid": "123e4567-e89b-12d3-a456-426614174000",
-  "createurUuid": "123e4567-e89b-12d3-a456-426614174001",
-  "ville": "Montreal",
+  "categorieUuid": "9b358044-7928-47c0-a79f-9e966517fc41",
+  "createurUuid": "545128a4-0b6c-4694-abdd-6952549381b5",
+  "ville": "Alberta",
   "pays": "Canada",
   "listePointsForts": [
-    "Nouveau point fort"
+    "Nouveau point fort1",
+    "Nouveau point fort2"
   ]
 }
 
@@ -86,46 +85,51 @@ Authorization: Bearer {{access_token}}
 # - imageUuid: absent du DTO → Supprimer de la BD
 # Réponse : deal avec UNIQUEMENT les nouvelles images (avec presignUrl)
 
-PUT {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000
+PUT {{base_url}}/api/deals/200caba0-7b65-4e01-9a9e-7fcc099e7a7d
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
-  "titre": "Deal mis à jour avec images",
-  "description": "Description modifiée",
+  "titre": "Deal mis à jour avec images 4",
+  "description": "Description modifiée 4",
   "prixDeal": 1500.00,
-  "prixPart": 15.00,
+  "prixPart": 16.00,
   "nbParticipants": 100,
   "dateDebut": "2026-02-09T10:00:00",
   "dateFin": "2026-12-31T23:59:59",
   "dateExpiration": "2026-12-31T23:59:59",
-  "categorieUuid": "123e4567-e89b-12d3-a456-426614174000",
-  "createurUuid": "123e4567-e89b-12d3-a456-426614174001",
+  "categorieUuid": "9b358044-7928-47c0-a79f-9e966517fc41",
+  "createurUuid": "545128a4-0b6c-4694-abdd-6952549381b5",
   "ville": "Montreal",
   "pays": "Canada",
+  "listePointsForts": [
+    "Nouveau point fort 1",
+    "Nouveau point fort 2"
+  ],
   "listeImages": [
     {
-      "imageUuid": "aaa-111-existing",
+      "imageUuid": null,
       "urlImage": "image_existante.jpg",
       "isPrincipal": true,
       "statut": null
     },
     {
-      "imageUuid": null,
-      "urlImage": "nouvelle_image.jpg",
+      "imageUuid": "8839d045-02b7-4fa6-9a0b-d26d45d7770f",
+      "urlImage": "deal_image_2_1772285497134.jpg",
       "isPrincipal": false,
-      "statut": null
+      "presignUrl": null,
+      "statut": "PENDING"
     }
   ]
 }
 
 ### 4.1. Mettre à jour uniquement le statut d'un deal (PATCH)
-PATCH {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000/statut
+PATCH {{base_url}}/api/deals/200caba0-7b65-4e01-9a9e-7fcc099e7a7d/statut
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
-  "statut": "PUBLIE"
+  "statut": "BROUILLON"
 }
 
 ### 4.2. Mettre à jour uniquement les images d'un deal (PATCH)
@@ -154,7 +158,7 @@ Authorization: Bearer {{access_token}}
 }
 
 ### 5. Supprimer un deal (DELETE)
-DELETE {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000
+DELETE {{base_url}}/api/deals/153bff26-d739-4767-acaf-872e2ab8dab0
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
