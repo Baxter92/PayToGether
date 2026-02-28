@@ -74,19 +74,8 @@ public class SecurityConfiguration {
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .authenticationEntryPoint((request, response, authException) -> {
-                            String path = request.getRequestURI();
-                            String method = request.getMethod();
                             // Ne pas retourner 401 pour les endpoints publics
-                            if (path.startsWith("/api/public/") ||
-                                path.startsWith("/api/auth/login") ||
-                                path.startsWith("/api/auth/register") ||
-                                path.startsWith("/api/deals/statut") ||
-                                path.startsWith("/api/deals/villes") ||
-                                path.startsWith("/api/deals/**/images/**/url") ||
-                                path.startsWith("/api/categories") ||
-                                path.startsWith("/actuator/") ||
-                                path.startsWith("/swagger-ui/") ||
-                                path.startsWith("/v3/api-docs/")) {
+                            if (isPublicEndpoint(request.getRequestURI())) {
                                 response.setStatus(HttpServletResponse.SC_OK);
                                 return;
                             }
@@ -95,17 +84,8 @@ public class SecurityConfiguration {
                             response.getWriter().write("{\"error\":\"Non autorisé\"}");
                         })
                         .bearerTokenResolver(request -> {
-                            String path = request.getRequestURI();
-                            String method = request.getMethod();
                             // Ne pas extraire le token pour les endpoints publics
-                            if (path.startsWith("/api/public/") ||
-                                path.startsWith("/api/auth/login") ||
-                                path.startsWith("/api/auth/register") ||
-                                    path.startsWith("/api/deals/statut") ||
-                                    path.startsWith("/api/deals/villes") ||
-                                path.startsWith("/actuator/") ||
-                                path.startsWith("/swagger-ui/") ||
-                                path.startsWith("/v3/api-docs/")) {
+                            if (isPublicEndpoint(request.getRequestURI())) {
                                 return null;
                             }
                             return new DefaultBearerTokenResolver().resolve(request);
@@ -116,6 +96,25 @@ public class SecurityConfiguration {
                         })
                 )
                 .build();
+    }
+
+    /**
+     * Vérifie si un endpoint est public (ne nécessite pas d'authentification)
+     *
+     * @param path le chemin de la requête
+     * @return true si l'endpoint est public, false sinon
+     */
+    private boolean isPublicEndpoint(String path) {
+        return path.startsWith("/api/public/") ||
+               path.startsWith("/api/auth/login") ||
+               path.startsWith("/api/auth/register") ||
+               path.startsWith("/api/deals/statut") ||
+               path.startsWith("/api/deals/villes") ||
+               (path.startsWith("/api/deals/") && path.contains("/images/") && path.endsWith("/url")) ||
+               path.startsWith("/api/categories") ||
+               path.startsWith("/actuator/") ||
+               path.startsWith("/swagger-ui/") ||
+               path.startsWith("/v3/api-docs/");
     }
 
     /**

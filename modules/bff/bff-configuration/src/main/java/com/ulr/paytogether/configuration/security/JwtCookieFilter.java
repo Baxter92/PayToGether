@@ -48,16 +48,23 @@ public class JwtCookieFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        String method = request.getMethod();
-        // Ne pas filtrer les endpoints publics
+        return isPublicEndpoint(request.getRequestURI());
+    }
+
+    /**
+     * Vérifie si un endpoint est public (ne nécessite pas d'authentification)
+     *
+     * @param path le chemin de la requête
+     * @return true si l'endpoint est public, false sinon
+     */
+    private boolean isPublicEndpoint(String path) {
         return path.startsWith("/api/public/") ||
                path.startsWith("/api/auth/login") ||
-                path.startsWith("/api/auth/register") ||
-                path.startsWith("/api/deals/statut") ||
-                path.startsWith("/api/deals/villes") ||
-                path.startsWith("/api/deals/**/images/**/url") ||
-                path.startsWith("/api/categories") ||
+               path.startsWith("/api/auth/register") ||
+               path.startsWith("/api/deals/statut") ||
+               path.startsWith("/api/deals/villes") ||
+               (path.startsWith("/api/deals/") && path.contains("/images/") && path.endsWith("/url")) ||
+               path.startsWith("/api/categories") ||
                path.startsWith("/actuator/") ||
                path.startsWith("/swagger-ui/") ||
                path.startsWith("/v3/api-docs/");
