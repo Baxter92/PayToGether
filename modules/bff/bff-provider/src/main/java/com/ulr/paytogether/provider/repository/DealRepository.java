@@ -26,7 +26,7 @@ public interface DealRepository extends JpaRepository<DealJpa, UUID> {
      */
     List<DealJpa> findByStatut(StatutDeal statut);
 
-/**
+    /**
      * Recherche tous les deals d'un créateur
      * @param utilisateurJpa le créateur
      * @return la liste des deals
@@ -45,6 +45,6 @@ public interface DealRepository extends JpaRepository<DealJpa, UUID> {
      * @param deal_uuid l'UUID du deal
      */
     @Modifying
-    @Query(value = "DELETE FROM public.deal_points_forts WHERE deal_uuid = :deal_uuid", nativeQuery = true)
-    void deleteAllPointsForts(@Param("deal_uuid") UUID deal_uuid);
+    @Query(value = "DELETE FROM public.deal WHERE uuid = :deal_uuid", nativeQuery = true)
+    void deleteDeal(@Param("deal_uuid") UUID deal_uuid);
 }

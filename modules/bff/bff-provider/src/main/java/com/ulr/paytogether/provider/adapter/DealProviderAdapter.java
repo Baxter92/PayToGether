@@ -11,15 +11,19 @@ import com.ulr.paytogether.provider.adapter.entity.ImageDealJpa;
 import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
 import com.ulr.paytogether.provider.adapter.mapper.DealJpaMapper;
 import com.ulr.paytogether.provider.repository.CategorieRepository;
+import com.ulr.paytogether.provider.repository.CommandeRepository;
 import com.ulr.paytogether.provider.repository.DealRepository;
 import com.ulr.paytogether.provider.repository.ImageDealRepository;
 import com.ulr.paytogether.provider.repository.UtilisateurRepository;
 import com.ulr.paytogether.provider.utils.FileManager;
 import com.ulr.paytogether.provider.utils.Tools;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -39,6 +43,7 @@ public class DealProviderAdapter implements DealProvider {
     private final ImageDealRepository imageDealRepository;
     private final UtilisateurRepository utilisateurRepository;
     private final CategorieRepository categorieRepository;
+    private final CommandeRepository commandeRepository;
     private final DealJpaMapper mapper;
     private final FileManager fileManager;
 
@@ -138,12 +143,65 @@ public class DealProviderAdapter implements DealProvider {
         return mapper.versModele(entite);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void supprimerParUuid(UUID uuid) {
+        log.info("🗑️ Début de suppression du deal : {}", uuid);
+
         DealJpa deal = jpaRepository.findById(uuid)
                 .orElseThrow(() -> new IllegalArgumentException("Deal non trouvé pour l'UUID : " + uuid));
-        jpaRepository.deleteAllPointsForts(uuid);
-        jpaRepository.delete(deal);
+
+        // Compter les commandes associées
+        var commandes = commandeRepository.findByDealJpa(deal);
+
+        log.info("✅ Deal trouvé - Participants: {}, Images: {}, Points forts: {}, Commentaires: {}, Commandes: {}",
+                deal.getParticipants() != null ? deal.getParticipants().size() : 0,
+                deal.getImageDealJpas() != null ? deal.getImageDealJpas().size() : 0,
+                deal.getListePointsForts() != null ? deal.getListePointsForts().size() : 0,
+                deal.getCommentaires() != null ? deal.getCommentaires().size() : 0,
+                commandes.size());
+
+        // 1. Supprimer les commandes liées AVANT tout (relation OneToOne sans cascade inverse)
+        if (!commandes.isEmpty()) {
+            log.info("🔄 Suppression de {} commandes", commandes.size());
+            commandeRepository.deleteAll(commandes);
+            commandeRepository.flush();
+            log.info("✅ Commandes supprimées et flush effectué");
+        }
+
+        // 2. Vider la relation ManyToMany avec les participants
+        if (deal.getParticipants() != null && !deal.getParticipants().isEmpty()) {
+            log.info("🔄 Suppression de {} participants", deal.getParticipants().size());
+            deal.getParticipants().clear();
+        }
+
+        // 3. Vider la liste des commentaires (OneToMany avec orphanRemoval)
+        if (deal.getCommentaires() != null && !deal.getCommentaires().isEmpty()) {
+            log.info("🔄 Suppression de {} commentaires", deal.getCommentaires().size());
+            deal.getCommentaires().clear();
+        }
+
+        // 4. Vider la liste des points forts (ElementCollection)
+        if (deal.getListePointsForts() != null && !deal.getListePointsForts().isEmpty()) {
+            log.info("🔄 Suppression de {} points forts", deal.getListePointsForts().size());
+            deal.getListePointsForts().clear();
+        }
+
+        // 5. Vider la liste des images (OneToMany avec orphanRemoval)
+        if (deal.getImageDealJpas() != null && !deal.getImageDealJpas().isEmpty()) {
+            log.info("🔄 Suppression de {} images", deal.getImageDealJpas().size());
+            deal.getImageDealJpas().clear();
+        }
+
+        // 6. Sauvegarder et forcer le flush pour appliquer toutes les suppressions
+        log.info("💾 Sauvegarde et flush des changements...");
+        jpaRepository.saveAndFlush(deal);
+        log.info("✅ Flush intermédiaire effectué");
+
+        // 7. Supprimer le deal par son UUID et forcer le flush
+        log.info("🗑️ Suppression finale du deal par UUID...");
+        jpaRepository.deleteDeal(uuid);
+        log.info("✅ Deal supprimé avec succès : {}", uuid);
     }
 
     @Override

@@ -74,6 +74,12 @@ public class DealJpa {
     @Builder.Default
     private List<ImageDealJpa> imageDealJpas = new ArrayList<>();
 
+    @OneToMany(mappedBy = "dealJpa", cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<CommentaireJpa> commentaires = new ArrayList<>();
+
+
     @ElementCollection
     @CollectionTable(name = "deal_points_forts", joinColumns = @JoinColumn(name = "deal_uuid"))
     @Column(name = "point_fort")

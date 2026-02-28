@@ -145,7 +145,6 @@ public class DealServiceImpl implements DealService {
         return dealProvider.mettreAJourImages(uuid, deal);
     }
 
-    @Transactional
     @Override
     public void supprimerParUuid(UUID uuid) {
         dealProvider.supprimerParUuid(uuid);

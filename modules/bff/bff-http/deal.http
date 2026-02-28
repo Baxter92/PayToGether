@@ -158,7 +158,7 @@ Authorization: Bearer {{access_token}}
 }
 
 ### 5. Supprimer un deal (DELETE)
-DELETE {{base_url}}/api/deals/153bff26-d739-4767-acaf-872e2ab8dab0
+DELETE {{base_url}}/api/deals/c21bbf74-4fd9-4cd4-86bb-bf2b1d661bd8
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
