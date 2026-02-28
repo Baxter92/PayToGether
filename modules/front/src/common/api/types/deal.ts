@@ -49,13 +49,20 @@ export interface CreateDealDTO {
   ville: string;
   pays: string;
 }
-export type UpdateDealDTO = Partial<
-  Omit<
-    DealDTO,
-    | "uuid"
-    | "dateCreation"
-    | "dateModification"
-    | "createurUuid"
-    | "createurNom"
-  >
->;
+export interface UpdateDealDTO {
+  titre?: string;
+  description?: string;
+  prixDeal?: number;
+  prixPart?: number;
+  nbParticipants?: number;
+  dateDebut?: string;
+  dateFin?: string;
+  dateExpiration?: string;
+  statut?: StatutDealType;
+  createurUuid?: string;
+  categorieUuid?: string;
+  listeImages?: Partial<ImageResponse>[];
+  listePointsForts?: string[];
+  ville?: string;
+  pays?: string;
+}

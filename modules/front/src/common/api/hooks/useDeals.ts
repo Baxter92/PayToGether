@@ -32,9 +32,81 @@ export const {
   keys: dealKeys,
   useList: useDeals,
   useDetail: useDeal,
-  useUpdate: useUpdateDeal,
   useDelete: useDeleteDeal,
 } = dealHooks;
+
+export const useUpdateDeal = () => {
+  const queryClient = useQueryClient();
+  const { uploadImages, progress, isUploading, hasErrors } = useImageUpload();
+
+  const mutation = useMutation<
+    DealDTO,
+    Error,
+    { id: string; data: UpdateDealDTO }
+  >({
+    mutationFn: async ({ id, data }) => {
+      // 1) Prepare payload
+      const payload = {
+        ...data,
+        listeImages: data.listeImages?.map((img) => ({
+          ...img,
+          urlImage: formatFileName(
+            img.nomUnique || img.file?.name || img.urlImage || "",
+          ),
+          nomUnique: formatFileName(img.nomUnique || img.file?.name || ""),
+          statut: img.statut || null,
+          isPrincipal: img.isPrincipal,
+          presignUrl: null,
+        })),
+      };
+
+      // 2) Call API
+      const dealMisAJour = await dealService.update(id, payload as any);
+
+      // 3) Handle image uploads if there are new ones (presigned URLs in response)
+      const imagesFromBackend = dealMisAJour.listeImages ?? [];
+      const filesForUpload: ImageFile[] = imagesFromBackend
+        .filter((f) => f.presignUrl && f.statut === "PENDING")
+        .map((f) => {
+          // Find the corresponding File object from the input data
+          const backendFileName = f.urlImage?.split("_")[0];
+          const matchedImage = data.listeImages?.find(
+            (img: any) =>
+              formatFileName(img.file?.name || "")?.split(".")[0] ===
+              backendFileName,
+          );
+
+          return {
+            file: matchedImage?.file as File,
+            isPrincipal: f.isPrincipal,
+            presignUrl: f.presignUrl as string,
+            id: f.imageUuid || "",
+            name: backendFileName || "",
+          };
+        });
+
+      if (filesForUpload.length > 0) {
+        await uploadImages("deals", dealMisAJour.uuid, filesForUpload);
+      }
+
+      return dealMisAJour;
+    },
+    onSuccess: (updatedDeal) => {
+      queryClient.invalidateQueries({ queryKey: dealKeys.lists() });
+      queryClient.invalidateQueries({
+        queryKey: dealKeys.detail(updatedDeal.uuid),
+      });
+      queryClient.invalidateQueries({ queryKey: dealKeys.byCreateur(updatedDeal.createurUuid) });
+    },
+  });
+
+  return {
+    ...mutation,
+    progress,
+    isUploading,
+    hasErrors,
+  };
+};
 
 // ===== QUERIES =====
 
@@ -136,9 +208,10 @@ export const useCreateDeal = () => {
       return dealCree;
     },
 
-    onSuccess: () => {
+    onSuccess: (deal) => {
       // invalider listes / cache
       queryClient.invalidateQueries({ queryKey: dealKeys.lists() });
+       queryClient.invalidateQueries({ queryKey: dealKeys.byCreateur(deal.createurUuid) });
       // si tu as d'autres keys (detail), invalide-les aussi
     },
 
@@ -155,6 +228,93 @@ export const useCreateDeal = () => {
   };
 };
 
+export const useUpdateDealStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    DealDTO,
+    Error,
+    { id: string; statut: StatutDealType | string }
+  >({
+    mutationFn: ({ id, statut }) => dealService.updateStatus(id, statut),
+    onSuccess: (updatedDeal) => {
+    queryClient.invalidateQueries({ queryKey: dealKeys.byCreateur(updatedDeal.createurUuid) });
+      queryClient.invalidateQueries({
+        queryKey: dealKeys.detail(updatedDeal.uuid),
+      });
+    },
+  });
+};
+
+export const useUpdateDealImages = () => {
+  const queryClient = useQueryClient();
+  const { uploadImages, progress, isUploading, hasErrors } = useImageUpload();
+
+  const mutation = useMutation<DealDTO, Error, { id: string; images: any }>({
+    mutationFn: async ({ id, images }) => {
+      // 1) Construire payload pour la mise à jour des images
+      const payload = {
+        listeImages: images.map((img: any) => ({
+          urlImage: formatFileName(img.nomUnique || img.file?.name || ""),
+          nomUnique: formatFileName(img.nomUnique || img.file?.name || ""),
+          statut: null,
+          isPrincipal: img.isPrincipal,
+          presignUrl: null,
+        })),
+      };
+
+      // 2) Appeler l'API patch images
+      const dealMisAJour = await dealService.updateImages(id, payload);
+
+      // 3) Préparer files pour l'upload
+      const imagesFromBackend: Partial<ImageResponse>[] =
+        dealMisAJour.listeImages ?? [];
+      if (!imagesFromBackend || imagesFromBackend.length === 0) {
+        return dealMisAJour;
+      }
+
+      const filesForUpload: ImageFile[] = imagesFromBackend
+        .filter((f) => f.presignUrl && f.statut === "PENDING")
+        .map((f) => {
+          const backendFileName = f.urlImage?.split("_")[0];
+          const matchedImage = images.find(
+            (img: any) =>
+              formatFileName(img.file?.name || "")?.split(".")[0] ===
+              backendFileName,
+          );
+
+          return {
+            file: matchedImage?.file as File,
+            isPrincipal: f.isPrincipal,
+            presignUrl: f.presignUrl as string,
+            id: f.imageUuid || "",
+            name: backendFileName || "",
+          };
+        });
+
+      // 4) Lancer les uploads
+      if (filesForUpload.length > 0) {
+        await uploadImages("deals", dealMisAJour.uuid, filesForUpload);
+      }
+
+      return dealMisAJour;
+    },
+    onSuccess: (updatedDeal) => {
+      queryClient.invalidateQueries({ queryKey: dealKeys.lists() });
+      queryClient.invalidateQueries({
+        queryKey: dealKeys.detail(updatedDeal.uuid),
+      });
+    },
+  });
+
+  return {
+    ...mutation,
+    progress,
+    isUploading,
+    hasErrors,
+  };
+};
+
 export const useConfirmDealImageUpload = () => {
   const queryClient = useQueryClient();
 
@@ -167,10 +327,10 @@ export const useConfirmDealImageUpload = () => {
   });
 };
 
-export const useGetDealImageUrl = (dealUuid: string, imageUuid: string) => {
+export const useGetDealImageUrl = (dealUuid: string, imageUuid?: string) => {
   return useQuery<{ url: string }, Error>({
     queryKey: [...dealKeys.detail(dealUuid), "image-url", imageUuid],
-    queryFn: () => dealService.getImageUrl(dealUuid, imageUuid),
+    queryFn: () => dealService.getImageUrl(dealUuid, imageUuid as any),
     enabled: !!dealUuid && !!imageUuid,
   });
 };

@@ -41,4 +41,16 @@ export const dealService = {
 
   // Récupérer les villes disponibles
   getVilles: () => apiClient.get<string[]>("/deals/villes"),
+
+  // Mettre à jour le statut d'un deal
+  updateStatus: (uuid: string, statut: string) =>
+    apiClient.patch<DealDTO>(`/deals/${uuid}/statut`, {
+      body: { statut },
+    }),
+
+  // Mettre à jour les images d'un deal
+  updateImages: (uuid: string, images: any) =>
+    apiClient.patch<DealDTO>(`/deals/${uuid}/images`, {
+      body: images,
+    }),
 };

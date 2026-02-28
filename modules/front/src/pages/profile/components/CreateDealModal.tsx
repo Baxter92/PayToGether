@@ -25,6 +25,8 @@ import {
   useUpdateDeal,
   type CreateDealDTO,
   type DealDTO,
+  type UpdateDealDTO,
+  useGetDealImageUrl,
 } from "@/common/api";
 import type { ImageResponse } from "@/common/api/hooks/useImageUpload";
 import { toast } from "sonner";
@@ -47,15 +49,24 @@ const buildPayload = (
   now: string,
   connectedMerchantUuid?: string,
 ): CreateDealDTO => {
-  const expiration = formData.expiryDate
-    ? new Date(formData.expiryDate).toISOString().slice(0, 19)
+  const dateDebut = formData.dateDebut
+    ? new Date(formData.dateDebut).toISOString().slice(0, 19)
     : now;
+  const dateFin = formData.dateFin
+    ? new Date(formData.dateFin).toISOString().slice(0, 19)
+    : now;
+  const dateExpiration = formData.dateExpiration
+    ? new Date(formData.dateExpiration).toISOString().slice(0, 19)
+    : dateFin;
 
   const [ville = "", pays = "CA"] = String(formData.location ?? "")
     .split(",")
     .map((s: string) => s.trim());
 
-  const images = (formData.images ?? []) as File[];
+  const images = (formData.images ?? []) as (
+    | ImageResponse
+    | (Partial<ImageResponse> & { file: File })
+  )[];
 
   return {
     titre: formData.title,
@@ -65,9 +76,9 @@ const buildPayload = (
       Number(formData.price) * Number(formData.partsTotal || 1),
     prixPart: Number(formData.price),
     nbParticipants: Number(formData.partsTotal),
-    dateDebut: now,
-    dateFin: expiration,
-    dateExpiration: expiration,
+    dateDebut,
+    dateFin,
+    dateExpiration,
     statut: formData.status,
     createurUuid: String(connectedMerchantUuid ?? formData.merchantId ?? ""),
     categorieUuid: String(formData.categoryId ?? ""),
@@ -77,16 +88,12 @@ const buildPayload = (
       .filter(Boolean),
     ville,
     pays,
-    listeImages: images.map(
-      (file, index): Partial<ImageResponse> => ({
-        urlImage: file.name,
-        nomUnique: file.name,
-        statut: "PENDING",
-        isPrincipal: index === 0,
-        presignUrl: null,
-        file,
-      }),
-    ),
+    listeImages: images.map((img): Partial<ImageResponse> => {
+      return {
+        ...img,
+        isPrincipal: !!img.isPrincipal,
+      };
+    }),
   };
 };
 
@@ -171,18 +178,30 @@ function CropModal({
    ImagesField
 ============================== */
 
-function ImagesField({ field, form }: { field: any; form: any }) {
+function ImagesField({
+  field,
+  form,
+  dealUuid,
+}: {
+  field: any;
+  form: any;
+  dealUuid?: string;
+}) {
   const [cropState, setCropState] = useState<{
     src: string;
     index: number;
   } | null>(null);
 
-  const images = (form.watch(field.name) as File[]) ?? [];
+  const images =
+    (form.watch(field.name) as (
+      | ImageResponse
+      | (Partial<ImageResponse> & { file: File })
+    )[]) ?? [];
   const maxFiles = field.maxFiles ?? MAX_IMAGES;
   const canAddMore = images.length < maxFiles;
 
   const setImages = useCallback(
-    (next: File[]) =>
+    (next: (ImageResponse | (Partial<ImageResponse> & { file: File }))[]) =>
       form.setValue(field.name, next, {
         shouldDirty: true,
         shouldValidate: true,
@@ -202,7 +221,16 @@ function ImagesField({ field, form }: { field: any; form: any }) {
         );
       }
 
-      setImages([...images, ...filesToAdd]);
+      const newImages = filesToAdd.map((file, index) => ({
+        imageUuid: null,
+        urlImage: file.name,
+        nomUnique: file.name,
+        isPrincipal: images.length === 0 && index === 0,
+        statut: "PENDING" as const,
+        file: file,
+      }));
+
+      setImages([...images, ...newImages]);
       e.target.value = "";
     },
     [images, maxFiles, setImages],
@@ -215,30 +243,50 @@ function ImagesField({ field, form }: { field: any; form: any }) {
 
   const setPrincipalImage = useCallback(
     (idx: number) => {
-      // Réorganiser pour que l'image sélectionnée soit en première position
-      const newImages = [...images];
-      const [selectedImage] = newImages.splice(idx, 1);
-      newImages.unshift(selectedImage);
+      const newImages = images.map((img, i) => {
+        if (i === idx) {
+          return {
+            ...img,
+            isPrincipal: i === idx,
+          };
+        } else {
+          return { ...img, isPrincipal: false };
+        }
+      });
       setImages(newImages);
       toast.success("Image principale mise à jour");
     },
     [images, setImages],
   );
 
-  const openCrop = useCallback((file: File, index: number) => {
-    setCropState({ src: URL.createObjectURL(file), index });
-  }, []);
+  const openCrop = useCallback(
+    (
+      fileObj: ImageResponse | (Partial<ImageResponse> & { file: File }),
+      index: number,
+    ) => {
+      if (fileObj.file) {
+        setCropState({ src: URL.createObjectURL(fileObj.file), index });
+      }
+    },
+    [],
+  );
 
   const applyCrop = useCallback(
     async (croppedArea: any) => {
       if (!cropState || !croppedArea) return;
+      const currentImageObj = images[cropState.index];
+      if (!currentImageObj.file) return;
+
       const newFile = await getCroppedImg(
         cropState.src,
         croppedArea,
-        images[cropState.index],
+        currentImageObj.file,
       );
       const updated = [...images];
-      updated[cropState.index] = newFile;
+      updated[cropState.index] = {
+        ...currentImageObj,
+        file: newFile,
+      };
       setImages(updated);
       setCropState(null);
     },
@@ -247,7 +295,7 @@ function ImagesField({ field, form }: { field: any; form: any }) {
 
   return (
     <div className="space-y-6">
-      {/* Header avec stats */}
+      {/* ... header ... */}
       <div className="flex items-center justify-between p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-100/50 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-xl bg-white shadow-sm flex items-center justify-center border border-blue-100">
@@ -291,9 +339,6 @@ function ImagesField({ field, form }: { field: any; form: any }) {
               <p className="text-sm text-gray-600 text-center">
                 Jusqu'à {maxFiles} images haute qualité
               </p>
-              <p className="text-xs text-gray-500 mt-1">
-                PNG, JPG, WEBP • Maximum 5MB par fichier
-              </p>
             </div>
           </div>
         </label>
@@ -308,100 +353,24 @@ function ImagesField({ field, form }: { field: any; form: any }) {
               {images.length > 1 ? "s" : ""}
             </p>
             <p className="text-xs text-blue-600 font-medium bg-blue-50 px-3 py-1 rounded-full">
-              ⭐ La 1ère image est principale
+              ⭐ Choisissez une image principale
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {images.map((file, idx) => (
-              <div
-                key={idx}
-                className={cn(
-                  "relative aspect-[4/3] rounded-xl overflow-hidden group bg-white",
-                  "border-2 transition-all duration-300 shadow-sm hover:shadow-lg",
-                  idx === 0
-                    ? "border-blue-500 ring-2 ring-blue-200/50 shadow-blue-100"
-                    : "border-gray-200 hover:border-blue-300",
-                )}
-              >
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt={`Upload ${idx + 1}`}
-                  className="w-full h-full object-cover"
+            {images.map((img, idx) => {
+              return (
+                <ImageThumbnail
+                  key={img.imageUuid || `${img.nomUnique}-${idx}`}
+                  image={img}
+                  index={idx}
+                  dealUuid={dealUuid}
+                  onRemove={() => removeImage(idx)}
+                  onSetPrincipal={() => setPrincipalImage(idx)}
+                  onCrop={() => openCrop(img, idx)}
                 />
-
-                {/* Overlay gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
-                  {/* Actions buttons */}
-                  <div className="absolute bottom-0 left-0 right-0 p-3 flex items-center justify-between gap-2">
-                    <span className="text-white text-xs font-semibold truncate mr-2 bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm">
-                      {file.name}
-                    </span>
-                    <div className="flex gap-1.5 flex-shrink-0">
-                      {idx !== 0 && (
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="secondary"
-                          className="h-8 w-8 p-0 bg-white hover:bg-blue-50 shadow-md"
-                          onClick={() => setPrincipalImage(idx)}
-                          title="Définir comme image principale"
-                        >
-                          <Star className="w-4 h-4 text-yellow-500" />
-                        </Button>
-                      )}
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="secondary"
-                        className="h-8 w-8 p-0 bg-white hover:bg-blue-50 shadow-md"
-                        onClick={() => openCrop(file, idx)}
-                        title="Recadrer"
-                      >
-                        <Crop className="w-4 h-4 text-gray-700" />
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        colorScheme="danger"
-                        className="h-8 w-8 p-0 shadow-md"
-                        onClick={() => removeImage(idx)}
-                        title="Supprimer"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Badge principal */}
-                  {idx === 0 && (
-                    <div className="absolute top-3 left-3">
-                      <div className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
-                        <Star className="w-3.5 h-3.5 fill-current" />
-                        PRINCIPALE
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Numéro */}
-                  <div className="absolute top-3 right-3">
-                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-sm font-bold text-gray-700 shadow-lg">
-                      {idx + 1}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Badge principal visible sans hover */}
-                {idx === 0 && (
-                  <div className="absolute top-3 left-3 group-hover:hidden">
-                    <div className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-                      <Star className="w-3.5 h-3.5 fill-current" />
-                      PRINCIPALE
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       ) : (
@@ -426,6 +395,132 @@ function ImagesField({ field, form }: { field: any; form: any }) {
           onClose={() => setCropState(null)}
           onApply={applyCrop}
         />
+      )}
+    </div>
+  );
+}
+
+function ImageThumbnail({
+  image,
+  index,
+  dealUuid,
+  onRemove,
+  onSetPrincipal,
+  onCrop,
+}: {
+  image: ImageResponse | (Partial<ImageResponse> & { file: File });
+  index: number;
+  dealUuid?: string;
+  onRemove: () => void;
+  onSetPrincipal: () => void;
+  onCrop: () => void;
+}) {
+  const isPrincipal = !!image.isPrincipal;
+  const isNewFile = !!image.file;
+
+  const { data: imageUrlData } = useGetDealImageUrl(
+    dealUuid ?? "",
+    !isNewFile && image.imageUuid ? image.imageUuid : "",
+  );
+
+  const src =
+    isNewFile && image.file
+      ? URL.createObjectURL(image.file)
+      : imageUrlData?.url;
+
+  return (
+    <div
+      className={cn(
+        "relative aspect-[4/3] rounded-xl overflow-hidden group bg-white",
+        "border-2 transition-all duration-300 shadow-sm hover:shadow-lg",
+        isPrincipal
+          ? "border-blue-500 ring-2 ring-blue-200/50 shadow-blue-100"
+          : "border-gray-200 hover:border-blue-300",
+      )}
+    >
+      {src ? (
+        <img
+          src={src}
+          alt={`Upload ${index + 1}`}
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-gray-100">
+          <Loader2 className="w-6 h-6 text-gray-300 animate-spin" />
+        </div>
+      )}
+
+      {/* Overlay gradient */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
+        {/* Actions buttons */}
+        <div className="absolute bottom-0 left-0 right-0 p-3 flex items-center justify-between gap-2">
+          <span className="text-white text-xs font-semibold truncate mr-2 bg-black/40 px-2 py-1 rounded-md backdrop-blur-sm">
+            {image.nomUnique || (image.file && image.file.name)}
+          </span>
+          <div className="flex gap-1.5 flex-shrink-0">
+            {!isPrincipal && (
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                className="h-8 w-8 p-0 bg-white hover:bg-blue-50 shadow-md"
+                onClick={onSetPrincipal}
+                title="Définir comme image principale"
+              >
+                <Star className="w-4 h-4 text-yellow-500" />
+              </Button>
+            )}
+            {isNewFile && (
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                className="h-8 w-8 p-0 bg-white hover:bg-blue-50 shadow-md"
+                onClick={onCrop}
+                title="Recadrer"
+              >
+                <Crop className="w-4 h-4 text-gray-700" />
+              </Button>
+            )}
+            <Button
+              type="button"
+              size="sm"
+              colorScheme="danger"
+              className="h-8 w-8 p-0 shadow-md"
+              onClick={onRemove}
+              title="Supprimer"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Badge principal */}
+        {isPrincipal && (
+          <div className="absolute top-3 left-3">
+            <div className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
+              <Star className="w-3.5 h-3.5 fill-current" />
+              PRINCIPALE
+            </div>
+          </div>
+        )}
+
+        {/* Numéro */}
+        <div className="absolute top-3 right-3">
+          <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-sm font-bold text-gray-700 shadow-lg">
+            {index + 1}
+          </div>
+        </div>
+      </div>
+
+      {/* Badge principal visible sans hover */}
+      {isPrincipal && (
+        <div className="absolute top-3 left-3 group-hover:hidden">
+          <div className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+            <Star className="w-3.5 h-3.5 fill-current" />
+            PRINCIPALE
+          </div>
+        </div>
       )}
     </div>
   );
@@ -572,7 +667,13 @@ export function CreateDealModal({
     hasErrors,
   } = useCreateDeal();
 
-  const { mutateAsync: updateDeal, isPending: isUpdating } = useUpdateDeal();
+  const {
+    mutateAsync: updateDeal,
+    isPending: isUpdatingEnhanced,
+    isUploading: isUploadingUpdate,
+    progress: updateProgressMap,
+    hasErrors: updateHasErrors,
+  } = useUpdateDeal();
 
   const categoryItems = useMemo(
     () => (categoriesData ?? []).map((c) => ({ label: c.nom, value: c.uuid })),
@@ -602,9 +703,10 @@ export function CreateDealModal({
 
   // Calculer la progression globale des uploads
   const uploadProgress = useMemo(() => {
-    if (!progress || progress.size === 0) return null;
+    const activeProgress = isUploading ? progress : updateProgressMap;
+    if (!activeProgress || activeProgress.size === 0) return null;
 
-    const progressArray = Array.from(progress.values());
+    const progressArray = Array.from(activeProgress.values());
     const totalProgress = progressArray.reduce((sum, p) => sum + p.progress, 0);
     const avgProgress = totalProgress / progressArray.length;
     const completed = progressArray.filter(
@@ -618,7 +720,7 @@ export function CreateDealModal({
       failed,
       total: progressArray.length,
     };
-  }, [progress]);
+  }, [progress, updateProgressMap, isUploading]);
 
   const handleSubmit = useCallback(
     async ({ data }: { data: any }) => {
@@ -626,14 +728,78 @@ export function CreateDealModal({
         const now = new Date().toISOString().slice(0, 19);
 
         if (initialData) {
-          // Update existing deal
-          const payload = buildPayload(
-            data,
+          // 1) Préparer le payload de mise à jour
+          const { images, ...formData } = data;
+          const basePayload = buildPayload(
+            formData,
             now,
             connectedMerchantUuid,
-          ) as unknown as Partial<DealDTO>;
+          );
+
+          const payload: UpdateDealDTO = {
+            titre: basePayload.titre,
+            description: basePayload.description,
+            prixDeal: basePayload.prixDeal,
+            prixPart: basePayload.prixPart,
+            nbParticipants: basePayload.nbParticipants,
+            dateDebut: basePayload.dateDebut,
+            dateFin: basePayload.dateFin,
+            dateExpiration: basePayload.dateExpiration,
+            categorieUuid: basePayload.categorieUuid,
+            listePointsForts: basePayload.listePointsForts,
+            ville: basePayload.ville,
+            pays: basePayload.pays,
+            createurUuid: basePayload.createurUuid,
+          };
+
+          // 2) Gérer la logique des images
+          const currentImages = initialData.listeImages || [];
+          const formImages = (images || []) as ImageResponse[];
+
+          // Vérifier si les images ont été modifiées
+          const isSameLength = currentImages.length === formImages.length;
+          const isSame =
+            JSON.stringify(currentImages) === JSON.stringify(formImages);
+          const isSameContent =
+            isSame &&
+            isSameLength &&
+            formImages.every((img, idx) => {
+              const current = currentImages[idx];
+              if (img instanceof File) return false;
+              return img.imageUuid === current.imageUuid;
+            });
+
+          if (!isSameContent) {
+            payload.listeImages = formImages.map((img, index) => {
+              if (img.file instanceof File) {
+                return {
+                  imageUuid: null, // Nouvelles images : imageUuid null
+                  urlImage: img.nomUnique,
+                  nomUnique: img.nomUnique,
+                  isPrincipal: img.isPrincipal || index === 0,
+                  statut: "PENDING" as any,
+                  file: img.file,
+                };
+              }
+
+              // Images existantes conservées
+              return {
+                ...img,
+              };
+            });
+          }
+
+          // 3) Appel unique pour la mise à jour
           await updateDeal({ id: initialData.uuid, data: payload });
-          toast.success("✅ Deal mis à jour avec succès");
+
+          if (updateHasErrors) {
+            toast.warning("Deal mis à jour avec des erreurs d'upload", {
+              description:
+                "Certaines nouvelles images n'ont pas pu être téléchargées",
+            });
+          } else {
+            toast.success("✅ Deal mis à jour avec succès");
+          }
         } else {
           // Create new deal
           await createDeal(buildPayload(data, now, connectedMerchantUuid));
@@ -668,6 +834,7 @@ export function CreateDealModal({
       onSuccess,
       onClose,
       hasErrors,
+      updateHasErrors,
       initialData,
       connectedMerchantUuid,
     ],
@@ -752,19 +919,23 @@ export function CreateDealModal({
       },
       {
         title: "📅 Disponibilité",
-        description: "Configurez les dates et quantités",
-        columns: 2,
+        description: "Configurez les dates de début, de fin et d'expiration",
+        columns: 3,
         className: "bg-white rounded-xl shadow-sm border border-gray-100 p-6",
         fields: [
           {
-            type: "number",
-            name: "minRequired",
-            label: "Parts minimum requises",
-            placeholder: "0",
+            type: "date",
+            name: "dateDebut",
+            label: "Date de début",
           },
           {
             type: "date",
-            name: "expiryDate",
+            name: "dateFin",
+            label: "Date de fin",
+          },
+          {
+            type: "date",
+            name: "dateExpiration",
             label: "Date d'expiration",
           },
         ],
@@ -825,17 +996,39 @@ export function CreateDealModal({
             name: "images",
             label: "Images",
             maxFiles: MAX_IMAGES,
-            render: (field, form) => <ImagesField field={field} form={form} />,
+            render: (field, form) => (
+              <ImagesField
+                field={field}
+                form={form}
+                dealUuid={initialData?.uuid}
+              />
+            ),
           },
         ],
       },
     ],
-    [categoryItems, statusItems, userItems, hideMerchantField],
+    [categoryItems, statusItems, userItems, hideMerchantField, initialData],
   );
 
   const defaultValues = useMemo(() => {
+    const parseDate = (dateStr?: any) => {
+      if (!dateStr) return undefined;
+      // Handle LocalDateTime format from Java (without Z or offset)
+      // Some browsers might need "T" instead of space, but Java LocalDateTime already has T
+      // We also ensure it's not already a Date object
+      if (dateStr instanceof Date) return dateStr;
+
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) {
+        console.warn("Invalid date format:", dateStr);
+        return undefined;
+      }
+      return date;
+    };
+
     if (initialData) {
-      return {
+      // DEBUG: console.log("InitialData dates:", initialData.dateDebut, initialData.dateFin, initialData.dateExpiration);
+      const parsedValues = {
         title: initialData.titre,
         description: initialData.description,
         categoryId: initialData.categorieUuid,
@@ -843,13 +1036,18 @@ export function CreateDealModal({
         price: initialData.prixPart,
         originalPrice: initialData.prixDeal,
         partsTotal: initialData.nbParticipants,
-        expiryDate: initialData.dateExpiration,
+        dateDebut: parseDate(initialData.dateDebut),
+        dateFin: parseDate(initialData.dateFin),
+        dateExpiration: parseDate(initialData.dateExpiration),
         location: initialData.ville
           ? `${initialData.ville}, ${initialData.pays}`
           : undefined,
         highlights: (initialData.listePointsForts || []).join("\n"),
         merchantId: connectedMerchantUuid ?? initialData.createurUuid,
+        images: initialData.listeImages || [],
       };
+      // DEBUG: console.log("Parsed defaultValues:", parsedValues);
+      return parsedValues;
     }
 
     if (connectedMerchantUuid) {
@@ -884,7 +1082,7 @@ export function CreateDealModal({
         </DialogTitle>
 
         {/* Indicateur de progression d'upload */}
-        {isUploading && uploadProgress && (
+        {(isUploading || isUploadingUpdate) && uploadProgress && (
           <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200/50 shadow-sm">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -932,12 +1130,15 @@ export function CreateDealModal({
           <Form<CreateDealDTO>
             groups={formGroups}
             schema={dealSchema}
-            defaultValues={defaultValues}
+            defaultValues={defaultValues as any}
             submitLabel={
-              isCreating || isUploading || isUpdating
-                ? isUploading
+              isCreating ||
+              isUploading ||
+              isUpdatingEnhanced ||
+              isUploadingUpdate
+                ? isUploading || isUploadingUpdate
                   ? "⏳ Upload des images..."
-                  : isUpdating
+                  : isUpdatingEnhanced
                     ? "⏳ Mise à jour en cours..."
                     : "⏳ Création en cours..."
                 : initialData
@@ -945,7 +1146,16 @@ export function CreateDealModal({
                   : "✨ Créer le deal"
             }
             onSubmit={handleSubmit}
-            isLoading={isCreating || isUploading || isUpdating}
+            onError={(errors) => {
+              console.error("Form validation errors:", errors);
+              toast.error("Veuillez corriger les erreurs dans le formulaire");
+            }}
+            isLoading={
+              isCreating ||
+              isUploading ||
+              isUpdatingEnhanced ||
+              isUploadingUpdate
+            }
           />
         </div>
       </DialogContent>
