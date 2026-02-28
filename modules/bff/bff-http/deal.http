@@ -196,7 +196,7 @@ Authorization: Bearer {{access_token}}
 
 ### 11. Obtenir l'URL de lecture d'une image (GET)
 ### Génère une URL présignée pour lire l'image depuis MinIO
-GET {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000/images/456e7890-e89b-12d3-a456-426614174001/url
+GET {{base_url}}/api/deals/439981e2-dbd2-4960-b662-895bc1b94dd7/images/c5ac5e54-9c21-4e5b-9f9b-91fbadb839e0/url
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
