@@ -6,7 +6,7 @@ metadata:
   labels:
     app: front
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: front
   ports:
