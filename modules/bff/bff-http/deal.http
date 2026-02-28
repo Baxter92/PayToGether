@@ -54,7 +54,8 @@ GET {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
-### 4. Mettre à jour un deal (PUT)
+### 4. Mettre à jour un deal (PUT) - Sans images
+# Si listeImages n'est pas présente, les images du deal ne sont pas modifiées
 
 PUT {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000
 Content-Type: application/json
@@ -71,19 +72,84 @@ Authorization: Bearer {{access_token}}
   "dateExpiration": "2026-12-31T23:59:59",
   "categorieUuid": "123e4567-e89b-12d3-a456-426614174000",
   "createurUuid": "123e4567-e89b-12d3-a456-426614174001",
-  "statut": "PUBLIE",
+  "ville": "Montreal",
+  "pays": "Canada",
+  "listePointsForts": [
+    "Nouveau point fort"
+  ]
+}
+
+### 4.0. Mettre à jour un deal AVEC images (PUT) - Gestion intelligente
+# Si listeImages est présente : gestion intelligente (ajout/modification/suppression)
+# - imageUuid: null → Ajouter nouvelle image
+# - imageUuid: existant → Conserver/modifier isPrincipal
+# - imageUuid: absent du DTO → Supprimer de la BD
+# Réponse : deal avec UNIQUEMENT les nouvelles images (avec presignUrl)
+
+PUT {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "titre": "Deal mis à jour avec images",
+  "description": "Description modifiée",
+  "prixDeal": 1500.00,
+  "prixPart": 15.00,
+  "nbParticipants": 100,
+  "dateDebut": "2026-02-09T10:00:00",
+  "dateFin": "2026-12-31T23:59:59",
+  "dateExpiration": "2026-12-31T23:59:59",
+  "categorieUuid": "123e4567-e89b-12d3-a456-426614174000",
+  "createurUuid": "123e4567-e89b-12d3-a456-426614174001",
   "ville": "Montreal",
   "pays": "Canada",
   "listeImages": [
     {
-      "urlImage": "deal_image_updated.jpg",
+      "imageUuid": "aaa-111-existing",
+      "urlImage": "image_existante.jpg",
+      "isPrincipal": true,
+      "statut": null
+    },
+    {
+      "imageUuid": null,
+      "urlImage": "nouvelle_image.jpg",
+      "isPrincipal": false,
+      "statut": null
+    }
+  ]
+}
+
+### 4.1. Mettre à jour uniquement le statut d'un deal (PATCH)
+PATCH {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000/statut
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "statut": "PUBLIE"
+}
+
+### 4.2. Mettre à jour uniquement les images d'un deal (PATCH)
+# Les anciennes images seront supprimées et remplacées par les nouvelles
+PATCH {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000/images
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "listeImages": [
+    {
+      "imageUuid": null,
+      "urlImage": "nouvelle_image_1.jpg",
       "isPrincipal": true,
       "presignUrl": null,
       "statut": null
+    },
+    {
+      "imageUuid": null,
+      "urlImage": "nouvelle_image_2.jpg",
+      "isPrincipal": false,
+      "presignUrl": null,
+      "statut": null
     }
-  ],
-  "listePointsForts": [
-    "Nouveau point fort"
   ]
 }
 

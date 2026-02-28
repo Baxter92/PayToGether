@@ -30,6 +30,16 @@ public interface DealProvider {
     void supprimerParUuid(UUID uuid);
 
     /**
+     * Mettre à jour uniquement le statut d'un deal
+     */
+    DealModele mettreAJourStatut(UUID uuid, com.ulr.paytogether.core.enumeration.StatutDeal statut);
+
+    /**
+     * Mettre à jour uniquement les images d'un deal
+     */
+    DealModele mettreAJourImages(UUID uuid, DealModele deal);
+
+    /**
      * Mettre à jour le statut d'une image d'un deal
      */
     void mettreAJourStatutImage(UUID dealUuid, UUID imageUuid, StatutImage statut);

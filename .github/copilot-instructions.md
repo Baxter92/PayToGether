@@ -112,6 +112,424 @@ Le projet PayToGether utilise une **architecture hexagonale** (ports & adapters)
 
 ---
 
+## 🔧 Mise à jour séparée : Statut et Images (Pattern PATCH)
+
+### Principe
+Pour éviter les conflits et simplifier les mises à jour, certains attributs d'une entité peuvent être mis à jour **séparément** via des endpoints PATCH dédiés. Cela permet de :
+- ✅ Séparer les préoccupations (statut, images, informations générales)
+- ✅ Éviter les conflits lors de modifications concurrentes
+- ✅ Simplifier la validation métier
+- ✅ Améliorer la sécurité (contrôle fin des autorisations)
+
+### Pattern général
+
+#### 1. Endpoint PUT général (sans statut et sans images)
+```java
+@PutMapping("/{uuid}")
+public ResponseEntity<DealResponseDto> mettreAJour(
+        @PathVariable UUID uuid,
+        @Valid @RequestBody MiseAJourDealDTO dto) {
+    // MiseAJourDealDTO ne contient PAS statut ni listeImages
+    return ResponseEntity.ok(apiAdapter.mettreAJour(uuid, dto));
+}
+```
+
+#### 2. Endpoint PATCH pour le statut
+```java
+@PatchMapping("/{uuid}/statut")
+public ResponseEntity<DealResponseDto> mettreAJourStatut(
+        @PathVariable UUID uuid,
+        @Valid @RequestBody MiseAJourStatutDealDTO dto) {
+    return ResponseEntity.ok(apiAdapter.mettreAJourStatut(uuid, dto.getStatut()));
+}
+```
+
+#### 3. Endpoint PATCH pour les images
+```java
+@PatchMapping("/{uuid}/images")
+public ResponseEntity<DealResponseDto> mettreAJourImages(
+        @PathVariable UUID uuid,
+        @Valid @RequestBody MiseAJourImagesDealDTO dto) {
+    // Les anciennes images sont SUPPRIMÉES et remplacées par les nouvelles
+    return ResponseEntity.ok(apiAdapter.mettreAJourImages(uuid, dto));
+}
+```
+
+### DTOs requis
+
+#### MiseAJour{Entité}DTO (sans statut et images)
+```java
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class MiseAJourDealDTO {
+    @NotBlank
+    private String titre;
+    private String description;
+    @NotNull @Positive
+    private BigDecimal prixDeal;
+    @NotNull @Positive
+    private BigDecimal prixPart;
+    @NotNull @Positive
+    private Integer nbParticipants;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime dateDebut;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @NotNull
+    private LocalDateTime dateFin;
+    @NotNull
+    private UUID createurUuid;
+    @NotNull
+    private UUID categorieUuid;
+    private List<String> listePointsForts;
+    @NotNull
+    private String ville;
+    private String pays;
+    
+    // NOTE: Pas de statut ni de listeImages
+}
+```
+
+#### MiseAJourStatut{Entité}DTO
+```java
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class MiseAJourStatutDealDTO {
+    @NotNull(message = "Le statut est obligatoire")
+    private StatutDeal statut;
+}
+```
+
+#### MiseAJourImages{Entité}DTO
+```java
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class MiseAJourImagesDealDTO {
+    @NotEmpty(message = "Au moins une image est obligatoire")
+    @Valid
+    private List<ImageDealDto> listeImages;
+}
+```
+
+### Méthodes dans le Validator (bff-core)
+
+```java
+@Component
+public class DealValidator {
+    
+    /**
+     * Validation partielle pour mise à jour sans images et sans statut
+     */
+    public void validerPourMiseAJourPartielle(DealModele dealModele) {
+        if (dealModele == null) {
+            throw new ValidationException("deal.null");
+        }
+        
+        if (dealModele.getUuid() == null) {
+            throw new ValidationException("deal.uuid.obligatoire");
+        }
+        
+        // Validation de tous les champs SAUF statut et images
+        if (dealModele.getTitre() == null || dealModele.getTitre().isBlank()) {
+            throw new ValidationException("deal.titre.obligatoire");
+        }
+        
+        if (dealModele.getPrixDeal() == null || dealModele.getPrixDeal().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ValidationException("deal.prixDeal.obligatoire");
+        }
+        
+        if (dealModele.getPrixPart() == null || dealModele.getPrixPart().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ValidationException("deal.prixPart.obligatoire");
+        }
+        
+        if (dealModele.getNbParticipants() == null || dealModele.getNbParticipants() <= 0) {
+            throw new ValidationException("deal.nbParticipants.obligatoire");
+        }
+        
+        if (dealModele.getDateDebut() == null) {
+            throw new ValidationException("deal.dateDebut.obligatoire");
+        }
+        
+        if (dealModele.getDateFin() == null) {
+            throw new ValidationException("deal.dateFin.obligatoire");
+        }
+        
+        if (dealModele.getCreateurUuid() == null) {
+            throw new ValidationException("deal.createurUuid.obligatoire");
+        }
+        
+        if (dealModele.getCategorieUuid() == null) {
+            throw new ValidationException("deal.categorieUuid.obligatoire");
+        }
+        
+        if (dealModele.getVille() == null || dealModele.getVille().isBlank()) {
+            throw new ValidationException("deal.ville.obligatoire");
+        }
+        
+        if (dealModele.getPays() == null || dealModele.getPays().isBlank()) {
+            throw new ValidationException("deal.pays.obligatoire");
+        }
+    }
+    
+    /**
+     * Validation des transitions de statut
+     */
+    public void validerTransitionStatut(StatutDeal statutActuel, StatutDeal nouveauStatut) {
+        if (nouveauStatut == null) {
+            throw new ValidationException("deal.statut.obligatoire");
+        }
+        
+        if (statutActuel == null) {
+            throw new ValidationException("deal.statut.actuel.null");
+        }
+        
+        // Règles de transition d'état selon la logique métier
+        switch (statutActuel) {
+            case BROUILLON:
+                if (nouveauStatut != StatutDeal.PUBLIE && nouveauStatut != StatutDeal.BROUILLON) {
+                    throw new ValidationException("deal.statut.transition.invalide", statutActuel, nouveauStatut);
+                }
+                break;
+            
+            case PUBLIE:
+                if (nouveauStatut != StatutDeal.EXPIRE && nouveauStatut != StatutDeal.PUBLIE) {
+                    throw new ValidationException("deal.statut.transition.invalide", statutActuel, nouveauStatut);
+                }
+                break;
+            
+            case EXPIRE:
+                // État final : aucune transition autorisée
+                if (nouveauStatut != StatutDeal.EXPIRE) {
+                    throw new ValidationException("deal.statut.expire.immuable");
+                }
+                break;
+        }
+    }
+    
+    /**
+     * Validation des images
+     */
+    public void validerImages(DealModele dealModele) {
+        if (dealModele == null) {
+            throw new ValidationException("deal.null");
+        }
+        
+        if (dealModele.getListeImages() == null || dealModele.getListeImages().isEmpty()) {
+            throw new ValidationException("deal.listeImages.obligatoire");
+        }
+        
+        // Une et une seule image principale
+        long nombreImagesPrincipales = dealModele.getListeImages().stream()
+                .filter(img -> img.getIsPrincipal() != null && img.getIsPrincipal())
+                .count();
+        
+        if (nombreImagesPrincipales == 0) {
+            throw new ValidationException("deal.image.principale.manquante");
+        }
+        
+        if (nombreImagesPrincipales > 1) {
+            throw new ValidationException("deal.image.principale.unique");
+        }
+        
+        // Chaque image doit avoir une URL
+        boolean imagesSansUrl = dealModele.getListeImages().stream()
+                .anyMatch(img -> img.getUrlImage() == null || img.getUrlImage().isBlank());
+        
+        if (imagesSansUrl) {
+            throw new ValidationException("deal.image.url.obligatoire");
+        }
+    }
+}
+```
+
+### Méthodes dans le Service (bff-core)
+
+```java
+@Service
+@RequiredArgsConstructor
+public class DealServiceImpl implements DealService {
+    
+    private final DealProvider dealProvider;
+    private final DealValidator dealValidator;
+    
+    @Override
+    public DealModele mettreAJour(UUID uuid, DealModele deal) {
+        // Validation PARTIELLE (sans statut ni images)
+        dealValidator.validerPourMiseAJourPartielle(deal);
+        return dealProvider.mettreAJour(uuid, deal);
+    }
+    
+    @Override
+    public DealModele mettreAJourStatut(UUID uuid, StatutDeal nouveauStatut) {
+        // Récupérer le deal existant
+        DealModele dealExistant = dealProvider.trouverParUuid(uuid)
+                .orElseThrow(() -> ResourceNotFoundException.parUuid("deal", uuid));
+        
+        // Valider la transition de statut
+        dealValidator.validerTransitionStatut(dealExistant.getStatut(), nouveauStatut);
+        
+        // Mettre à jour le statut
+        return dealProvider.mettreAJourStatut(uuid, nouveauStatut);
+    }
+    
+    @Override
+    public DealModele mettreAJourImages(UUID uuid, DealModele deal) {
+        // Vérifier que le deal existe
+        dealProvider.trouverParUuid(uuid)
+                .orElseThrow(() -> ResourceNotFoundException.parUuid("deal", uuid));
+        
+        // Valider les images
+        dealValidator.validerImages(deal);
+        
+        // Mettre à jour uniquement les images (suppression + remplacement)
+        return dealProvider.mettreAJourImages(uuid, deal);
+    }
+}
+```
+
+### Méthodes dans le Provider (bff-core/provider)
+
+```java
+public interface DealProvider {
+    // CRUD standard
+    DealModele sauvegarder(DealModele deal);
+    DealModele mettreAJour(UUID uuid, DealModele deal);
+    Optional<DealModele> trouverParUuid(UUID uuid);
+    
+    // Mise à jour séparée du statut
+    DealModele mettreAJourStatut(UUID uuid, StatutDeal statut);
+    
+    // Mise à jour séparée des images (suppression + remplacement)
+    DealModele mettreAJourImages(UUID uuid, DealModele deal);
+    
+    // Gestion fine des images
+    void mettreAJourStatutImage(UUID entityUuid, UUID imageUuid, StatutImage statut);
+    String obtenirUrlLectureImage(UUID entityUuid, UUID imageUuid);
+}
+```
+
+### Implémentation dans ProviderAdapter (bff-provider)
+
+```java
+@Component
+@RequiredArgsConstructor
+public class DealProviderAdapter implements DealProvider {
+    
+    private final DealRepository jpaRepository;
+    private final DealJpaMapper mapper;
+    private final FileManager fileManager;
+    
+    @Transactional(rollbackOn = Exception.class)
+    @Override
+    public DealModele mettreAJourStatut(UUID uuid, StatutDeal statut) {
+        DealJpa deal = jpaRepository.findById(uuid)
+                .orElseThrow(() -> new IllegalArgumentException("Deal non trouvé : " + uuid));
+        
+        deal.setStatut(statut);
+        deal.setDateModification(LocalDateTime.now());
+        
+        DealJpa sauvegarde = jpaRepository.save(deal);
+        return mapper.versModele(sauvegarde);
+    }
+    
+    @Transactional(rollbackOn = Exception.class)
+    @Override
+    public DealModele mettreAJourImages(UUID uuid, DealModele dealAvecNouvellesImages) {
+        DealJpa deal = jpaRepository.findById(uuid)
+                .orElseThrow(() -> new IllegalArgumentException("Deal non trouvé : " + uuid));
+        
+        if (dealAvecNouvellesImages.getListeImages() == null || dealAvecNouvellesImages.getListeImages().isEmpty()) {
+            return mapper.versModele(deal);
+        }
+
+        // Collecter les UUIDs des images envoyées dans le DTO
+        List<UUID> uuidsEnvoyes = dealAvecNouvellesImages.getListeImages().stream()
+                .map(img -> img.getUuid())
+                .filter(uuid1 -> uuid1 != null)
+                .toList();
+
+        // 1. SUPPRIMER les images en BD dont l'UUID n'est PAS dans le DTO
+        if (deal.getImageDealJpas() != null && !deal.getImageDealJpas().isEmpty()) {
+            deal.getImageDealJpas().removeIf(imageJpa -> 
+                !uuidsEnvoyes.contains(imageJpa.getUuid())
+            );
+        }
+
+        // 2. Créer une map des images existantes en BD
+        var imagesExistantesParUuid = deal.getImageDealJpas() != null 
+            ? deal.getImageDealJpas().stream()
+                .collect(Collectors.toMap(
+                    ImageDealJpa::getUuid,
+                    img -> img,
+                    (img1, img2) -> img2
+                ))
+            : new HashMap<UUID, ImageDealJpa>();
+
+        // 3. Liste des nouvelles images à retourner avec presignUrl
+        List<ImageDealModele> nouvellesImagesAvecPresign = new ArrayList<>();
+
+        // 4. Parcourir les images du DTO
+        for (var imageModele : dealAvecNouvellesImages.getListeImages()) {
+            if (imageModele.getUuid() == null) {
+                // 4.1. AJOUTER nouvelle image (UUID null)
+                ImageDealJpa nouvelleImage = ImageDealJpa.builder()
+                        .uuid(UUID.randomUUID())
+                        .urlImage(FilenameUtils.getBaseName(imageModele.getUrlImage())
+                                + "_" + System.currentTimeMillis()
+                                + "." + FilenameUtils.getExtension(imageModele.getUrlImage()))
+                        .isPrincipal(imageModele.getIsPrincipal())
+                        .statut(StatutImage.PENDING)
+                        .dealJpa(deal)
+                        .build();
+                
+                if (deal.getImageDealJpas() == null) {
+                    deal.setImageDealJpas(new ArrayList<>());
+                }
+                deal.getImageDealJpas().add(nouvelleImage);
+                
+                // Ajouter à la liste pour générer presignUrl
+                ImageDealModele imageModeleAvecUuid = ImageDealModele.builder()
+                        .uuid(nouvelleImage.getUuid())
+                        .urlImage(nouvelleImage.getUrlImage())
+                        .isPrincipal(nouvelleImage.getIsPrincipal())
+                        .statut(StatutImage.PENDING)
+                        .build();
+                nouvellesImagesAvecPresign.add(imageModeleAvecUuid);
+                
+            } else {
+                // 4.2. MODIFIER image existante si isPrincipal change
+                ImageDealJpa imageExistante = imagesExistantesParUuid.get(imageModele.getUuid());
+                if (imageExistante != null && imageExistante.getIsPrincipal() != imageModele.getIsPrincipal()) {
+                    imageExistante.setIsPrincipal(imageModele.getIsPrincipal());
+                    imageExistante.setDateModification(LocalDateTime.now());
+                }
+            }
+        }
+
+        deal.setDateModification(LocalDateTime.now());
+        DealJpa sauvegarde = jpaRepository.save(deal);
+        DealModele modeleSauvegarde = mapper.versModele(sauvegarde);
+        
+        // 5. Générer les URL présignées UNIQUEMENT pour les nouvelles images
+        nouvellesImagesAvecPresign.forEach(img -> {
+            String presignUrl = fileManager.generatePresignedUrl(Tools.DIRECTORY_DEALS_IMAGES, img.getUrlImage());
+            img.setPresignUrl(presignUrl);
+        });
+        
+        // 6. Remplacer la liste par UNIQUEMENT les nouvelles images avec presignUrl
+        modeleSauvegarde.setListeImages(nouvellesImagesAvecPresign);
+        
+        return modeleSauvegarde;
+    }
+}
+```
+
+### Frontend - Utilisation des endpoints PATCH
 ## 🛡️ Validators et Exceptions Métier
 
 ### Principe fondamental
@@ -1248,5 +1666,5 @@ Chaque module a son `pom.xml` avec dépendances spécifiques.
 
 ---
 
-**Date de dernière mise à jour** : 25 février 2026  
+**Date de dernière mise à jour** : 28 février 2026  
 **Auteur** : Équipe PayToGether

@@ -2,6 +2,8 @@ package com.ulr.paytogether.api.apiadapter;
 
 import com.ulr.paytogether.api.dto.DealDTO;
 import com.ulr.paytogether.api.dto.DealResponseDto;
+import com.ulr.paytogether.api.dto.MiseAJourDealDTO;
+import com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO;
 import com.ulr.paytogether.api.mapper.DealMapper;
 import com.ulr.paytogether.core.domaine.service.DealService;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
@@ -61,9 +63,32 @@ public class DealApiAdapter {
                 .toList();
     }
 
-    public DealResponseDto mettreAJour(UUID uuid, DealDTO dto) {
+    public DealResponseDto mettreAJour(UUID uuid, MiseAJourDealDTO dto) {
         var dealModele = dealMapper.versEntite(dto);
+        dealModele.setUuid(uuid);
+
+        // mettreAJour retourne le deal avec UNIQUEMENT les nouvelles images si listeImages est présente
         var updated = dealService.mettreAJour(uuid, dealModele);
+
+        // Si le DTO contenait des images, la réponse contiendra uniquement les nouvelles images avec presignUrl
+        // Sinon, la réponse contiendra toutes les images existantes
+        return dealMapper.versDTO(updated);
+    }
+
+    public DealResponseDto mettreAJourStatut(UUID uuid, StatutDeal statut) {
+        var updated = dealService.mettreAJourStatut(uuid, statut);
+        return dealMapper.versDTO(updated);
+    }
+
+    public DealResponseDto mettreAJourImages(UUID uuid, MiseAJourImagesDealDTO dto) {
+        var dealModele = com.ulr.paytogether.core.modele.DealModele.builder()
+                .uuid(uuid)
+                .listeImages(dto.getListeImages().stream()
+                        .map(dealMapper::imageDtoVersModele)
+                        .toList())
+                .build();
+
+        var updated = dealService.mettreAJourImages(uuid, dealModele);
         return dealMapper.versDTO(updated);
     }
 

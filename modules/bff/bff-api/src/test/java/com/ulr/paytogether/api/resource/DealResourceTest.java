@@ -6,6 +6,7 @@ import com.ulr.paytogether.api.dto.DealDTO;
 import com.ulr.paytogether.api.dto.DealResponseDto;
 import com.ulr.paytogether.api.dto.ImageDealDto;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
+import com.ulr.paytogether.core.enumeration.StatutImage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -307,6 +308,18 @@ class DealResourceTest {
     @Test
     void testMettreAJour_DevraitMettreAJourDeal() throws Exception {
         // Given
+        com.ulr.paytogether.api.dto.MiseAJourDealDTO miseAJourDTO = com.ulr.paytogether.api.dto.MiseAJourDealDTO.builder()
+                .titre("Filet de boeuf premium - Prix réduit")
+                .description("Viande de qualité supérieure - Offre spéciale")
+                .prixDeal(new BigDecimal("120.00"))
+                .prixPart(new BigDecimal("24.00"))
+                .nbParticipants(5)
+                .dateFin(LocalDateTime.now().plusDays(7))
+                .createurUuid(uuidCreateur)
+                .categorieUuid(uuidCategorie)
+                .ville("Montreal")
+                .build();
+
         DealResponseDto dealMisAJour = DealResponseDto.builder()
                 .uuid(uuidDeal)
                 .titre("Filet de boeuf premium - Prix réduit")
@@ -318,32 +331,94 @@ class DealResourceTest {
                 .ville("Montreal")
                 .build();
 
-        when(dealApiAdapter.mettreAJour(eq(uuidDeal), any(DealDTO.class))).thenReturn(dealMisAJour);
+        when(dealApiAdapter.mettreAJour(eq(uuidDeal), any(com.ulr.paytogether.api.dto.MiseAJourDealDTO.class))).thenReturn(dealMisAJour);
 
         // When & Then
         mockMvc.perform(put("/api/deals/{uuid}", uuidDeal)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dealDTO)))
+                        .content(objectMapper.writeValueAsString(miseAJourDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.titre").value("Filet de boeuf premium - Prix réduit"))
                 .andExpect(jsonPath("$.prixDeal").value(120.00));
 
-        verify(dealApiAdapter, times(1)).mettreAJour(eq(uuidDeal), any(DealDTO.class));
+        verify(dealApiAdapter, times(1)).mettreAJour(eq(uuidDeal), any(com.ulr.paytogether.api.dto.MiseAJourDealDTO.class));
     }
 
     @Test
     void testMettreAJour_DevraitRetournerErreurSiValidationEchoue() throws Exception {
         // Given
-        when(dealApiAdapter.mettreAJour(eq(uuidDeal), any(DealDTO.class)))
-                .thenThrow(new IllegalArgumentException("L'attribut ville est obligatoire"));
+        com.ulr.paytogether.api.dto.MiseAJourDealDTO miseAJourDTO = com.ulr.paytogether.api.dto.MiseAJourDealDTO.builder()
+                .titre("Filet de boeuf premium")
+                .prixDeal(new BigDecimal("150.00"))
+                .prixPart(new BigDecimal("30.00"))
+                .nbParticipants(5)
+                .dateFin(LocalDateTime.now().plusDays(7))
+                .createurUuid(uuidCreateur)
+                .categorieUuid(uuidCategorie)
+                .build();
+
+        when(dealApiAdapter.mettreAJour(eq(uuidDeal), any(com.ulr.paytogether.api.dto.MiseAJourDealDTO.class)))
+                .thenThrow(new com.ulr.paytogether.core.exception.ValidationException("deal.ville.obligatoire"));
 
         // When & Then
         mockMvc.perform(put("/api/deals/{uuid}", uuidDeal)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dealDTO)))
+                        .content(objectMapper.writeValueAsString(miseAJourDTO)))
                 .andExpect(status().isBadRequest());
 
-        verify(dealApiAdapter, times(1)).mettreAJour(eq(uuidDeal), any(DealDTO.class));
+        verify(dealApiAdapter, times(1)).mettreAJour(eq(uuidDeal), any(com.ulr.paytogether.api.dto.MiseAJourDealDTO.class));
+    }
+
+    @Test
+    void testMettreAJour_AvecImages_DevraitRetournerSeulementNouvellesImages() throws Exception {
+        // Given
+        ImageDealDto nouvelleImage = ImageDealDto.builder()
+                .imageUuid(null) // Nouvelle image
+                .urlImage("nouvelle_image.jpg")
+                .isPrincipal(true)
+                .build();
+
+        com.ulr.paytogether.api.dto.MiseAJourDealDTO miseAJourDTO = com.ulr.paytogether.api.dto.MiseAJourDealDTO.builder()
+                .titre("Deal avec nouvelle image")
+                .description("Description")
+                .prixDeal(new BigDecimal("150.00"))
+                .prixPart(new BigDecimal("30.00"))
+                .nbParticipants(5)
+                .dateFin(LocalDateTime.now().plusDays(7))
+                .createurUuid(uuidCreateur)
+                .categorieUuid(uuidCategorie)
+                .ville("Montreal")
+                .listeImages(List.of(nouvelleImage)) // Images présentes
+                .build();
+
+        com.ulr.paytogether.api.dto.ImageDealDto imageAvecPresignUrl = com.ulr.paytogether.api.dto.ImageDealDto.builder()
+                .imageUuid(UUID.randomUUID())
+                .urlImage("deals/nouvelle_image_1707988800000.jpg")
+                .isPrincipal(true)
+                .presignUrl("https://minio.../put-url")
+                .statut(StatutImage.PENDING)
+                .build();
+
+        DealResponseDto dealAvecNouvellesImages = DealResponseDto.builder()
+                .uuid(uuidDeal)
+                .titre("Deal avec nouvelle image")
+                .listeImages(List.of(imageAvecPresignUrl)) // Uniquement nouvelles images
+                .build();
+
+        when(dealApiAdapter.mettreAJour(eq(uuidDeal), any(com.ulr.paytogether.api.dto.MiseAJourDealDTO.class)))
+                .thenReturn(dealAvecNouvellesImages);
+
+        // When & Then
+        mockMvc.perform(put("/api/deals/{uuid}", uuidDeal)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(miseAJourDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.titre").value("Deal avec nouvelle image"))
+                .andExpect(jsonPath("$.listeImages", hasSize(1)))
+                .andExpect(jsonPath("$.listeImages[0].presignUrl").value("https://minio.../put-url"))
+                .andExpect(jsonPath("$.listeImages[0].statut").value("PENDING"));
+
+        verify(dealApiAdapter, times(1)).mettreAJour(eq(uuidDeal), any(com.ulr.paytogether.api.dto.MiseAJourDealDTO.class));
     }
 
     // ==================== Tests pour DELETE /api/deals/{uuid} ====================
@@ -397,13 +472,201 @@ class DealResourceTest {
     @Test
     void testMettreAJour_DevraitRetournerConflitSiConcurrence() throws Exception {
         // Given
-        when(dealApiAdapter.mettreAJour(eq(uuidDeal), any(DealDTO.class)))
+        com.ulr.paytogether.api.dto.MiseAJourDealDTO miseAJourDTO = com.ulr.paytogether.api.dto.MiseAJourDealDTO.builder()
+                .titre("Filet de boeuf premium")
+                .prixDeal(new BigDecimal("150.00"))
+                .prixPart(new BigDecimal("30.00"))
+                .nbParticipants(5)
+                .dateFin(LocalDateTime.now().plusDays(7))
+                .createurUuid(uuidCreateur)
+                .categorieUuid(uuidCategorie)
+                .ville("Montreal")
+                .build();
+
+        when(dealApiAdapter.mettreAJour(eq(uuidDeal), any(com.ulr.paytogether.api.dto.MiseAJourDealDTO.class)))
                 .thenThrow(new RuntimeException("Conflit de version"));
 
         // When & Then
         mockMvc.perform(put("/api/deals/{uuid}", uuidDeal)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dealDTO)))
+                        .content(objectMapper.writeValueAsString(miseAJourDTO)))
                 .andExpect(status().is5xxServerError());
+    }
+
+    // ==================== Tests pour PATCH /api/deals/{uuid}/statut ====================
+
+    @Test
+    void testMettreAJourStatut_DevraitMettreAJourStatut() throws Exception {
+        // Given
+        com.ulr.paytogether.api.dto.MiseAJourStatutDealDTO statutDTO =
+            com.ulr.paytogether.api.dto.MiseAJourStatutDealDTO.builder()
+                    .statut(StatutDeal.PUBLIE)
+                    .build();
+
+        DealResponseDto dealMisAJour = DealResponseDto.builder()
+                .uuid(uuidDeal)
+                .titre(dealResponseDto.getTitre())
+                .statut(StatutDeal.PUBLIE)
+                .build();
+
+        when(dealApiAdapter.mettreAJourStatut(uuidDeal, StatutDeal.PUBLIE)).thenReturn(dealMisAJour);
+
+        // When & Then
+        mockMvc.perform(patch("/api/deals/{uuid}/statut", uuidDeal)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(statutDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.uuid").value(uuidDeal.toString()))
+                .andExpect(jsonPath("$.statut").value("PUBLIE"));
+
+        verify(dealApiAdapter, times(1)).mettreAJourStatut(uuidDeal, StatutDeal.PUBLIE);
+    }
+
+    @Test
+    void testMettreAJourStatut_DevraitRetournerErreurSiTransitionInvalide() throws Exception {
+        // Given
+        com.ulr.paytogether.api.dto.MiseAJourStatutDealDTO statutDTO =
+            com.ulr.paytogether.api.dto.MiseAJourStatutDealDTO.builder()
+                    .statut(StatutDeal.PUBLIE)
+                    .build();
+
+        when(dealApiAdapter.mettreAJourStatut(uuidDeal, StatutDeal.PUBLIE))
+                .thenThrow(new com.ulr.paytogether.core.exception.ValidationException("deal.statut.transition.invalide"));
+
+        // When & Then
+        mockMvc.perform(patch("/api/deals/{uuid}/statut", uuidDeal)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(statutDTO)))
+                .andExpect(status().isBadRequest());
+
+        verify(dealApiAdapter, times(1)).mettreAJourStatut(uuidDeal, StatutDeal.PUBLIE);
+    }
+
+    @Test
+    void testMettreAJourStatut_DevraitRetourner404SiDealNonTrouve() throws Exception {
+        // Given
+        com.ulr.paytogether.api.dto.MiseAJourStatutDealDTO statutDTO =
+            com.ulr.paytogether.api.dto.MiseAJourStatutDealDTO.builder()
+                    .statut(StatutDeal.PUBLIE)
+                    .build();
+
+        when(dealApiAdapter.mettreAJourStatut(uuidDeal, StatutDeal.PUBLIE))
+                .thenThrow(new com.ulr.paytogether.core.exception.ResourceNotFoundException("deal.non.trouve", uuidDeal.toString()));
+
+        // When & Then
+        mockMvc.perform(patch("/api/deals/{uuid}/statut", uuidDeal)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(statutDTO)))
+                .andExpect(status().isNotFound());
+
+        verify(dealApiAdapter, times(1)).mettreAJourStatut(uuidDeal, StatutDeal.PUBLIE);
+    }
+
+    // ==================== Tests pour PATCH /api/deals/{uuid}/images ====================
+
+    @Test
+    void testMettreAJourImages_DevraitMettreAJourImages() throws Exception {
+        // Given
+        ImageDealDto imageDto = new ImageDealDto(
+                UUID.randomUUID(),
+                "nouvelle_image.jpg",
+                true,
+                null,
+                com.ulr.paytogether.core.enumeration.StatutImage.PENDING
+        );
+
+        com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO imagesDTO =
+            com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO.builder()
+                    .listeImages(List.of(imageDto))
+                    .build();
+
+        DealResponseDto dealMisAJour = DealResponseDto.builder()
+                .uuid(uuidDeal)
+                .titre(dealResponseDto.getTitre())
+                .listeImages(List.of(imageDto))
+                .build();
+
+        when(dealApiAdapter.mettreAJourImages(eq(uuidDeal), any(com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO.class)))
+                .thenReturn(dealMisAJour);
+
+        // When & Then
+        mockMvc.perform(patch("/api/deals/{uuid}/images", uuidDeal)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(imagesDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.uuid").value(uuidDeal.toString()));
+
+        verify(dealApiAdapter, times(1)).mettreAJourImages(eq(uuidDeal), any(com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO.class));
+    }
+
+    @Test
+    void testMettreAJourImages_DevraitRetournerErreurSiListeVide() throws Exception {
+        // Given
+        com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO imagesDTO =
+            com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO.builder()
+                    .listeImages(List.of())
+                    .build();
+
+        // When & Then
+        mockMvc.perform(patch("/api/deals/{uuid}/images", uuidDeal)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(imagesDTO)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testMettreAJourImages_DevraitRetournerErreurSiAucuneImagePrincipale() throws Exception {
+        // Given
+        ImageDealDto imageDto = new ImageDealDto(
+                UUID.randomUUID(),
+                "image.jpg",
+                false, // Pas d'image principale
+                null,
+                null
+        );
+
+        com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO imagesDTO =
+            com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO.builder()
+                    .listeImages(List.of(imageDto))
+                    .build();
+
+        when(dealApiAdapter.mettreAJourImages(eq(uuidDeal), any(com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO.class)))
+                .thenThrow(new com.ulr.paytogether.core.exception.ValidationException("deal.image.principale.manquante"));
+
+        // When & Then
+        mockMvc.perform(patch("/api/deals/{uuid}/images", uuidDeal)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(imagesDTO)))
+                .andExpect(status().isBadRequest());
+
+        verify(dealApiAdapter, times(1)).mettreAJourImages(eq(uuidDeal), any(com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO.class));
+    }
+
+    @Test
+    void testMettreAJourImages_DevraitRetourner404SiDealNonTrouve() throws Exception {
+        // Given
+        ImageDealDto imageDto = new ImageDealDto(
+                UUID.randomUUID(),
+                "image.jpg",
+                true,
+                null,
+                null
+        );
+
+        com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO imagesDTO =
+            com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO.builder()
+                    .listeImages(List.of(imageDto))
+                    .build();
+
+        when(dealApiAdapter.mettreAJourImages(eq(uuidDeal), any(com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO.class)))
+                .thenThrow(new com.ulr.paytogether.core.exception.ResourceNotFoundException("deal.non.trouve", uuidDeal.toString()));
+
+        // When & Then
+        mockMvc.perform(patch("/api/deals/{uuid}/images", uuidDeal)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(imagesDTO)))
+                .andExpect(status().isNotFound());
+
+        verify(dealApiAdapter, times(1)).mettreAJourImages(eq(uuidDeal), any(com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO.class));
     }
 }

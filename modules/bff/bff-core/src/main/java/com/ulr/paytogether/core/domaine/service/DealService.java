@@ -50,6 +50,16 @@ public interface DealService {
     DealModele mettreAJour(UUID uuid, DealModele deal);
 
     /**
+     * Mettre à jour uniquement le statut d'un deal
+     */
+    DealModele mettreAJourStatut(UUID uuid, StatutDeal statut);
+
+    /**
+     * Mettre à jour uniquement les images d'un deal
+     */
+    DealModele mettreAJourImages(UUID uuid, DealModele deal);
+
+    /**
      * Supprimer un deal par son UUID
      */
     void supprimerParUuid(UUID uuid);

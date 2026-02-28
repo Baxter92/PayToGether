@@ -88,6 +88,43 @@ public class DealMapper {
     }
 
     /**
+     * Convertit un MiseAJourDealDTO en DealModele (sans statut et sans images)
+     */
+    public DealModele versEntite(com.ulr.paytogether.api.dto.MiseAJourDealDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        return DealModele.builder()
+                .titre(dto.getTitre())
+                .description(dto.getDescription())
+                .prixDeal(dto.getPrixDeal())
+                .prixPart(dto.getPrixPart())
+                .nbParticipants(dto.getNbParticipants())
+                .dateDebut(dto.getDateDebut())
+                .dateFin(dto.getDateFin())
+                .createur(dto.getCreateurUuid() != null ? UtilisateurModele.builder()
+                        .uuid(dto.getCreateurUuid())
+                        .build() : null)
+                .categorie(dto.getCategorieUuid() != null ? CategorieModele.builder()
+                        .uuid(dto.getCategorieUuid())
+                        .build() : null)
+                .listePointsForts(dto.getListePointsForts())
+                .dateExpiration(dto.getDateExpiration())
+                .ville(dto.getVille())
+                .pays(dto.getPays())
+                .build();
+    }
+
+    /**
+     * Convertit un ImageDealDto vers ImageDealModele
+     * Exposé publiquement pour utilisation dans les adaptateurs
+     */
+    public com.ulr.paytogether.core.modele.ImageDealModele imageDtoVersModele(com.ulr.paytogether.api.dto.ImageDealDto dto) {
+        return imageDealMapper.dtoVersModele(dto);
+    }
+
+    /**
      * Met à jour une entité existante avec les données du DTO
      */
     public void mettreAJour(DealModele deal, DealDTO dto) {

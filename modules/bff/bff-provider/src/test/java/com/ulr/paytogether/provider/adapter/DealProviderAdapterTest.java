@@ -8,12 +8,14 @@ import com.ulr.paytogether.core.modele.ImageDealModele;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
 import com.ulr.paytogether.provider.adapter.entity.CategorieJpa;
 import com.ulr.paytogether.provider.adapter.entity.DealJpa;
+import com.ulr.paytogether.provider.adapter.entity.ImageDealJpa;
 import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
 import com.ulr.paytogether.provider.adapter.mapper.DealJpaMapper;
 import com.ulr.paytogether.provider.repository.CategorieRepository;
 import com.ulr.paytogether.provider.repository.DealRepository;
 import com.ulr.paytogether.provider.repository.UtilisateurRepository;
 import com.ulr.paytogether.provider.utils.FileManager;
+import com.ulr.paytogether.provider.utils.Tools;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +33,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -489,5 +492,310 @@ class DealProviderAdapterTest {
         assertNotNull(resultat);
         // Vérifier que generatePresignedUrl n'est pas appelé pour les images UPLOADED
         verify(fileManager, never()).generatePresignedUrl(anyString(), anyString());
+    }
+
+    @Test
+    void testMettreAJourStatut_DevraitMettreAJourStatut() {
+        // Given
+        dealJpa.setStatut(StatutDeal.BROUILLON);
+        DealJpa dealMisAJour = DealJpa.builder()
+                .uuid(uuidDeal)
+                .titre(dealJpa.getTitre())
+                .statut(StatutDeal.PUBLIE)
+                .build();
+        DealModele dealModeleStatutMisAJour = DealModele.builder()
+                .uuid(uuidDeal)
+                .titre(dealModele.getTitre())
+                .statut(StatutDeal.PUBLIE)
+                .build();
+
+        when(jpaRepository.findById(uuidDeal)).thenReturn(Optional.of(dealJpa));
+        when(jpaRepository.save(any(DealJpa.class))).thenReturn(dealMisAJour);
+        when(mapper.versModele(dealMisAJour)).thenReturn(dealModeleStatutMisAJour);
+
+        // When
+        DealModele resultat = providerAdapter.mettreAJourStatut(uuidDeal, StatutDeal.PUBLIE);
+
+        // Then
+        assertNotNull(resultat);
+        assertEquals(StatutDeal.PUBLIE, resultat.getStatut());
+        verify(jpaRepository, times(1)).findById(uuidDeal);
+        verify(jpaRepository, times(1)).save(any(DealJpa.class));
+        verify(mapper, times(1)).versModele(dealMisAJour);
+    }
+
+    @Test
+    void testMettreAJourStatut_DevraitLancerExceptionSiDealNonTrouve() {
+        // Given
+        when(jpaRepository.findById(uuidDeal)).thenReturn(Optional.empty());
+
+        // When & Then
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> providerAdapter.mettreAJourStatut(uuidDeal, StatutDeal.PUBLIE)
+        );
+        assertTrue(exception.getMessage().contains("Deal non trouvé"));
+        verify(jpaRepository, times(1)).findById(uuidDeal);
+        verify(jpaRepository, never()).save(any());
+    }
+
+    @Test
+    void testMettreAJourImages_DevraitRemplacerLesImages() {
+        // Given
+        ImageDealModele nouvelleImage1 = ImageDealModele.builder()
+                .uuid(UUID.randomUUID())
+                .urlImage("nouvelle_image1.jpg")
+                .isPrincipal(true)
+                .statut(StatutImage.PENDING)
+                .build();
+
+        ImageDealModele nouvelleImage2 = ImageDealModele.builder()
+                .uuid(UUID.randomUUID())
+                .urlImage("nouvelle_image2.jpg")
+                .isPrincipal(false)
+                .statut(StatutImage.PENDING)
+                .build();
+
+        DealModele dealAvecNouvellesImages = DealModele.builder()
+                .uuid(uuidDeal)
+                .listeImages(List.of(nouvelleImage1, nouvelleImage2))
+                .build();
+
+        DealModele dealMisAJour = DealModele.builder()
+                .uuid(uuidDeal)
+                .titre(dealModele.getTitre())
+                .listeImages(List.of(nouvelleImage1, nouvelleImage2))
+                .build();
+
+        dealJpa.setImageDealJpas(new java.util.ArrayList<>());
+
+        when(jpaRepository.findById(uuidDeal)).thenReturn(Optional.of(dealJpa));
+        when(jpaRepository.save(any(DealJpa.class))).thenReturn(dealJpa);
+        when(mapper.versModele(any(DealJpa.class))).thenReturn(dealMisAJour);
+        when(fileManager.generatePresignedUrl(anyString(), anyString())).thenReturn("https://presigned-url.com/image");
+
+        // When
+        DealModele resultat = providerAdapter.mettreAJourImages(uuidDeal, dealAvecNouvellesImages);
+
+        // Then
+        assertNotNull(resultat);
+        assertNotNull(resultat.getListeImages());
+        assertEquals(2, resultat.getListeImages().size());
+        verify(jpaRepository, times(1)).findById(uuidDeal);
+        verify(jpaRepository, times(1)).save(any(DealJpa.class));
+        verify(mapper, times(1)).versModele(any(DealJpa.class));
+        // Vérifier que les URL présignées sont générées pour les 2 images PENDING
+        verify(fileManager, times(2)).generatePresignedUrl(anyString(), anyString());
+    }
+
+    @Test
+    void testMettreAJourImages_DevraitLancerExceptionSiDealNonTrouve() {
+        // Given
+        DealModele dealAvecImages = DealModele.builder()
+                .uuid(uuidDeal)
+                .listeImages(List.of())
+                .build();
+
+        when(jpaRepository.findById(uuidDeal)).thenReturn(Optional.empty());
+
+        // When & Then
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> providerAdapter.mettreAJourImages(uuidDeal, dealAvecImages)
+        );
+        assertTrue(exception.getMessage().contains("Deal non trouvé"));
+        verify(jpaRepository, times(1)).findById(uuidDeal);
+        verify(jpaRepository, never()).save(any());
+    }
+
+    @Test
+    void testMettreAJourImages_DevraitSupprimerAnciennesImages() {
+        // Given
+        com.ulr.paytogether.provider.adapter.entity.ImageDealJpa ancienneImage =
+            com.ulr.paytogether.provider.adapter.entity.ImageDealJpa.builder()
+                .uuid(UUID.randomUUID())
+                .urlImage("ancienne_image.jpg")
+                .isPrincipal(true)
+                .statut(StatutImage.UPLOADED)
+                .build();
+
+        dealJpa.setImageDealJpas(new java.util.ArrayList<>(List.of(ancienneImage)));
+
+        ImageDealModele nouvelleImage = ImageDealModele.builder()
+                .uuid(UUID.randomUUID())
+                .urlImage("nouvelle_image.jpg")
+                .isPrincipal(true)
+                .statut(StatutImage.PENDING)
+                .build();
+
+        DealModele dealAvecNouvellesImages = DealModele.builder()
+                .uuid(uuidDeal)
+                .listeImages(List.of(nouvelleImage))
+                .build();
+
+        DealModele dealMisAJour = DealModele.builder()
+                .uuid(uuidDeal)
+                .listeImages(List.of(nouvelleImage))
+                .build();
+
+        when(jpaRepository.findById(uuidDeal)).thenReturn(Optional.of(dealJpa));
+        when(jpaRepository.save(any(DealJpa.class))).thenReturn(dealJpa);
+        when(mapper.versModele(any(DealJpa.class))).thenReturn(dealMisAJour);
+        when(fileManager.generatePresignedUrl(anyString(), anyString())).thenReturn("https://presigned-url.com/image");
+
+        // When
+        DealModele resultat = providerAdapter.mettreAJourImages(uuidDeal, dealAvecNouvellesImages);
+
+        // Then
+        assertNotNull(resultat);
+        assertNotNull(resultat.getListeImages());
+        assertEquals(1, resultat.getListeImages().size());
+        // Vérifier que les anciennes images ont été supprimées (clear appelé)
+        verify(jpaRepository, times(1)).save(any(DealJpa.class));
+    }
+
+    @Test
+    void testMettreAJourImages_DevraitAjouterNouvelleImage_AvecUuidNull() {
+        // Given
+        // Image existante conservée
+        UUID imageExistanteUuid = UUID.randomUUID();
+        ImageDealJpa imageExistante = ImageDealJpa.builder()
+                .uuid(imageExistanteUuid)
+                .urlImage("image_existante.jpg")
+                .isPrincipal(true)
+                .statut(StatutImage.UPLOADED)
+                .dealJpa(dealJpa)
+                .build();
+        dealJpa.setImageDealJpas(new java.util.ArrayList<>(List.of(imageExistante)));
+
+        // Image existante dans le DTO
+        ImageDealModele imageExistanteModele = ImageDealModele.builder()
+                .uuid(imageExistanteUuid)
+                .urlImage("image_existante.jpg")
+                .isPrincipal(true)
+                .build();
+
+        // Nouvelle image à ajouter (UUID null)
+        ImageDealModele nouvelleImage = ImageDealModele.builder()
+                .uuid(null) // UUID null = AJOUT
+                .urlImage("nouvelle_image.jpg")
+                .isPrincipal(false)
+                .build();
+
+        DealModele dealAvecImages = DealModele.builder()
+                .uuid(uuidDeal)
+                .listeImages(List.of(imageExistanteModele, nouvelleImage))
+                .build();
+
+        when(jpaRepository.findById(uuidDeal)).thenReturn(Optional.of(dealJpa));
+        when(jpaRepository.save(any(DealJpa.class))).thenReturn(dealJpa);
+        when(mapper.versModele(any(DealJpa.class))).thenReturn(dealModele);
+        when(fileManager.generatePresignedUrl(anyString(), anyString())).thenReturn("https://presigned-url.com/new-image");
+
+        // When
+        DealModele resultat = providerAdapter.mettreAJourImages(uuidDeal, dealAvecImages);
+
+        // Then
+        assertNotNull(resultat);
+        // Vérifier qu'il y a 2 images en BD (1 existante + 1 nouvelle)
+        assertEquals(2, dealJpa.getImageDealJpas().size());
+        // Vérifier que SEULEMENT la nouvelle image est retournée avec presignUrl
+        assertNotNull(resultat.getListeImages());
+        assertEquals(1, resultat.getListeImages().size());
+        assertEquals("https://presigned-url.com/new-image", resultat.getListeImages().getFirst().getPresignUrl());
+        verify(fileManager, times(1)).generatePresignedUrl(eq(Tools.DIRECTORY_DEALS_IMAGES), anyString());
+    }
+
+    @Test
+    void testMettreAJourImages_DevraitModifierIsPrincipal_ImageExistante() {
+        // Given
+        UUID imageExistanteUuid = UUID.randomUUID();
+        ImageDealJpa imageExistante = ImageDealJpa.builder()
+                .uuid(imageExistanteUuid)
+                .urlImage("image_existante.jpg")
+                .isPrincipal(false) // Actuellement NON principale
+                .statut(StatutImage.UPLOADED)
+                .dealJpa(dealJpa)
+                .build();
+        dealJpa.setImageDealJpas(new java.util.ArrayList<>(List.of(imageExistante)));
+
+        // Modification : passer isPrincipal à true
+        ImageDealModele imageModifiee = ImageDealModele.builder()
+                .uuid(imageExistanteUuid)
+                .urlImage("image_existante.jpg")
+                .isPrincipal(true) // Devient principale
+                .build();
+
+        DealModele dealAvecModification = DealModele.builder()
+                .uuid(uuidDeal)
+                .listeImages(List.of(imageModifiee))
+                .build();
+
+        when(jpaRepository.findById(uuidDeal)).thenReturn(Optional.of(dealJpa));
+        when(jpaRepository.save(any(DealJpa.class))).thenReturn(dealJpa);
+        when(mapper.versModele(any(DealJpa.class))).thenReturn(dealModele);
+
+        // When
+        DealModele resultat = providerAdapter.mettreAJourImages(uuidDeal, dealAvecModification);
+
+        // Then
+        assertNotNull(resultat);
+        // Vérifier que isPrincipal a été modifié
+        assertTrue(imageExistante.getIsPrincipal());
+        // Vérifier qu'aucune URL présignée n'est générée (pas de nouvelle image)
+        assertTrue(resultat.getListeImages().isEmpty());
+        verify(jpaRepository, times(1)).save(any(DealJpa.class));
+        verify(fileManager, never()).generatePresignedUrl(anyString(), anyString());
+    }
+
+    @Test
+    void testMettreAJourImages_DevraitSupprimerImageNonEnvoyee() {
+        // Given
+        UUID image1Uuid = UUID.randomUUID();
+        UUID image2Uuid = UUID.randomUUID();
+
+        ImageDealJpa image1 = ImageDealJpa.builder()
+                .uuid(image1Uuid)
+                .urlImage("image1.jpg")
+                .isPrincipal(true)
+                .statut(StatutImage.UPLOADED)
+                .dealJpa(dealJpa)
+                .build();
+
+        ImageDealJpa image2 = ImageDealJpa.builder()
+                .uuid(image2Uuid)
+                .urlImage("image2.jpg")
+                .isPrincipal(false)
+                .statut(StatutImage.UPLOADED)
+                .dealJpa(dealJpa)
+                .build();
+
+        dealJpa.setImageDealJpas(new java.util.ArrayList<>(List.of(image1, image2)));
+
+        // DTO envoie seulement image1 (image2 doit être supprimée)
+        ImageDealModele image1Modele = ImageDealModele.builder()
+                .uuid(image1Uuid)
+                .urlImage("image1.jpg")
+                .isPrincipal(true)
+                .build();
+
+        DealModele dealAvecUneSeuleImage = DealModele.builder()
+                .uuid(uuidDeal)
+                .listeImages(List.of(image1Modele))
+                .build();
+
+        when(jpaRepository.findById(uuidDeal)).thenReturn(Optional.of(dealJpa));
+        when(jpaRepository.save(any(DealJpa.class))).thenReturn(dealJpa);
+        when(mapper.versModele(any(DealJpa.class))).thenReturn(dealModele);
+
+        // When
+        DealModele resultat = providerAdapter.mettreAJourImages(uuidDeal, dealAvecUneSeuleImage);
+
+        // Then
+        assertNotNull(resultat);
+        // Vérifier que image2 a été supprimée
+        assertEquals(1, dealJpa.getImageDealJpas().size());
+        assertEquals(image1Uuid, dealJpa.getImageDealJpas().getFirst().getUuid());
+        verify(jpaRepository, times(1)).save(any(DealJpa.class));
     }
 }

@@ -256,14 +256,16 @@ class DealApiAdapterTest {
     @Test
     void testMettreAJour_DevraitMettreAJourDeal() {
         // Given
-        DealDTO dealModifieDTO = DealDTO.builder()
-                .uuid(uuidDeal)
+        com.ulr.paytogether.api.dto.MiseAJourDealDTO dealModifieDTO = com.ulr.paytogether.api.dto.MiseAJourDealDTO.builder()
                 .titre("Filet de boeuf premium - Prix réduit")
                 .description("Viande de qualité supérieure - Offre spéciale")
                 .prixDeal(new BigDecimal("120.00"))
                 .prixPart(new BigDecimal("24.00"))
                 .nbParticipants(5)
-                .statut(StatutDeal.PUBLIE)
+                .dateFin(LocalDateTime.now().plusDays(7))
+                .createurUuid(uuidCreateur)
+                .categorieUuid(uuidCategorie)
+                .ville("Montreal")
                 .build();
         DealModele dealModifieModele = DealModele.builder()
                 .uuid(uuidDeal)
@@ -272,7 +274,6 @@ class DealApiAdapterTest {
                 .prixDeal(new BigDecimal("120.00"))
                 .prixPart(new BigDecimal("24.00"))
                 .nbParticipants(5)
-                .statut(StatutDeal.PUBLIE)
                 .build();
         DealResponseDto dealModifieResponseDto = DealResponseDto.builder()
                 .uuid(uuidDeal)
@@ -364,5 +365,137 @@ class DealApiAdapterTest {
         assertEquals(StatutDeal.BROUILLON, resultat.get(0).getStatut());
         verify(dealService, times(1)).lireParStatut(StatutDeal.BROUILLON);
         verify(mapper, times(1)).versDTO(dealBrouillon);
+    }
+
+    @Test
+    void testMettreAJourStatut_DevraitMettreAJourStatut() {
+        // Given
+        DealModele dealMisAJour = DealModele.builder()
+                .uuid(uuidDeal)
+                .titre(dealModele.getTitre())
+                .statut(StatutDeal.PUBLIE)
+                .build();
+        DealResponseDto responseDtoMisAJour = DealResponseDto.builder()
+                .uuid(uuidDeal)
+                .titre(dealModele.getTitre())
+                .statut(StatutDeal.PUBLIE)
+                .build();
+
+        when(dealService.mettreAJourStatut(uuidDeal, StatutDeal.PUBLIE)).thenReturn(dealMisAJour);
+        when(mapper.versDTO(dealMisAJour)).thenReturn(responseDtoMisAJour);
+
+        // When
+        DealResponseDto resultat = apiAdapter.mettreAJourStatut(uuidDeal, StatutDeal.PUBLIE);
+
+        // Then
+        assertNotNull(resultat);
+        assertEquals(StatutDeal.PUBLIE, resultat.getStatut());
+        verify(dealService, times(1)).mettreAJourStatut(uuidDeal, StatutDeal.PUBLIE);
+        verify(mapper, times(1)).versDTO(dealMisAJour);
+    }
+
+    @Test
+    void testMettreAJourStatut_DevraitLancerExceptionSiDealNonTrouve() {
+        // Given
+        when(dealService.mettreAJourStatut(uuidDeal, StatutDeal.PUBLIE))
+                .thenThrow(new com.ulr.paytogether.core.exception.ResourceNotFoundException("deal.non.trouve", uuidDeal.toString()));
+
+        // When & Then
+        assertThrows(com.ulr.paytogether.core.exception.ResourceNotFoundException.class,
+                () -> apiAdapter.mettreAJourStatut(uuidDeal, StatutDeal.PUBLIE));
+        verify(dealService, times(1)).mettreAJourStatut(uuidDeal, StatutDeal.PUBLIE);
+        verify(mapper, never()).versDTO(any());
+    }
+
+    @Test
+    void testMettreAJourImages_DevraitMettreAJourImages() {
+        // Given
+        com.ulr.paytogether.core.modele.ImageDealModele image1 = com.ulr.paytogether.core.modele.ImageDealModele.builder()
+                .uuid(UUID.randomUUID())
+                .urlImage("nouvelle_image.jpg")
+                .isPrincipal(true)
+                .statut(com.ulr.paytogether.core.enumeration.StatutImage.PENDING)
+                .build();
+
+        com.ulr.paytogether.api.dto.ImageDealDto imageDto = new com.ulr.paytogether.api.dto.ImageDealDto(
+                image1.getUuid(),
+                image1.getUrlImage(),
+                image1.getIsPrincipal(),
+                null,
+                image1.getStatut()
+        );
+
+        com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO dto = com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO.builder()
+                .listeImages(List.of(imageDto))
+                .build();
+
+        DealModele dealMisAJour = DealModele.builder()
+                .uuid(uuidDeal)
+                .titre(dealModele.getTitre())
+                .listeImages(List.of(image1))
+                .build();
+
+        DealResponseDto responseDtoMisAJour = DealResponseDto.builder()
+                .uuid(uuidDeal)
+                .titre(dealModele.getTitre())
+                .build();
+
+        when(mapper.imageDtoVersModele(imageDto)).thenReturn(image1);
+        when(dealService.mettreAJourImages(eq(uuidDeal), any(DealModele.class))).thenReturn(dealMisAJour);
+        when(mapper.versDTO(dealMisAJour)).thenReturn(responseDtoMisAJour);
+
+        // When
+        DealResponseDto resultat = apiAdapter.mettreAJourImages(uuidDeal, dto);
+
+        // Then
+        assertNotNull(resultat);
+        verify(mapper, times(1)).imageDtoVersModele(imageDto);
+        verify(dealService, times(1)).mettreAJourImages(eq(uuidDeal), any(DealModele.class));
+        verify(mapper, times(1)).versDTO(dealMisAJour);
+    }
+
+    @Test
+    void testMettreAJourImages_DevraitLancerExceptionSiDealNonTrouve() {
+        // Given
+        com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO dto = com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO.builder()
+                .listeImages(List.of())
+                .build();
+
+        when(dealService.mettreAJourImages(eq(uuidDeal), any(DealModele.class)))
+                .thenThrow(new com.ulr.paytogether.core.exception.ResourceNotFoundException("deal.non.trouve", uuidDeal.toString()));
+
+        // When & Then
+        assertThrows(com.ulr.paytogether.core.exception.ResourceNotFoundException.class,
+                () -> apiAdapter.mettreAJourImages(uuidDeal, dto));
+    }
+
+    @Test
+    void testMettreAJourImages_DevraitValiderPresenceImagePrincipale() {
+        // Given
+        com.ulr.paytogether.core.modele.ImageDealModele image1 = com.ulr.paytogether.core.modele.ImageDealModele.builder()
+                .uuid(UUID.randomUUID())
+                .urlImage("image1.jpg")
+                .isPrincipal(false)
+                .build();
+
+        com.ulr.paytogether.api.dto.ImageDealDto imageDto = new com.ulr.paytogether.api.dto.ImageDealDto(
+                image1.getUuid(),
+                image1.getUrlImage(),
+                image1.getIsPrincipal(),
+                null,
+                null
+        );
+
+        com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO dto = com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO.builder()
+                .listeImages(List.of(imageDto))
+                .build();
+
+        when(mapper.imageDtoVersModele(imageDto)).thenReturn(image1);
+        when(dealService.mettreAJourImages(eq(uuidDeal), any(DealModele.class)))
+                .thenThrow(new com.ulr.paytogether.core.exception.ValidationException("deal.image.principale.manquante"));
+
+        // When & Then
+        assertThrows(com.ulr.paytogether.core.exception.ValidationException.class,
+                () -> apiAdapter.mettreAJourImages(uuidDeal, dto));
     }
 }

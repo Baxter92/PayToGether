@@ -1,8 +1,7 @@
 package com.ulr.paytogether.api.resource;
 
 import com.ulr.paytogether.api.apiadapter.DealApiAdapter;
-import com.ulr.paytogether.api.dto.DealResponseDto;
-import com.ulr.paytogether.api.dto.DealDTO;
+import com.ulr.paytogether.api.dto.*;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
 import com.ulr.paytogether.core.enumeration.StatutImage;
 import jakarta.validation.Valid;
@@ -93,15 +92,41 @@ public class DealResource {
     }
 
     /**
-     * Mettre à jour un deal
+     * Mettre à jour un deal (sans statut et sans images)
+     * Utiliser les endpoints PATCH dédiés pour mettre à jour le statut ou les images
      */
     @PutMapping("/{uuid}")
     @PreAuthorize("hasAnyRole('ADMIN', 'VENDEUR')")
     public ResponseEntity<DealResponseDto> mettreAJour(
             @PathVariable UUID uuid,
-            @Valid @RequestBody DealDTO dto) {
-        log.info("Mise à jour du deal: {}", uuid);
+            @Valid @RequestBody MiseAJourDealDTO dto) {
+        log.info("Mise à jour des informations du deal: {}", uuid);
         return ResponseEntity.ok(dealApiAdapter.mettreAJour(uuid, dto));
+    }
+
+    /**
+     * Mettre à jour uniquement le statut d'un deal
+     */
+    @PatchMapping("/{uuid}/statut")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VENDEUR')")
+    public ResponseEntity<DealResponseDto> mettreAJourStatut(
+            @PathVariable UUID uuid,
+            @Valid @RequestBody MiseAJourStatutDealDTO dto) {
+        log.info("Mise à jour du statut du deal {} vers {}", uuid, dto.getStatut());
+        return ResponseEntity.ok(dealApiAdapter.mettreAJourStatut(uuid, dto.getStatut()));
+    }
+
+    /**
+     * Mettre à jour uniquement les images d'un deal
+     * Les anciennes images seront supprimées et remplacées par les nouvelles
+     */
+    @PatchMapping("/{uuid}/images")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VENDEUR')")
+    public ResponseEntity<DealResponseDto> mettreAJourImages(
+            @PathVariable UUID uuid,
+            @Valid @RequestBody MiseAJourImagesDealDTO dto) {
+        log.info("Mise à jour des images du deal: {}", uuid);
+        return ResponseEntity.ok(dealApiAdapter.mettreAJourImages(uuid, dto));
     }
 
     /**
