@@ -33,7 +33,7 @@ export default function Login() {
 
       if (from.includes("/checkout")) {
         navigate(from.replace(/\/checkout$/, ""), { replace: true });
-      } else if (user?.role === "admin") {
+      } else if (user?.role === "ADMIN") {
         navigate("/admin", { replace: true });
       } else {
         navigate(from, { replace: true });

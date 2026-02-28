@@ -1,4 +1,4 @@
-
+import type { RoleUtilisateurType } from "../types";
 import { apiClient } from "./apiClient";
 
 export type LoginRequest = {
@@ -24,7 +24,7 @@ export type MeResponse = {
   actif: boolean;
   emailVerifie: boolean;
   dateCreationTimestamp: number;
-  roles: string[];
+  roles: RoleUtilisateurType[];
 };
 
 export const authService = {
