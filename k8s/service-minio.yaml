@@ -6,15 +6,32 @@ metadata:
   labels:
     app: minio
 spec:
-  # ExternalName : pour mapper vers un service HORS du cluster Kubernetes
-  # Remplacez 'minio.external.domain' par l'adresse réelle de votre MinIO
-  # Exemples possibles :
-  # - minio.dealtogether.ca (si MinIO est sur un autre serveur)
-  # - 192.168.1.100 (si MinIO est sur IP locale)
-  # - localhost (si MinIO est sur le même serveur que K8s)
-  type: ExternalName
-  externalName: 31.97.132.132:9005  # ⚠️ À REMPLACER par l'adresse réelle de votre MinIO
+  # Service sans selector pour mapper vers une IP externe
+  type: ClusterIP
   ports:
-    - protocol: TCP
+    - name: api
+      protocol: TCP
       port: 9005
       targetPort: 9005
+    - name: console
+      protocol: TCP
+      port: 9006
+      targetPort: 9006
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: minio-service
+  namespace: paytogether
+  labels:
+    app: minio
+subsets:
+  - addresses:
+      - ip: 31.97.132.132  # ⚠️ IP de votre MinIO externe
+    ports:
+      - name: api
+        port: 9005
+        protocol: TCP
+      - name: console
+        port: 9006
+        protocol: TCP
