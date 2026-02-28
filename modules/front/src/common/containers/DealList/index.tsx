@@ -31,13 +31,24 @@ import {
   useDealVilles,
   useGetDealImageUrl,
   useDeal,
-  useUpdateDeal,
+  useUpdateDealStatus,
+  useDeleteDeal,
 } from "@/common/api";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
 } from "@/common/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/common/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useAuth } from "@/common/context/AuthContext";
 
@@ -202,8 +213,15 @@ export default function DealsList({
   } | null>(null);
 
   const { data: cities } = useDealVilles();
-  const { mutateAsync: updateDeal, isPending: isUpdatingDeal } =
-    useUpdateDeal();
+  const { mutateAsync: updateStatus, isPending: isUpdatingStatus } =
+    useUpdateDealStatus();
+  const { mutateAsync: deleteDeal, isPending: isDeleting } = useDeleteDeal();
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
 
   // Fetch selected deal details when editing
   const { data: editingDealData } = useDeal(editingDealUuid ?? "");
@@ -607,7 +625,31 @@ export default function DealsList({
                 <>
                   <Grid cols={cols} gap="gap-8">
                     {gridDeals.map((deal, idx) => (
-                      <DealCard key={deal.id ?? idx} deal={deal} />
+                      <DealCard
+                        key={deal.id ?? idx}
+                        deal={deal}
+                        isAdmin={isAdmin}
+                        onEdit={(id) => {
+                          setEditingDealUuid(id);
+                          setCreateModalOpen(true);
+                        }}
+                        onDelete={(id, title) => {
+                          setDeleteTarget({ id, title });
+                          setDeleteModalOpen(true);
+                        }}
+                        onToggleStatus={(id, title, currentStatus) => {
+                          const isPublished = [
+                            "PUBLIE",
+                            "PUBLISHED",
+                          ].includes(currentStatus);
+                          setStatusTarget({
+                            id,
+                            title,
+                            nextStatus: isPublished ? "BROUILLON" : "PUBLIE",
+                          });
+                          setStatusModalOpen(true);
+                        }}
+                      />
                     ))}
                   </Grid>
 
@@ -692,7 +734,12 @@ export default function DealsList({
                               colorScheme: "danger",
                               tooltip: "Supprimer",
                               onClick: () => {
-                                console.log(props.row);
+                                const row = props.row.original;
+                                setDeleteTarget({
+                                  id: row.id || row.uuid,
+                                  title: row.title || row.titre || "ce deal",
+                                });
+                                setDeleteModalOpen(true);
                               },
                             },
                           ],
@@ -732,19 +779,19 @@ export default function DealsList({
                 type="button"
                 variant="outline"
                 onClick={() => setStatusModalOpen(false)}
-                disabled={isUpdatingDeal}
+                disabled={isUpdatingStatus}
               >
                 Annuler
               </Button>
               <Button
                 type="button"
-                loading={isUpdatingDeal}
+                loading={isUpdatingStatus}
                 onClick={async () => {
                   if (!statusTarget?.id) return;
                   try {
-                    await updateDeal({
+                    await updateStatus({
                       id: statusTarget.id,
-                      data: { statut: statusTarget.nextStatus },
+                      statut: statusTarget.nextStatus,
                     });
                     toast.success(
                       statusTarget.nextStatus === "PUBLIE"
@@ -767,6 +814,49 @@ export default function DealsList({
             </div>
           </DialogContent>
         </Dialog>
+
+        <AlertDialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+          <AlertDialogContent size="default">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-destructive">
+                Supprimer le deal
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Êtes-vous sûr de vouloir supprimer "{deleteTarget?.title}" ?
+                Cette action est irréversible.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                onClick={() => setDeleteModalOpen(false)}
+                disabled={isDeleting}
+              >
+                Annuler
+              </AlertDialogCancel>
+              <AlertDialogAction
+                variant="destructive"
+                onClick={async (e) => {
+                  e.preventDefault();
+                  if (!deleteTarget?.id) return;
+                  try {
+                    await deleteDeal(deleteTarget.id);
+                    toast.success("Deal supprimé avec succès");
+                    setDeleteModalOpen(false);
+                    setDeleteTarget(null);
+                    onDealUpdated?.();
+                  } catch (error: any) {
+                    toast.error("Erreur lors de la suppression du deal", {
+                      description:
+                        error?.response?.data?.message || error?.message,
+                    });
+                  }
+                }}
+              >
+                Supprimer
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </VStack>
 
       {/* Mobile bottom sheet for filters */}

@@ -21,14 +21,25 @@ export type IDateInputProps = Omit<
 
 function formatDateValue(
   value?: Date | string | null,
-  opts?: Intl.DateTimeFormatOptions
+  opts?: Intl.DateTimeFormatOptions,
 ) {
   if (!value) return "";
-  const d = typeof value === "string" ? new Date(value) : value;
+
+  let d: Date;
+  if (value instanceof Date) {
+    d = value;
+  } else if (typeof value === "string") {
+    // Handle ISO strings or other formats
+    d = new Date(value);
+  } else {
+    return "";
+  }
+
   if (Number.isNaN(d.getTime())) return "";
+
   return new Intl.DateTimeFormat(
     "fr-FR",
-    opts ?? { year: "numeric", month: "2-digit", day: "2-digit" }
+    opts ?? { year: "numeric", month: "2-digit", day: "2-digit" },
   ).format(d);
 }
 
@@ -44,36 +55,55 @@ const DateInput = React.forwardRef<HTMLInputElement, IDateInputProps>(
       error,
       size = "md",
       dateFormat,
-      ...props
+      // ...props
     },
-    ref
+    ref,
   ) => {
     const [open, setOpen] = React.useState(false);
+
     const selectedDate = React.useMemo(() => {
       if (!value) return null;
-      const d = typeof value === "string" ? new Date(value) : value;
-      return Number.isNaN(d.getTime()) ? null : d;
+
+      if (value instanceof Date) {
+        return Number.isNaN(value.getTime()) ? null : value;
+      }
+
+      if (typeof value === "string") {
+        // Tentative de parsing (ISO ou autre format valide)
+        const d = new Date(value);
+        if (!Number.isNaN(d.getTime())) return d;
+
+        // Si c'est notre format display "jj/mm/aaaa", on ne veut pas l'interpréter
+        // Cela évite que l'input s'efface si Input.tsx déclenche un onChange par erreur
+        if (value.match(/^\d{2}\/\d{2}\/\d{4}$/)) return null;
+      }
+
+      return null;
     }, [value]);
+
+    const displayString = React.useMemo(() => {
+      return formatDateValue(selectedDate, dateFormat);
+    }, [selectedDate, dateFormat]);
 
     return (
       <Popover open={open} onOpenChange={setOpen}>
-        <div>
+        <div className="w-full">
           {label && (
             <label className={cn("mb-1 text-sm font-medium")}>{label}</label>
           )}
           <PopoverTrigger asChild>
-            <div>
+            <div className="w-full">
               <Input
                 ref={ref}
                 readOnly
-                value={formatDateValue(selectedDate, dateFormat)}
-                onClick={() => setOpen(true)}
-                placeholder="jj/mm/aaaa"
                 rightIcon={<CalendarIcon className="w-4 h-4" />}
                 error={error}
                 helperText={helperText}
                 size={size}
-                {...(props as any)}
+                // {...(props as any)}
+                value={displayString}
+                onClick={() => setOpen(true)}
+                placeholder="jj/mm/aaaa"
               />
             </div>
           </PopoverTrigger>
@@ -103,7 +133,7 @@ const DateInput = React.forwardRef<HTMLInputElement, IDateInputProps>(
         </div>
       </Popover>
     );
-  }
+  },
 );
 
 export default DateInput;

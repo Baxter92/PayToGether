@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { imageService } from "../services/imageService";
 
 export interface ImageResponse {
-  imageUuid: string;
+  imageUuid: string | null;
   urlImage: string;
   nomUnique: string;
   presignUrl: string | null;
@@ -156,7 +156,11 @@ export const useImageUpload = (): UseImageUploadReturn => {
         // Étape 5: Confirmation backend
         if (imageIds.length > 0) {
           if (entityType === "deals") {
-            await imageService.confirmAllUploads(entityType, entityUuid, imageIds);
+            await imageService.confirmAllUploads(
+              entityType,
+              entityUuid,
+              imageIds,
+            );
           } else {
             await Promise.all(
               imageIds.map((imageUuid) =>

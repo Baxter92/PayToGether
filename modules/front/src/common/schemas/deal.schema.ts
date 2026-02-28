@@ -10,8 +10,9 @@ export const dealSchema = z.object({
   originalPrice: z.number().optional(),
 
   partsTotal: z.number().min(1, "Le nombre de parts est requis"),
-  minRequired: z.number().min(1, "Le minimum requis doit etre superieur a 0"),
-  expiryDate: z.date().optional(),
+  dateDebut: z.union([z.date(), z.string()]).optional(),
+  dateFin: z.union([z.date(), z.string()]),
+  dateExpiration: z.union([z.date(), z.string()]).optional(),
 
   location: z.string().min(3, "Le lieu est requis"),
   categoryId: z.string().min(1, "La categorie est requise"),
@@ -24,7 +25,7 @@ export const dealSchema = z.object({
   packagingMethod: z.string().optional(),
   merchantId: z.string().min(1, "Le fournisseur est requis"),
   images: z
-    .array(z.instanceof(File))
+    .array(z.any())
     .min(1, "Au moins une image est requise")
     .max(5, "Maximum 5 images"),
 });

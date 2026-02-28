@@ -73,7 +73,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     React.useImperativeHandle(
       forwardedRef,
       () => internalRef.current as HTMLInputElement,
-      [internalRef]
+      [internalRef],
     );
 
     // helper pour merger (si forwardedRef est function ou RefObject)
@@ -101,9 +101,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     const displayValue = controlled
       ? (() => {
-        const raw = computeRaw(String(value ?? ""));
-        return format ? format(raw) : String(value ?? "");
-      })()
+          if (!format) return String(value ?? "");
+          const raw = computeRaw(String(value ?? ""));
+          return format(raw);
+        })()
       : undefined;
 
     // centraliser la logique qui notifie le parent (réutilisée par handleChange et par la détection autofill)
@@ -144,13 +145,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           onChange?.(syntheticEvent);
         }
       },
-      [format, onValueChange, onChange, debounce]
+      [format, onValueChange, onChange, debounce],
     );
 
     // Détection de l'autofill : input/change + animationstart + check initial
     React.useEffect(() => {
       const el = internalRef.current;
-      if (!el) return;
+      if (!el || isReadOnly) return;
 
       const onInput = () => notifyChangeFromDom(el);
       const onChange = () => notifyChangeFromDom(el);
@@ -179,7 +180,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         el.removeEventListener("change", onChange);
         el.removeEventListener(
           "animationstart",
-          onAnimationStart as EventListener
+          onAnimationStart as EventListener,
         );
         clearTimeout(t);
       };
@@ -225,7 +226,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           ? "h-11 text-base px-4"
           : "h-9 text-sm px-3";
 
-    const wouldBeDisabled = !!(disabled || loading || (rest as any).readOnly);
+    const wouldBeDisabled = !!(disabled || loading);
+    const isReadOnly = !!(rest as any).readOnly;
 
     return (
       <div className={cn("flex flex-col", wrapperClassName)}>
@@ -245,7 +247,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               ? "border-destructive/80 focus-within:ring-destructive/30"
               : "border-input focus-within:ring-ring/30",
             wouldBeDisabled ? "opacity-60 pointer-events-none" : "opacity-100",
-            size === "sm" ? "rounded-sm" : "rounded-md"
+            isReadOnly && "bg-muted/30 cursor-pointer",
+            size === "sm" ? "rounded-sm" : "rounded-md",
           )}
         >
           {leftIcon && (
@@ -265,7 +268,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               sizeClasses,
               leftIcon ? "pl-1" : "",
               rightIcon || loading ? "pr-10" : "",
-              className
+              className,
             )}
             disabled={wouldBeDisabled}
             aria-invalid={!!error || undefined}
@@ -306,7 +309,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         ) : null}
       </div>
     );
-  }
+  },
 );
 
 Input.displayName = "Input";
