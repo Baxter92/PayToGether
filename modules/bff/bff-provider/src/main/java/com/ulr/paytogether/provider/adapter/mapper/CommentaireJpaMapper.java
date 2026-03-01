@@ -20,21 +20,28 @@ public class CommentaireJpaMapper {
                 .note(jpaCommentaire.getNote())
                 .utilisateur(jpaCommentaire.getUtilisateurJpa() != null ? utilisateurJpaMapper.versModele(jpaCommentaire.getUtilisateurJpa()) : null)
                 .deal(jpaCommentaire.getDealJpa() != null ? dealJpaMapper.versModele(jpaCommentaire.getDealJpa()) : null)
+                .commentaireParentUuid(jpaCommentaire.getCommentaireParentJpa() != null ? jpaCommentaire.getCommentaireParentJpa().getUuid() : null)
+                .estPertinent(jpaCommentaire.getEstPertinent())
                 .dateCreation(jpaCommentaire.getDateCreation())
                 .dateModification(jpaCommentaire.getDateModification())
                 .build();
     }
     public CommentaireJpa versEntite(CommentaireModele modele) {
         if (modele == null) return null;
-        return CommentaireJpa.builder()
+
+        CommentaireJpa.CommentaireJpaBuilder builder = CommentaireJpa.builder()
                 .uuid(modele.getUuid())
                 .contenu(modele.getContenu())
                 .note(modele.getNote())
                 .utilisateurJpa(modele.getUtilisateur() != null ? utilisateurJpaMapper.versEntite(modele.getUtilisateur()) : null)
                 .dealJpa(modele.getDeal() != null ? dealJpaMapper.versEntite(modele.getDeal()) : null)
+                .estPertinent(modele.getEstPertinent() != null ? modele.getEstPertinent() : false)
                 .dateCreation(modele.getDateCreation())
-                .dateModification(modele.getDateModification())
-                .build();
+                .dateModification(modele.getDateModification());
+
+        // Note: commentaireParentJpa est géré dans le ProviderAdapter car il nécessite une recherche en base
+
+        return builder.build();
     }
 
     /**

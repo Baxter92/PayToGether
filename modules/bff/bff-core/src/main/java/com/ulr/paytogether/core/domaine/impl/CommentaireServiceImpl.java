@@ -48,5 +48,20 @@ public class CommentaireServiceImpl implements CommentaireService {
     public void supprimerParUuid(UUID uuid) {
         commentaireProvider.supprimerParUuid(uuid);
     }
+
+    @Override
+    public List<CommentaireModele> lireReponsesParCommentaireParent(UUID commentaireParentUuid) {
+        return commentaireProvider.trouverReponsesParCommentaireParent(commentaireParentUuid);
+    }
+
+    @Override
+    public void mettreAJourFlagPertinent(UUID uuid, Boolean estPertinent) {
+        // Validation basique
+        if (estPertinent == null) {
+            throw new IllegalArgumentException("Le flag pertinent ne peut pas être null");
+        }
+
+        commentaireProvider.mettreAJourFlagPertinent(uuid, estPertinent);
+    }
 }
 

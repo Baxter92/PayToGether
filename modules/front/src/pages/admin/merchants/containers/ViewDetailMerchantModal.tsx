@@ -81,7 +81,7 @@ export default function ViewDetailMerchantModal({ open, onClose }: any) {
                   <Calendar className="h-5 w-5 text-primary" />
                   <span className="font-semibold">
                     {new Date(supplierMock.joinedAt).toLocaleDateString(
-                      "fr-FR"
+                      "fr-FR",
                     )}
                   </span>
                 </div>

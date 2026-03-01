@@ -10,7 +10,7 @@ export default function Orders(): JSX.Element {
   const deals = (dealsData ?? []).map(mapDealToView);
 
   return (
-    <main className="bg-white">
+    <main className="bg-white dark:bg-gray-900">
       <div className="max-w-7xl mx-auto py-4">
         <Heading
           title="Mes commandes"

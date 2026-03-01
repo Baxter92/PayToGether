@@ -191,12 +191,11 @@ export const SortableSlideCard = memo(function SortableSlideCard({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>{tAdmin("hero.backgroundImage")}</Label>
-            <div className="relative aspect-video rounded-lg overflow-hidden bg-muted group">
+            <div className="relative aspect-video rounded-lg overflow-hidden bg-muted group flex items-center justify-center bg-gray-100 dark:bg-gray-900">
               <img
                 src={slide.image}
                 alt={slide.title}
-                className="w-full h-full object-cover"
-                // ✅ Évite le layout shift et force le navigateur à ne pas re-décoder si src identique
+                className="w-full h-full object-contain"
                 loading="lazy"
               />
               <div

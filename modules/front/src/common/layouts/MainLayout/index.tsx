@@ -33,7 +33,7 @@ export const MainLayout = () => {
           { label: "Douala", value: "Douala" },
           { label: "Yaoundé", value: "Yaoundé" },
           { label: "Bafoussam", value: "Bafoussam" },
-          { label: "Garoua", value: "Garoua" }
+          { label: "Garoua", value: "Garoua" },
         ]}
       />
       <main className="flex-1">

@@ -61,7 +61,7 @@ export default function Pagination({
           ? "md:items-center"
           : align === "right"
             ? "md:items-end"
-            : "md:items-start"
+            : "md:items-start",
       )}
     >
       <ShadcnPagination
@@ -71,7 +71,7 @@ export default function Pagination({
             : align === "right"
               ? "md:justify-end"
               : "md:justify-start",
-          className
+          className,
         )}
       >
         <PaginationContent>
@@ -104,7 +104,7 @@ export default function Pagination({
                   {p}
                 </Button>
               </PaginationItem>
-            )
+            ),
           )}
 
           {/* NEXT */}

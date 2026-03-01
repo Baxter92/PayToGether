@@ -1,0 +1,106 @@
+### Commentaires avec hiérarchie parent/réponses et flag pertinent
+
+### Variables
+@base_url = http://localhost:8080
+@deal_uuid = 550e8400-e29b-41d4-a716-446655440000
+@utilisateur_uuid = 660e9511-f30c-52e5-b827-557766551111
+@commentaire_parent_uuid = 770e8622-a41d-63f6-c938-668877662222
+
+### 1. Créer un commentaire parent (racine)
+POST {{base_url}}/api/commentaires
+Content-Type: application/json
+
+{
+  "contenu": "Excellent deal ! Je recommande vivement ce produit.",
+  "note": 5,
+  "utilisateurUuid": "{{utilisateur_uuid}}",
+  "dealUuid": "{{deal_uuid}}"
+}
+
+### 2. Créer une réponse à un commentaire parent
+POST {{base_url}}/api/commentaires
+Content-Type: application/json
+
+{
+  "contenu": "Merci pour votre retour ! Avez-vous déjà reçu le produit ?",
+  "note": 5,
+  "utilisateurUuid": "{{utilisateur_uuid}}",
+  "dealUuid": "{{deal_uuid}}",
+  "commentaireParentUuid": "{{commentaire_parent_uuid}}",
+  "estPertinent": false
+}
+
+### 3. Créer une autre réponse (pertinente)
+POST {{base_url}}/api/commentaires
+Content-Type: application/json
+
+{
+  "contenu": "Oui ! Reçu en 2 jours, livraison parfaite.",
+  "note": 5,
+  "utilisateurUuid": "{{utilisateur_uuid}}",
+  "dealUuid": "{{deal_uuid}}",
+  "commentaireParentUuid": "{{commentaire_parent_uuid}}",
+  "estPertinent": true
+}
+
+### 4. Récupérer tous les commentaires d'un deal (incluant parents et réponses)
+GET {{base_url}}/api/commentaires/deal/{{deal_uuid}}
+Content-Type: application/json
+
+### 5. Récupérer toutes les réponses d'un commentaire parent
+GET {{base_url}}/api/commentaires/{{commentaire_parent_uuid}}/reponses
+Content-Type: application/json
+
+### 6. Mettre à jour le flag pertinent d'une réponse (marquer comme pertinent)
+PATCH {{base_url}}/api/commentaires/880e9733-b52e-74g7-d049-779988773333/pertinent
+Content-Type: application/json
+
+{
+  "estPertinent": true
+}
+
+### 7. Retirer le flag pertinent d'une réponse
+PATCH {{base_url}}/api/commentaires/880e9733-b52e-74g7-d049-779988773333/pertinent
+Content-Type: application/json
+
+{
+  "estPertinent": false
+}
+
+### 8. Récupérer un commentaire spécifique (avec ses infos parent)
+GET {{base_url}}/api/commentaires/880e9733-b52e-74g7-d049-779988773333
+Content-Type: application/json
+
+### 9. Filtrer uniquement les réponses pertinentes (à implémenter côté frontend)
+# Le frontend peut filtrer les réponses avec estPertinent === true
+# Exemple de structure de réponse:
+# {
+#   "uuid": "...",
+#   "contenu": "...",
+#   "commentaireParentUuid": "...",
+#   "estPertinent": true
+# }
+
+### 10. Récupérer tous les commentaires parents d'un deal (sans réponses)
+# À filtrer côté frontend: commentaires où commentaireParentUuid === null
+GET {{base_url}}/api/commentaires/deal/{{deal_uuid}}
+Content-Type: application/json
+
+### Notes d'utilisation:
+#
+# Structure hiérarchique:
+# - Commentaire parent: commentaireParentUuid = null
+# - Réponse: commentaireParentUuid = UUID du parent
+#
+# Flag pertinent (estPertinent):
+# - Utilisé uniquement pour les réponses (commentaireParentUuid !== null)
+# - Permet de mettre en avant les réponses importantes/pertinentes
+# - Les réponses non pertinentes peuvent être masquées par défaut côté frontend
+#
+# Flux recommandé frontend:
+# 1. Afficher les commentaires parents (commentaireParentUuid = null)
+# 2. Pour chaque parent, charger ses réponses avec GET /commentaires/{uuid}/reponses
+# 3. Afficher en premier les réponses avec estPertinent = true
+# 4. Cacher ou afficher dans un collapse les réponses avec estPertinent = false
+# 5. Permettre à l'admin/créateur de marquer une réponse comme pertinente via PATCH
+

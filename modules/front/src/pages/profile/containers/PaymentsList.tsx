@@ -169,7 +169,7 @@ const columns: ColumnDef<Payment, any>[] = [
     header: "Statut",
     accessorKey: "status",
     cell: ({ getValue }) => <StatusBadge status={getValue<PaymentStatus>()} />,
-  }
+  },
 ];
 
 export default function PaymentsList(): JSX.Element {
@@ -211,9 +211,9 @@ export default function PaymentsList(): JSX.Element {
                   colorScheme: "success" as const,
                   onClick: () =>
                     alert(
-                      `Marquer ${row.original.id} comme payé (simulation)`
+                      `Marquer ${row.original.id} comme payé (simulation)`,
                     ),
-                }
+                },
               ]
               : []),
             ...(canRefund
@@ -224,7 +224,7 @@ export default function PaymentsList(): JSX.Element {
                   colorScheme: "warning" as const,
                   onClick: () =>
                     alert(`Rembourser ${row.original.id} (simulation)`),
-                }
+                },
               ]
               : []),
 
@@ -239,7 +239,7 @@ export default function PaymentsList(): JSX.Element {
               leftIcon: <DownloadIcon className="w-4 h-4" />,
               colorScheme: "secondary" as const,
               onClick: () => alert(`Télécharger reçu ${row.original.id}`),
-            }
+            },
           ];
         }}
       />

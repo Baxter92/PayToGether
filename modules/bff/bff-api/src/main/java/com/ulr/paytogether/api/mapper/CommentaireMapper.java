@@ -27,6 +27,8 @@ public class CommentaireMapper {
                 .note(modele.getNote())
                 .utilisateurUuid(modele.getUtilisateur() != null ? modele.getUtilisateur().getUuid() : null)
                 .dealUuid(modele.getDeal() != null ? modele.getDeal().getUuid() : null)
+                .commentaireParentUuid(modele.getCommentaireParentUuid())
+                .estPertinent(modele.getEstPertinent())
                 .dateCreation(modele.getDateCreation())
                 .dateModification(modele.getDateModification())
                 .build();
@@ -50,6 +52,8 @@ public class CommentaireMapper {
                 .deal(dto.getDealUuid() != null
                     ? DealModele.builder().uuid(dto.getDealUuid()).build()
                     : null)
+                .commentaireParentUuid(dto.getCommentaireParentUuid())
+                .estPertinent(dto.getEstPertinent() != null ? dto.getEstPertinent() : false)
                 .dateCreation(dto.getDateCreation())
                 .dateModification(dto.getDateModification())
                 .build();

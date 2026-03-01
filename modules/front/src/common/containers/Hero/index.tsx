@@ -62,7 +62,7 @@ const TAILWIND_MAXWIDTH_MAP: Record<string, string> = {
 
 const Hero = ({
   slides,
-  height = { mobile: "400px", desktop: "500px" },
+  height = { mobile: "280px", desktop: "380px" },
   autoPlay = true,
   autoPlayInterval = 5000,
   pauseOnHover = true,
@@ -94,7 +94,7 @@ const Hero = ({
   const defaultStats: HeroStats[] = [
     { value: "5000+", label: "Offres disponibles" },
     { value: "98%", label: "Clients satisfaits" },
-    { value: "24/7", label: "Support client" }
+    { value: "24/7", label: "Support client" },
   ];
   const displayStats = stats || defaultStats;
 
@@ -117,7 +117,7 @@ const Hero = ({
     pauseOnHover,
     slides.length,
     autoPlayInterval,
-    onSlideChange
+    onSlideChange,
   ]);
 
   const goToSlide = (index: number) => {
@@ -184,155 +184,155 @@ const Hero = ({
   };
 
   return (
-    <div
-      className={`relative w-full overflow-hidden ${backgroundColor} ${heightClass}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={containerStyle}
-    >
-      {/* Slides container */}
-      <div className="relative w-full h-full">
-        {/* Slide track for SLIDE transition */}
-        {transitionType === "slide" && (
-          <div
-            className="flex h-full w-full"
-            style={{
-              transform: `translateX(-${currentSlide * 100}%)`,
-              transitionProperty: "transform",
-              transitionTimingFunction: "ease-out",
-              transitionDuration: `${transitionDuration}ms`,
-            }}
-          >
-            {slides.map((slide) => (
-              <div key={slide.id} className="min-w-full h-full relative">
-                {/* Use img to ensure object-cover behaviour */}
-                <img
-                  src={slide.image}
-                  alt={slide.title}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  // loading="lazy" peut être ajouté si souhaité
-                />
+    <div className="w-full py-6 px-4 bg-background">
+      <div
+        className={`relative w-full max-w-7xl mx-auto overflow-hidden rounded-2xl shadow-2xl ${backgroundColor} ${heightClass}`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        style={containerStyle}
+      >
+        {/* Slides container */}
+        <div className="relative w-full h-full">
+          {/* Slide track for SLIDE transition */}
+          {transitionType === "slide" && (
+            <div
+              className="flex h-full w-full"
+              style={{
+                transform: `translateX(-${currentSlide * 100}%)`,
+                transitionProperty: "transform",
+                transitionTimingFunction: "ease-out",
+                transitionDuration: `${transitionDuration}ms`,
+              }}
+            >
+              {slides.map((slide) => (
+                <div key={slide.id} className="min-w-full h-full relative">
+                  {/* Image avec object-cover pour remplir */}
+                  <img
+                    src={slide.image}
+                    alt={slide.title}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
 
-                {/* Gradient overlay */}
-                <div
-                  className={`absolute inset-0 bg-gradient-to-r ${slide.gradient}`}
-                  style={{
-                    opacity: overlayOpacity / 100,
-                    pointerEvents: "none",
-                  }}
-                />
+                  {/* Gradient overlay */}
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-r ${slide.gradient}`}
+                    style={{
+                      opacity: overlayOpacity / 100,
+                      pointerEvents: "none",
+                    }}
+                  />
 
-                {/* Content area */}
-                <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                  <div className={`flex h-full ${alignmentClass}`}>
-                    <div
-                      className={`${
-                        contentWidthTailwind ?? ""
-                      } space-y-4 md:space-y-6 animate-fade-in`}
-                      style={contentStyle}
-                    >
-                      {showBadge && slide.badge && (
-                        <div
-                          className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 ${
-                            contentAlignment === "center"
-                              ? "mx-auto"
-                              : contentAlignment === "right"
-                                ? "ml-auto"
-                                : ""
-                          }`}
-                        >
-                          <Sparkles className="w-4 h-4" />
-                          <span className="text-sm font-semibold">
-                            {slide.badge}
-                          </span>
-                        </div>
-                      )}
-
-                      <p
-                        className={`text-sm md:text-xl font-medium ${slide.textColor} uppercase tracking-wide`}
-                      >
-                        {slide.subtitle}
-                      </p>
-
-                      <h1
-                        className={`text-3xl md:text-5xl lg:text-6xl font-bold ${slide.textColor} leading-tight`}
-                      >
-                        {slide.title}
-                      </h1>
-
-                      <p
-                        className={`text-base md:text-lg lg:text-xl ${slide.textColor} opacity-90`}
-                      >
-                        {slide.description}
-                      </p>
-
+                  {/* Content area */}
+                  <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className={`flex h-full ${alignmentClass}`}>
                       <div
-                        className={
-                          contentAlignment === "center"
-                            ? "flex justify-center"
-                            : contentAlignment === "right"
-                              ? "flex justify-end"
-                              : ""
-                        }
+                        className={`${
+                          contentWidthTailwind ?? ""
+                        } space-y-4 md:space-y-6 animate-fade-in`}
+                        style={contentStyle}
                       >
-                        <Button
-                          className="bg-white text-gray-900 hover:bg-gray-100 rounded-full px-6 py-3 text-base"
-                          onClick={() => handleButtonClick(slide)}
-                          asChild={!onButtonClick}
-                        >
-                          {onButtonClick ? (
-                            <span className="flex items-center gap-2">
-                              {slide.buttonText}
-                              <Play className="w-4 h-4 fill-current" />
+                        {showBadge && slide.badge && (
+                          <div
+                            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 ${
+                              contentAlignment === "center"
+                                ? "mx-auto"
+                                : contentAlignment === "right"
+                                  ? "ml-auto"
+                                  : ""
+                            }`}
+                          >
+                            <Sparkles className="w-4 h-4" />
+                            <span className="text-sm font-semibold">
+                              {slide.badge}
                             </span>
-                          ) : (
-                            <a
-                              href={slide.buttonLink}
-                              className="flex items-center gap-2"
-                            >
-                              {slide.buttonText}
-                              <Play className="w-4 h-4 fill-current" />
-                            </a>
-                          )}
-                        </Button>
-                      </div>
+                          </div>
+                        )}
 
-                      {showStats && displayStats.length > 0 && (
-                        <div
-                          className={`flex gap-6 md:gap-8 pt-2 md:pt-4 ${
-                            contentAlignment === "center"
-                              ? "justify-center"
-                              : contentAlignment === "right"
-                                ? "justify-end"
-                                : ""
-                          }`}
+                        <p
+                          className={`text-sm md:text-xl font-medium ${slide.textColor} uppercase tracking-wide`}
                         >
-                          {displayStats.map((stat, idx) => (
-                            <div key={idx}>
-                              <p
-                                className={`text-lg md:text-2xl font-bold ${slide.textColor}`}
+                          {slide.subtitle}
+                        </p>
+
+                        <h1
+                          className={`text-3xl md:text-5xl lg:text-6xl font-bold ${slide.textColor} leading-tight`}
+                        >
+                          {slide.title}
+                        </h1>
+
+                        <p
+                          className={`text-base md:text-lg lg:text-xl ${slide.textColor} opacity-90`}
+                        >
+                          {slide.description}
+                        </p>
+
+                        <div
+                          className={
+                            contentAlignment === "center"
+                              ? "flex justify-center"
+                              : contentAlignment === "right"
+                                ? "flex justify-end"
+                                : ""
+                          }
+                        >
+                          <Button
+                            className="bg-white text-gray-900 hover:bg-gray-100 rounded-full px-6 py-3 text-base"
+                            onClick={() => handleButtonClick(slide)}
+                            asChild={!onButtonClick}
+                          >
+                            {onButtonClick ? (
+                              <span className="flex items-center gap-2">
+                                {slide.buttonText}
+                                <Play className="w-4 h-4 fill-current" />
+                              </span>
+                            ) : (
+                              <a
+                                href={slide.buttonLink}
+                                className="flex items-center gap-2"
                               >
-                                {stat.value}
-                              </p>
-                              <p
-                                className={`text-xs md:text-sm ${slide.textColor} opacity-80`}
-                              >
-                                {stat.label}
-                              </p>
-                            </div>
-                          ))}
+                                {slide.buttonText}
+                                <Play className="w-4 h-4 fill-current" />
+                              </a>
+                            )}
+                          </Button>
                         </div>
-                      )}
+
+                        {showStats && displayStats.length > 0 && (
+                          <div
+                            className={`flex gap-6 md:gap-8 pt-2 md:pt-4 ${
+                              contentAlignment === "center"
+                                ? "justify-center"
+                                : contentAlignment === "right"
+                                  ? "justify-end"
+                                  : ""
+                            }`}
+                          >
+                            {displayStats.map((stat, idx) => (
+                              <div key={idx}>
+                                <p
+                                  className={`text-lg md:text-2xl font-bold ${slide.textColor}`}
+                                >
+                                  {stat.value}
+                                </p>
+                                <p
+                                  className={`text-xs md:text-sm ${slide.textColor} opacity-80`}
+                                >
+                                  {stat.label}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
 
-        {/* Fade variant */}
-        {transitionType === "fade" &&
+          {/* Fade variant */}
+          {transitionType === "fade" &&
           slides.map((slide, index) => (
             <div
               key={slide.id}
@@ -438,83 +438,84 @@ const Hero = ({
               </div>
             </div>
           ))}
-      </div>
+        </div>
 
-      {/* Navigation Arrows */}
-      {showArrows && (
-        <div className={getArrowsContainerClass()}>
-          {arrowsPosition === "center-sides" ||
+        {/* Navigation Arrows */}
+        {showArrows && (
+          <div className={getArrowsContainerClass()}>
+            {arrowsPosition === "center-sides" ||
           arrowsPosition === "bottom-sides" ? (
-              <>
-                <button
-                  onClick={prevSlide}
-                  className="pointer-events-auto p-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
-                  aria-label="Slide précédent"
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-                <button
-                  onClick={nextSlide}
-                  className="pointer-events-auto p-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
-                  aria-label="Slide suivant"
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-              </>
-            ) : (
-              <HStack className="gap-2">
-                <button
-                  onClick={prevSlide}
-                  className="p-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
-                  aria-label="Slide précédent"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={nextSlide}
-                  className="p-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
-                  aria-label="Slide suivant"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-                {showPlayPause && (
+                <>
                   <button
-                    onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-                    className="p-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
-                    aria-label={isAutoPlaying ? "Pause" : "Play"}
+                    onClick={prevSlide}
+                    className="pointer-events-auto p-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
+                    aria-label="Slide précédent"
                   >
-                    {isAutoPlaying ? (
-                      <div className="w-5 h-5 flex items-center justify-center">
-                        <div className="w-1 h-4 bg-white rounded mr-1" />
-                        <div className="w-1 h-4 bg-white rounded" />
-                      </div>
-                    ) : (
-                      <Play className="w-5 h-5 fill-current" />
-                    )}
+                    <ChevronLeft className="w-6 h-6" />
                   </button>
-                )}
-              </HStack>
-            )}
-        </div>
-      )}
+                  <button
+                    onClick={nextSlide}
+                    className="pointer-events-auto p-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
+                    aria-label="Slide suivant"
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
+                </>
+              ) : (
+                <HStack className="gap-2">
+                  <button
+                    onClick={prevSlide}
+                    className="p-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
+                    aria-label="Slide précédent"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={nextSlide}
+                    className="p-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
+                    aria-label="Slide suivant"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                  {showPlayPause && (
+                    <button
+                      onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+                      className="p-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white/30 transition-all"
+                      aria-label={isAutoPlaying ? "Pause" : "Play"}
+                    >
+                      {isAutoPlaying ? (
+                        <div className="w-5 h-5 flex items-center justify-center">
+                          <div className="w-1 h-4 bg-white rounded mr-1" />
+                          <div className="w-1 h-4 bg-white rounded" />
+                        </div>
+                      ) : (
+                        <Play className="w-5 h-5 fill-current" />
+                      )}
+                    </button>
+                  )}
+                </HStack>
+              )}
+          </div>
+        )}
 
-      {/* Dots */}
-      {showDots && (
-        <div className={`${getDotsContainerClass()} flex gap-3 z-30`}>
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => goToSlide(index)}
-              className={`transition-all ${
-                index === currentSlide
-                  ? "w-8 h-2 bg-white rounded-full"
-                  : "w-2 h-2 bg-white/50 rounded-full hover:bg-white/75"
-              }`}
-              aria-label={`Aller au slide ${index + 1}`}
-            />
-          ))}
-        </div>
-      )}
+        {/* Dots */}
+        {showDots && (
+          <div className={`${getDotsContainerClass()} flex gap-3 z-30`}>
+            {slides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`transition-all ${
+                  index === currentSlide
+                    ? "w-8 h-2 bg-white rounded-full"
+                    : "w-2 h-2 bg-white/50 rounded-full hover:bg-white/75"
+                }`}
+                aria-label={`Aller au slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

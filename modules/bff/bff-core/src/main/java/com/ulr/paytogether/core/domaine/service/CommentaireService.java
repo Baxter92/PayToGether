@@ -36,4 +36,15 @@ public interface CommentaireService {
      * Supprimer un paiement par son UUID
      */
     void supprimerParUuid(UUID uuid);
+
+    /**
+     * Lire toutes les réponses d'un commentaire parent
+     */
+    List<CommentaireModele> lireReponsesParCommentaireParent(UUID commentaireParentUuid);
+
+    /**
+     * Mettre à jour le flag pertinent d'une réponse
+     */
+    void mettreAJourFlagPertinent(UUID uuid, Boolean estPertinent);
 }
+

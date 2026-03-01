@@ -16,5 +16,5 @@ createRoot(document.getElementById("root")!).render(
         <Toaster />
       </I18nProvider>
     </ReactQueryProvider>
-  </StrictMode>
+  </StrictMode>,
 );

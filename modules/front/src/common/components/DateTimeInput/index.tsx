@@ -31,7 +31,7 @@ const DateTimeInput: React.FC<IDateTimeInputProps> = ({
 }) => {
   const dt = toDate(value);
   const [localDate, setLocalDate] = React.useState<Date | null>(
-    dt ? new Date(dt) : null
+    dt ? new Date(dt) : null,
   );
   const [localTime, setLocalTime] = React.useState<string | null>(() => {
     if (!dt) return null;
@@ -47,8 +47,8 @@ const DateTimeInput: React.FC<IDateTimeInputProps> = ({
     if (d) {
       setLocalTime(
         `${String(d.getHours()).padStart(2, "0")}:${String(
-          d.getMinutes()
-        ).padStart(2, "0")}`
+          d.getMinutes(),
+        ).padStart(2, "0")}`,
       );
     }
   }, [value]);
@@ -64,7 +64,7 @@ const DateTimeInput: React.FC<IDateTimeInputProps> = ({
       newD.setHours(Number(hh), Number(mm), 0, 0);
       onChange?.(newD);
     },
-    [onChange]
+    [onChange],
   );
 
   return (

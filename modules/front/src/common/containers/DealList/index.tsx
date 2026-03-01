@@ -149,11 +149,11 @@ function DealTableProductCell({ deal }: { deal: any }) {
 
   return (
     <div className="flex items-center gap-3">
-      <Avatar className="h-12 w-12 rounded-lg border border-border/50 shadow-sm">
+      <Avatar className="h-12 w-12 rounded-lg border border-border/50 shadow-sm bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <AvatarImage
           src={imageUrl?.url || "/placeholder.svg"}
           alt={deal?.title}
-          className="object-cover"
+          className="object-contain"
         />
       </Avatar>
       <div className="flex flex-col">
@@ -680,70 +680,70 @@ export default function DealsList({
                     {...tableProps}
                     {...(isAdmin
                       ? {
-                          actionsRow: (props: any) => [
-                            ...(tableProps?.actionsRow?.(props) || []),
-                            {
-                              leftIcon: ["PUBLIE", "PUBLISHED"].includes(
-                                String(
-                                  props.row.original.status ?? "",
-                                ).toUpperCase(),
-                              ) ? (
+                        actionsRow: (props: any) => [
+                          ...(tableProps?.actionsRow?.(props) || []),
+                          {
+                            leftIcon: ["PUBLIE", "PUBLISHED"].includes(
+                              String(
+                                props.row.original.status ?? "",
+                              ).toUpperCase(),
+                            ) ? (
                                 <FileEdit />
                               ) : (
                                 <Globe />
                               ),
-                              tooltip: ["PUBLIE", "PUBLISHED"].includes(
-                                String(
-                                  props.row.original.status ?? "",
-                                ).toUpperCase(),
-                              )
-                                ? "Remettre en brouillon"
-                                : "Publier",
-                              onClick: () => {
-                                const row = props.row.original;
-                                const currentStatus = String(
-                                  row.status ?? "",
-                                ).toUpperCase();
-                                const isPublished = [
-                                  "PUBLIE",
-                                  "PUBLISHED",
-                                ].includes(currentStatus);
+                            tooltip: ["PUBLIE", "PUBLISHED"].includes(
+                              String(
+                                props.row.original.status ?? "",
+                              ).toUpperCase(),
+                            )
+                              ? "Remettre en brouillon"
+                              : "Publier",
+                            onClick: () => {
+                              const row = props.row.original;
+                              const currentStatus = String(
+                                row.status ?? "",
+                              ).toUpperCase();
+                              const isPublished = [
+                                "PUBLIE",
+                                "PUBLISHED",
+                              ].includes(currentStatus);
 
-                                setStatusTarget({
-                                  id: row.id || row.uuid,
-                                  title: row.title || "ce deal",
-                                  nextStatus: isPublished
-                                    ? "BROUILLON"
-                                    : "PUBLIE",
-                                });
-                                setStatusModalOpen(true);
-                              },
+                              setStatusTarget({
+                                id: row.id || row.uuid,
+                                title: row.title || "ce deal",
+                                nextStatus: isPublished
+                                  ? "BROUILLON"
+                                  : "PUBLIE",
+                              });
+                              setStatusModalOpen(true);
                             },
-                            {
-                              leftIcon: <Edit2 className="w-4 h-4" />,
-                              onClick: () => {
-                                const uuid =
+                          },
+                          {
+                            leftIcon: <Edit2 className="w-4 h-4" />,
+                            onClick: () => {
+                              const uuid =
                                   props.row.original.id ||
                                   props.row.original.uuid;
-                                setEditingDealUuid(uuid);
-                                setCreateModalOpen(true);
-                              },
+                              setEditingDealUuid(uuid);
+                              setCreateModalOpen(true);
                             },
-                            {
-                              leftIcon: <Trash2 className="w-4 h-4" />,
-                              colorScheme: "danger",
-                              tooltip: "Supprimer",
-                              onClick: () => {
-                                const row = props.row.original;
-                                setDeleteTarget({
-                                  id: row.id || row.uuid,
-                                  title: row.title || row.titre || "ce deal",
-                                });
-                                setDeleteModalOpen(true);
-                              },
+                          },
+                          {
+                            leftIcon: <Trash2 className="w-4 h-4" />,
+                            colorScheme: "danger",
+                            tooltip: "Supprimer",
+                            onClick: () => {
+                              const row = props.row.original;
+                              setDeleteTarget({
+                                id: row.id || row.uuid,
+                                title: row.title || row.titre || "ce deal",
+                              });
+                              setDeleteModalOpen(true);
                             },
-                          ],
-                        }
+                          },
+                        ],
+                      }
                       : {})}
                   />
                 </div>

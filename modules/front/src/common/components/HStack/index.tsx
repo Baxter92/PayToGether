@@ -46,7 +46,7 @@ const HStack = ({
         wrap && "flex-wrap",
         alignMap[align],
         justifyMap[justify],
-        className
+        className,
       )}
       style={{ gap, ...style }}
       {...props}

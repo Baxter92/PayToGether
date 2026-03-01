@@ -431,7 +431,7 @@ function ImageThumbnail({
   return (
     <div
       className={cn(
-        "relative aspect-[4/3] rounded-xl overflow-hidden group bg-white",
+        "relative aspect-[4/3] rounded-xl overflow-hidden group bg-white dark:bg-gray-900",
         "border-2 transition-all duration-300 shadow-sm hover:shadow-lg",
         isPrincipal
           ? "border-blue-500 ring-2 ring-blue-200/50 shadow-blue-100"
@@ -439,13 +439,15 @@ function ImageThumbnail({
       )}
     >
       {src ? (
-        <img
-          src={src}
-          alt={`Upload ${index + 1}`}
-          className="w-full h-full object-cover"
-        />
+        <div className="w-full h-full flex items-center justify-center bg-gray-50 dark:bg-gray-800">
+          <img
+            src={src}
+            alt={`Upload ${index + 1}`}
+            className="w-full h-full object-contain"
+          />
+        </div>
       ) : (
-        <div className="w-full h-full flex items-center justify-center bg-gray-100">
+        <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
           <Loader2 className="w-6 h-6 text-gray-300 animate-spin" />
         </div>
       )}

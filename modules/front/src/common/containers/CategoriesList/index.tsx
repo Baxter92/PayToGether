@@ -43,7 +43,7 @@ export default function CategoriesList({
   const totalItems = categories.length;
   const totalPages = useMemo(
     () => Math.max(1, Math.ceil(totalItems / itemsPerPage)),
-    [totalItems, itemsPerPage]
+    [totalItems, itemsPerPage],
   );
 
   const paginated = useMemo(() => {
@@ -133,14 +133,14 @@ export default function CategoriesList({
                   key={c.id}
                   className="flex items-center gap-4 p-4 border rounded bg-card"
                 >
-                  <div className="w-16 h-12 overflow-hidden rounded">
+                  <div className="w-16 h-12 overflow-hidden rounded bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
                     <img
                       src={
                         c.image ??
                         "https://images.unsplash.com/photo-1521335629791-ce4aec67dd47?auto=format&fit=crop&w=600&q=60"
                       }
                       alt={c.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                   </div>
                   <div className="flex-1 min-w-0">

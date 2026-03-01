@@ -24,4 +24,14 @@ public interface CommentaireProvider {
     List<CommentaireModele> trouverTous();
 
     void supprimerParUuid(UUID uuid);
+
+    /**
+     * Trouver toutes les réponses d'un commentaire parent
+     */
+    List<CommentaireModele> trouverReponsesParCommentaireParent(UUID commentaireParentUuid);
+
+    /**
+     * Mettre à jour le flag pertinent d'une réponse
+     */
+    void mettreAJourFlagPertinent(UUID uuid, Boolean estPertinent);
 }

@@ -35,7 +35,7 @@ const TimeInput = React.forwardRef<HTMLInputElement, ITimeInputProps>(
       size = "md",
       ...props
     },
-    ref
+    ref,
   ) => {
     const formatted = normalizeTime(value);
 
@@ -58,7 +58,7 @@ const TimeInput = React.forwardRef<HTMLInputElement, ITimeInputProps>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 export default TimeInput;

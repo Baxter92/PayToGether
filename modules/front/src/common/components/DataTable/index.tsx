@@ -100,7 +100,7 @@ export default function DataTable<TData, TValue>({
   const { t: tFilters } = useI18n("filters");
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+    [],
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -108,7 +108,7 @@ export default function DataTable<TData, TValue>({
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [showFilters, setShowFilters] = React.useState(false);
   const [activeFilters, setActiveFilters] = React.useState<Record<string, any>>(
-    {}
+    {},
   );
 
   React.useEffect(() => {
@@ -213,7 +213,7 @@ export default function DataTable<TData, TValue>({
         return Object.values(row.original).some((val) =>
           String(val ?? "")
             .toLowerCase()
-            .includes(searchLower)
+            .includes(searchLower),
         );
       }
 
@@ -225,7 +225,7 @@ export default function DataTable<TData, TValue>({
           .includes(searchLower);
       });
     },
-    [searchKey]
+    [searchKey],
   );
 
   const table = useReactTable({
@@ -260,7 +260,7 @@ export default function DataTable<TData, TValue>({
     const column = table.getColumn(filterId);
     if (column && column.getCanFilter() && !onFilter) {
       column.setFilterValue(
-        value === "all" || value === "" ? undefined : value
+        value === "all" || value === "" ? undefined : value,
       );
     }
   };
@@ -296,8 +296,8 @@ export default function DataTable<TData, TValue>({
       const csvContent = [
         headers.join(","),
         ...filteredData.map((row) =>
-          headers.map((h) => JSON.stringify((row as any)[h] ?? "")).join(",")
-        )
+          headers.map((h) => JSON.stringify((row as any)[h] ?? "")).join(","),
+        ),
       ].join("\n");
 
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -505,13 +505,13 @@ export default function DataTable<TData, TValue>({
                       label={
                         activeFilters[filter.id]
                           ? filter.options.find(
-                            (o) => o.value === activeFilters[filter.id]
+                            (o) => o.value === activeFilters[filter.id],
                           )?.label || tFilters("all")
                           : tFilters("all")
                       }
                       items={[
                         { label: tFilters("all"), value: "all" },
-                        ...filter.options
+                        ...filter.options,
                       ]}
                       selectedValue={activeFilters[filter.id] || "all"}
                       onChange={(value) => handleColumnFilter(filter.id, value)}
@@ -565,7 +565,7 @@ export default function DataTable<TData, TValue>({
             {Object.entries(activeFilters).map(([key, value]) => {
               if (!value || value === "all") return null;
               const filterConfig = columnFiltersConfig.find(
-                (f) => f.id === key
+                (f) => f.id === key,
               );
               const label =
                 filterConfig?.options?.find((o) => o.value === value)?.label ||
@@ -612,11 +612,11 @@ export default function DataTable<TData, TValue>({
                             header.column,
                             typeof header.column.columnDef.header === "string"
                               ? header.column.columnDef.header
-                              : header.column.id
+                              : header.column.id,
                           )
                           : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </th>
                   ))}
@@ -641,7 +641,7 @@ export default function DataTable<TData, TValue>({
                     }
                     className={cn(
                       "transition-colors hover:bg-muted/30 data-[state=selected]:bg-primary/5",
-                      index % 2 === 0 ? "bg-background" : "bg-muted/10"
+                      index % 2 === 0 ? "bg-background" : "bg-muted/10",
                     )}
                   >
                     {row.getVisibleCells().map((cell) => (
@@ -652,7 +652,7 @@ export default function DataTable<TData, TValue>({
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </td>
                     ))}

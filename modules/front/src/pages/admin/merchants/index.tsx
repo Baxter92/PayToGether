@@ -73,7 +73,7 @@ const mockMerchants: Merchant[] = [
     totalSales: 95000,
     status: "suspended",
     createdAt: "2024-03-25",
-  }
+  },
 ];
 
 const statusConfig = {
@@ -90,7 +90,7 @@ export default function AdminMerchants(): ReactElement {
   const filteredMerchants = mockMerchants.filter(
     (merchant) =>
       merchant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      merchant.email.toLowerCase().includes(searchQuery.toLowerCase())
+      merchant.email.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const columns: ColumnDef<Merchant>[] = [
@@ -168,7 +168,7 @@ export default function AdminMerchants(): ReactElement {
           </DropdownMenuContent>
         </DropdownMenu>
       ),
-    }
+    },
   ];
 
   const stats = {

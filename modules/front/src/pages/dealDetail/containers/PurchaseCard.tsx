@@ -36,18 +36,18 @@ export default function PurchaseCard({
       <CardContent>
         <div className="flex items-baseline gap-3">
           <div>
-            <div className="text-sm text-gray-500">Prix par part</div>
-            <div className="text-2xl font-bold">
+            <div className="text-sm text-gray-500 dark:text-gray-400">Prix par part</div>
+            <div className="text-2xl font-bold text-foreground">
               {formatCurrency(deal.priceDeal ?? 0)}
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
               ({formatCurrency(deal.priceOriginal)})
             </div>
           </div>
         </div>
 
         <div className="mt-4">
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
             Choisir le nombre de parts
           </div>
           <Counter
@@ -57,27 +57,27 @@ export default function PurchaseCard({
             min={1}
             className="mt-3"
           />
-          <div className="mt-2 text-sm text-gray-600">
+          <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             {partsRemaining - qty} part(s) disponibles
           </div>
         </div>
 
         <div className="mt-4">
-          <div className="text-sm text-gray-600">Total</div>
-          <div className="text-xl font-semibold">
+          <div className="text-sm text-gray-600 dark:text-gray-400">Total</div>
+          <div className="text-xl font-semibold text-foreground">
             {formatCurrency(totalPrice)}
           </div>
         </div>
 
         <div className="mt-4">
           {/* {!activated ? (
-            <div className="text-sm text-yellow-700">
+            <div className="text-sm text-yellow-700 dark:text-yellow-600">
               En attente : l'offre s'activera si au moins {deal.minRequired}{" "}
               parts sont vendues avant{" "}
               {new Date(deal.expiryDate ?? "").toLocaleDateString()}.
             </div>
           ) : ( */}
-          <div className="text-sm text-green-700">
+          <div className="text-sm text-green-700 dark:text-green-400">
             Offre activée — Vous recevrez votre part.
           </div>
           {/* )} */}
@@ -95,11 +95,11 @@ export default function PurchaseCard({
 
         <Separator className="my-3" />
 
-        <div className="text-sm text-gray-700">
+        <div className="text-sm text-gray-700 dark:text-gray-300">
           <div className="flex items-center gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-gray-500"
+              className="h-5 w-5 text-gray-500 dark:text-gray-400"
               viewBox="0 0 20 20"
               fill="currentColor"
             >

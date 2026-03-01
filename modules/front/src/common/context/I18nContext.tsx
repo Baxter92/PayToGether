@@ -42,7 +42,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       changeLanguage,
       availableLanguages: availableLanguages.filter((lng) => lng !== "cimode"),
     }),
-    [t, i18n, language, availableLanguages, changeLanguage]
+    [t, i18n, language, availableLanguages, changeLanguage],
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

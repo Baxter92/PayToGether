@@ -101,10 +101,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     const displayValue = controlled
       ? (() => {
-          if (!format) return String(value ?? "");
-          const raw = computeRaw(String(value ?? ""));
-          return format(raw);
-        })()
+        if (!format) return String(value ?? "");
+        const raw = computeRaw(String(value ?? ""));
+        return format(raw);
+      })()
       : undefined;
 
     // centraliser la logique qui notifie le parent (réutilisée par handleChange et par la détection autofill)

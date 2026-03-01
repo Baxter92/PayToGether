@@ -1,7 +1,7 @@
 export async function getCroppedImg(
   imageSrc: string,
   crop: any,
-  file: File
+  file: File,
 ): Promise<File> {
   const image = new Image();
   image.src = imageSrc;
@@ -21,11 +21,11 @@ export async function getCroppedImg(
     0,
     0,
     crop.width,
-    crop.height
+    crop.height,
   );
 
   const blob = await new Promise<Blob>((resolve) =>
-    canvas.toBlob((b) => resolve(b!), file.type)
+    canvas.toBlob((b) => resolve(b!), file.type),
   );
 
   return new File([blob], file.name, { type: file.type });

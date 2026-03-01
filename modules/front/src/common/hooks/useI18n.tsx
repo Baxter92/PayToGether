@@ -118,7 +118,7 @@ export function useFormattedCurrency() {
         currency,
       }).format(amount);
     },
-    [language]
+    [language],
   );
 
   return formatCurrency;

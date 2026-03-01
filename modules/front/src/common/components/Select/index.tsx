@@ -89,7 +89,7 @@ export default function Select({
             "relative rounded-md border bg-transparent",
             triggerErrorClass,
             disabled ? "opacity-60 pointer-events-none" : "opacity-100",
-            triggerClassName
+            triggerClassName,
           )}
           disabled={disabled}
           aria-invalid={!!error || undefined}

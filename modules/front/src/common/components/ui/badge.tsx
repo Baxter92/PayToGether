@@ -113,7 +113,7 @@ const badgeVariants = cva(
         variant: "subtle",
         colorScheme: "secondary",
         className: "bg-secondary/20 text-secondary-foreground",
-      }
+      },
     ],
     defaultVariants: {
       variant: "subtle",
@@ -121,7 +121,7 @@ const badgeVariants = cva(
       size: "md",
       rounded: "full",
     },
-  }
+  },
 );
 
 export interface BadgeProps
@@ -146,7 +146,7 @@ function Badge({
       data-slot="badge"
       className={cn(
         badgeVariants({ variant, colorScheme, size, rounded }),
-        className
+        className,
       )}
       {...props}
     />

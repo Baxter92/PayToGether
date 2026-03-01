@@ -53,7 +53,7 @@ export default function CheckboxGroup({
   const groupName = name ?? `checkbox-group-${generatedName}`;
 
   const [internal, setInternal] = React.useState<string | undefined>(
-    defaultValue
+    defaultValue,
   );
 
   const currentValue = value !== undefined ? value : internal;
@@ -87,7 +87,7 @@ export default function CheckboxGroup({
           orientation === "vertical"
             ? "flex-col space-y-2"
             : "flex-row gap-4 flex-wrap",
-          className
+          className,
         )}
         role="group"
         aria-invalid={!!error || undefined}

@@ -29,4 +29,11 @@ public interface CommentaireRepository extends JpaRepository<CommentaireJpa, UUI
      */
     List<CommentaireJpa> findByUtilisateurJpa(UtilisateurJpa utilisateurJpa);
 
+    /**
+     * Recherche toutes les réponses d'un commentaire parent
+     * @param commentaireParentJpa le commentaire parent
+     * @return liste des réponses (commentaires enfants)
+     */
+    List<CommentaireJpa> findByCommentaireParentJpa(CommentaireJpa commentaireParentJpa);
+
 }

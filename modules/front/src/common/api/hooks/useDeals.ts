@@ -211,7 +211,7 @@ export const useCreateDeal = () => {
     onSuccess: (deal) => {
       // invalider listes / cache
       queryClient.invalidateQueries({ queryKey: dealKeys.lists() });
-       queryClient.invalidateQueries({ queryKey: dealKeys.byCreateur(deal.createurUuid) });
+      queryClient.invalidateQueries({ queryKey: dealKeys.byCreateur(deal.createurUuid) });
       // si tu as d'autres keys (detail), invalide-les aussi
     },
 
@@ -238,7 +238,7 @@ export const useUpdateDealStatus = () => {
   >({
     mutationFn: ({ id, statut }) => dealService.updateStatus(id, statut),
     onSuccess: (updatedDeal) => {
-    queryClient.invalidateQueries({ queryKey: dealKeys.byCreateur(updatedDeal.createurUuid) });
+      queryClient.invalidateQueries({ queryKey: dealKeys.byCreateur(updatedDeal.createurUuid) });
       queryClient.invalidateQueries({
         queryKey: dealKeys.detail(updatedDeal.uuid),
       });

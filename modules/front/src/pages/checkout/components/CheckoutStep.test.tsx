@@ -42,7 +42,7 @@ describe("CheckoutStep", () => {
     render(
       <CheckoutStep {...defaultProps} isActive>
         <div>Contenu de l'étape</div>
-      </CheckoutStep>
+      </CheckoutStep>,
     );
 
     expect(screen.getByText("Contenu de l'étape")).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe("CheckoutStep", () => {
     render(
       <CheckoutStep {...defaultProps} isActive={false}>
         <div>Contenu de l'étape</div>
-      </CheckoutStep>
+      </CheckoutStep>,
     );
 
     expect(screen.queryByText("Contenu de l'étape")).not.toBeInTheDocument();

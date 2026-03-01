@@ -15,6 +15,7 @@ import { Badge } from "@components/ui/badge";
 import CategoriesBar from "./components/CategoriesBar";
 import SidebarMenu from "./components/SidebarMenu";
 import LanguageSelector from "@components/LanguageSelector";
+import { ThemeToggle } from "@components/ThemeToggle";
 import { Dropdown } from "@components/Dropdown";
 import SearchBar from "./components/SearchBar";
 import { PATHS } from "@/common/constants/path";
@@ -187,7 +188,7 @@ const Header = ({
     <header
       className={`${
         sticky ? "sm:sticky" : ""
-      } top-0 z-50 w-full border-b ${headerBgColor} shadow-sm ${className}`}
+      } top-0 z-50 w-full border-b ${headerBgColor} dark:bg-gray-900 dark:border-gray-800 shadow-sm ${className}`}
     >
       {/* Top Bar - Promo Banner */}
       {topBanner}
@@ -326,6 +327,11 @@ const Header = ({
               </div>
             )}
 
+            {/* Theme Toggle - Mobile Only */}
+            <div className="flex lg:hidden">
+              <ThemeToggle />
+            </div>
+
             {/* Mobile Menu */}
             <SidebarMenu
               categories={categories}
@@ -341,6 +347,11 @@ const Header = ({
               <LanguageSelector variant="icon" />
             </div>
           )}
+
+          {/* Theme Toggle - Desktop Only */}
+          <div className="hidden lg:flex ml-2">
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* Search Bar - Mobile Only */}
@@ -353,7 +364,7 @@ const Header = ({
 
       {/* Categories Bar - Desktop Only */}
       {showCategoriesBar && (
-        <div className="hidden lg:block border-t bg-gray-50">
+        <div className="hidden lg:block border-t bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
           <CategoriesBar
             categories={categories}
             maxVisibleCategories={5}

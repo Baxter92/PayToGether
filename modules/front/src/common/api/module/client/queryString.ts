@@ -5,8 +5,8 @@ export function buildQueryString(params?: Record<string, any>): string {
     .flatMap(([k, v]) =>
       Array.isArray(v)
         ? v.map(
-            (x) => `${encodeURIComponent(k)}=${encodeURIComponent(String(x))}`,
-          )
+          (x) => `${encodeURIComponent(k)}=${encodeURIComponent(String(x))}`,
+        )
         : `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`,
     )
     .filter(Boolean);

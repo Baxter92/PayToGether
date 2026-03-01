@@ -86,7 +86,7 @@ function StarRating({
             className={cn(
               "relative",
               !readOnly && "cursor-pointer",
-              readOnly && "cursor-default"
+              readOnly && "cursor-default",
             )}
             aria-label={`Rate ${i + 1} star`}
           >
@@ -101,7 +101,7 @@ function StarRating({
               <span
                 className={cn(
                   "absolute inset-0 overflow-hidden",
-                  SIZE_MAP[size]
+                  SIZE_MAP[size],
                 )}
                 style={{ width: fill === 1 ? "100%" : "50%" }}
               >

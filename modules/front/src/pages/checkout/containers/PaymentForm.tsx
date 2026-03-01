@@ -59,7 +59,7 @@ function formatCardNumber(value = "") {
   // AMEX groups differently: 4-6-5
   if (/^3[47]/.test(digits)) {
     return digits.replace(/(\d{1,4})(\d{1,6})?(\d{1,5})?/, (_match, a, b, c) =>
-      [a, b, c].filter(Boolean).join(" ")
+      [a, b, c].filter(Boolean).join(" "),
     );
   }
   return digits.replace(/(\d{1,4})/g, "$1 ").trim();
@@ -295,7 +295,7 @@ export default function PaymentFormCard({
       label: "Enregistrer la carte pour une prochaine fois",
       type: "checkbox",
       colSpan: 12,
-    }
+    },
   ];
 
   return (

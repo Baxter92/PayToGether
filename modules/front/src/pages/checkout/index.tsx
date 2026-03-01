@@ -42,7 +42,7 @@ export default function CheckoutPage(): JSX.Element {
 
   const deliveryFee = useMemo(
     () => (deliveryData?.deliveryMethod === "home" ? 3.5 : 0),
-    [deliveryData]
+    [deliveryData],
   );
   const total = useMemo(() => subtotal + deliveryFee, [subtotal, deliveryFee]);
 
@@ -105,7 +105,7 @@ export default function CheckoutPage(): JSX.Element {
     {
       title: t("checkout.paymentTitle"),
       description: t("checkout.paymentDescription"),
-    }
+    },
   ];
 
   return (

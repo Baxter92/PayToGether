@@ -160,7 +160,7 @@ const CategoriesBar = ({
               leftIcon: dropdownIcon || defaultDropdownIcon,
             }}
             items={categories.map((category) =>
-              defaultRenderDropdownItem(category)
+              defaultRenderDropdownItem(category),
             )}
           />
         )}
@@ -169,7 +169,7 @@ const CategoriesBar = ({
         {visibleCategories.map((category) =>
           renderCategory
             ? renderCategory(category)
-            : defaultRenderCategory(category)
+            : defaultRenderCategory(category),
         )}
 
         {/* Lien "Voir tout" si catégories masquées */}

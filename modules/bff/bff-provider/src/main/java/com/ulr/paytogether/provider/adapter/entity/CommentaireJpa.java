@@ -41,6 +41,23 @@ public class CommentaireJpa {
     @JoinColumn(name = "deal_uuid", nullable = false)
     private DealJpa dealJpa;
 
+    /**
+     * Commentaire parent (null si c'est un commentaire racine)
+     * Relation auto-référencée
+     */
+    @ManyToOne
+    @JoinColumn(name = "commentaire_parent_uuid")
+    private CommentaireJpa commentaireParentJpa;
+
+    /**
+     * Flag indiquant si la réponse est marquée comme pertinente
+     * Utilisé uniquement pour les réponses (commentaireParentJpa != null)
+     * Par défaut false
+     */
+    @Column(name = "est_pertinent", nullable = false)
+    @Builder.Default
+    private Boolean estPertinent = false;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime dateCreation;

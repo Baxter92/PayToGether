@@ -56,7 +56,7 @@ export function AdminSidebar(): ReactElement {
         titleKey: "sidebar.dashboard",
         url: ADMIN_PATHS.DASHBOARD,
         icon: LayoutDashboard,
-      }
+      },
     ],
     commerce: [
       { titleKey: "sidebar.deals", url: ADMIN_PATHS.DEALS, icon: Tag },
@@ -79,7 +79,7 @@ export function AdminSidebar(): ReactElement {
         titleKey: "sidebar.categories",
         url: ADMIN_PATHS.CATEGORIES,
         icon: FolderTree,
-      }
+      },
     ],
     users: [
       { titleKey: "sidebar.users", url: ADMIN_PATHS.USERS, icon: Users },
@@ -87,7 +87,7 @@ export function AdminSidebar(): ReactElement {
         titleKey: "sidebar.merchants",
         url: ADMIN_PATHS.MERCHANTS,
         icon: Store,
-      }
+      },
     ],
     content: [{ titleKey: "sidebar.hero", url: ADMIN_PATHS.HERO, icon: Image }],
     config: [
@@ -95,7 +95,7 @@ export function AdminSidebar(): ReactElement {
         titleKey: "sidebar.reports",
         url: ADMIN_PATHS.REPORTS,
         icon: BarChart3,
-      }
+      },
     ],
   };
 
@@ -245,7 +245,7 @@ export function AdminSidebar(): ReactElement {
             <SidebarMenuButton
               onClick={handleLogout}
               className={cn(
-                "text-destructive hover:bg-destructive/10 hover:text-destructive"
+                "text-destructive hover:bg-destructive/10 hover:text-destructive",
               )}
               tooltip={t("sidebar.logout")}
             >

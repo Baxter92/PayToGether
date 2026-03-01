@@ -70,7 +70,7 @@ export default function Reviews({
         comment: newComment,
         createdAt: new Date().toISOString(),
       },
-      ...prev
+      ...prev,
     ]);
     setNewComment("");
     setNewRating(0);
@@ -88,8 +88,8 @@ export default function Reviews({
               createdAt: new Date().toISOString(),
             },
           }
-          : r
-      )
+          : r,
+      ),
     );
     setReplyText("");
     setReplyOpenId(null);
@@ -100,7 +100,7 @@ export default function Reviews({
       <Heading level={4} title="Avis des clients" />
 
       {!isMerchant && (
-        <div className="border rounded-lg p-4 bg-gray-50 space-y-3">
+        <div className="border border-border rounded-lg p-4 bg-gray-50 dark:bg-gray-800 space-y-3">
           <Heading level={6} title="Ajouter un avis" />
 
           <StarRating
@@ -132,7 +132,7 @@ export default function Reviews({
       {/* LISTE DES AVIS */}
       <VStack spacing={10}>
         {reviews.map((review) => (
-          <article key={review.id} className="border rounded-lg p-4 space-y-3">
+          <article key={review.id} className="border border-border rounded-lg p-4 bg-card space-y-3">
             {/* Avis client */}
             <HStack spacing={10} align="start">
               <Avatar className="rounded-lg">

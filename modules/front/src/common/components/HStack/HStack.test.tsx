@@ -8,7 +8,7 @@ describe("HStack", () => {
       <HStack>
         <span>Item 1</span>
         <span>Item 2</span>
-      </HStack>
+      </HStack>,
     );
 
     expect(screen.getByText("Item 1")).toBeInTheDocument();

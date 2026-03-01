@@ -249,9 +249,17 @@
     @apply border-border outline-ring/50;
   }
 
+  html {
+    font-size: 100%;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    min-height: 100vh;
   }
 
   h1, h2, h3, h4, h5, h6 {

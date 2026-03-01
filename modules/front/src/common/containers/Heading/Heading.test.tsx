@@ -38,7 +38,7 @@ describe("Heading", () => {
       <Heading
         title="Titre"
         actions={<button>Action</button>}
-      />
+      />,
     );
 
     expect(screen.getByRole("button", { name: "Action" })).toBeInTheDocument();
@@ -46,7 +46,7 @@ describe("Heading", () => {
 
   it("applique le style underline quand underline est true", () => {
     const { container } = render(
-      <Heading title="Titre" underline underlineStyle="line" />
+      <Heading title="Titre" underline underlineStyle="line" />,
     );
 
     const underlineDiv = container.querySelector(".border-b-2");

@@ -8,7 +8,7 @@ describe("VStack", () => {
       <VStack>
         <span>Item 1</span>
         <span>Item 2</span>
-      </VStack>
+      </VStack>,
     );
 
     expect(screen.getByText("Item 1")).toBeInTheDocument();

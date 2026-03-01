@@ -29,9 +29,9 @@ export type ResourceKeys<T = any> = BaseResourceKeys & T;
 export const createResourceKeys = <
   T extends Record<string, (...args: any[]) => readonly any[]> = any,
 >(
-  resourceName: string,
-  customKeys?: T,
-): ResourceKeys<T> => {
+    resourceName: string,
+    customKeys?: T,
+  ): ResourceKeys<T> => {
   const baseKeys: BaseResourceKeys = {
     all: [resourceName] as const,
     lists: function () {
@@ -63,10 +63,10 @@ export const createResourceHooks = <
   TCreateDTO,
   TUpdateDTO = Partial<TEntity>,
 >({
-  resourceName,
-  service,
-  customKeys = {},
-}: CreateResourceHooksOptions<TEntity, TCreateDTO, TUpdateDTO>) => {
+    resourceName,
+    service,
+    customKeys = {},
+  }: CreateResourceHooksOptions<TEntity, TCreateDTO, TUpdateDTO>) => {
   const keys = createResourceKeys(resourceName, customKeys);
 
   // ===== QUERIES =====

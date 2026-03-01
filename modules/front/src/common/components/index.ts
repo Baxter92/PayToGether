@@ -1,4 +1,5 @@
 export { default as LanguageSelector } from "./LanguageSelector";
+export { ThemeToggle } from "./ThemeToggle";
 export { default as Hero } from "../containers/Hero";
 export { default as VStack } from "./VStack";
 export { default as HStack } from "./HStack";
@@ -14,3 +15,5 @@ export { default as TimeInput } from "./TimeInput";
 export { default as DateTimeInput } from "./DateTimeInput";
 export { default as DataTable } from "./DataTable";
 export { default as StarRating } from "./StarRating";
+export { ImageLightbox } from "./ImageLightbox";
+export { ImageZoomCropper } from "./ImageZoomCropper";

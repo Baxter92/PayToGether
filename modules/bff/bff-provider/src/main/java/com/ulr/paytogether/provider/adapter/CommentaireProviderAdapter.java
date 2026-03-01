@@ -37,6 +37,15 @@ public class CommentaireProviderAdapter implements CommentaireProvider {
     @Override
     public CommentaireModele sauvegarder(CommentaireModele commentaire) {
         CommentaireJpa entite = mapper.versEntite(commentaire);
+
+        // Gérer le commentaire parent si présent
+        if (commentaire.getCommentaireParentUuid() != null) {
+            CommentaireJpa parent = jpaRepository.findById(commentaire.getCommentaireParentUuid())
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Commentaire parent non trouvé : " + commentaire.getCommentaireParentUuid()));
+            entite.setCommentaireParentJpa(parent);
+        }
+
         CommentaireJpa sauvegarde = jpaRepository.save(entite);
         return mapper.versModele(sauvegarde);
     }
@@ -68,6 +77,33 @@ public class CommentaireProviderAdapter implements CommentaireProvider {
                 .stream()
                 .map(mapper::versModele)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public List<CommentaireModele> trouverReponsesParCommentaireParent(UUID commentaireParentUuid) {
+        CommentaireJpa parent = jpaRepository.findById(commentaireParentUuid)
+                .orElseThrow(() -> ResourceNotFoundException.parUuid("commentaire", commentaireParentUuid));
+
+        return jpaRepository.findByCommentaireParentJpa(parent)
+                .stream()
+                .map(mapper::versModele)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void mettreAJourFlagPertinent(UUID uuid, Boolean estPertinent) {
+        CommentaireJpa commentaire = jpaRepository.findById(uuid)
+                .orElseThrow(() -> ResourceNotFoundException.parUuid("commentaire", uuid));
+
+        // Vérifier que c'est bien une réponse
+        if (commentaire.getCommentaireParentJpa() == null) {
+            throw new IllegalArgumentException("Le flag pertinent ne peut être modifié que sur une réponse (commentaire avec parent)");
+        }
+
+        commentaire.setEstPertinent(estPertinent);
+        jpaRepository.save(commentaire);
     }
 
     @Override

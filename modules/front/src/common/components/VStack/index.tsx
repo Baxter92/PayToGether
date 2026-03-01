@@ -46,7 +46,7 @@ const VStack = ({
         alignMap[align],
         justifyMap[justify],
         wrap && "flex-wrap",
-        className
+        className,
       )}
       style={{ gap, ...style }}
       {...props}

@@ -27,7 +27,7 @@ interface ImageCropperProps {
 function centerAspectCrop(
   mediaWidth: number,
   mediaHeight: number,
-  aspect: number
+  aspect: number,
 ): Crop {
   return centerCrop(
     makeAspectCrop(
@@ -37,10 +37,10 @@ function centerAspectCrop(
       },
       aspect,
       mediaWidth,
-      mediaHeight
+      mediaHeight,
     ),
     mediaWidth,
-    mediaHeight
+    mediaHeight,
   );
 }
 
@@ -60,7 +60,7 @@ export function ImageCropper({
       const { width, height } = e.currentTarget;
       setCrop(centerAspectCrop(width, height, aspectRatio));
     },
-    [aspectRatio]
+    [aspectRatio],
   );
 
   const handleReset = () => {
@@ -98,7 +98,7 @@ export function ImageCropper({
       0,
       0,
       canvas.width,
-      canvas.height
+      canvas.height,
     );
 
     return new Promise((resolve, reject) => {
@@ -118,7 +118,7 @@ export function ImageCropper({
           };
         },
         "image/jpeg",
-        0.9
+        0.9,
       );
     });
   }, [completedCrop]);

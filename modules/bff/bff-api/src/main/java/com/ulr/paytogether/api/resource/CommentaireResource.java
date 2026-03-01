@@ -92,5 +92,42 @@ public class CommentaireResource {
 
         return ResponseEntity.noContent().build();
     }
+
+    /**
+     * Récupérer toutes les réponses d'un commentaire parent
+     * GET /api/commentaires/{commentaireParentUuid}/reponses
+     */
+    @GetMapping("/{commentaireParentUuid}/reponses")
+    public ResponseEntity<List<CommentaireDTO>> trouverReponses(@PathVariable UUID commentaireParentUuid) {
+        log.info("Requête de lecture des réponses du commentaire: {}", commentaireParentUuid);
+
+        List<CommentaireDTO> reponses = apiAdapter.trouverReponsesParCommentaireParent(commentaireParentUuid);
+
+        return ResponseEntity.ok(reponses);
+    }
+
+    /**
+     * Mettre à jour le flag pertinent d'une réponse
+     * PATCH /api/commentaires/{uuid}/pertinent
+     */
+    @PatchMapping("/{uuid}/pertinent")
+    public ResponseEntity<Void> mettreAJourFlagPertinent(
+            @PathVariable UUID uuid,
+            @RequestBody java.util.Map<String, Boolean> body) {
+        log.info("Requête de mise à jour du flag pertinent pour le commentaire: {}", uuid);
+
+        Boolean estPertinent = body.get("estPertinent");
+        if (estPertinent == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        try {
+            apiAdapter.mettreAJourFlagPertinent(uuid, estPertinent);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            log.error("Erreur lors de la mise à jour du flag pertinent: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }
 

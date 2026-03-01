@@ -73,7 +73,7 @@ const buttonVariants = cva(
       {
         variant: "secondary",
         colorScheme: "default",
-        class: "bg-secondary text-secondary-foreground hover:bg-secondary/90",
+        class: "bg-secondary text-secondary-foreground hover:bg-secondary/90 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600",
       },
       {
         variant: "secondary",
@@ -346,7 +346,7 @@ const buttonVariants = cva(
         variant: "link",
         colorScheme: "info",
         class: "text-blue-600 underline-offset-4 hover:underline",
-      }
+      },
     ],
 
     defaultVariants: {
@@ -354,7 +354,7 @@ const buttonVariants = cva(
       size: "default",
       colorScheme: "default",
     },
-  }
+  },
 );
 
 export type IButtonProps = React.ComponentProps<"button"> &
@@ -420,7 +420,7 @@ function Button({
     <span
       className={cn(
         "inline-flex items-center justify-center animate-spin rounded-full border-current border-t-transparent",
-        spinnerSizeClass
+        spinnerSizeClass,
       )}
       aria-hidden="true"
     />
@@ -452,7 +452,7 @@ function Button({
     <Comp
       {...(!isFragment && {
         className: cn(
-          buttonVariants({ variant, size, colorScheme, className })
+          buttonVariants({ variant, size, colorScheme, className }),
         ),
       })}
       {...props}

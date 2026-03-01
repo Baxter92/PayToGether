@@ -136,7 +136,7 @@ export default function OrdersReceivedList({ data }: { data: Order[] }) {
       cell: ({ getValue }) => (
         <OrderStatusBadge status={getValue<OrderStatus>()} />
       ),
-    }
+    },
   ];
 
   return (
@@ -178,7 +178,7 @@ export default function OrdersReceivedList({ data }: { data: Order[] }) {
                   colorScheme: "success" as const,
                   onClick: () =>
                     alert(`Confirmer ${row.original.id} (simulation)`),
-                }
+                },
               ]
               : []),
             ...(canUse
@@ -189,9 +189,9 @@ export default function OrdersReceivedList({ data }: { data: Order[] }) {
                   colorScheme: "warning" as const,
                   onClick: () =>
                     alert(
-                      `Marquer ${row.original.id} comme utilisée (simulation)`
+                      `Marquer ${row.original.id} comme utilisée (simulation)`,
                     ),
-                }
+                },
               ]
               : []),
             ...(canCancel
@@ -202,7 +202,7 @@ export default function OrdersReceivedList({ data }: { data: Order[] }) {
                   colorScheme: "danger" as const,
                   onClick: () =>
                     alert(`Annuler ${row.original.id} (simulation)`),
-                }
+                },
               ]
               : []),
 
@@ -217,7 +217,7 @@ export default function OrdersReceivedList({ data }: { data: Order[] }) {
               leftIcon: <DownloadIcon className="w-4 h-4" />,
               colorScheme: "secondary" as const,
               onClick: () => alert(`Télécharger ticket ${row.original.id}`),
-            }
+            },
           ];
         }}
       />

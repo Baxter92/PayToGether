@@ -81,5 +81,25 @@ public class CommentaireApiAdapter {
         log.debug("Suppression du commentaire: {}", uuid);
         commentaireService.supprimerParUuid(uuid);
     }
+
+    /**
+     * Trouver toutes les réponses d'un commentaire parent
+     */
+    public List<CommentaireDTO> trouverReponsesParCommentaireParent(UUID commentaireParentUuid) {
+        log.debug("Recherche des réponses du commentaire: {}", commentaireParentUuid);
+
+        return commentaireService.lireReponsesParCommentaireParent(commentaireParentUuid)
+                .stream()
+                .map(mapper::modeleVersDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Mettre à jour le flag pertinent d'une réponse
+     */
+    public void mettreAJourFlagPertinent(UUID uuid, Boolean estPertinent) {
+        log.debug("Mise à jour du flag pertinent pour le commentaire: {} -> {}", uuid, estPertinent);
+        commentaireService.mettreAJourFlagPertinent(uuid, estPertinent);
+    }
 }
 

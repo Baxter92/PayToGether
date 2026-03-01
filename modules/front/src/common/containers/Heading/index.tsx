@@ -86,7 +86,7 @@ export const Heading = ({
                 underlineStyle === "text" &&
                 "underline underline-offset-4",
               align === "center" && "text-center",
-              align === "right" && "text-right"
+              align === "right" && "text-right",
             )}
           >
             {title}
@@ -100,7 +100,7 @@ export const Heading = ({
                 underlineColor,
                 underlineWidth,
                 align === "center" && "mx-auto",
-                align === "right" && "ml-auto"
+                align === "right" && "ml-auto",
               )}
             />
           )}
@@ -116,7 +116,7 @@ export const Heading = ({
             descriptionSizeMap[descriptionSize],
             "text-muted-foreground",
             align === "center" && "text-center",
-            align === "right" && "text-right"
+            align === "right" && "text-right",
           )}
         >
           {description}

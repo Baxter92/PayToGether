@@ -19,15 +19,15 @@ export default function ProductDetails({ deal }: { deal: Deal }) {
   }, [deal.expiryDate]);
 
   return (
-    <section className="mt-6 bg-white rounded-lg p-5 shadow-sm">
-      <h2 className="text-2xl font-semibold">{deal.title}</h2>
+    <section className="mt-6 bg-white dark:bg-gray-800 rounded-lg p-5 shadow-sm">
+      <h2 className="text-2xl font-semibold text-foreground">{deal.title}</h2>
 
       <div className="flex items-center gap-4 mt-4">
         <Badge>{deal.rating} ★</Badge>
-        <div className="text-sm text-gray-600">{deal.reviewsCount} avis</div>
-        <div className="text-sm text-gray-500">{deal.location}</div>
+        <div className="text-sm text-gray-600 dark:text-gray-400">{deal.reviewsCount} avis</div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">{deal.location}</div>
         {deal.expiryDate && (
-          <div className="ml-2 text-sm text-red-600">
+          <div className="ml-2 text-sm text-red-600 dark:text-red-400">
             Expire dans {expiresIn}
           </div>
         )}
@@ -35,22 +35,22 @@ export default function ProductDetails({ deal }: { deal: Deal }) {
 
       <Separator className="my-4" />
 
-      <p className="mt-3 text-gray-700 leading-relaxed">{deal.description}</p>
+      <p className="mt-3 text-gray-700 dark:text-gray-300 leading-relaxed">{deal.description}</p>
 
       <div className="mt-4">
-        <h4 className="font-medium">Disponibilité</h4>
+        <h4 className="font-medium text-foreground">Disponibilité</h4>
         <div className="mt-2">
-          <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+          <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
             <div
               className="h-3 bg-green-500"
               style={{ width: `${percent}%` }}
             />
           </div>
-          <div className="mt-2 text-sm text-gray-700">
+          <div className="mt-2 text-sm text-gray-700 dark:text-gray-300">
             {deal.partsSold} vendues • {partsRemaining} restantes (sur{" "}
             {deal.partsTotal})
           </div>
-          <div className="mt-1 text-sm text-gray-600">
+          <div className="mt-1 text-sm text-gray-600 dark:text-gray-400">
             Nécessaire pour activer l'offre : {deal.minRequired} parts
           </div>
         </div>
@@ -60,8 +60,8 @@ export default function ProductDetails({ deal }: { deal: Deal }) {
 
       <div className="mt-4 grid grid-cols-1 gap-4">
         <div>
-          <h3 className="font-semibold">Points forts</h3>
-          <ul className="mt-2 list-disc list-inside text-gray-700">
+          <h3 className="font-semibold text-foreground">Points forts</h3>
+          <ul className="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
             {deal.highlights?.map((h) => (
               <li key={h}>{h}</li>
             ))}

@@ -114,7 +114,7 @@ export function Dropdown({
                 </div>
               )}
             </DropdownMenuItem>
-          )
+          ),
         )}
       </DropdownMenuContent>
     </DropdownMenu>

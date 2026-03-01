@@ -149,7 +149,7 @@ export default function Grid({
     gapClsOrStyle.cls,
     rowGapClsOrStyle.cls,
     colGapClsOrStyle.cls,
-    className
+    className,
   );
 
   const inlineStyle: React.CSSProperties = {
@@ -177,7 +177,7 @@ export default function Grid({
             <div key={idx} className={itemWrapperClassName}>
               {child}
             </div>
-          ) : null
+          ) : null,
         )
         : children;
 

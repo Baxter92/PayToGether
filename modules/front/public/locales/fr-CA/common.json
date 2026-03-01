@@ -41,5 +41,10 @@
     "days": "jours",
     "selectedLigne": "ligne sélectionnée",
     "selectedLignes": "lignes sélectionnées",
-    "on": "sur"
+    "on": "sur",
+    "theme": "Thème",
+    "changeTheme": "Changer le thème",
+    "lightTheme": "Clair",
+    "darkTheme": "Sombre",
+    "systemTheme": "Système"
 }

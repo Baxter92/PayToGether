@@ -29,7 +29,7 @@ export default function Radio({
       <label
         className={cn(
           "flex items-center gap-2 cursor-pointer",
-          disabled && "opacity-50 cursor-not-allowed"
+          disabled && "opacity-50 cursor-not-allowed",
         )}
       >
         {position === "left" && label && (
@@ -47,7 +47,7 @@ export default function Radio({
               "focus-visible:ring-ring/50 focus-visible:border-ring",
               "disabled:opacity-50 disabled:cursor-not-allowed",
               error && "border-destructive",
-              className
+              className,
             )}
             {...props}
           />

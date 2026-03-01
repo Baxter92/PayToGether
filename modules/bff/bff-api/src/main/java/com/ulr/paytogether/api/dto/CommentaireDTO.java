@@ -41,6 +41,17 @@ public class CommentaireDTO {
     @NotNull(message = "L'UUID du deal est obligatoire")
     private UUID dealUuid;
 
+    /**
+     * UUID du commentaire parent (null si c'est un commentaire racine)
+     */
+    private UUID commentaireParentUuid;
+
+    /**
+     * Flag indiquant si la réponse est marquée comme pertinente
+     * Utilisé uniquement pour les réponses (commentaireParentUuid != null)
+     */
+    private Boolean estPertinent;
+
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime dateCreation;
 
