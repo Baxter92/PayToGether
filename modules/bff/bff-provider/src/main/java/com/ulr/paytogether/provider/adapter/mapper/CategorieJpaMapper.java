@@ -32,7 +32,6 @@ public class CategorieJpaMapper {
     public CategorieJpa versEntite(CategorieModele modele) {
         if (modele == null) return null;
         return CategorieJpa.builder()
-                .uuid(modele.getUuid())
                 .nom(modele.getNom())
                 .description(modele.getDescription())
                 .icone(modele.getIcone())

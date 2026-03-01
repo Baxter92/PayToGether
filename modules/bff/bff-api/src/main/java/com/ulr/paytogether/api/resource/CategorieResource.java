@@ -30,7 +30,7 @@ public class CategorieResource {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<CategorieDTO> creer(@Valid @RequestBody CategorieDTO categorieDTO) {
+    public ResponseEntity<CategorieDTO> creer( @RequestBody CategorieDTO categorieDTO) {
         log.info("Création d'une catégorie: {}", categorieDTO.getNom());
 
         try {
@@ -43,8 +43,9 @@ public class CategorieResource {
     }
 
     /**
-     * Récupérer une catégorie par son UUID
+     * Récupérer une catégorie par son UUID (AUTHENTIFICATION REQUISE)
      */
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{uuid}")
     public ResponseEntity<CategorieDTO> lireParUuid(@PathVariable UUID uuid) {
         log.debug("Lecture de la catégorie: {}", uuid);
@@ -54,8 +55,9 @@ public class CategorieResource {
     }
 
     /**
-     * Récupérer une catégorie par son nom
+     * Récupérer une catégorie par son nom (AUTHENTIFICATION REQUISE)
      */
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/nom/{nom}")
     public ResponseEntity<CategorieDTO> lireParNom(@PathVariable String nom) {
         log.debug("Lecture de la catégorie par nom: {}", nom);
@@ -65,7 +67,7 @@ public class CategorieResource {
     }
 
     /**
-     * Récupérer toutes les catégories
+     * Récupérer toutes les catégories (PUBLIC - GET uniquement)
      */
     @GetMapping
     public ResponseEntity<List<CategorieDTO>> lireTous() {
@@ -75,8 +77,9 @@ public class CategorieResource {
     }
 
     /**
-     * Vérifier si une catégorie existe par son nom
+     * Vérifier si une catégorie existe par son nom (AUTHENTIFICATION REQUISE)
      */
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/existe/{nom}")
     public ResponseEntity<Boolean> existeParNom(@PathVariable String nom) {
         log.debug("Vérification de l'existence de la catégorie: {}", nom);

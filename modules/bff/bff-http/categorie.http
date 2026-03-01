@@ -8,9 +8,9 @@ Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
-  "nom": "POISSON",
+  "nom": "LEGUMES",
   "description": "Produits de la mer et poissons frais",
-  "icone": "fish-icon.svg"
+  "icone": "leaf-icon.svg"
 }
 
 ### 2. Créer une autre catégorie (POST)

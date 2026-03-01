@@ -2,6 +2,7 @@ package com.ulr.paytogether.configuration;
 
 import com.ulr.paytogether.configuration.security.DynamicRealmJwtDecoder;
 import com.ulr.paytogether.configuration.security.JwtConverter;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,7 +66,6 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/deals/villes").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/deals/*/images/*/url").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/deals/*").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/deals/categorie/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/deals/*/commentaires").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/publicites/actives").permitAll()
@@ -80,7 +80,7 @@ public class SecurityConfiguration {
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .authenticationEntryPoint((request, response, authException) -> {
                             // Ne pas retourner 401 pour les endpoints publics
-                            if (isPublicEndpoint(request.getRequestURI())) {
+                            if (isPublicEndpoint(request)) {
                                 response.setStatus(HttpServletResponse.SC_OK);
                                 return;
                             }
@@ -90,7 +90,7 @@ public class SecurityConfiguration {
                         })
                         .bearerTokenResolver(request -> {
                             // Ne pas extraire le token pour les endpoints publics
-                            if (isPublicEndpoint(request.getRequestURI())) {
+                            if (isPublicEndpoint(request)) {
                                 return null;
                             }
                             return new DefaultBearerTokenResolver().resolve(request);
@@ -106,20 +106,22 @@ public class SecurityConfiguration {
     /**
      * Vérifie si un endpoint est public (ne nécessite pas d'authentification)
      *
-     * @param path le chemin de la requête
+     * @param request la requête HTTP
      * @return true si l'endpoint est public, false sinon
      */
-    private boolean isPublicEndpoint(String path) {
+    private boolean isPublicEndpoint(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+
         return path.startsWith("/api/public/") ||
                path.startsWith("/api/auth/login") ||
                path.startsWith("/api/auth/register") ||
                path.startsWith("/api/deals/statut") ||
                path.startsWith("/api/deals/villes") ||
-               path.startsWith("/api/deals/categorie/") ||
                (path.startsWith("/api/deals/") && path.contains("/images/") && path.endsWith("/url")) ||
                (path.startsWith("/api/deals/") && path.contains("/commentaires")) ||
-               (path.matches("/api/deals/[0-9a-fA-F\\-]+") && !path.contains("/")) || // Deal par UUID
-               path.startsWith("/api/categories") ||
+               (path.matches("/api/deals/[0-9a-fA-F\\-]+") && !path.contains("/")) ||
+               (path.equals("/api/categories") && "GET".equals(method)) || // UNIQUEMENT GET /api/categories
                path.startsWith("/api/publicites/actives") ||
                (path.startsWith("/api/publicites/") && path.contains("/images/") && path.endsWith("/url")) ||
                path.startsWith("/actuator/") ||

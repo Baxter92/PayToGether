@@ -48,26 +48,26 @@ public class JwtCookieFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return isPublicEndpoint(request.getRequestURI());
+        return isPublicEndpoint(request.getRequestURI(), request.getMethod());
     }
 
     /**
      * Vérifie si un endpoint est public (ne nécessite pas d'authentification)
      *
      * @param path le chemin de la requête
+     * @param method la méthode HTTP (GET, POST, etc.)
      * @return true si l'endpoint est public, false sinon
      */
-    private boolean isPublicEndpoint(String path) {
+    private boolean isPublicEndpoint(String path, String method) {
         return path.startsWith("/api/public/") ||
                path.startsWith("/api/auth/login") ||
                path.startsWith("/api/auth/register") ||
                path.startsWith("/api/deals/statut") ||
                path.startsWith("/api/deals/villes") ||
-               path.startsWith("/api/deals/categorie/") ||
                (path.startsWith("/api/deals/") && path.contains("/images/") && path.endsWith("/url")) ||
                (path.startsWith("/api/deals/") && path.contains("/commentaires")) ||
                (path.matches("/api/deals/[0-9a-fA-F\\-]+") && !path.contains("/images") && !path.contains("/commentaires")) ||
-               path.startsWith("/api/categories") ||
+               (path.equals("/api/categories") && "GET".equals(method)) || // UNIQUEMENT GET
                path.startsWith("/api/publicites/actives") ||
                (path.startsWith("/api/publicites/") && path.contains("/images/") && path.endsWith("/url")) ||
                path.startsWith("/actuator/") ||

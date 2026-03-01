@@ -8,10 +8,10 @@ Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
-  "nom": "Admin",
+  "nom": "Ronald",
   "prenom": "Test",
-  "email": "admin.test@hana.com",
-  "motDePasse": "MotDePasse123!",
+  "email": "ronald@hana.com",
+  "motDePasse": "12345678",
   "statut": "ACTIF",
   "role": "ADMIN"
 }
