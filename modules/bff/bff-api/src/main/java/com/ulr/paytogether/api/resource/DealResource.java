@@ -1,5 +1,6 @@
 package com.ulr.paytogether.api.resource;
 
+import com.ulr.paytogether.api.apiadapter.CommentaireApiAdapter;
 import com.ulr.paytogether.api.apiadapter.DealApiAdapter;
 import com.ulr.paytogether.api.dto.*;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
@@ -13,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -27,6 +29,7 @@ import java.util.UUID;
 public class DealResource {
 
     private final DealApiAdapter dealApiAdapter;
+    private final CommentaireApiAdapter commentaireApiAdapter;
 
     /**
      * Créer un nouveau deal
@@ -42,7 +45,7 @@ public class DealResource {
     }
 
     /**
-     * Récupérer un deal par son UUID
+     * Récupérer un deal par son UUID (PUBLIC)
      */
     @GetMapping("/{uuid}")
     public ResponseEntity<DealResponseDto> lireParUuid(@PathVariable UUID uuid) {
@@ -83,7 +86,7 @@ public class DealResource {
     }
 
     /**
-     * Récupérer les deals d'une catégorie
+     * Récupérer les deals d'une catégorie (PUBLIC)
      */
     @GetMapping("/categorie/{categorieUuid}")
     public ResponseEntity<List<DealResponseDto>> lireParCategorie(@PathVariable UUID categorieUuid) {
@@ -194,21 +197,31 @@ public class DealResource {
     }
 
     /**
-     * Obtenir l'URL de lecture d'une image
+     * Obtenir l'URL de lecture d'une image (PUBLIC)
      * Génère une URL présignée pour lire l'image depuis MinIO
      */
     @GetMapping("/{dealUuid}/images/{imageUuid}/url")
-    public ResponseEntity<java.util.Map<String, String>> obtenirUrlImage(
+    public ResponseEntity<Map<String, String>> obtenirUrlImage(
             @PathVariable UUID dealUuid,
             @PathVariable UUID imageUuid) {
         log.debug("Récupération de l'URL de lecture pour l'image {} du deal {}", imageUuid, dealUuid);
 
         try {
             String urlLecture = dealApiAdapter.obtenirUrlLectureImage(dealUuid, imageUuid);
-            return ResponseEntity.ok(java.util.Map.of("url", urlLecture));
+            return ResponseEntity.ok(Map.of("url", urlLecture));
         } catch (IllegalArgumentException e) {
             log.error("Erreur lors de la récupération de l'URL de lecture: {}", e.getMessage());
             return ResponseEntity.notFound().build();
         }
+    }
+
+    /**
+     * Récupérer tous les commentaires d'un deal (PUBLIC)
+     */
+    @GetMapping("/{dealUuid}/commentaires")
+    public ResponseEntity<List<CommentaireDTO>> lireCommentaires(@PathVariable UUID dealUuid) {
+        log.debug("Récupération des commentaires du deal: {}", dealUuid);
+        List<CommentaireDTO> commentaires = commentaireApiAdapter.trouverParDeal(dealUuid);
+        return ResponseEntity.ok(commentaires);
     }
 }

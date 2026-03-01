@@ -50,6 +50,9 @@ public class PubliciteResource {
         return ResponseEntity.ok(publicites);
     }
 
+    /**
+     * Récupérer les publicités actives (PUBLIC)
+     */
     @GetMapping("/actives")
     public ResponseEntity<List<PubliciteDTO>> lireActives() {
         log.debug("Lecture des publicités actives");
@@ -99,7 +102,7 @@ public class PubliciteResource {
     }
 
     /**
-     * Obtenir l'URL de lecture d'une image de publicité
+     * Obtenir l'URL de lecture d'une image de publicité (PUBLIC)
      * Génère une URL présignée pour lire l'image depuis MinIO
      */
     @GetMapping("/{publiciteUuid}/images/{imageUuid}/url")

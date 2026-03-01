@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -45,8 +46,12 @@ public class DealServiceImpl implements DealService {
         return dealProvider.trouverTous();
     }
 
+    @Transactional
     @Override
     public List<DealModele> lireParStatut(StatutDeal statut) {
+        // Vérifier et mettre à jour les deals expirés avant de retourner les résultats
+        verifierEtMettreAJourDealsExpires();
+
         return dealProvider.trouverParStatut(statut);
     }
 
@@ -168,5 +173,29 @@ public class DealServiceImpl implements DealService {
     public String obtenirUrlLectureImage(UUID dealUuid, UUID imageUuid) {
         return dealProvider.obtenirUrlLectureImage(dealUuid, imageUuid);
     }
-}
 
+    @Transactional
+    @Override
+    public void verifierEtMettreAJourDealsExpires() {
+        log.debug("Vérification des deals expirés...");
+
+        // Récupérer tous les deals PUBLIE
+        List<DealModele> dealsPublies = dealProvider.trouverParStatut(StatutDeal.PUBLIE);
+
+        LocalDateTime maintenant = LocalDateTime.now();
+        int nombreDealsExpires = 0;
+
+        for (DealModele deal : dealsPublies) {
+            // Vérifier si la date d'expiration est dépassée
+            if (deal.getDateExpiration() != null && deal.getDateExpiration().isBefore(maintenant)) {
+                log.info("Deal {} expiré (date expiration: {})", deal.getUuid(), deal.getDateExpiration());
+                dealProvider.mettreAJourStatut(deal.getUuid(), StatutDeal.EXPIRE);
+                nombreDealsExpires++;
+            }
+        }
+
+        if (nombreDealsExpires > 0) {
+            log.info("{} deal(s) mis à jour vers le statut EXPIRE", nombreDealsExpires);
+        }
+    }
+}

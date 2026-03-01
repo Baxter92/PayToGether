@@ -78,4 +78,10 @@ public interface DealService {
      * Obtenir l'URL de lecture d'une image d'un deal
      */
     String obtenirUrlLectureImage(UUID dealUuid, UUID imageUuid);
+
+    /**
+     * Vérifier et mettre à jour les deals expirés
+     * Change le statut des deals PUBLIE dont la date d'expiration est dépassée vers EXPIRE
+     */
+    void verifierEtMettreAJourDealsExpires();
 }

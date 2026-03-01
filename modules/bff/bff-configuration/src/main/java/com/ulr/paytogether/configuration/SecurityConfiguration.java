@@ -61,10 +61,15 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/public/**", "/api/auth/login").permitAll()
                         .requestMatchers("/api/public/**", "/api/auth/register").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/deals/statut/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/deals/villes").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/deals/*/images/*/url").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/categories").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/deals/statut/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/deals/villes").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/deals/*/images/*/url").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/deals/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/deals/categorie/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/deals/*/commentaires").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/categories").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/publicites/actives").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/publicites/*/images/*/url").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         // Tous les autres endpoints nécessitent une authentification
                         .anyRequest().authenticated()
@@ -110,8 +115,13 @@ public class SecurityConfiguration {
                path.startsWith("/api/auth/register") ||
                path.startsWith("/api/deals/statut") ||
                path.startsWith("/api/deals/villes") ||
+               path.startsWith("/api/deals/categorie/") ||
                (path.startsWith("/api/deals/") && path.contains("/images/") && path.endsWith("/url")) ||
+               (path.startsWith("/api/deals/") && path.contains("/commentaires")) ||
+               (path.matches("/api/deals/[0-9a-fA-F\\-]+") && !path.contains("/")) || // Deal par UUID
                path.startsWith("/api/categories") ||
+               path.startsWith("/api/publicites/actives") ||
+               (path.startsWith("/api/publicites/") && path.contains("/images/") && path.endsWith("/url")) ||
                path.startsWith("/actuator/") ||
                path.startsWith("/swagger-ui/") ||
                path.startsWith("/v3/api-docs/");
