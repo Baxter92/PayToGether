@@ -1,0 +1,122 @@
+### Configuration
+@baseUrl = http://localhost:8080
+@contentType = application/json
+
+### Variables pour les tests
+@commandeUuid = 550e8400-e29b-41d4-a716-446655440000
+@utilisateurUuid = 550e8400-e29b-41d4-a716-446655440001
+@paiementUuid = 550e8400-e29b-41d4-a716-446655440002
+@squareToken = cnon:card-nonce-ok
+
+###############################################################################
+# 1. Créer un paiement Square avec carte de crédit
+###############################################################################
+POST {{baseUrl}}/api/square-payments
+Content-Type: {{contentType}}
+
+{
+  "commandeUuid": "{{commandeUuid}}",
+  "utilisateurUuid": "{{utilisateurUuid}}",
+  "montant": 99.99,
+  "squareToken": "{{squareToken}}",
+  "methodePaiement": "SQUARE_CARD",
+  "locationId": "main"
+}
+
+###############################################################################
+# 2. Créer un paiement Square avec Google Pay
+###############################################################################
+POST {{baseUrl}}/api/square-payments
+Content-Type: {{contentType}}
+
+{
+  "commandeUuid": "{{commandeUuid}}",
+  "utilisateurUuid": "{{utilisateurUuid}}",
+  "montant": 149.99,
+  "squareToken": "cnon:google-pay-nonce",
+  "methodePaiement": "SQUARE_GOOGLE_PAY",
+  "locationId": "main"
+}
+
+###############################################################################
+# 3. Créer un paiement Square avec Apple Pay
+###############################################################################
+POST {{baseUrl}}/api/square-payments
+Content-Type: {{contentType}}
+
+{
+  "commandeUuid": "{{commandeUuid}}",
+  "utilisateurUuid": "{{utilisateurUuid}}",
+  "montant": 199.99,
+  "squareToken": "cnon:apple-pay-nonce",
+  "methodePaiement": "SQUARE_APPLE_PAY",
+  "locationId": "main"
+}
+
+###############################################################################
+# 4. Créer un paiement Square avec Cash App Pay
+###############################################################################
+POST {{baseUrl}}/api/square-payments
+Content-Type: {{contentType}}
+
+{
+  "commandeUuid": "{{commandeUuid}}",
+  "utilisateurUuid": "{{utilisateurUuid}}",
+  "montant": 79.99,
+  "squareToken": "cnon:cash-app-pay-nonce",
+  "methodePaiement": "SQUARE_CASH_APP_PAY",
+  "locationId": "main"
+}
+
+###############################################################################
+# 5. Vérifier le statut d'un paiement Square
+###############################################################################
+GET {{baseUrl}}/api/square-payments/{{paiementUuid}}/status
+
+###############################################################################
+# 6. Rembourser un paiement Square
+###############################################################################
+POST {{baseUrl}}/api/square-payments/{{paiementUuid}}/refund
+Content-Type: {{contentType}}
+
+###############################################################################
+# 7. Test avec données invalides (montant négatif)
+###############################################################################
+POST {{baseUrl}}/api/square-payments
+Content-Type: {{contentType}}
+
+{
+  "commandeUuid": "{{commandeUuid}}",
+  "utilisateurUuid": "{{utilisateurUuid}}",
+  "montant": -50.00,
+  "squareToken": "{{squareToken}}",
+  "methodePaiement": "SQUARE_CARD"
+}
+
+###############################################################################
+# 8. Test avec token manquant
+###############################################################################
+POST {{baseUrl}}/api/square-payments
+Content-Type: {{contentType}}
+
+{
+  "commandeUuid": "{{commandeUuid}}",
+  "utilisateurUuid": "{{utilisateurUuid}}",
+  "montant": 99.99,
+  "methodePaiement": "SQUARE_CARD"
+}
+
+###############################################################################
+# 9. Test avec méthode de paiement invalide
+###############################################################################
+POST {{baseUrl}}/api/square-payments
+Content-Type: {{contentType}}
+
+{
+  "commandeUuid": "{{commandeUuid}}",
+  "utilisateurUuid": "{{utilisateurUuid}}",
+  "montant": 99.99,
+  "squareToken": "{{squareToken}}",
+  "methodePaiement": "INVALID_METHOD"
+}
+

@@ -7,10 +7,12 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="bff-configuration" />
-        <module name="bff-api" />
         <module name="bff-provider" />
         <module name="bff-wsclient" />
+        <module name="bff-event" />
+        <module name="bff-event-dispatcher" />
+        <module name="bff-configuration" />
+        <module name="bff-api" />
         <module name="bff-core" />
       </profile>
     </annotationProcessing>
@@ -23,6 +25,8 @@
       <module name="bff-api" options="-parameters" />
       <module name="bff-configuration" options="-parameters" />
       <module name="bff-core" options="-parameters" />
+      <module name="bff-event" options="-parameters" />
+      <module name="bff-event-dispatcher" options="-parameters" />
       <module name="bff-provider" options="-parameters" />
       <module name="bff-wsclient" options="-parameters" />
     </option>

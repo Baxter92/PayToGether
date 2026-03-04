@@ -1,5 +1,6 @@
 package com.ulr.paytogether.core.domaine.validator;
 
+import com.ulr.paytogether.core.enumeration.MethodePaiement;
 import com.ulr.paytogether.core.enumeration.StatutPaiement;
 import com.ulr.paytogether.core.exception.ValidationException;
 import com.ulr.paytogether.core.modele.PaiementModele;
@@ -10,6 +11,7 @@ import java.math.BigDecimal;
 /**
  * Validator pour les entités Paiement
  * Centralise toutes les règles métier de validation
+ * Support Square Payment avec validations spécifiques
  */
 @Component
 public class PaiementValidator {
@@ -33,6 +35,10 @@ public class PaiementValidator {
             throw new ValidationException("paiement.montant.positif");
         }
 
+        // Validation de la méthode de paiement
+        if (paiement.getMethodePaiement() == null) {
+            throw new ValidationException("paiement.methodePaiement.obligatoire");
+        }
 
         // Validation du statut (obligatoire)
         if (paiement.getStatut() == null) {
@@ -47,6 +53,11 @@ public class PaiementValidator {
         // Validation de la commande (obligatoire)
         if (paiement.getCommande() == null || paiement.getCommande().getUuid() == null) {
             throw new ValidationException("paiement.commandeUuid.obligatoire");
+        }
+
+        // Validations spécifiques Square
+        if (isSquarePayment(paiement.getMethodePaiement())) {
+            validerPaiementSquare(paiement);
         }
     }
 
@@ -119,5 +130,81 @@ public class PaiementValidator {
             throw new ValidationException("paiement.montant.positif");
         }
     }
+
+    /**
+     * Validation spécifique pour les paiements Square
+     */
+    private void validerPaiementSquare(PaiementModele paiement) {
+        // Token obligatoire pour initier un paiement Square
+        if (paiement.getStatut() == StatutPaiement.EN_ATTENTE &&
+            (paiement.getSquareToken() == null || paiement.getSquareToken().isBlank())) {
+            throw new ValidationException("paiement.square.token.obligatoire");
+        }
+
+        // Validation du token (doit commencer par les préfixes Square)
+        if (paiement.getSquareToken() != null && !paiement.getSquareToken().isBlank()) {
+            if (!paiement.getSquareToken().startsWith("cnon:") &&
+                !paiement.getSquareToken().startsWith("tok:")) {
+                throw new ValidationException("paiement.square.token.format.invalide");
+            }
+        }
+    }
+
+    /**
+     * Validation de la transition de statut
+     */
+    public void validerTransitionStatut(StatutPaiement statutActuel, StatutPaiement nouveauStatut) {
+        if (nouveauStatut == null) {
+            throw new ValidationException("paiement.statut.obligatoire");
+        }
+
+        if (statutActuel == null) {
+            throw new ValidationException("paiement.statut.actuel.null");
+        }
+
+        // Règles de transition d'état
+        switch (statutActuel) {
+            case EN_ATTENTE:
+                if (nouveauStatut != StatutPaiement.PROCESSING &&
+                    nouveauStatut != StatutPaiement.ECHOUE &&
+                    nouveauStatut != StatutPaiement.CANCELLED) {
+                    throw new ValidationException("paiement.statut.transition.invalide", statutActuel, nouveauStatut);
+                }
+                break;
+
+            case PROCESSING:
+                if (nouveauStatut != StatutPaiement.CONFIRME &&
+                    nouveauStatut != StatutPaiement.ECHOUE) {
+                    throw new ValidationException("paiement.statut.transition.invalide", statutActuel, nouveauStatut);
+                }
+                break;
+
+            case CONFIRME:
+                if (nouveauStatut != StatutPaiement.REFUNDED) {
+                    throw new ValidationException("paiement.statut.transition.invalide", statutActuel, nouveauStatut);
+                }
+                break;
+
+            case ECHOUE:
+            case CANCELLED:
+            case REFUNDED:
+                // États finaux : aucune transition autorisée
+                if (nouveauStatut != statutActuel) {
+                    throw new ValidationException("paiement.statut.final.immuable", statutActuel);
+                }
+                break;
+        }
+    }
+
+    /**
+     * Vérifie si la méthode de paiement est une méthode Square
+     */
+    private boolean isSquarePayment(MethodePaiement methode) {
+        return methode == MethodePaiement.SQUARE_CARD ||
+               methode == MethodePaiement.SQUARE_GOOGLE_PAY ||
+               methode == MethodePaiement.SQUARE_APPLE_PAY ||
+               methode == MethodePaiement.SQUARE_CASH_APP_PAY;
+    }
 }
+
 

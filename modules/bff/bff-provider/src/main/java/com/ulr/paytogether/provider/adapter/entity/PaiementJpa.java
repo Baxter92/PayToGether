@@ -1,6 +1,5 @@
 package com.ulr.paytogether.provider.adapter.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ulr.paytogether.core.enumeration.MethodePaiement;
 import com.ulr.paytogether.core.enumeration.StatutPaiement;
 import jakarta.persistence.*;
@@ -18,6 +17,7 @@ import java.util.UUID;
 /**
  * Entité JPA Paiement (spécifique à la base de données)
  * Préfixe "Jpa" selon les instructions de l'architecture
+ * Support Square Payment avec champs additionnels
  */
 @Entity
 @Table(name = "paiement")
@@ -44,6 +44,25 @@ public class PaiementJpa {
 
     @Column(unique = true, length = 255)
     private String transactionId;
+
+    // Champs spécifiques Square Payment
+    @Column(length = 255)
+    private String squarePaymentId;
+
+    @Column(length = 255)
+    private String squareOrderId;
+
+    @Column(length = 255)
+    private String squareLocationId;
+
+    @Column(length = 500)
+    private String squareReceiptUrl;
+
+    @Column(length = 500)
+    private String squareToken;
+
+    @Column(length = 1000)
+    private String messageErreur;
 
     @OneToOne
     @JoinColumn(name = "utilisateur_uuid", nullable = false)

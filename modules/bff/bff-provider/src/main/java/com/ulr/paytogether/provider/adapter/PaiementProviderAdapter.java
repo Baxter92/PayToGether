@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
  * Adaptateur JPA pour le paiement
  * Implémente le port PaiementProvider défini dans bff-core
  * Fait le pont entre le domaine métier et la couche de persistence JPA
+ * Support Square Payment avec méthodes additionnelles
  */
 @Component
 @RequiredArgsConstructor
@@ -36,6 +37,28 @@ public class PaiementProviderAdapter implements PaiementProvider {
     }
 
     @Override
+    public PaiementModele mettreAJour(UUID uuid, PaiementModele paiement) {
+        PaiementJpa entite = jpaRepository.findById(uuid)
+            .orElseThrow(() -> new IllegalArgumentException("Paiement non trouvé : " + uuid));
+
+        // Mettre à jour les champs
+        entite.setMontant(paiement.getMontant());
+        entite.setStatut(paiement.getStatut());
+        entite.setMethodePaiement(paiement.getMethodePaiement());
+        entite.setTransactionId(paiement.getTransactionId());
+        entite.setSquarePaymentId(paiement.getSquarePaymentId());
+        entite.setSquareOrderId(paiement.getSquareOrderId());
+        entite.setSquareLocationId(paiement.getSquareLocationId());
+        entite.setSquareReceiptUrl(paiement.getSquareReceiptUrl());
+        entite.setSquareToken(paiement.getSquareToken());
+        entite.setMessageErreur(paiement.getMessageErreur());
+        entite.setDatePaiement(paiement.getDatePaiement());
+
+        PaiementJpa sauvegarde = jpaRepository.save(entite);
+        return mapper.versModele(sauvegarde);
+    }
+
+    @Override
     public Optional<PaiementModele> trouverParUuid(UUID uuid) {
         return jpaRepository.findById(uuid)
                 .map(mapper::versModele);
@@ -43,9 +66,14 @@ public class PaiementProviderAdapter implements PaiementProvider {
 
     @Override
     public Optional<PaiementModele> trouverParTransactionId(String transactionId) {
-        // Cette méthode n'est pas implémentée dans le repository actuel
-        // On retourne un Optional vide pour le moment
-        return Optional.empty();
+        return jpaRepository.findByTransactionId(transactionId)
+                .map(mapper::versModele);
+    }
+
+    @Override
+    public Optional<PaiementModele> trouverParSquarePaymentId(String squarePaymentId) {
+        return jpaRepository.findBySquarePaymentId(squarePaymentId)
+                .map(mapper::versModele);
     }
 
     @Override
@@ -61,7 +89,10 @@ public class PaiementProviderAdapter implements PaiementProvider {
 
     @Override
     public List<PaiementModele> trouverParCommande(UUID commandeUuid) {
-        return List.of();
+        return jpaRepository.findByCommandeJpaUuid(commandeUuid)
+                .stream()
+                .map(mapper::versModele)
+                .collect(Collectors.toList());
     }
 
     @Override

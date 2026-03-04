@@ -13,6 +13,7 @@ import java.util.UUID;
 
 /**
  * Modèle métier Paiement (indépendant de JPA)
+ * Support Square Payment avec champs additionnels
  */
 @Data
 @Builder
@@ -25,6 +26,15 @@ public class PaiementModele {
     private StatutPaiement statut;
     private MethodePaiement methodePaiement;
     private String transactionId;
+
+    // Champs spécifiques Square Payment
+    private String squarePaymentId;      // ID du paiement Square
+    private String squareOrderId;        // ID de la commande Square
+    private String squareLocationId;     // ID du lieu Square
+    private String squareReceiptUrl;     // URL du reçu Square
+    private String squareToken;          // Token de paiement Square (sécurisé)
+    private String messageErreur;        // Message d'erreur en cas d'échec
+
     private UtilisateurModele utilisateur;
     private CommandeModele commande;
     private LocalDateTime datePaiement;
