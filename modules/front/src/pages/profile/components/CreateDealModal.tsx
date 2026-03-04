@@ -32,6 +32,7 @@ import type { ImageResponse } from "@/common/api/hooks/useImageUpload";
 import { toast } from "sonner";
 import { dealSchema } from "@/common/schemas/deal.schema";
 import { cn } from "@/common/utils";
+import { useAuth } from "@/common/context/AuthContext";
 
 /* ==============================
    Constants
@@ -659,8 +660,11 @@ export function CreateDealModal({
   initialData?: DealDTO | null;
   connectedMerchantUuid?: string;
 }) {
+  const { isAdmin } = useAuth();
   const { data: categoriesData } = useCategories();
-  const { data: usersData } = useUsers();
+  const { data: usersData } = useUsers(undefined, {
+    enabled: isAdmin,
+  });
   const {
     mutateAsync: createDeal,
     isPending: isCreating,

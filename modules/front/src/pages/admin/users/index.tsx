@@ -164,11 +164,6 @@ export default function AdminUsers(): ReactElement {
         data: {
           nom: data.nom ?? "",
           prenom: data.prenom ?? "",
-          email: data.email,
-          motDePasse: data.motDePasse,
-          statut: selectedUser.statut,
-          role: selectedUser.role,
-          photoProfil: data.photoProfil,
         },
       });
 
@@ -394,15 +389,15 @@ export default function AdminUsers(): ReactElement {
                       setOpenEditModal(true);
                     },
                   },
-                  {
-                    leftIcon: <KeyRound className="h-4 w-4" />,
-                    tooltip: "Réinitialiser mot de passe",
-                    disabled: isActionsPending,
-                    onClick: () => {
-                      setSelectedUser(user);
-                      setOpenResetPasswordModal(true);
-                    },
-                  },
+                  // {
+                  //   leftIcon: <KeyRound className="h-4 w-4" />,
+                  //   tooltip: "Réinitialiser mot de passe",
+                  //   disabled: isActionsPending,
+                  //   onClick: () => {
+                  //     setSelectedUser(user);
+                  //     setOpenResetPasswordModal(true);
+                  //   },
+                  // },
                   {
                     leftIcon: <Trash2 className="h-4 w-4" />,
                     tooltip: "Supprimer",
@@ -435,7 +430,6 @@ export default function AdminUsers(): ReactElement {
               prenom: "",
               email: "",
               motDePasse: "",
-              photoProfil: "",
               statut: StatutUtilisateur.ACTIF,
               role: RoleUtilisateur.UTILISATEUR,
             }}
@@ -511,9 +505,6 @@ export default function AdminUsers(): ReactElement {
               defaultValues={{
                 nom: selectedUser.nom,
                 prenom: selectedUser.prenom,
-                email: selectedUser.email,
-                motDePasse: "",
-                photoProfil: selectedUser.photoProfil || "",
               }}
               onSubmit={async ({ data }) => {
                 await handleUpdateUser(data);
@@ -534,17 +525,6 @@ export default function AdminUsers(): ReactElement {
               fields={[
                 { name: "nom", label: "Nom", type: "text" },
                 { name: "prenom", label: "Prénom", type: "text" },
-                { name: "email", label: "Email", type: "email" },
-                {
-                  name: "motDePasse",
-                  label: "Mot de passe (requis par le backend)",
-                  type: "password",
-                },
-                {
-                  name: "photoProfil",
-                  label: "Photo profil (URL)",
-                  type: "text",
-                },
               ]}
             />
           )}

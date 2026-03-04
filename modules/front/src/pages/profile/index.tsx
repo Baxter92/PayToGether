@@ -63,7 +63,7 @@ export default function Profile() {
           </div>
 
           {/* Activity / feed */}
-          <div className="bg-white dark:bg-slate-900 rounded-lg p-6 shadow-sm">
+          {/* <div className="bg-white dark:bg-slate-900 rounded-lg p-6 shadow-sm">
             <h3 className="text-md font-semibold mb-3">
               {t("recentActivity")}
             </h3>
@@ -78,7 +78,7 @@ export default function Profile() {
               <li>• {t("leftReview", { merchant: "ZenSpa", days: 5 })}</li>
               <li>• {t("savedOffers", { count: 3, days: 7 })}</li>
             </ul>
-          </div>
+          </div> */}
         </main>
       </div>
     </div>

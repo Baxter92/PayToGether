@@ -20,9 +20,11 @@ import {
   Upload,
   ImageIcon,
 } from "lucide-react";
+import { useGetPubliciteImageUrl } from "@/common/api";
 
-interface HeroSlide {
+export interface HeroSlide {
   id: number;
+  uuid?: string;
   title: string;
   subtitle: string;
   description: string;
@@ -33,6 +35,7 @@ interface HeroSlide {
   textColor: string;
   badge?: string;
   isActive: boolean;
+  imageFile?: File;
 }
 
 interface SortableSlideCardProps {
@@ -61,6 +64,10 @@ export const SortableSlideCard = memo(function SortableSlideCard({
 }: SortableSlideCardProps): JSX.Element {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { t: tAdmin } = useI18n("admin");
+  const { data: image } = useGetPubliciteImageUrl(
+    slide.uuid as string,
+    slide.image,
+  );
 
   const {
     attributes,
@@ -193,7 +200,7 @@ export const SortableSlideCard = memo(function SortableSlideCard({
             <Label>{tAdmin("hero.backgroundImage")}</Label>
             <div className="relative aspect-video rounded-lg overflow-hidden bg-muted group flex items-center justify-center bg-gray-100 dark:bg-gray-900">
               <img
-                src={slide.image}
+                src={image?.url}
                 alt={slide.title}
                 className="w-full h-full object-contain"
                 loading="lazy"
