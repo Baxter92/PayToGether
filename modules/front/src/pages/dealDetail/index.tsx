@@ -8,16 +8,24 @@ import { Card, CardContent } from "@components/ui/card";
 import { VStack } from "@/common/components";
 import { Heading } from "@/common/containers/Heading";
 import DealsList from "@/common/containers/DealList";
-import { dealService, useDeal, useDealsByStatut } from "@/common/api";
+import {
+  dealService,
+  useCommentairesByDeal,
+  useDeal,
+  useDealsByStatut,
+} from "@/common/api";
 import { mapDealToView } from "@/common/api/mappers/catalog";
 import { StatutDeal } from "@/common/api/types/deal";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/common/components/ui/button";
 import { useQueries } from "@tanstack/react-query";
+import { useAuth } from "@/common/context/AuthContext";
 export default function DealDetail(): JSX.Element {
   const { id = "" } = useParams<{ id: string }>();
   const { data: dealData, isLoading, isError } = useDeal(id);
+  const { data: commentaires = [] } = useCommentairesByDeal(id);
   const { data: dealsData } = useDealsByStatut(StatutDeal.PUBLIE);
+  const { user } = useAuth();
   const similarDeals = (dealsData ?? [])
     .filter((d) => d.uuid !== id)
     .map(mapDealToView);
@@ -45,6 +53,21 @@ export default function DealDetail(): JSX.Element {
     return urls.length > 0 ? urls : ["/placeholder.svg"];
   }, [imageUrlQueries]);
 
+  const commentairesRacine = useMemo(
+    () =>
+      commentaires.filter((commentaire) => !commentaire.commentaireParentUuid),
+    [commentaires],
+  );
+
+  const noteMoyenne = useMemo(() => {
+    if (!commentairesRacine.length) return 0;
+    const total = commentairesRacine.reduce(
+      (sum, commentaire) => sum + (Number(commentaire.note) || 0),
+      0,
+    );
+    return Number((total / commentairesRacine.length).toFixed(1));
+  }, [commentairesRacine]);
+
   const deal = useMemo<Deal | null>(() => {
     if (!dealData) return null;
 
@@ -55,8 +78,8 @@ export default function DealDetail(): JSX.Element {
       priceOriginal: Number(dealData.prixDeal) || 0,
       priceDeal: Number(dealData.prixPart) || 0,
       pricePerPart: Number(dealData.prixPart) || 0,
-      rating: 4.8, // mock temporaire (avis non fournis par le backend)
-      reviewsCount: 342, // mock temporaire (avis non fournis par le backend)
+      rating: noteMoyenne,
+      reviewsCount: commentairesRacine.length,
       images: dealImages,
       description: dealData.description,
       highlights: dealData.listePointsForts ?? [],
@@ -67,7 +90,7 @@ export default function DealDetail(): JSX.Element {
       minRequired: 1,
       supplier: { name: dealData.createurNom },
     };
-  }, [dealData, dealImages]);
+  }, [commentairesRacine.length, dealData, dealImages, noteMoyenne]);
 
   const [qty, setQty] = useState(1);
   const [partsSold, setPartsSold] = useState(0);
@@ -118,7 +141,10 @@ export default function DealDetail(): JSX.Element {
           <main className="flex-1">
             <Gallery images={deal.images} />
             <ProductDetails deal={{ ...deal, partsSold: currentPartsSold }} />
-            <Reviews count={deal.reviewsCount ?? 0} />
+            <Reviews
+              dealUuid={deal.id}
+              isMerchant={user?.id === dealData?.createurUuid}
+            />
           </main>
 
           <aside className="w-full lg:w-[360px]">

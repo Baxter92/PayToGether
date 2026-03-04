@@ -1,16 +1,24 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/common/components/ui/button";
 import { Avatar, AvatarFallback } from "@/common/components/ui/avatar";
-import { ChevronRight, Send } from "lucide-react";
+import { Send } from "lucide-react";
 import { timeAgo } from "@/common/utils/date";
 import { HStack, StarRating, Textarea, VStack } from "@/common/components";
 import { Heading } from "@/common/containers/Heading";
+import { useAuth } from "@/common/context/AuthContext";
+import {
+  commentaireKeys,
+  useCommentairesByDeal,
+  useCreateCommentaire,
+  useUsers,
+} from "@/common/api";
+import { useQueryClient } from "@tanstack/react-query";
 
 // ==============================
 // Types
 // ==============================
 type Review = {
-  id: number;
+  id: string;
   author: string;
   rating: number;
   comment: string;
@@ -26,73 +34,135 @@ type Review = {
 // Component
 // ==============================
 export default function Reviews({
-  count,
+  dealUuid,
   isMerchant = false,
 }: {
-  count: number;
+  dealUuid: string;
   isMerchant?: boolean;
 }) {
-  const initialReviews: Review[] = [1, 2, 3]
-    .slice(0, Math.min(3, count))
-    .map((i) => ({
-      id: i,
-      author: `Utilisateur ${i}`,
-      rating: 4 + i * 0.2,
-      comment: "Très bon produit, viande de qualité et livraison soignée.",
-      createdAt: new Date(Date.now() - i * 86400000).toISOString(),
-      reply:
-        i === 1
-          ? {
-            author: "merchant",
-            message: "Merci pour votre retour, au plaisir de vous revoir !",
-            createdAt: new Date(Date.now() - 3600000).toISOString(),
-          }
-          : undefined,
-    }));
-
-  const [reviews, setReviews] = useState<Review[]>(initialReviews);
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const { data: commentaires = [], isLoading } =
+    useCommentairesByDeal(dealUuid);
+  const { data: users = [] } = useUsers();
+  const createCommentaire = useCreateCommentaire({
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: commentaireKeys.byDeal(dealUuid),
+      });
+    },
+  });
 
   const [newComment, setNewComment] = useState("");
   const [newRating, setNewRating] = useState(0);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const [replyOpenId, setReplyOpenId] = useState<number | null>(null);
+  const [replyOpenId, setReplyOpenId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
+
+  const usersByUuid = useMemo(
+    () =>
+      new Map(
+        users.map((u) => [
+          u.uuid,
+          `${u.prenom ?? ""} ${u.nom ?? ""}`.trim() || u.email,
+        ]),
+      ),
+    [users],
+  );
+
+  const currentUserUuid = useMemo(() => {
+    if (!user) return null;
+    const direct = users.find((u) => u.uuid === user.id)?.uuid;
+    if (direct) return direct;
+    const byEmail = users.find((u) => u.email === user.email)?.uuid;
+    if (byEmail) return byEmail;
+    return null;
+  }, [user, users]);
+
+  const commentsByParent = useMemo(() => {
+    const index = new Map<string, typeof commentaires>();
+    commentaires.forEach((commentaire) => {
+      const parent = commentaire.commentaireParentUuid;
+      if (!parent) return;
+      const list = index.get(parent) ?? [];
+      list.push(commentaire);
+      index.set(parent, list);
+    });
+    return index;
+  }, [commentaires]);
+
+  const reviews = useMemo<Review[]>(() => {
+    return commentaires
+      .filter((commentaire) => !commentaire.commentaireParentUuid)
+      .sort(
+        (a, b) =>
+          new Date(b.dateCreation ?? 0).getTime() -
+          new Date(a.dateCreation ?? 0).getTime(),
+      )
+      .map((commentaire) => {
+        const replies = commentsByParent.get(commentaire.uuid ?? "") ?? [];
+        const pertinent = replies.find((r) => r.estPertinent);
+        const selectedReply = pertinent ?? replies[0];
+        return {
+          id: commentaire.uuid ?? "",
+          author:
+            usersByUuid.get(commentaire.utilisateurUuid) ??
+            `Utilisateur ${commentaire.utilisateurUuid.slice(0, 8)}`,
+          rating: Number(commentaire.note) || 0,
+          comment: commentaire.contenu,
+          createdAt: commentaire.dateCreation ?? new Date().toISOString(),
+          reply: selectedReply
+            ? {
+                author: "merchant",
+                message: selectedReply.contenu,
+                createdAt:
+                  selectedReply.dateCreation ?? new Date().toISOString(),
+              }
+            : undefined,
+        };
+      });
+  }, [commentaires, commentsByParent, usersByUuid]);
 
   // ==============================
   // Handlers
   // ==============================
-  const handleAddReview = () => {
-    setReviews((prev) => [
-      {
-        id: Date.now(),
-        author: "Vous",
-        rating: newRating,
-        comment: newComment,
-        createdAt: new Date().toISOString(),
-      },
-      ...prev,
-    ]);
-    setNewComment("");
-    setNewRating(0);
+  const handleAddReview = async () => {
+    if (!currentUserUuid || !newComment.trim() || newRating <= 0) return;
+    setSubmitError(null);
+    try {
+      await createCommentaire.mutateAsync({
+        contenu: newComment.trim(),
+        note: Math.max(1, Math.min(5, Math.round(newRating))),
+        utilisateurUuid: currentUserUuid,
+        dealUuid,
+        commentaireParentUuid: null,
+        estPertinent: null,
+      });
+      setNewComment("");
+      setNewRating(0);
+    } catch {
+      setSubmitError("Impossible de publier votre avis pour le moment.");
+    }
   };
 
-  const handleReply = (reviewId: number) => {
-    setReviews((prev) =>
-      prev.map((r) =>
-        r.id === reviewId
-          ? {
-            ...r,
-            reply: {
-              author: "merchant",
-              message: replyText,
-              createdAt: new Date().toISOString(),
-            },
-          }
-          : r,
-      ),
-    );
-    setReplyText("");
-    setReplyOpenId(null);
+  const handleReply = async (review: Review) => {
+    if (!currentUserUuid || !replyText.trim()) return;
+    setSubmitError(null);
+    try {
+      await createCommentaire.mutateAsync({
+        contenu: replyText.trim(),
+        note: Math.max(1, Math.min(5, Math.round(review.rating || 5))),
+        utilisateurUuid: currentUserUuid,
+        dealUuid,
+        commentaireParentUuid: review.id,
+        estPertinent: true,
+      });
+      setReplyText("");
+      setReplyOpenId(null);
+    } catch {
+      setSubmitError("Impossible d'envoyer la reponse pour le moment.");
+    }
   };
 
   return (
@@ -120,19 +190,46 @@ export default function Reviews({
             <Button
               size="sm"
               leftIcon={<Send className="w-4 h-4" />}
-              disabled={!newComment || newRating === 0}
+              disabled={
+                !currentUserUuid ||
+                !newComment ||
+                newRating === 0 ||
+                createCommentaire.isPending
+              }
               onClick={handleAddReview}
             >
               Publier
             </Button>
           </div>
+          {!currentUserUuid && (
+            <p className="text-xs text-muted-foreground">
+              Connectez-vous avec un compte utilisateur valide pour publier un
+              avis.
+            </p>
+          )}
+          {submitError && <p className="text-xs text-red-600">{submitError}</p>}
         </div>
       )}
 
       {/* LISTE DES AVIS */}
       <VStack spacing={10}>
+        {isLoading && (
+          <p className="text-sm text-muted-foreground">
+            Chargement des avis...
+          </p>
+        )}
+
+        {!isLoading && reviews.length === 0 && (
+          <p className="text-sm text-muted-foreground">
+            Aucun avis pour le moment.
+          </p>
+        )}
+
         {reviews.map((review) => (
-          <article key={review.id} className="border border-border rounded-lg p-4 bg-card space-y-3">
+          <article
+            key={review.id}
+            className="border border-border rounded-lg p-4 bg-card space-y-3"
+          >
             {/* Avis client */}
             <HStack spacing={10} align="start">
               <Avatar className="rounded-lg">
@@ -167,50 +264,52 @@ export default function Reviews({
               </div>
             )}
 
-            <>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() =>
-                  setReplyOpenId(replyOpenId === review.id ? null : review.id)
-                }
-              >
-                Répondre
-              </Button>
+            {isMerchant && (
+              <>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() =>
+                    setReplyOpenId(replyOpenId === review.id ? null : review.id)
+                  }
+                >
+                  Répondre
+                </Button>
 
-              {replyOpenId === review.id && (
-                <div className="mt-2 space-y-2">
-                  <Textarea
-                    placeholder="Votre réponse..."
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                  />
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => setReplyOpenId(null)}
-                    >
-                      Annuler
-                    </Button>
-                    <Button
-                      size="sm"
-                      leftIcon={<Send className="w-4 h-4" />}
-                      disabled={!replyText.trim()}
-                      onClick={() => handleReply(review.id)}
-                    >
-                      Envoyer
-                    </Button>
+                {replyOpenId === review.id && (
+                  <div className="mt-2 space-y-2">
+                    <Textarea
+                      placeholder="Votre réponse..."
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                    />
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => setReplyOpenId(null)}
+                      >
+                        Annuler
+                      </Button>
+                      <Button
+                        size="sm"
+                        leftIcon={<Send className="w-4 h-4" />}
+                        disabled={
+                          !replyText.trim() ||
+                          !currentUserUuid ||
+                          createCommentaire.isPending
+                        }
+                        onClick={() => handleReply(review)}
+                      >
+                        Envoyer
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              )}
-            </>
+                )}
+              </>
+            )}
           </article>
         ))}
-
-        <Button variant="ghost" leftIcon={<ChevronRight className="w-4 h-4" />}>
-          Voir tous les avis
-        </Button>
       </VStack>
     </section>
   );

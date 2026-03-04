@@ -8,21 +8,102 @@ import MyPurchases from "./containers/MyPurchases";
 import Settings from "./containers/Settings";
 import PaymentsList from "./containers/PaymentsList";
 import OrdersReceivedList from "./containers/OrderReceivedList";
-import { mockOrdersReceived, mockReviews } from "@/common/constants/data";
+import { mockOrdersReceived } from "@/common/constants/data";
 import ReviewsList, { type Review } from "./containers/ReviewsList";
 import Favorites from "./containers/Favorites";
 import { useAuth } from "@/common/context/AuthContext";
+import {
+  type CommentaireDTO,
+  useCommentaires,
+  useDeals,
+  useDealsByCreateur,
+  useUsers,
+} from "@/common/api";
 
 export default function Profile() {
   const { t } = useI18n("profile");
-  const { roles, role } = useAuth();
+  const { roles, role, user } = useAuth();
   const [activeTab, setActiveTab] =
     useState<(typeof PROFILE_TABS)[number]["key"]>("overview");
+  const { data: commentaires = [], isLoading: commentairesLoading } =
+    useCommentaires();
+  const { data: deals = [] } = useDeals();
+  const { data: users = [] } = useUsers();
+  const { data: merchantDeals = [] } = useDealsByCreateur(user?.id ?? "");
 
   const isMerchant = useMemo(
     () => role === "VENDEUR" || roles.includes("VENDEUR"),
     [role, roles],
   );
+
+  const dealsByUuid = useMemo(
+    () => new Map(deals.map((deal) => [deal.uuid, deal.titre])),
+    [deals],
+  );
+
+  const usersByUuid = useMemo(
+    () =>
+      new Map(
+        users.map((currentUser) => [
+          currentUser.uuid,
+          {
+            name:
+              `${currentUser.prenom ?? ""} ${currentUser.nom ?? ""}`.trim() ||
+              currentUser.email,
+            email: currentUser.email,
+          },
+        ]),
+      ),
+    [users],
+  );
+
+  const merchantDealUuids = useMemo(
+    () => new Set(merchantDeals.map((deal) => deal.uuid)),
+    [merchantDeals],
+  );
+
+  const commentairesToReviewRows = useMemo(() => {
+    const toReview = (commentaire: CommentaireDTO, index: number): Review => {
+      const buyer = usersByUuid.get(commentaire.utilisateurUuid);
+      return {
+        id: commentaire.uuid ?? `${commentaire.utilisateurUuid}-${index}`,
+        orderNumber: `COM-${(commentaire.uuid ?? "").slice(0, 8) || index + 1}`,
+        dealTitle: dealsByUuid.get(commentaire.dealUuid) ?? "Deal inconnu",
+        buyer: {
+          id: commentaire.utilisateurUuid,
+          name: buyer?.name ?? `Utilisateur ${commentaire.utilisateurUuid?.slice(0, 8)}`,
+          email: buyer?.email,
+        },
+        rating: Number(commentaire.note) || 0,
+        comment: commentaire.contenu ?? "",
+        status: "published",
+        createdAt: commentaire.dateCreation ?? new Date().toISOString(),
+      };
+    };
+
+    const racines = commentaires
+      .filter((commentaire) => !commentaire.commentaireParentUuid)
+      .sort(
+        (a, b) =>
+          new Date(b.dateCreation ?? 0).getTime() -
+          new Date(a.dateCreation ?? 0).getTime(),
+      );
+
+    const myReviews = racines
+      .filter((commentaire) => commentaire.utilisateurUuid === user?.id)
+      .map(toReview);
+
+    const clientReviews = racines
+      .filter(
+        (commentaire) =>
+          merchantDealUuids.has(commentaire.dealUuid) &&
+          commentaire.utilisateurUuid !== user?.id,
+      )
+      .map(toReview);
+
+    return { myReviews, clientReviews };
+  }, [commentaires, dealsByUuid, merchantDealUuids, user?.id, usersByUuid]);
+
   return (
     <div className="max-w-6xl mx-auto p-6">
       {/* Header */}
@@ -46,7 +127,11 @@ export default function Profile() {
             {activeTab === "favorites" && <Favorites />}
 
             {activeTab === "reviews" && (
-              <ReviewsList data={mockReviews as Review[]} isMyReviews />
+              commentairesLoading ? (
+                <div className="text-sm text-muted-foreground">Chargement des avis...</div>
+              ) : (
+                <ReviewsList data={commentairesToReviewRows.myReviews} isMyReviews />
+              )
             )}
 
             {activeTab === "payouts" && isMerchant && <PaymentsList />}
@@ -56,7 +141,11 @@ export default function Profile() {
             )}
 
             {activeTab === "client-reviews" && isMerchant && (
-              <ReviewsList data={mockReviews as Review[]} />
+              commentairesLoading ? (
+                <div className="text-sm text-muted-foreground">Chargement des avis...</div>
+              ) : (
+                <ReviewsList data={commentairesToReviewRows.clientReviews} />
+              )
             )}
 
             {activeTab === "settings" && <Settings />}
