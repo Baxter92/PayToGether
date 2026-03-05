@@ -3,6 +3,7 @@ export const PATHS = {
   LOGIN: "/login",
   REGISTER: "/register",
   FORGOT_PASSWORD: "/forgot-password",
+  RESET_PASSWORD: "/reset-password",
   PROFILE: "/profile",
   CHECKOUT: (id: string | number = ":id") => `/deals/${id}/checkout`,
   SUCCESS_SUBSCRIPTION: (id: string | number = ":id") =>

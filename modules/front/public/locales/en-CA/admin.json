@@ -128,7 +128,7 @@
     "customer": "Customer",
     "deal": "Deal purchased",
     "date": "Order date",
-    "amount": "Amount (FCFA)",
+    "amount": "Amount",
     "status": "Status",
     "actions": "Actions",
     "viewDetails": "View details",

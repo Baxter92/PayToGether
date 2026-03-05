@@ -72,13 +72,12 @@ export default function Reviews({
   );
 
   const currentUserUuid = useMemo(() => {
-    if (!user) return null;
-    const direct = users.find((u) => u.uuid === user.id)?.uuid;
-    if (direct) return direct;
-    const byEmail = users.find((u) => u.email === user.email)?.uuid;
-    if (byEmail) return byEmail;
-    return null;
-  }, [user, users]);
+    if (user?.id) return user.id;
+    if (!user?.email) return null;
+    return users.find((u) => u.email === user.email)?.uuid ?? null;
+  }, [user?.email, user?.id, users]);
+
+  const isAuthenticated = Boolean(currentUserUuid);
 
   const commentsByParent = useMemo(() => {
     const index = new Map<string, typeof commentaires>();
@@ -104,6 +103,15 @@ export default function Reviews({
         const replies = commentsByParent.get(commentaire.uuid ?? "") ?? [];
         const pertinent = replies.find((r) => r.estPertinent);
         const selectedReply = pertinent ?? replies[0];
+        let reply: Review["reply"] = undefined;
+        if (selectedReply) {
+          reply = {
+            author: "merchant",
+            message: selectedReply.contenu,
+            createdAt: selectedReply.dateCreation ?? new Date().toISOString(),
+          };
+        }
+
         return {
           id: commentaire.uuid ?? "",
           author:
@@ -112,14 +120,7 @@ export default function Reviews({
           rating: Number(commentaire.note) || 0,
           comment: commentaire.contenu,
           createdAt: commentaire.dateCreation ?? new Date().toISOString(),
-          reply: selectedReply
-            ? {
-                author: "merchant",
-                message: selectedReply.contenu,
-                createdAt:
-                  selectedReply.dateCreation ?? new Date().toISOString(),
-              }
-            : undefined,
+          reply,
         };
       });
   }, [commentaires, commentsByParent, usersByUuid]);
@@ -137,7 +138,7 @@ export default function Reviews({
         utilisateurUuid: currentUserUuid,
         dealUuid,
         commentaireParentUuid: null,
-        estPertinent: null,
+        estPertinent: false,
       });
       setNewComment("");
       setNewRating(0);
@@ -152,7 +153,7 @@ export default function Reviews({
     try {
       await createCommentaire.mutateAsync({
         contenu: replyText.trim(),
-        note: Math.max(1, Math.min(5, Math.round(review.rating || 5))),
+        note: 5,
         utilisateurUuid: currentUserUuid,
         dealUuid,
         commentaireParentUuid: review.id,
@@ -169,7 +170,7 @@ export default function Reviews({
     <section className="mt-6 space-y-6">
       <Heading level={4} title="Avis des clients" />
 
-      {!isMerchant && (
+      {!isMerchant && isAuthenticated && (
         <div className="border border-border rounded-lg p-4 bg-gray-50 dark:bg-gray-800 space-y-3">
           <Heading level={6} title="Ajouter un avis" />
 
@@ -201,14 +202,14 @@ export default function Reviews({
               Publier
             </Button>
           </div>
-          {!currentUserUuid && (
-            <p className="text-xs text-muted-foreground">
-              Connectez-vous avec un compte utilisateur valide pour publier un
-              avis.
-            </p>
-          )}
           {submitError && <p className="text-xs text-red-600">{submitError}</p>}
         </div>
+      )}
+
+      {!isMerchant && !isAuthenticated && (
+        <p className="text-sm text-muted-foreground">
+          Connectez-vous pour laisser un avis.
+        </p>
       )}
 
       {/* LISTE DES AVIS */}
