@@ -130,7 +130,6 @@ public class PubliciteProviderAdapter implements PubliciteProvider {
             if (imageModele != null && !imageJpa.getUrlImage().equals(imageModele.getUrlImage())) {
                 imageJpa.setUrlImage(imageModele.getUrlImage() + "_" + System.currentTimeMillis());
                 imageJpa.setStatut(StatutImage.PENDING);
-                imageJpa.setDateModification(java.time.LocalDateTime.now());
             }
         });
     }
@@ -153,7 +152,6 @@ public class PubliciteProviderAdapter implements PubliciteProvider {
                 .ifPresentOrElse(
                         image -> {
                             image.setStatut(statut);
-                            image.setDateModification(java.time.LocalDateTime.now());
                             jpaRepository.save(publicite);
                         },
                         () -> {

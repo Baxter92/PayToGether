@@ -50,6 +50,16 @@ public interface UtilisateurProvider {
     boolean existeParEmail(String email);
 
     /**
+     * Vérifier si un utilisateur existe par son Keycloak ID
+     */
+    boolean existeParKeycloakId(String keycloakId);
+
+    /**
+     * Trouver un utilisateur par son Keycloak ID
+     */
+    Optional<UtilisateurModele> trouverParKeycloakId(String keycloakId);
+
+    /**
      * Mettre à jour le statut de la photo de profil d'un utilisateur
      */
     void mettreAJourStatutPhotoProfil(UUID utilisateurUuid, StatutImage statut);

@@ -15,6 +15,7 @@ import CheckoutStep from "./components/CheckoutStep";
 import ShippingForm from "./containers/ShippingForm";
 import { DeliveryForm } from "./containers/DeliveryForm";
 import PaymentForm from "./containers/PaymentForm";
+import SquarePaymentForm from "./containers/SquarePaymentForm";
 import OrderSummary from "./containers/OrderSummary";
 import HelpSection from "./containers/HelpSection";
 import TrustIndicators from "./containers/TrustIndicators";
@@ -36,6 +37,7 @@ export default function CheckoutPage(): JSX.Element {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [useSquarePayment, setUseSquarePayment] = useState(true);
 
   const [shippingData, setShippingData] = useState<ShippingData | null>(null);
   const [deliveryData, setDeliveryData] = useState<DeliveryData | null>(null);
@@ -91,6 +93,30 @@ export default function CheckoutPage(): JSX.Element {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleSquarePaymentSuccess = (paymentId: string): void => {
+    const orderId = `ORD-${Date.now()}`;
+    navigate(`/orders/${orderId}`, {
+      replace: true,
+      state: {
+        orderId,
+        deal,
+        qty,
+        total,
+        shipping: shippingData,
+        delivery: deliveryData,
+        payment: {
+          paymentMethod: "square",
+          squarePaymentId: paymentId,
+        },
+      },
+    });
+  };
+
+  const handleSquarePaymentError = (error: string): void => {
+    setApiError(error);
+    setIsSubmitting(false);
   };
 
   const steps = [
@@ -168,12 +194,45 @@ export default function CheckoutPage(): JSX.Element {
                     isActive={currentStep === 2}
                     isCompleted={false}
                   >
-                    <PaymentForm
-                      total={total}
-                      onSubmit={handlePaymentSubmit}
-                      onBack={() => setCurrentStep(1)}
-                      isSubmitting={isSubmitting}
-                    />
+                    {/* Toggle pour choisir entre Square et paiement classique */}
+                    <div className="mb-4 flex items-center justify-end gap-2">
+                      <label className="text-sm text-muted-foreground">
+                        Paiement classique
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setUseSquarePayment(!useSquarePayment)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                          useSquarePayment ? "bg-primary" : "bg-gray-300"
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            useSquarePayment ? "translate-x-6" : "translate-x-1"
+                          }`}
+                        />
+                      </button>
+                      <label className="text-sm font-medium">
+                        Square Payment
+                      </label>
+                    </div>
+
+                    {useSquarePayment ? (
+                      <SquarePaymentForm
+                        commandeUuid={checkoutState.dealId || deal?.uuid || ""}
+                        utilisateurUuid={user?.uuid || ""}
+                        montant={total}
+                        onSuccess={handleSquarePaymentSuccess}
+                        onError={handleSquarePaymentError}
+                      />
+                    ) : (
+                      <PaymentForm
+                        total={total}
+                        onSubmit={handlePaymentSubmit}
+                        onBack={() => setCurrentStep(1)}
+                        isSubmitting={isSubmitting}
+                      />
+                    )}
                   </CheckoutStep>
                 </VStack>
 

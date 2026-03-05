@@ -1,0 +1,57 @@
+### Test des endpoints de validation et notification
+
+### 1. Créer un utilisateur (devrait envoyer une notification de validation)
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "nom": "Dupont",
+  "prenom": "Jean",
+  "email": "jean.dupont@example.com",
+  "motDePasse": "MotDePasse123!",
+  "role": "CLIENT"
+}
+
+### 2. Valider le compte avec un token
+GET http://localhost:8080/api/validation/compte?token=VOTRE_TOKEN_ICI
+
+### 3. Demander une réinitialisation de mot de passe
+POST http://localhost:8080/api/validation/mot-de-passe/demander
+Content-Type: application/json
+
+{
+  "email": "jean.dupont@example.com"
+}
+
+### 4. Réinitialiser le mot de passe avec un token
+POST http://localhost:8080/api/validation/mot-de-passe/reinitialiser
+Content-Type: application/json
+
+{
+  "token": "VOTRE_TOKEN_ICI",
+  "nouveauMotDePasse": "NouveauMotDePasse123!"
+}
+
+### 5. Mettre à jour un utilisateur (devrait envoyer une notification de mise à jour)
+PUT http://localhost:8080/api/utilisateurs/{{utilisateurUuid}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "nom": "Dupont",
+  "prenom": "Jean-Pierre",
+  "photoProfil": "nouvelle-photo.jpg"
+}
+
+### 6. Activer/Désactiver un utilisateur (devrait envoyer une notification)
+PATCH http://localhost:8080/api/utilisateurs/{{utilisateurUuid}}/activer?actif=false
+Authorization: Bearer {{adminToken}}
+
+### Notes
+# - Remplacez {{utilisateurUuid}} par l'UUID de l'utilisateur
+# - Remplacez {{token}} par un token JWT valide
+# - Remplacez {{adminToken}} par un token JWT d'administrateur
+# - Les notifications sont envoyées de manière asynchrone par email
+# - Vérifiez les logs pour voir les détails d'envoi des emails
+# - Les tokens de validation expirent après 24 heures
+

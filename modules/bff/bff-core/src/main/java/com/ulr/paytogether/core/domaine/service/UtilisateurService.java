@@ -67,4 +67,17 @@ public interface UtilisateurService {
      * Assigner un rôle à un utilisateur
      */
     void assignerRole(UUID utilisateurUuid, String nomRole, String token);
+
+    /**
+     * Activer un compte avec validation du token
+     * @param token Token de validation reçu par email
+     */
+    void activerCompteAvecToken(String token);
+
+    /**
+     * Réinitialiser le mot de passe avec validation du token
+     * @param token Token de réinitialisation reçu par email
+     * @param nouveauMotDePasse Nouveau mot de passe
+     */
+    void reinitialiserMotDePasseAvecToken(String token, String nouveauMotDePasse);
 }

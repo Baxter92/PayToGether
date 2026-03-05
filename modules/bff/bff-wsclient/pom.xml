@@ -53,6 +53,20 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+
+        <!-- Square SDK pour les paiements -->
+        <dependency>
+            <groupId>com.squareup</groupId>
+            <artifactId>square</artifactId>
+            <version>46.0.0.20260122</version>
+        </dependency>
+
+        <!-- Dépendance bff-core pour les providers -->
+        <dependency>
+            <groupId>com.ulr.paytogether</groupId>
+            <artifactId>bff-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

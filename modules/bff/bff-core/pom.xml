@@ -13,6 +13,7 @@
 
   <dependencies>
 
+
     <!-- JPA pour les entités et repositories -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -36,6 +37,18 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+    </dependency>
+
+    <!-- Jackson for JSON serialization -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+
+    <!-- Jackson JSR310 for Java 8 Date/Time -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
     </dependency>
 
     <!-- Tests -->

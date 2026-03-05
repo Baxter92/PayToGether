@@ -85,5 +85,17 @@
       <version>2.16.1</version>
     </dependency>
 
+    <!-- Spring Mail pour l'envoi d'emails -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-mail</artifactId>
+    </dependency>
+
+    <!-- Thymeleaf pour les templates HTML -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-thymeleaf</artifactId>
+    </dependency>
+
   </dependencies>
 </project>

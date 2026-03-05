@@ -1,7 +1,5 @@
 package com.ulr.paytogether.api.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * DTO pour la réinitialisation du mot de passe d'un utilisateur
+ * Validation gérée par ReinitialiserMotDePasseValidator (bff-core)
  */
 @Data
 @Builder
@@ -16,8 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ReinitialiserMotDePasseDTO {
 
-    @NotBlank(message = "Le nouveau mot de passe est obligatoire")
-    @Size(min = 8, message = "Le mot de passe doit contenir au moins 8 caractères")
+    private String token;
     private String nouveauMotDePasse;
 }
 

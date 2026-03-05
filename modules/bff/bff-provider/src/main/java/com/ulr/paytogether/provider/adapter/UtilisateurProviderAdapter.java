@@ -124,6 +124,17 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
         return jpaRepository.existsByEmail(email);
     }
 
+    @Override
+    public boolean existeParKeycloakId(String keycloakId) {
+        return jpaRepository.existsByKeycloakId(keycloakId);
+    }
+
+    @Override
+    public Optional<UtilisateurModele> trouverParKeycloakId(String keycloakId) {
+        return jpaRepository.findByKeycloakId(keycloakId)
+                .map(mapper::versModele);
+    }
+
     private void creerkeycloackutilisateur(UtilisateurJpa entite) {
         LoginResponse loginResponse = authApiCLient.loginAdmin();
         UserRequest userRequest = UserRequest.builder()
@@ -143,7 +154,7 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
             if (!jpa.getPhotoProfil().getUrlImage().equals(modele.getPhotoProfil().getUrlImage())) {
                 jpa.getPhotoProfil().setUrlImage(modele.getPhotoProfil().getUrlImage());
                 jpa.getPhotoProfil().setStatut(StatutImage.PENDING);
-                jpa.getPhotoProfil().setDateModification(LocalDateTime.now());            }
+            }
         }
     }
 
@@ -164,7 +175,6 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
         // Mettre à jour le statut de la photo de profil
         if (utilisateur.getPhotoProfil() != null) {
             utilisateur.getPhotoProfil().setStatut(statut);
-            utilisateur.getPhotoProfil().setDateModification(LocalDateTime.now());
             jpaRepository.save(utilisateur);
         } else {
             throw new IllegalArgumentException("Aucune photo de profil trouvée pour cet utilisateur");
@@ -194,7 +204,6 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
 
         // Mettre à jour le mot de passe dans la base de données locale
         utilisateur.setMotDePasse(passwordEncoder.encode(nouveauMotDePasse));
-        utilisateur.setDateModification(LocalDateTime.now());
         jpaRepository.save(utilisateur);
 
         // Réinitialiser le mot de passe dans Keycloak
@@ -211,7 +220,6 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
         // Mettre à jour le statut dans la base de données locale
         utilisateur.setStatut(actif ? StatutUtilisateur.ACTIF
                                     : StatutUtilisateur.INACTIF);
-        utilisateur.setDateModification(LocalDateTime.now());
         jpaRepository.save(utilisateur);
 
         // Activer/Désactiver l'utilisateur dans Keycloak
@@ -227,7 +235,6 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
 
         RoleUtilisateur role = RoleUtilisateur.valueOf(nomRole);
         utilisateur.setRole(role);
-        utilisateur.setDateModification(LocalDateTime.now());
         jpaRepository.save(utilisateur);
         // Assigner le rôle dans Keycloak
         userApiClient.assignRoleToUser(token, utilisateur.getKeycloakId(), nomRole);

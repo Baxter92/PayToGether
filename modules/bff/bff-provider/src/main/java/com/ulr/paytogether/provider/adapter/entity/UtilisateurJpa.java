@@ -2,7 +2,6 @@ package com.ulr.paytogether.provider.adapter.entity;
 
 import com.ulr.paytogether.core.enumeration.RoleUtilisateur;
 import com.ulr.paytogether.core.enumeration.StatutUtilisateur;
-import com.ulr.paytogether.provider.utils.Tools;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

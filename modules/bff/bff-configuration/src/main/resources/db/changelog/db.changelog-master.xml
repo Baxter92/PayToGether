@@ -8,5 +8,8 @@
     <!-- Migration pour ajouter le support des commentaires parents/réponses et flag pertinent -->
     <include file="db/changelog/changes/20260301-add-commentaire-parent-pertinent.xml"/>
 
+    <!-- Migration pour ajouter la table validation_token pour les notifications -->
+    <include file="db/changelog/validation-token-migration.xml"/>
+
 </databaseChangeLog>
 

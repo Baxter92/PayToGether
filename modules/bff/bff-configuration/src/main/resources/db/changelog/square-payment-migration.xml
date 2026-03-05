@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="add-square-payment-columns" author="system">
+        <comment>Ajout des colonnes pour Square Payment dans la table paiement</comment>
+
+        <!-- Ajout des colonnes pour Square Payment -->
+        <addColumn tableName="paiement">
+            <column name="square_payment_id" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="square_order_id" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="square_location_id" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="square_receipt_url" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="square_token" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="message_erreur" type="VARCHAR(1000)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <!-- Ajout de nouveaux statuts de paiement -->
+        <comment>Les nouveaux statuts PROCESSING, REFUNDED, CANCELLED sont maintenant supportés</comment>
+
+        <!-- Ajout de nouvelles méthodes de paiement -->
+        <comment>Les nouvelles méthodes SQUARE_CARD, SQUARE_GOOGLE_PAY, SQUARE_APPLE_PAY, SQUARE_CASH_APP_PAY sont maintenant supportées</comment>
+
+    </changeSet>
+
+</databaseChangeLog>
+

@@ -28,13 +28,16 @@ Le projet PayToGether utilise une **architecture hexagonale** (ports & adapters)
   - `provider/` : Interfaces des ports (ex: `DealProvider`, `UtilisateurProvider`)
   - `enumeration/` : Énumérations métier (ex: `StatutDeal`, `StatutImage`)
   - `exception/` : **Exceptions métier personnalisées avec codes traduisibles**
+  - `event/` : **Modèles d'événements ET interface EventPublisher** (ex: `AccountValidationEvent`, `PaymentInitiatedEvent`)
 
 **Règles** :
 - ✅ Aucune dépendance technique (pas de JPA, Spring Web, etc.)
 - ✅ Modèles avec suffixe `Modele`
-- ✅ Services utilisent uniquement les interfaces Provider
+- ✅ Services utilisent uniquement les interfaces Provider et EventPublisher
 - ✅ **Toutes les règles métier sont dans les Validators**
 - ✅ **Toutes les exceptions utilisent des codes d'erreur traduisibles**
+- ✅ **Tous les modèles d'événements sont dans event/** (PAS dans bff-event !)
+- ✅ **L'interface EventPublisher est dans event/** (implémentée par bff-event-dispatcher)
 - ✅ Validation métier OBLIGATOIRE avant appel au Provider
 
 #### 2. **BFF-PROVIDER** (Adaptateurs techniques - Partie droite)
@@ -52,30 +55,354 @@ Le projet PayToGether utilise une **architecture hexagonale** (ports & adapters)
 - ✅ ProviderAdapter implémente l'interface Provider du core
 - ✅ Gestion des transactions (@Transactional)
 
-#### 3. **BFF-API** (Adaptateurs API - Partie gauche)
-- **Rôle** : Exposition des API REST
+#### 3. **BFF-API** (Adaptateurs API - Partie gauche HTTP)
+- **Rôle** : Exposition des API REST (HTTP uniquement)
 - **Contient** :
   - `resource/` : Contrôleurs REST (suffixe `Resource`)
   - `dto/` : Data Transfer Objects (suffixe `DTO`)
   - `apiadapter/` : Adaptateurs API (suffixe `ApiAdapter`)
   - `mapper/` : Mappers DTO ↔ Modèle (suffixe `Mapper`)
+  - `exception/` : **GlobalExceptionHandler uniquement** (gestion des exceptions HTTP)
 
 **Règles** :
 - ✅ DTOs avec validation Jakarta (`@NotNull`, `@NotBlank`, `@Size`, etc.)
 - ✅ Resources exposent les endpoints REST
 - ✅ ApiAdapter utilise uniquement les Services du core
 - ✅ Mappers avec méthodes : `modeleVersDto()`, `dtoVersModele()`
+- ❌ **AUCUN Handler d'événements** (ils doivent être dans bff-event)
 
-#### 4. **BFF-FRONT** (Interface utilisateur)
+#### 4. **BFF-EVENT** (Adaptateurs Event - Partie gauche Événements)
+- **Rôle** : Gestion des handlers d'événements asynchrones
+- **Contient** :
+  - `annotation/` : Annotations custom (ex: `@FunctionalHandler`)
+  - `handler/` : Interface `ConsumerHandler`
+  - `handler/impl/` : **Implémentations des handlers** (ex: `AccountValidationHandler`, `SquarePaymentHandler`)
+
+**⚠️ IMPORTANT : Les modèles d'événements sont dans bff-core, PAS dans bff-event !**
+
+**Règles CRITIQUES** :
+- ✅ **TOUS les handlers d'événements DOIVENT être dans bff-event**
+- ✅ Les handlers utilisent **UNIQUEMENT** les Services du core (jamais de Provider direct)
+- ✅ Les handlers importent les événements depuis `com.ulr.paytogether.core.event`
+- ✅ Dépendance autorisée : `bff-core` uniquement (pour les Services ET les événements)
+- ❌ **JAMAIS** de dépendance vers `bff-provider` (pas d'accès direct aux Repositories)
+- ❌ **JAMAIS** de dépendance vers `bff-api` (séparation HTTP/Event)
+- ❌ **JAMAIS** de dépendance vers `bff-event-dispatcher` (c'est l'inverse : dispatcher dépend de core)
+
+**Stratégie de retry avec backoff exponentiel (Spring @Retryable)** :
+
+Tous les handlers héritent automatiquement d'une stratégie de retry via l'interface `ConsumerHandler` qui est annotée avec `@Retryable` de Spring Retry :
+
+```java
+@Retryable(
+    retryFor = Exception.class,
+    maxAttempts = 3,
+    backoff = @Backoff(
+        delay = 1000,           // 1 seconde
+        multiplier = 1.5,       // Facteur 1.5 (backoff exponentiel)
+        maxDelay = 30000,       // Max 30 secondes
+        random = true           // Jitter activé
+    )
+)
+public interface ConsumerHandler {
+    // Marker interface
+}
+```
+
+**Avantages** :
+- ✅ Configuration centralisée dans l'interface
+- ✅ Tous les handlers héritent automatiquement du retry
+- ✅ Utilise Spring Retry (standard Spring)
+- ✅ Pas besoin de configurer @Retryable sur chaque méthode
+
+**Exemple d'utilisation** :
+```java
+@Component
+@RequiredArgsConstructor
+public class AccountValidationHandler implements ConsumerHandler {
+    private final EmailNotificationService emailNotificationService;
+    private final ValidationTokenService validationTokenService;
+    
+    @FunctionalHandler(
+        eventType = AccountValidationEvent.class,
+        maxAttempts = 3,
+        description = "Envoie un email de validation"
+    )
+    public void handleAccountValidation(AccountValidationEvent event) {
+        // ✅ Retry automatique hérité de ConsumerHandler :
+        // - Tentative 1 : immédiat
+        // - Tentative 2 : ~1 seconde (+ jitter)
+        // - Tentative 3 : ~1.5 secondes (+ jitter)
+        validationTokenService.creer(...);
+    }
+}
+```
+
+**Pour une configuration personnalisée** (rare) :
+Si un handler nécessite une stratégie de retry différente, vous pouvez surcharger `@Retryable` :
+
+```java
+@FunctionalHandler(eventType = PaymentInitiatedEvent.class, maxAttempts = 5)
+@Retryable(
+    retryFor = Exception.class,
+    maxAttempts = 5,
+    backoff = @Backoff(delay = 2000, multiplier = 2.0, maxDelay = 60000)
+)
+public void handlePayment(PaymentInitiatedEvent event) {
+    // Configuration personnalisée
+}
+```
+
+**Séquence de retry par défaut** :
+1. Tentative 1 : **immédiat** (0 ms)
+2. Tentative 2 : **~1000 ms** (1 sec + jitter aléatoire)
+3. Tentative 3 : **~1500 ms** (1.5 sec + jitter aléatoire)
+
+**Port EventPublisher** :
+
+Le core expose l'interface `EventPublisher` (port) qui est implémentée par `EventDispatcherImpl` dans bff-event-dispatcher :
+
+```java
+// Dans bff-core
+package com.ulr.paytogether.core.event;
+
+public interface EventPublisher {
+    void publishAsync(Object event);  // Publication asynchrone
+    void publishSync(Object event);   // Publication synchrone
+}
+
+// Utilisation dans les Services du core
+@Service
+@RequiredArgsConstructor
+public class UtilisateurServiceImpl {
+    private final EventPublisher eventPublisher;  // ✅ Interface du core
+    
+    public void creer(UtilisateurModele utilisateur) {
+        // ... logique métier ...
+        
+        // Publication d'événement
+        eventPublisher.publishAsync(new AccountValidationEvent(...));
+    }
+}
+```
+
+#### 5. **BFF-EVENT-DISPATCHER** (Implémentation technique - Partie droite Événements)
+- **Rôle** : Implémentation technique de la persistance et du dispatching d'événements
+- **Contient** :
+  - `dispatcher/` : Implémentation du dispatching (ex: `EventDispatcherImpl`)
+  - `entity/` : Entités JPA pour les événements (ex: `EventRecordJpa`)
+  - `repository/` : Repository pour les événements (ex: `EventRecordRepository`)
+
+**Règles** :
+- ✅ Persiste les événements en base de données
+- ✅ Gère le retry et le scheduling
+- ✅ Ne connaît QUE le module `bff-event` (pour les interfaces)
+
+#### 6. **BFF-FRONT** (Interface utilisateur)
 - **Rôle** : Application React/TypeScript
 - **Stack** : React, TypeScript, Vite
 
-#### 5. **BFF-WSCLIENT** (Clients externes)
+#### 7. **BFF-WSCLIENT** (Clients externes)
 - **Rôle** : Communication avec services externes (JWT, authentification)
 - **Stack** : WebClient (Spring WebFlux)
 
-#### 6. **BFF-CONFIGURATION**
+#### 8. **BFF-CONFIGURATION**
 - **Rôle** : Configuration centralisée Spring Boot
+
+---
+
+## 🔗 Règles CRITIQUES des dépendances entre modules
+
+### ⚠️ ARCHITECTURE HEXAGONALE - Dépendances autorisées
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    PARTIE GAUCHE                        │
+│              (Adaptateurs d'entrée)                     │
+├─────────────────────────────────────────────────────────┤
+│  bff-api (HTTP)          bff-event (Événements)        │
+│      ↓                           ↓                       │
+│  - Resources               - Handlers                   │
+│  - ApiAdapters            - @FunctionalHandler         │
+│  - DTOs                   - Event Models                │
+│      ↓                           ↓                       │
+│      └───────────┬───────────────┘                      │
+└──────────────────┼──────────────────────────────────────┘
+                   ↓
+┌──────────────────────────────────────────────────────────┐
+│                    HEXAGONE CENTRAL                      │
+│                      (bff-core)                          │
+├──────────────────────────────────────────────────────────┤
+│  - Services (interfaces + impl)                          │
+│  - Modèles métier                                        │
+│  - Validators                                            │
+│  - Providers (interfaces uniquement)                     │
+│  - Exceptions métier                                     │
+└──────────────────┬───────────────────────────────────────┘
+                   ↓
+┌──────────────────────────────────────────────────────────┐
+│                    PARTIE DROITE                         │
+│              (Adaptateurs de sortie)                     │
+├──────────────────────────────────────────────────────────┤
+│  bff-provider           bff-event-dispatcher            │
+│      ↓                           ↓                       │
+│  - ProviderAdapters       - EventDispatcherImpl        │
+│  - Repositories           - EventRecordRepository       │
+│  - Entités JPA            - EventRecordJpa              │
+│  - Mappers JPA            - Scheduling & Retry          │
+└──────────────────────────────────────────────────────────┘
+```
+
+### 📋 Matrice des dépendances Maven
+
+| Module              | Peut dépendre de                          | NE DOIT PAS dépendre de                  |
+|---------------------|-------------------------------------------|------------------------------------------|
+| **bff-core**        | RIEN (pur métier + événements)           | Tous les autres modules                  |
+| **bff-api**         | bff-core                                  | bff-provider, bff-event, bff-event-dispatcher |
+| **bff-event**       | bff-core UNIQUEMENT                       | bff-provider, bff-api, bff-event-dispatcher |
+| **bff-provider**    | bff-core, bff-wsclient                   | bff-api, bff-event, bff-event-dispatcher |
+| **bff-event-dispatcher** | bff-core (pour EventPublisher)    | bff-api, bff-event, bff-provider |
+| **bff-wsclient**    | RIEN (clients externes uniquement)      | Tous les modules BFF                     |
+| **bff-configuration** | TOUS (module d'assemblage)            | AUCUN                                    |
+
+**🔑 Points clés** :
+- ✅ **bff-core** ne dépend de RIEN (contient les événements ET l'interface EventPublisher)
+- ✅ **bff-event** ne dépend QUE de bff-core (pas de bff-event-dispatcher !)
+- ✅ **bff-event-dispatcher** dépend de bff-core pour implémenter EventPublisher
+- ✅ Pas de cycle : bff-core ← bff-event ← bff-event-dispatcher ✅
+
+### ⚠️ Règles ABSOLUES à respecter
+
+#### ✅ **BFF-CORE (Hexagone central)**
+```xml
+<!-- pom.xml de bff-core -->
+<dependencies>
+    <!-- ✅ UNIQUEMENT des dépendances techniques de base -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+    </dependency>
+    <!-- ❌ PAS DE bff-provider, bff-api, bff-event, JPA, etc. -->
+</dependencies>
+```
+
+#### ✅ **BFF-EVENT (Partie gauche - Événements)**
+```xml
+<!-- pom.xml de bff-event -->
+<dependencies>
+    <!-- ✅ Dépendance vers bff-core pour appeler les Services -->
+    <dependency>
+        <groupId>com.ulr.paytogether</groupId>
+        <artifactId>bff-core</artifactId>
+    </dependency>
+#### ✅ **BFF-EVENT (Partie gauche - Événements)**
+```xml
+<!-- pom.xml de bff-event -->
+<dependencies>
+    <!-- ✅ Dépendance vers bff-core UNIQUEMENT -->
+    <!-- Le core contient les Services ET les événements -->
+    <dependency>
+        <groupId>com.ulr.paytogether</groupId>
+        <artifactId>bff-core</artifactId>
+    </dependency>
+    
+    <!-- ❌ PAS DE bff-event-dispatcher -->
+    <!-- ❌ PAS DE bff-provider (accès direct aux repositories INTERDIT) -->
+    <!-- ❌ PAS DE bff-api (séparation HTTP/Event) -->
+</dependencies>
+```
+
+#### ✅ **BFF-API (Partie gauche - HTTP)**
+```xml
+<!-- pom.xml de bff-api -->
+<dependencies>
+    <!-- ✅ Dépendance vers bff-core pour appeler les Services -->
+    <dependency>
+        <groupId>com.ulr.paytogether</groupId>
+        <artifactId>bff-core</artifactId>
+    </dependency>
+    
+    <!-- ❌ PAS DE bff-provider (accès direct aux repositories INTERDIT) -->
+    <!-- ❌ PAS DE bff-event (séparation HTTP/Event) -->
+</dependencies>
+```
+
+#### ✅ **BFF-PROVIDER (Partie droite - Persistance)**
+```xml
+<!-- pom.xml de bff-provider -->
+<dependencies>
+    <!-- ✅ Dépendance vers bff-core pour implémenter les Providers -->
+    <dependency>
+        <groupId>com.ulr.paytogether</groupId>
+        <artifactId>bff-core</artifactId>
+    </dependency>
+    
+    <!-- ✅ Dépendance vers bff-wsclient pour les appels externes -->
+    <dependency>
+        <groupId>com.ulr.paytogether</groupId>
+        <artifactId>bff-wsclient</artifactId>
+    </dependency>
+    
+    <!-- ❌ PAS DE bff-api, bff-event, bff-event-dispatcher -->
+</dependencies>
+```
+
+#### ✅ **BFF-EVENT-DISPATCHER (Partie droite - Événements)**
+```xml
+<!-- pom.xml de bff-event-dispatcher -->
+<dependencies>
+    <!-- ✅ Dépendance vers bff-core pour l'interface EventPublisher -->
+    <dependency>
+        <groupId>com.ulr.paytogether</groupId>
+        <artifactId>bff-core</artifactId>
+    </dependency>
+    
+    <!-- ✅ Spring Data JPA pour persister les événements -->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    
+    <!-- ❌ PAS DE bff-api, bff-event, bff-provider -->
+</dependencies>
+```
+
+### 🚨 Conséquences des violations
+
+**SI vous violez ces règles :**
+1. ❌ **Dépendances circulaires** → Échec de compilation Maven
+2. ❌ **Beans non trouvés** → Échec de démarrage Spring Boot
+3. ❌ **Architecture corrompue** → Code impossible à maintenir
+4. ❌ **Tests impossibles** → Couplage fort entre couches
+
+### 🎯 Comment corriger une violation
+
+**Symptôme** : Bean `XxxRepository` not found dans `bff-event`
+```
+❌ MAUVAIS CODE dans bff-event :
+@Component
+public class AccountValidationHandler {
+    private final ValidationTokenRepository tokenRepository; // ❌ ACCÈS DIRECT AU REPOSITORY !
+}
+```
+
+**Solution** : Appeler le Service du core
+```java
+✅ BON CODE dans bff-event :
+@Component
+public class AccountValidationHandler {
+    private final ValidationTokenService validationTokenService; // ✅ Service du core
+    
+    public void handle(AccountValidationEvent event) {
+        // ✅ Appel au service métier
+        validationTokenService.creer(tokenModele);
+    }
+}
+```
 
 ---
 
@@ -1610,6 +1937,126 @@ private LocalDateTime dateCreation;
 
 ---
 
+## 🚨 Gestion Globale des Exceptions
+
+### GlobalExceptionHandler
+
+Un **GlobalExceptionHandler** intercepte TOUTES les exceptions non gérées et retourne des réponses structurées au frontend.
+
+**Fichier** : `bff-api/handler/GlobalExceptionHandler.java`
+
+**Annotation** : `@RestControllerAdvice`
+
+### Structure de réponse d'erreur
+
+```json
+{
+  "timestamp": "2026-03-05T10:30:00",
+  "status": 500,
+  "error": "Erreur serveur",
+  "message": "Description claire de l'erreur",
+  "path": "/api/deals/123",
+  "validationErrors": {
+    "nom": "Le nom est obligatoire",
+    "email": "Email invalide"
+  },
+  "technicalDetails": "NullPointerException: Cannot invoke method..."
+}
+```
+
+### Exceptions gérées
+
+| Exception | Status | Message | Utilisation |
+|-----------|--------|---------|-------------|
+| `IllegalArgumentException` | 400 | Message de l'exception | Validation métier |
+| `MethodArgumentNotValidException` | 400 | Détails des champs invalides | Validation Jakarta (@NotNull, @Size) |
+| `ResourceNotFoundException` | 404 | "Ressource non trouvée" | Ressource inexistante |
+| `AccessDeniedException` | 403 | "Accès refusé" | Sécurité |
+| `IllegalStateException` | 409 | Message de l'exception | État invalide |
+| `RuntimeException` | 500 | Message ou "Erreur serveur" | Erreurs d'exécution |
+| `Exception` (catch-all) | 500 | "Raison inconnue. Veuillez contacter le support technique." | Toutes les autres erreurs |
+
+### Règles importantes
+
+1. ✅ **TOUJOURS** lancer des exceptions avec des messages clairs
+   ```java
+   throw new IllegalArgumentException("Le deal avec l'UUID " + uuid + " n'existe pas");
+   ```
+
+2. ✅ **JAMAIS** lancer d'exception sans message
+   ```java
+   throw new RuntimeException(); // ❌ Mauvais
+   throw new RuntimeException("Token invalide"); // ✅ Bon
+   ```
+
+3. ✅ **Utiliser les bonnes exceptions** selon le contexte
+   - `IllegalArgumentException` : Paramètres invalides
+   - `IllegalStateException` : État invalide (ex: commande déjà payée)
+   - `ResourceNotFoundException` : Ressource non trouvée
+
+4. ✅ **Le GlobalExceptionHandler log automatiquement** toutes les erreurs
+   - Pas besoin de logger manuellement dans les services
+
+5. ✅ **Les erreurs 500 incluent des détails techniques** pour le débogage
+   - Visible dans les logs serveur
+   - Peut être retourné au frontend (env dev uniquement)
+
+### Exemple d'utilisation dans les services
+
+```java
+@Service
+public class DealServiceImpl implements DealService {
+    
+    @Override
+    public DealModele lireParUuid(UUID uuid) {
+        return dealProvider.trouverParUuid(uuid)
+            .orElseThrow(() -> new IllegalArgumentException(
+                "Le deal avec l'UUID " + uuid + " n'existe pas"
+            ));
+    }
+    
+    @Override
+    public void validerDeal(UUID uuid) {
+        DealModele deal = lireParUuid(uuid);
+        
+        if (deal.getStatut() == StatutDeal.VALIDE) {
+            throw new IllegalStateException(
+                "Ce deal a déjà été validé"
+            );
+        }
+        
+        // ... logique de validation
+    }
+}
+```
+
+### Réponse côté Frontend
+
+Le frontend reçoit TOUJOURS une structure d'erreur claire :
+
+```typescript
+try {
+  await api.post('/api/deals', dealData);
+} catch (error) {
+  // Structure garantie
+  console.error(error.response.data.message); // Message clair
+  console.error(error.response.data.status);  // 400, 404, 500, etc.
+  
+  // Afficher le message à l'utilisateur
+  toast.error(error.response.data.message);
+}
+```
+
+### Avantages
+
+- ✅ **Plus de 500 sans message** : Toujours un message clair
+- ✅ **Logs centralisés** : Toutes les erreurs sont loggées
+- ✅ **Structure uniforme** : Le frontend sait toujours quoi attendre
+- ✅ **Débogage facile** : Détails techniques inclus
+- ✅ **UX améliorée** : Messages clairs pour l'utilisateur
+
+---
+
 ## 📚 Documentation
 
 ### Avant de créer de la documentation
@@ -1639,32 +2086,77 @@ Chaque module a son `pom.xml` avec dépendances spécifiques.
 2. ✅ **Jamais** de dépendance technique dans bff-core
 3. ✅ **Toujours** utiliser des suffixes explicites (`Modele`, `Jpa`, `DTO`)
 4. ✅ **Toujours** mapper entre les couches (ne pas exposer les entités JPA)
+5. ✅ **RÈGLE ABSOLUE** : La logique métier s'exécute **TOUJOURS** côté Service (bff-core), **JAMAIS** côté ApiAdapter (bff-api)
 
-### Validation et Exceptions
-5. ✅ **TOUTES les règles métier doivent être dans les Validators** (bff-core/domaine/validator/)
-6. ✅ **TOUJOURS** valider dans le Service avant d'appeler le Provider
-7. ✅ **TOUJOURS** utiliser des exceptions avec codes d'erreur traduisibles (ValidationException, ResourceNotFoundException, etc.)
-8. ✅ **JAMAIS** utiliser IllegalArgumentException ou RuntimeException directement
+### Responsabilités par couche (Architecture Hexagonale)
+- **Resource (bff-api)** : Point d'entrée HTTP uniquement - Reçoit la requête, retourne la réponse
+- **ApiAdapter (bff-api)** : Conversion DTO ↔ Modèle + Appel au service - **AUCUNE logique métier**
+- **Service (bff-core)** : **TOUTE la logique métier** - Validation, orchestration, appel aux providers
+- **Provider (bff-core)** : Interface du port - Définit le contrat
+- **ProviderAdapter (bff-provider)** : Implémentation technique - Accès BDD, services externes
+
+### Validation métier
+6. ✅ **TOUTES les règles métier doivent être dans les Validators** (bff-core/domaine/validator/)
+7. ✅ **TOUJOURS** valider dans le Service avant d'appeler le Provider
+8. ✅ **NE PAS utiliser @Valid** dans les Resources - Utiliser les Validators métier explicitement
 9. ✅ **TOUJOURS** créer un Validator pour chaque entité métier
-10. ✅ **TOUJOURS** documenter les nouveaux codes d'erreur dans CODES_ERREUR_TRADUISIBLES.md
+10. ✅ **Les DTOs sont simples** - Pas d'annotations Jakarta Validation (@NotNull, @Size, etc.)
+
+### Exceptions et gestion des erreurs
+11. ✅ **TOUJOURS** lancer des exceptions avec des messages clairs et descriptifs
+12. ✅ **JAMAIS** lancer d'exception sans message (sera interceptée par GlobalExceptionHandler)
+13. ✅ **Le GlobalExceptionHandler gère automatiquement toutes les exceptions** et retourne des réponses structurées
+14. ✅ **Toujours** utiliser `IllegalArgumentException` pour les paramètres invalides
+15. ✅ **Toujours** utiliser `IllegalStateException` pour les états invalides
+
+### Gestion des dates (JPA/Hibernate)
+16. ✅ **NE JAMAIS** définir manuellement `dateCreation` ou `dateModification` dans le code
+17. ✅ **TOUJOURS** utiliser les annotations Hibernate pour la gestion automatique :
+    - `@CreationTimestamp` pour `dateCreation`
+    - `@UpdateTimestamp` pour `dateModification`
+18. ✅ **Exemple dans une entité JPA** :
+    ```java
+    @CreationTimestamp
+    @Column(name = "date_creation", nullable = false, updatable = false)
+    private LocalDateTime dateCreation;
+    
+    @UpdateTimestamp
+    @Column(name = "date_modification")
+    private LocalDateTime dateModification;
+    ```
 
 ### Gestion des images (MinIO)
-11. ✅ **Toujours** générer les URL présignées pour images avec statut PENDING
-12. ✅ **Toujours** ajouter timestamp unique aux noms de fichiers
-13. ✅ **Toujours** utiliser FileManager pour MinIO
-14. ✅ **Toujours** suivre le pattern : Frontend → MinIO (direct) → Backend (confirmation)
+19. ✅ **Toujours** générer les URL présignées pour images avec statut PENDING
+20. ✅ **Toujours** ajouter timestamp unique aux noms de fichiers
+21. ✅ **Toujours** utiliser FileManager pour MinIO
+22. ✅ **Toujours** suivre le pattern : Frontend → MinIO (direct) → Backend (confirmation)
+
+### Gestion des événements (Event Handlers)
+23. ✅ **TOUS les handlers d'événements DOIVENT être dans bff-event** (JAMAIS dans bff-api)
+24. ✅ **Les handlers utilisent UNIQUEMENT les Services du core** (jamais de Repository ou Provider direct)
+25. ✅ **bff-event dépend UNIQUEMENT de bff-core et bff-event-dispatcher** (jamais de bff-provider)
+26. ✅ **Seul GlobalExceptionHandler reste dans bff-api** (gestion des exceptions HTTP uniquement)
+
+**Exemple de handler CORRECT** :
+```java
+// ✅ Emplacement : bff-event/handler/impl/AccountValidationHandler.java
+@Component
+@RequiredArgsConstructor
+public class AccountValidationHandler implements ConsumerHandler {
+    // ✅ Injection de Services du core uniquement
+    private final ValidationTokenService validationTokenService;
+    private final EmailNotificationService emailNotificationService;
+    
+    // ❌ PAS DE : ValidationTokenRepository, ValidationTokenProvider, etc.
+}
+```
 
 ### Tests et Documentation
-15. ✅ **Toujours** créer les tests unitaires (minimum 10+ par ServiceImpl)
-16. ✅ **Toujours** documenter les endpoints dans fichiers .http
-17. ✅ **Toujours** demander confirmation avant de créer de la documentation
-
-### Codes d'erreur traduisibles
-18. ✅ **Format** : `{entité}.{attribut}.{type}` (ex: `deal.titre.obligatoire`)
-19. ✅ **Avec paramètres** : `new ValidationException("deal.description.longueur", 5000)`
-20. ✅ **ResourceNotFoundException** : `ResourceNotFoundException.parUuid("deal", uuid)`
+27. ✅ **Toujours** créer les tests unitaires (minimum 10+ par ServiceImpl)
+28. ✅ **Toujours** documenter les endpoints dans fichiers .http
+29. ✅ **Toujours** demander confirmation avant de créer de la documentation
 
 ---
 
-**Date de dernière mise à jour** : 28 février 2026  
+**Date de dernière mise à jour** : 5 mars 2026  
 **Auteur** : Équipe PayToGether

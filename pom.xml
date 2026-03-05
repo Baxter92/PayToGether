@@ -23,6 +23,8 @@
 
   <modules>
     <module>modules/bff/bff-core</module>
+    <module>modules/bff/bff-event</module>
+    <module>modules/bff/bff-event-dispatcher</module>
     <module>modules/bff/bff-provider</module>
     <module>modules/bff/bff-wsclient</module>
     <module>modules/bff/bff-api</module>
