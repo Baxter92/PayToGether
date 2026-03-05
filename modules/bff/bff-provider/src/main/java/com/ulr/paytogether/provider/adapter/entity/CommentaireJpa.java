@@ -33,7 +33,7 @@ public class CommentaireJpa {
     @Column(nullable = false)
     private Integer note;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "utilisateur_uuid", nullable = false)
     private UtilisateurJpa utilisateurJpa;
 

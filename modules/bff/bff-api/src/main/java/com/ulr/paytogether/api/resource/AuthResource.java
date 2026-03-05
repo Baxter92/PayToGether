@@ -74,7 +74,29 @@ public class AuthResource {
     }
 
     /**
-     * Réinitialiser le mot de passe avec un token
+     * Demander la réinitialisation du mot de passe (étape 1)
+     * Envoie un email avec un lien de réinitialisation contenant un token
+     * Route publique accessible sans authentification
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@RequestBody DemanderReinitialisationMotDePasseDTO dto) {
+        log.info("Requête de demande de réinitialisation de mot de passe pour: {}", dto.getEmail());
+
+        try {
+            utilisateurApiAdapter.demanderReinitialisationMotDePasse(dto.getEmail());
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            log.error("Erreur lors de la demande de réinitialisation: {}", e.getMessage());
+            // Pour des raisons de sécurité, on retourne toujours 200 même si l'email n'existe pas
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            log.error("Erreur inattendue lors de la demande de réinitialisation: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Réinitialiser le mot de passe avec un token (étape 2)
      * Route publique accessible sans authentification
      */
     @PostMapping("/reset-password")

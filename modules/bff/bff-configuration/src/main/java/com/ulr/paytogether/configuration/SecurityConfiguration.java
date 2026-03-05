@@ -61,6 +61,7 @@ public class SecurityConfiguration {
                         // Endpoints publics
                         .requestMatchers("/api/public/**", "/api/auth/login").permitAll()
                         .requestMatchers("/api/public/**", "/api/auth/register").permitAll()
+                        .requestMatchers("/api/auth/forgot-password").permitAll()
                         .requestMatchers("/api/auth/reset-password").permitAll()
                         .requestMatchers("/api/auth/activate-account").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
@@ -118,6 +119,9 @@ public class SecurityConfiguration {
         return path.startsWith("/api/public/") ||
                path.startsWith("/api/auth/login") ||
                path.startsWith("/api/auth/register") ||
+               path.startsWith("/api/auth/forgot-password") ||
+               path.startsWith("/api/auth/reset-password") ||
+               path.startsWith("/api/auth/activate-account") ||
                path.startsWith("/api/deals/statut") ||
                path.startsWith("/api/deals/villes") ||
                (path.startsWith("/api/deals/") && path.contains("/images/") && path.endsWith("/url")) ||

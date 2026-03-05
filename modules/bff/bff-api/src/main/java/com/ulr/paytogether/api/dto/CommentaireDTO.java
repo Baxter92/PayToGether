@@ -38,6 +38,18 @@ public class CommentaireDTO {
     @NotNull(message = "L'UUID de l'utilisateur est obligatoire")
     private UUID utilisateurUuid;
 
+    /**
+     * Prénom de l'utilisateur qui a écrit le commentaire
+     * Rempli automatiquement par le mapper en réponse (pas en création)
+     */
+    private String prenom;
+
+    /**
+     * Nom de l'utilisateur qui a écrit le commentaire
+     * Rempli automatiquement par le mapper en réponse (pas en création)
+     */
+    private String nom;
+
     @NotNull(message = "L'UUID du deal est obligatoire")
     private UUID dealUuid;
 

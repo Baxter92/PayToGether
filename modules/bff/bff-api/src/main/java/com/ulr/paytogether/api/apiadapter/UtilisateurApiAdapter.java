@@ -128,6 +128,17 @@ public class UtilisateurApiAdapter {
     }
 
     /**
+     * Demander la réinitialisation du mot de passe (étape 1)
+     * Envoie un événement qui déclenchera l'envoi d'un email avec un token
+     */
+    public void demanderReinitialisationMotDePasse(String email) {
+        log.info("ApiAdapter - Demande de réinitialisation de mot de passe pour: {}", email);
+
+        // Appel au service métier qui dispatche l'événement PasswordResetEvent
+        utilisateurService.demanderReinitialisationMotDePasse(email);
+    }
+
+    /**
      * Réinitialiser le mot de passe avec validation du token
      * Conversion DTO → appel service métier (logique dans le core)
      */
