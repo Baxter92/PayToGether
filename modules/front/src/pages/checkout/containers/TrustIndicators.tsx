@@ -14,19 +14,17 @@ export default function TrustIndicators(): JSX.Element {
           <HStack spacing={2}>
             <CheckIcon className="w-5 h-5 text-accent flex-shrink-0" />
             <span className="text-sm text-foreground">
-              {t("checkout.securePayment")}
+              {t("securePayment")}
             </span>
           </HStack>
           <HStack spacing={2}>
             <TruckIcon className="w-5 h-5 text-accent flex-shrink-0" />
-            <span className="text-sm text-foreground">
-              {t("checkout.fastDelivery")}
-            </span>
+            <span className="text-sm text-foreground">{t("fastDelivery")}</span>
           </HStack>
           <HStack spacing={2}>
             <CreditCardIcon className="w-5 h-5 text-accent flex-shrink-0" />
             <span className="text-sm text-foreground">
-              {t("checkout.multiplePaymentMethods")}
+              {t("multiplePaymentMethods")}
             </span>
           </HStack>
         </VStack>

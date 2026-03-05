@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, MemoryRouter } from "react-router-dom";
+import { MemoryRouter } from "react-router-dom";
 import CheckoutPage from "../index";
 
 // Mock du contexte d'authentification
@@ -89,7 +89,7 @@ describe("CheckoutPage avec Square Payment", () => {
         <MemoryRouter initialEntries={[{ state: mockState }]}>
           {ui}
         </MemoryRouter>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
   };
 
@@ -123,9 +123,9 @@ describe("CheckoutPage avec Square Payment", () => {
     renderWithProviders(<CheckoutPage />);
 
     await waitFor(() => {
-      const toggle = screen.getAllByRole("button").find(
-        (btn) => btn.className.includes("inline-flex")
-      );
+      const toggle = screen
+        .getAllByRole("button")
+        .find((btn) => btn.className.includes("inline-flex"));
 
       if (toggle) {
         fireEvent.click(toggle);
@@ -134,7 +134,9 @@ describe("CheckoutPage avec Square Payment", () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId("classic-payment-form")).toBeInTheDocument();
-      expect(screen.queryByTestId("square-payment-form")).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("square-payment-form"),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -214,11 +216,10 @@ describe("CheckoutPage avec Square Payment", () => {
         <MemoryRouter initialEntries={[{ state: {} }]}>
           <CheckoutPage />
         </MemoryRouter>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
 
     // Vérifier que la redirection est déclenchée
     expect(mockNavigate).toHaveBeenCalledWith("/deals", { replace: true });
   });
 });
-

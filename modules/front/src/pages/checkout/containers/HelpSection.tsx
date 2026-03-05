@@ -18,12 +18,8 @@ export default function HelpSection({
   return (
     <Card className="border-border bg-card">
       <CardContent className="pt-6">
-        <h4 className="font-semibold text-foreground mb-2">
-          {t("checkout.needHelp")}
-        </h4>
-        <p className="text-sm text-muted-foreground mb-4">
-          {t("checkout.helpText")}
-        </p>
+        <h4 className="font-semibold text-foreground mb-2">{t("needHelp")}</h4>
+        <p className="text-sm text-muted-foreground mb-4">{t("helpText")}</p>
         <HStack spacing={2}>
           <Button
             variant="outline"
@@ -31,7 +27,7 @@ export default function HelpSection({
             onClick={onBack}
             className="flex-1"
           >
-            {t("checkout.back")}
+            {t("back")}
           </Button>
           <Button variant="ghost" size="sm" onClick={onHome} className="flex-1">
             {t("nav.home")}

@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { useI18n } from "@hooks/useI18n";
 import HeaderProfile, { type PROFILE_TABS } from "./containers/HeaderProfile";
 import AsideStats from "./containers/AsideStats";
 import Overview from "./containers/Overview";
@@ -21,7 +20,6 @@ import {
 } from "@/common/api";
 
 export default function Profile() {
-  const { t } = useI18n("profile");
   const { roles, role, user } = useAuth();
   const [activeTab, setActiveTab] =
     useState<(typeof PROFILE_TABS)[number]["key"]>("overview");
@@ -71,7 +69,9 @@ export default function Profile() {
         dealTitle: dealsByUuid.get(commentaire.dealUuid) ?? "Deal inconnu",
         buyer: {
           id: commentaire.utilisateurUuid,
-          name: buyer?.name ?? `Utilisateur ${commentaire.utilisateurUuid?.slice(0, 8)}`,
+          name:
+            buyer?.name ??
+            `Utilisateur ${commentaire.utilisateurUuid?.slice(0, 8)}`,
           email: buyer?.email,
         },
         rating: Number(commentaire.note) || 0,
@@ -126,13 +126,17 @@ export default function Profile() {
 
             {activeTab === "favorites" && <Favorites />}
 
-            {activeTab === "reviews" && (
-              commentairesLoading ? (
-                <div className="text-sm text-muted-foreground">Chargement des avis...</div>
+            {activeTab === "reviews" &&
+              (commentairesLoading ? (
+                <div className="text-sm text-muted-foreground">
+                  Chargement des avis...
+                </div>
               ) : (
-                <ReviewsList data={commentairesToReviewRows.myReviews} isMyReviews />
-              )
-            )}
+                <ReviewsList
+                  data={commentairesToReviewRows.myReviews}
+                  isMyReviews
+                />
+              ))}
 
             {activeTab === "payouts" && isMerchant && <PaymentsList />}
 
@@ -140,13 +144,15 @@ export default function Profile() {
               <OrdersReceivedList data={mockOrdersReceived as any} />
             )}
 
-            {activeTab === "client-reviews" && isMerchant && (
-              commentairesLoading ? (
-                <div className="text-sm text-muted-foreground">Chargement des avis...</div>
+            {activeTab === "client-reviews" &&
+              isMerchant &&
+              (commentairesLoading ? (
+                <div className="text-sm text-muted-foreground">
+                  Chargement des avis...
+                </div>
               ) : (
                 <ReviewsList data={commentairesToReviewRows.clientReviews} />
-              )
-            )}
+              ))}
 
             {activeTab === "settings" && <Settings />}
           </div>

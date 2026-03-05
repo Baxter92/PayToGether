@@ -20,41 +20,41 @@ export default function ShippingForm({
   const { t } = useI18n("checkout");
 
   const shippingSchema = z.object({
-    fullName: z.string().min(2, t("checkout.nameRequired")),
-    phone: z.string().min(6, t("checkout.phoneInvalid")),
-    address: z.string().min(5, t("checkout.addressTooShort")),
-    city: z.string().min(2, t("checkout.cityRequired")),
-    postalCode: z.string().optional(),
+    // fullName: z.string().min(2, t("nameRequired")),
+    // phone: z.string().min(6, t("phoneInvalid")),
+    // address: z.string().min(5, t("addressTooShort")),
+    // city: z.string().min(2, t("cityRequired")),
+    // postalCode: z.string().optional(),
   });
 
   const fields: IFieldConfig[] = [
     {
       name: "fullName",
-      label: t("checkout.fullName"),
+      label: t("fullName"),
       type: "text",
-      placeholder: defaultValues?.fullName || t("checkout.fullNamePlaceholder"),
+      placeholder: defaultValues?.fullName || t("fullNamePlaceholder"),
     },
     {
       name: "phone",
-      label: t("checkout.phone"),
+      label: t("phone"),
       type: "text",
       placeholder: defaultValues?.phone || "+237 6XX XXX XXX",
     },
     {
       name: "address",
-      label: t("checkout.address"),
+      label: t("address"),
       type: "text",
-      placeholder: t("checkout.addressPlaceholder"),
+      placeholder: t("addressPlaceholder"),
     },
     {
       name: "city",
-      label: t("checkout.city"),
+      label: t("city"),
       type: "text",
-      placeholder: t("checkout.cityPlaceholder"),
+      placeholder: t("cityPlaceholder"),
     },
     {
       name: "postalCode",
-      label: t("checkout.postalCodeOptional"),
+      label: t("postalCodeOptional"),
       type: "text",
       placeholder: "67000",
     },
@@ -65,10 +65,8 @@ export default function ShippingForm({
       fields={fields}
       schema={shippingSchema}
       onSubmit={({ data }) => onSubmit(data as ShippingData)}
-      submitLabel={
-        isSubmitting ? t("checkout.processing") : t("checkout.continue")
-      }
-      resetLabel={onBack ? t("checkout.back") : undefined}
+      submitLabel={isSubmitting ? t("processing") : t("continue")}
+      resetLabel={onBack ? t("back") : undefined}
       onReset={onBack}
     />
   );

@@ -89,7 +89,7 @@ export default function CheckoutPage(): JSX.Element {
       });
     } catch (err: any) {
       console.error(err);
-      setApiError(t("checkout.orderError"));
+      setApiError(t("orderError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -121,16 +121,16 @@ export default function CheckoutPage(): JSX.Element {
 
   const steps = [
     {
-      title: t("checkout.shippingTitle"),
-      description: t("checkout.shippingDescription"),
+      title: t("shippingTitle"),
+      description: t("shippingDescription"),
     },
     {
-      title: t("checkout.deliveryTitle"),
-      description: t("checkout.deliveryDescription"),
+      title: t("deliveryTitle"),
+      description: t("deliveryDescription"),
     },
     {
-      title: t("checkout.paymentTitle"),
-      description: t("checkout.paymentDescription"),
+      title: t("paymentTitle"),
+      description: t("paymentDescription"),
     },
   ];
 
@@ -139,10 +139,8 @@ export default function CheckoutPage(): JSX.Element {
       {/* Header */}
       <div className="border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-foreground">
-            {t("checkout.title")}
-          </h1>
-          <p className="text-muted-foreground mt-1">{t("checkout.subtitle")}</p>
+          <h1 className="text-3xl font-bold text-foreground">{t("title")}</h1>
+          <p className="text-muted-foreground mt-1">{t("subtitle")}</p>
         </div>
       </div>
 
@@ -219,8 +217,8 @@ export default function CheckoutPage(): JSX.Element {
 
                     {useSquarePayment ? (
                       <SquarePaymentForm
-                        commandeUuid={checkoutState.dealId || deal?.uuid || ""}
-                        utilisateurUuid={user?.uuid || ""}
+                        commandeUuid={checkoutState.dealId || deal?.id || ""}
+                        utilisateurUuid={user?.id || ""}
                         montant={total}
                         onSuccess={handleSquarePaymentSuccess}
                         onError={handleSquarePaymentError}

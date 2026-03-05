@@ -3,7 +3,7 @@ import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import CheckoutPage from "../index";
-import { apiClient } from "@/common/api/apiClient";
+import { apiClient } from "@/common/api/services/apiClient";
 
 // Mock de l'API
 vi.mock("@/common/api/apiClient", () => ({
@@ -88,7 +88,7 @@ describe("Checkout E2E - Flux complet avec Square Payment", () => {
         <MemoryRouter initialEntries={[{ state: mockDealState }]}>
           <CheckoutPage />
         </MemoryRouter>
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
   };
 
@@ -145,7 +145,7 @@ describe("Checkout E2E - Flux complet avec Square Payment", () => {
     // 5. Attendre le chargement du formulaire Square
     await waitFor(() => {
       expect(
-        screen.getByText(/paiement sécurisé via square/i)
+        screen.getByText(/paiement sécurisé via square/i),
       ).toBeInTheDocument();
     });
 
@@ -185,7 +185,7 @@ describe("Checkout E2E - Flux complet avec Square Payment", () => {
   it("devrait gérer les erreurs de paiement Square", async () => {
     // Mock d'une erreur API
     (apiClient.post as any).mockRejectedValue(
-      new Error("Erreur de traitement du paiement")
+      new Error("Erreur de traitement du paiement"),
     );
 
     renderCheckout();
@@ -204,7 +204,7 @@ describe("Checkout E2E - Flux complet avec Square Payment", () => {
     // Vérifier l'affichage de l'erreur
     await waitFor(() => {
       expect(
-        screen.getByText(/erreur de traitement du paiement/i)
+        screen.getByText(/erreur de traitement du paiement/i),
       ).toBeInTheDocument();
     });
   });
@@ -230,7 +230,7 @@ describe("Checkout E2E - Flux complet avec Square Payment", () => {
     await waitFor(() => {
       expect(screen.getByTestId("classic-payment-form")).toBeInTheDocument();
       expect(
-        screen.queryByTestId("square-payment-form")
+        screen.queryByTestId("square-payment-form"),
       ).not.toBeInTheDocument();
     });
 
@@ -240,7 +240,7 @@ describe("Checkout E2E - Flux complet avec Square Payment", () => {
     await waitFor(() => {
       expect(screen.getByTestId("square-payment-form")).toBeInTheDocument();
       expect(
-        screen.queryByTestId("classic-payment-form")
+        screen.queryByTestId("classic-payment-form"),
       ).not.toBeInTheDocument();
     });
   });
@@ -280,4 +280,3 @@ describe("Checkout E2E - Flux complet avec Square Payment", () => {
     });
   });
 });
-

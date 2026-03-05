@@ -26,11 +26,11 @@ export function DeliveryForm({
   const fields: IFieldConfig[] = [
     {
       name: "deliveryMethod",
-      label: t("checkout.deliveryTitle"),
+      label: t("deliveryTitle"),
       type: "radio",
       items: [
-        { label: `${t("checkout.homeDelivery")} (+3.50€)`, value: "home" },
-        { label: t("checkout.pickupDelivery"), value: "pickup" },
+        { label: `${t("homeDelivery")} (+3.50€)`, value: "home" },
+        { label: t("pickupDelivery"), value: "pickup" },
       ],
     },
   ];
@@ -40,8 +40,8 @@ export function DeliveryForm({
       fields={fields}
       schema={deliverySchema}
       onSubmit={({ data }) => onSubmit(data as DeliveryData)}
-      submitLabel={isSubmitting ? t("checkout.processing") : t("checkout.continue")}
-      resetLabel={onBack ? t("checkout.back") : undefined}
+      submitLabel={isSubmitting ? t("processing") : t("continue")}
+      resetLabel={onBack ? t("back") : undefined}
       onReset={() => {
         onBack?.();
       }}

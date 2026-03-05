@@ -28,23 +28,22 @@ export default function OrderSummary({
     <Card className="border-border bg-card shadow-sm">
       <CardContent className="pt-6">
         <h3 className="text-lg font-semibold text-foreground mb-4">
-          {t("checkout.summary")}
+          {t("summary")}
         </h3>
 
         <VStack spacing={4} className="mb-4">
           <div className="flex items-start gap-3 p-3 bg-secondary rounded-lg">
             <div className="flex-1">
               <p className="font-medium text-foreground text-sm">
-                {deal?.title ?? t("checkout.productPart")}
+                {deal?.title ?? t("productPart")}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                {t("checkout.quantity")} {qty} ×{" "}
+                {t("quantity")} {qty} ×{" "}
                 {formatCurrency(deal?.pricePerPart || 0)}
               </p>
               {deal?.partWeightKg && (
                 <p className="text-xs text-muted-foreground">
-                  {t("checkout.totalWeight")}{" "}
-                  {(qty * deal.partWeightKg).toFixed(2)} kg
+                  {t("totalWeight")} {(qty * deal.partWeightKg).toFixed(2)} kg
                 </p>
               )}
             </div>
@@ -59,7 +58,7 @@ export default function OrderSummary({
         <VStack spacing={3} className="mb-4">
           <HStack justify="between" className="text-sm">
             <span className="text-muted-foreground">
-              {t("orderSuccess.subtotal")}
+              {t("orderSuccess:subtotal")}
             </span>
             <span className="font-medium text-foreground">
               {formatCurrency(subtotal)}
@@ -67,12 +66,10 @@ export default function OrderSummary({
           </HStack>
           <HStack justify="between" className="text-sm">
             <span className="text-muted-foreground">
-              {t("orderSuccess.delivery")}
+              {t("orderSuccess:delivery")}
             </span>
             <span className="font-medium text-foreground">
-              {deliveryFee > 0
-                ? formatCurrency(deliveryFee)
-                : t("checkout.free")}
+              {deliveryFee > 0 ? formatCurrency(deliveryFee) : t("free")}
             </span>
           </HStack>
         </VStack>
@@ -81,16 +78,14 @@ export default function OrderSummary({
 
         <HStack justify="between" className="mb-4">
           <span className="font-semibold text-foreground">
-            {t("checkout.totalToPay")}
+            {t("totalToPay")}
           </span>
           <span className="text-2xl font-bold text-primary">
             {formatCurrency(total)}
           </span>
         </HStack>
 
-        <p className="text-xs text-muted-foreground">
-          ✓ {t("checkout.refundNotice")}
-        </p>
+        <p className="text-xs text-muted-foreground">✓ {t("refundNotice")}</p>
       </CardContent>
     </Card>
   );

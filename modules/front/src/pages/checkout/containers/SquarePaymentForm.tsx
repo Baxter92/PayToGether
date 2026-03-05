@@ -1,10 +1,22 @@
 import { useState, useEffect, useRef } from "react";
 import { useSquarePayment } from "@/common/api/hooks/useSquarePayment";
-import type { SquarePaymentMethod } from "@/common/api/hooks/useSquarePayment";
+import type {
+  SquarePaymentMethod,
+  SquarePaymentRequest,
+} from "@/common/api/hooks/useSquarePayment";
 import { Card, CardContent, CardHeader, CardTitle } from "@components/ui/card";
 import { Button } from "@components/ui/button";
-import { AlertDialog, AlertDialogDescription } from "@components/ui/alert-dialog";
-import { Loader2, CreditCard, Smartphone, Apple, DollarSign } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogDescription,
+} from "@components/ui/alert-dialog";
+import {
+  Loader2,
+  CreditCard,
+  Smartphone,
+  Apple,
+  DollarSign,
+} from "lucide-react";
 import VStack from "@components/VStack";
 import HStack from "@components/HStack";
 
@@ -32,14 +44,16 @@ export default function SquarePaymentForm({
 
   const [payments, setPayments] = useState<any>(null);
   const [card, setCard] = useState<any>(null);
-  const [selectedMethod, setSelectedMethod] = useState<SquarePaymentMethod>("card");
+  const [selectedMethod, setSelectedMethod] =
+    useState<SquarePaymentMethod>("card");
   const [initError, setInitError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
   const cardContainerRef = useRef<HTMLDivElement>(null);
 
   // Application ID Square (à configurer depuis les variables d'environnement)
-  const SQUARE_APPLICATION_ID = import.meta.env.VITE_SQUARE_APPLICATION_ID || "sandbox-sq0idb-YOUR_APP_ID";
+  const SQUARE_APPLICATION_ID =
+    import.meta.env.VITE_SQUARE_APPLICATION_ID || "sandbox-sq0idb-YOUR_APP_ID";
   const SQUARE_LOCATION_ID = import.meta.env.VITE_SQUARE_LOCATION_ID || "main";
 
   // Initialiser Square Payments
@@ -50,7 +64,7 @@ export default function SquarePaymentForm({
       try {
         const paymentsInstance = window.Square.payments(
           SQUARE_APPLICATION_ID,
-          SQUARE_LOCATION_ID
+          SQUARE_LOCATION_ID,
         );
         setPayments(paymentsInstance);
 
@@ -97,11 +111,14 @@ export default function SquarePaymentForm({
           squareToken: result.token,
           methodePaiement: getMethodePaiementEnum(selectedMethod),
           locationId: SQUARE_LOCATION_ID,
-        };
+        } as SquarePaymentRequest;
 
         const response = await createPayment(paymentData);
 
-        if (response.statut === "CONFIRME" || response.statut === "PROCESSING") {
+        if (
+          response.statut === "CONFIRME" ||
+          response.statut === "PROCESSING"
+        ) {
           onSuccess(response.uuid);
         } else if (response.statut === "ECHOUE") {
           onError?.(response.messageErreur || "Paiement échoué");
@@ -205,7 +222,9 @@ export default function SquarePaymentForm({
               </Button>
               <Button
                 type="button"
-                variant={selectedMethod === "cashAppPay" ? "default" : "outline"}
+                variant={
+                  selectedMethod === "cashAppPay" ? "default" : "outline"
+                }
                 onClick={() => setSelectedMethod("cashAppPay")}
                 className="flex items-center gap-2"
               >
@@ -249,11 +268,13 @@ export default function SquarePaymentForm({
           {/* Informations de sécurité */}
           <div className="text-xs text-muted-foreground text-center">
             <p>🔒 Paiement sécurisé par Square</p>
-            <p>Vos informations de paiement ne sont jamais stockées sur nos serveurs</p>
+            <p>
+              Vos informations de paiement ne sont jamais stockées sur nos
+              serveurs
+            </p>
           </div>
         </VStack>
       </CardContent>
     </Card>
   );
 }
-
