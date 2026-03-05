@@ -21,29 +21,16 @@ import { Label } from "@/common/components/ui/label";
 import { Heading } from "@/common/containers/Heading";
 import { Save, Plus } from "lucide-react";
 import { toast } from "sonner";
-import { SortableSlideCard } from "./components/SortableSlideCard";
+import {
+  SortableSlideCard,
+  type HeroSlide,
+} from "./components/SortableSlideCard";
 import {
   useCreatePublicite,
   useDeletePublicite,
   usePublicites,
   useUpdatePublicite,
 } from "@/common/api";
-
-interface HeroSlide {
-  id: number;
-  uuid?: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  buttonText: string;
-  buttonLink: string;
-  image: string;
-  gradient: string;
-  textColor: string;
-  badge?: string;
-  isActive: boolean;
-  imageFile?: File;
-}
 
 export default function AdminHero(): JSX.Element {
   const [slides, setSlides] = useState<HeroSlide[]>([]);
@@ -89,7 +76,7 @@ export default function AdminHero(): JSX.Element {
           description: parts[1] ?? publicite.description ?? "",
           buttonText: "Voir l'offre",
           buttonLink: publicite.lienExterne ?? "/deals",
-          image: publicite.listeImages?.[0]?.urlImage || "/placeholder.svg",
+          image: publicite.listeImages?.[0]?.imageUuid || "/placeholder.svg",
           gradient: "from-blue-600/50 to-indigo-600/50",
           textColor: "text-white",
           badge: parts[2],

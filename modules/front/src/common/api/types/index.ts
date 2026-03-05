@@ -2,6 +2,7 @@ export * from "./category";
 export * from "./deal";
 export * from "./utilisateur";
 export * from "./publicite";
+export * from "./commentaire";
 
 export interface PaginatedResponse<T> {
   items: T[];

@@ -59,7 +59,9 @@ export default function Login() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             {t("loginTitle")}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">{t("loginSubtitle")}</p>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            {t("loginSubtitle")}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -149,9 +151,9 @@ export default function Login() {
           </Link>
         </div>
 
-        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+        {/* <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
           <p className="text-xs text-gray-500 dark:text-gray-400 text-center">{t("demoHint")}</p>
-        </div>
+        </div> */}
       </div>
     </div>
   );

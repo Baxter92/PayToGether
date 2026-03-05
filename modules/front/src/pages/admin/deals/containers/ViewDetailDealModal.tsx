@@ -16,6 +16,7 @@ import { Badge } from "@/common/components/ui/badge";
 import { Star, MapPin, Phone, Calendar } from "lucide-react";
 import { DataTable } from "@/common/components";
 import { formatCurrency } from "@/common/utils/formatCurrency";
+import { useCommentairesByDeal, useUsers } from "@/common/api";
 
 // Define CreateDealInput type
 type CreateDealInput = {
@@ -95,23 +96,6 @@ const participantsMock: ParticipantRow[] = [
   },
 ];
 
-const reviewsMock: ReviewRow[] = [
-  {
-    id: "1",
-    user: "User 1",
-    rating: 4,
-    comment: "Great deal!",
-    date: "2023-10-01",
-  },
-  {
-    id: "2",
-    user: "User 2",
-    rating: 5,
-    comment: "Excellent!",
-    date: "2023-10-02",
-  },
-];
-
 const supplierMock = {
   name: "Supplier Name",
   rating: 4.5,
@@ -155,6 +139,10 @@ export function ViewDetailDealModal({
   onClose: () => void;
   deal: any;
 }) {
+  const dealUuid = deal?.id ?? deal?.raw?.uuid ?? "";
+  const { data: commentaires = [] } = useCommentairesByDeal(dealUuid);
+  const { data: users = [] } = useUsers();
+
   const form = useForm<CreateDealInput>({
     resolver: zodResolver(viewDetailDealFormSchema),
   });
@@ -293,6 +281,34 @@ export function ViewDetailDealModal({
     ],
     [],
   );
+
+  const reviews = useMemo<ReviewRow[]>(() => {
+    const usersByUuid = new Map(
+      users.map((user) => [
+        user.uuid,
+        `${user.prenom ?? ""} ${user.nom ?? ""}`.trim() || user.email,
+      ]),
+    );
+
+    return commentaires
+      .filter((commentaire) => !commentaire.commentaireParentUuid)
+      .sort(
+        (a, b) =>
+          new Date(b.dateCreation ?? 0).getTime() -
+          new Date(a.dateCreation ?? 0).getTime(),
+      )
+      .map((commentaire) => ({
+        id: commentaire.uuid ?? "",
+        user:
+          usersByUuid.get(commentaire.utilisateurUuid) ??
+          `Utilisateur ${commentaire.utilisateurUuid.slice(0, 8)}`,
+        rating: Number(commentaire.note) || 0,
+        comment: commentaire.contenu,
+        date: commentaire.dateCreation
+          ? new Date(commentaire.dateCreation).toLocaleDateString("fr-FR")
+          : "",
+      }));
+  }, [commentaires, users]);
 
   const [partsTotal, setPartsTotal] = useState<number>(0);
 
@@ -583,12 +599,12 @@ export function ViewDetailDealModal({
                 <div>
                   <h3 className="text-lg font-semibold">Avis clients</h3>
                   <p className="text-sm text-muted-foreground">
-                    {reviewsMock.length} avis reçus
+                    {reviews.length} avis reçus
                   </p>
                 </div>
                 <DataTable<ReviewRow, unknown>
                   columns={reviewColumns}
-                  data={reviewsMock}
+                  data={reviews}
                   searchKey="user"
                   searchPlaceholder="Rechercher un avis..."
                   enableSelection={false}

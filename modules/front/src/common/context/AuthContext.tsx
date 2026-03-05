@@ -2,6 +2,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -30,6 +31,8 @@ export interface IAuthContextType {
   user: IUser | null;
   roles: RoleUtilisateurType[];
   role: IUser["role"] | null;
+  isAdmin: boolean;
+  isMerchant: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<IUser>;
   register: (email: string, password: string, name: string) => Promise<void>;
@@ -102,6 +105,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       role: mapRole(me.roles),
     };
   };
+
+  const { isMerchant, isAdmin } = useMemo(
+    () => ({
+      isMerchant: role === "VENDEUR" || roles.includes("VENDEUR"),
+      isAdmin: role === "ADMIN" || roles.includes("ADMIN"),
+    }),
+    [role, roles],
+  );
 
   const toAuthErrorMessage = (error: unknown): string => {
     if (error instanceof HttpError) {
@@ -195,6 +206,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     logout,
     roles,
     role,
+    isAdmin,
+    isMerchant,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
