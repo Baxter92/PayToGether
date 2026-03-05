@@ -1,6 +1,6 @@
 import { HStack } from "@/common/components";
 import { Button } from "@/common/components/ui/button";
-import { useDealsByCreateur } from "@/common/api";
+import { useDealsByCreateur, useDealVilles } from "@/common/api";
 import { mapDealToView } from "@/common/api/mappers/catalog";
 import DealsList from "@/common/containers/DealList";
 import { Heading } from "@/common/containers/Heading";
@@ -13,6 +13,7 @@ import { useAuth } from "@/common/context/AuthContext";
 export default function MyDeals(): JSX.Element {
   const [addDealModalOpen, setAddDealModalOpen] = useState(false);
   const { user } = useAuth();
+  const { data: villesData } = useDealVilles();
   const { data: dealsData, refetch } = useDealsByCreateur(user?.id || "");
   const deals = (dealsData ?? []).map(mapDealToView);
 
@@ -32,10 +33,10 @@ export default function MyDeals(): JSX.Element {
       id: "city",
       label: "Ville",
       type: "select",
-      options: [
-        { label: "Yaoundé", value: "yaounde" },
-        { label: "Douala", value: "douala" },
-      ],
+      options: (villesData ?? []).map((ville) => ({
+        label: ville,
+        value: ville,
+      })),
     },
     {
       id: "groupPrice",

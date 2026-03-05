@@ -956,7 +956,7 @@ export function CreateDealModal({
             type: "text",
             name: "location",
             label: "Lieu",
-            placeholder: "Ville, Quartier (Ex: Douala – Bonapriso)",
+            placeholder: "Ville, Quartier (Ex: Montréal – Côte-des-Neiges)",
           },
         ],
       },
