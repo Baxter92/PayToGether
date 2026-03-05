@@ -18,10 +18,30 @@
     <description>Module Event - Définition des événements et handlers</description>
 
     <dependencies>
+        <!-- Dépendance vers bff-core UNIQUEMENT -->
+        <!-- Le core contient les Services ET les événements ET l'interface EventPublisher -->
+        <dependency>
+            <groupId>com.ulr.paytogether</groupId>
+            <artifactId>bff-core</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
         <!-- Spring Boot Starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Spring Retry pour @Retryable -->
+        <dependency>
+            <groupId>org.springframework.retry</groupId>
+            <artifactId>spring-retry</artifactId>
+        </dependency>
+
+        <!-- Spring AOP pour @EnableRetry -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
         <!-- Lombok -->

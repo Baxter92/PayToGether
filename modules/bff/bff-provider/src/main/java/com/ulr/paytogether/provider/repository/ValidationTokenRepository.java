@@ -23,6 +23,14 @@ public interface ValidationTokenRepository extends JpaRepository<ValidationToken
     Optional<ValidationTokenJpa> findByToken(String token);
 
     /**
+     * Recherche un token par l'UUID de l'utilisateur
+     *
+     * @param utilisateurUuid UUID de l'utilisateur
+     * @return Le token si trouvé
+     */
+    Optional<ValidationTokenJpa> findByUtilisateurUuid(UUID utilisateurUuid);
+
+    /**
      * Vérifie si un token existe et est valide
      *
      * @param token La valeur du token
@@ -35,8 +43,9 @@ public interface ValidationTokenRepository extends JpaRepository<ValidationToken
      * Supprime les tokens expirés
      *
      * @param maintenant La date actuelle
+     * @return Nombre de tokens supprimés
      */
-    void deleteByDateExpirationBefore(LocalDateTime maintenant);
+    int deleteByDateExpirationBefore(LocalDateTime maintenant);
 
     /**
      * Supprime les tokens d'un utilisateur

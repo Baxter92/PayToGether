@@ -4,10 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.ulr.paytogether.bff.event.annotation.FunctionalHandler;
 import com.ulr.paytogether.bff.event.handler.ConsumerHandler;
-import com.ulr.paytogether.bff.event.model.DomainEvent;
-import com.ulr.paytogether.bff.event.model.HandlerConsumedEvent;
-import com.ulr.paytogether.bff.event.model.HandlerFailedEvent;
-import com.ulr.paytogether.bff.event.model.EventDispatcher;
+import com.ulr.paytogether.core.event.EventPublisher;
+import com.ulr.paytogether.core.event.HandlerConsumedEvent;
+import com.ulr.paytogether.core.event.HandlerFailedEvent;
 import com.ulr.paytogether.bff.eventdispatcher.entity.EventRecordJpa;
 import com.ulr.paytogether.bff.eventdispatcher.repository.EventRecordRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,17 +33,17 @@ public class EventConsumerService {
 
     private final EventRecordRepository eventRecordRepository;
     private final ApplicationContext applicationContext;
-    private final EventDispatcher eventDispatcher;
+    private final EventPublisher eventPublisher;
     private final ObjectMapper objectMapper;
     private final List<HandlerInfo> registeredHandlers = new ArrayList<>();
 
     @Autowired
     public EventConsumerService(EventRecordRepository eventRecordRepository,
                                ApplicationContext applicationContext,
-                               EventDispatcher eventDispatcher) {
+                               EventPublisher eventPublisher) {
         this.eventRecordRepository = eventRecordRepository;
         this.applicationContext = applicationContext;
-        this.eventDispatcher = eventDispatcher;
+        this.eventPublisher = eventPublisher;
         this.objectMapper = new ObjectMapper();
         this.objectMapper.registerModule(new JavaTimeModule());
         discoverHandlers();
@@ -128,7 +127,7 @@ public class EventConsumerService {
             }
 
             // Désérialiser l'événement
-            DomainEvent event = deserializeEvent(eventRecord);
+            Object event = deserializeEvent(eventRecord);
 
             // Exécuter tous les handlers compatibles
             boolean allSuccess = true;
@@ -170,7 +169,7 @@ public class EventConsumerService {
 
         for (HandlerInfo handlerInfo : registeredHandlers) {
             if (handlerInfo.getEventType().getSimpleName().equals(eventRecord.getEventType()) ||
-                handlerInfo.getEventType().equals(DomainEvent.class)) {
+                handlerInfo.getEventType().equals(Object.class)) {
                 compatible.add(handlerInfo);
             }
         }
@@ -181,9 +180,9 @@ public class EventConsumerService {
     /**
      * Désérialise un événement depuis JSON
      */
-    private DomainEvent deserializeEvent(EventRecordJpa eventRecord) throws Exception {
+    private Object deserializeEvent(EventRecordJpa eventRecord) throws Exception {
         // Trouver la classe de l'événement
-        Class<? extends DomainEvent> eventClass = findEventClass(eventRecord.getEventType());
+        Class<?> eventClass = findEventClass(eventRecord.getEventType());
         return objectMapper.readValue(eventRecord.getPayload(), eventClass);
     }
 
@@ -191,28 +190,21 @@ public class EventConsumerService {
      * Trouve la classe d'événement par son nom
      */
     @SuppressWarnings("unchecked")
-    private Class<? extends DomainEvent> findEventClass(String eventType) throws ClassNotFoundException {
-        // Rechercher dans les packages connus
-        String[] packages = {
-            "com.ulr.paytogether.bff.event.model",
-            "com.ulr.paytogether.bff.core.event"
-        };
+    private Class<?> findEventClass(String eventType) throws ClassNotFoundException {
+        // Rechercher dans le package du core
+        String corePackage = "com.ulr.paytogether.core.event";
 
-        for (String pkg : packages) {
-            try {
-                return (Class<? extends DomainEvent>) Class.forName(pkg + "." + eventType);
-            } catch (ClassNotFoundException ignored) {
-                // Continuer la recherche
-            }
+        try {
+            return Class.forName(corePackage + "." + eventType);
+        } catch (ClassNotFoundException e) {
+            throw new ClassNotFoundException("Event class not found: " + eventType + " in package " + corePackage);
         }
-
-        throw new ClassNotFoundException("Event class not found: " + eventType);
     }
 
     /**
      * Exécute un handler avec l'événement
      */
-    private void executeHandler(HandlerInfo handlerInfo, DomainEvent event, EventRecordJpa eventRecord) throws Exception {
+    private void executeHandler(HandlerInfo handlerInfo, Object event, EventRecordJpa eventRecord) throws Exception {
         Method method = handlerInfo.getMethod();
         method.setAccessible(true);
         method.invoke(handlerInfo.getHandlerInstance(), event);
@@ -220,29 +212,28 @@ public class EventConsumerService {
         eventRecord.setConsumerHandler(handlerInfo.getHandlerName());
 
         // ✅ RÈGLE IMPORTANTE : Publier événement de confirmation après consommation réussie
-        publishHandlerConsumedEvent(event, handlerInfo.getHandlerName());
+        publishHandlerConsumedEvent(eventRecord, handlerInfo.getHandlerName());
     }
 
     /**
      * Publie un événement HandlerConsumedEvent pour tracer la consommation réussie
      */
-    private void publishHandlerConsumedEvent(DomainEvent originalEvent, String handlerName) {
+    private void publishHandlerConsumedEvent(EventRecordJpa eventRecord, String handlerName) {
         try {
-            HandlerConsumedEvent consumedEvent = new HandlerConsumedEvent(
-                originalEvent.getEventId(),
-                originalEvent.getEventType(),
-                handlerName,
-                "Handler executed successfully",
-                null
-            );
+            HandlerConsumedEvent consumedEvent = HandlerConsumedEvent.builder()
+                .eventId(eventRecord.getEventId().toString())
+                .eventType(eventRecord.getEventType())
+                .handlerName(handlerName)
+                .message("Handler executed successfully")
+                .build();
 
-            eventDispatcher.dispatchAsync(consumedEvent);
+            eventPublisher.publishAsync(consumedEvent);
             log.info("Published HandlerConsumedEvent for event {} by handler {}",
-                    originalEvent.getEventId(), handlerName);
+                    eventRecord.getEventId(), handlerName);
 
         } catch (Exception e) {
             log.error("Failed to publish HandlerConsumedEvent for event {}: {}",
-                    originalEvent.getEventId(), e.getMessage(), e);
+                    eventRecord.getEventId(), e.getMessage(), e);
             // Ne pas relancer l'exception pour ne pas affecter le traitement principal
         }
     }
@@ -301,17 +292,17 @@ public class EventConsumerService {
             // Extraire la classe d'exception du message d'erreur si possible
             String exceptionClass = extractExceptionClass(errorMessage);
 
-            HandlerFailedEvent failedEvent = new HandlerFailedEvent(
-                eventRecord.getEventId(),
-                eventRecord.getEventType(),
-                eventRecord.getConsumerHandler() != null ? eventRecord.getConsumerHandler() : "Unknown",
-                errorMessage,
-                exceptionClass,
-                eventRecord.getAttempts() + 1,
-                isFinalFailure
-            );
+            HandlerFailedEvent failedEvent = HandlerFailedEvent.builder()
+                .eventId(eventRecord.getEventId().toString())
+                .eventType(eventRecord.getEventType())
+                .handlerName(eventRecord.getConsumerHandler() != null ? eventRecord.getConsumerHandler() : "Unknown")
+                .errorMessage(errorMessage)
+                .exceptionClass(exceptionClass)
+                .attemptNumber(eventRecord.getAttempts() + 1)
+                .isFinalFailure(isFinalFailure)
+                .build();
 
-            eventDispatcher.dispatchAsync(failedEvent);
+            eventPublisher.publishAsync(failedEvent);
             log.info("Published HandlerFailedEvent for event {} (attempt {}, final={})",
                     eventRecord.getEventId(), eventRecord.getAttempts() + 1, isFinalFailure);
 

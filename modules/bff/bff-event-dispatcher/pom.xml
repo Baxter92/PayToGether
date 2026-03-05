@@ -18,7 +18,14 @@
     <description>Module Event Dispatcher - Gestion du dispatch et de la consommation des événements</description>
 
     <dependencies>
-        <!-- Module Event -->
+        <!-- Dépendance vers bff-core pour implémenter EventPublisher -->
+        <dependency>
+            <groupId>com.ulr.paytogether</groupId>
+            <artifactId>bff-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Dépendance vers bff-event pour accéder aux annotations et handlers -->
         <dependency>
             <groupId>com.ulr.paytogether</groupId>
             <artifactId>bff-event</artifactId>
@@ -55,6 +62,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- Jackson JSR310 for Java 8 Date/Time -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
 
         <!-- Spring Boot Starter Test -->

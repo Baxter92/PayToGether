@@ -16,6 +16,11 @@ public interface ValidationTokenProvider {
     Optional<ValidationTokenModele> trouverParToken(String token);
 
     /**
+     * Trouver un token par l'UUID de l'utilisateur
+     */
+    Optional<ValidationTokenModele> trouverParUtilisateur(UUID utilisateurUuid);
+
+    /**
      * Marquer un token comme utilisé
      */
     void marquerCommeUtilise(String token);
@@ -24,5 +29,11 @@ public interface ValidationTokenProvider {
      * Sauvegarder un token
      */
     ValidationTokenModele sauvegarder(ValidationTokenModele token);
+
+    /**
+     * Supprimer les tokens expirés
+     * @return Nombre de tokens supprimés
+     */
+    int supprimerTokensExpires();
 }
 

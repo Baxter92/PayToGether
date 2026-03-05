@@ -1,12 +1,12 @@
 package com.ulr.paytogether.core.domaine.impl;
 
-import com.ulr.paytogether.bff.event.model.AccountValidationEvent;
-import com.ulr.paytogether.bff.event.model.EventDispatcher;
 import com.ulr.paytogether.core.domaine.service.UtilisateurService;
 import com.ulr.paytogether.core.domaine.validator.ActivationCompteValidator;
 import com.ulr.paytogether.core.domaine.validator.ReinitialiserMotDePasseValidator;
 import com.ulr.paytogether.core.domaine.validator.UtilisateurValidator;
 import com.ulr.paytogether.core.enumeration.StatutImage;
+import com.ulr.paytogether.core.event.AccountValidationEvent;
+import com.ulr.paytogether.core.event.EventPublisher;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
 import com.ulr.paytogether.core.modele.ValidationTokenModele;
 import com.ulr.paytogether.core.provider.UtilisateurProvider;
@@ -30,7 +30,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
     private final UtilisateurProvider utilisateurProvider;
     private final UtilisateurValidator utilisateurValidator;
-    private final EventDispatcher eventDispatcher;
+    private final EventPublisher eventDispatcher;
     private final ValidationTokenProvider validationTokenProvider;
     private final ActivationCompteValidator activationCompteValidator;
     private final ReinitialiserMotDePasseValidator reinitialiserMotDePasseValidator;
@@ -57,7 +57,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
                 expiration
             );
 
-            eventDispatcher.dispatchAsync(event);
+            eventDispatcher.publishAsync(event);
             log.info("Événement de validation de compte dispatché pour: {}", cree.getEmail());
         } catch (Exception e) {
             log.error("Erreur lors du dispatch de l'événement de validation: {}", e.getMessage(), e);

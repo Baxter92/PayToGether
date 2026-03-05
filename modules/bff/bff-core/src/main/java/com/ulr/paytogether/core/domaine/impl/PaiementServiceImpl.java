@@ -38,6 +38,11 @@ public class PaiementServiceImpl implements PaiementService {
     }
 
     @Override
+    public List<PaiementModele> trouverParCommande(UUID commandeUuid) {
+        return List.of();
+    }
+
+    @Override
     public DealModele mettreAJour(UUID uuid, PaiementModele paiement) {
         return null;
     }

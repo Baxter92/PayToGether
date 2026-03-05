@@ -36,6 +36,7 @@ bin/
 #Target folder
 modules/bff-provider/target/
 modules/bff-wsclient/target/
+modules/bff-wsclient/bin/
 modules/bff-core/target/
 modules/bff-configuration/target/
 modules/front/node_modules/

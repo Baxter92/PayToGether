@@ -3,49 +3,52 @@ package com.ulr.paytogether.bff.eventdispatcher.dispatcher;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.ulr.paytogether.bff.event.model.DomainEvent;
-import com.ulr.paytogether.bff.event.model.EventDispatcher;
+import com.ulr.paytogether.core.event.EventPublisher;
 import com.ulr.paytogether.bff.eventdispatcher.entity.EventRecordJpa;
 import com.ulr.paytogether.bff.eventdispatcher.repository.EventRecordRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 /**
- * Implémentation du dispatcher d'événements.
+ * Implémentation du publisher d'événements (ADAPTATEUR - Partie droite).
  * Enregistre tous les événements en base de données pour traitement ultérieur.
+ *
+ * Cette classe implémente le port EventPublisher défini dans bff-core.
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class EventDispatcherImpl implements EventDispatcher {
+public class EventDispatcherImpl implements EventPublisher {
 
     private final EventRecordRepository eventRecordRepository;
     private final ObjectMapper objectMapper;
 
-    @Autowired
-    public EventDispatcherImpl(EventRecordRepository eventRecordRepository) {
-        this.eventRecordRepository = eventRecordRepository;
-        this.objectMapper = new ObjectMapper();
-        this.objectMapper.registerModule(new JavaTimeModule());
+    @PostConstruct
+    public void init() {
+        objectMapper.registerModule(new JavaTimeModule());
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void dispatch(DomainEvent event) {
-        log.info("Dispatching event: {} from class: {}", event.getEventType(), event.getSourceClass());
+    public void publishSync(Object event) {
+        log.info("Publishing sync event: {}", event.getClass().getSimpleName());
 
         try {
             String payload = serializeEvent(event);
+            String eventType = event.getClass().getSimpleName();
 
             EventRecordJpa eventRecord = EventRecordJpa.builder()
-                    .eventId(event.getEventId())
-                    .eventType(event.getEventType())
-                    .sourceClass(event.getSourceClass())
-                    .occurredOn(event.getOccurredOn())
+                    .eventId(UUID.randomUUID())
+                    .eventType(eventType)
+                    .sourceClass(event.getClass().getName())
+                    .occurredOn(LocalDateTime.now())
                     .payload(payload)
                     .status(EventRecordJpa.EventStatus.PENDING)
                     .attempts(0)
@@ -53,26 +56,26 @@ public class EventDispatcherImpl implements EventDispatcher {
                     .build();
 
             eventRecordRepository.save(eventRecord);
-            log.info("Event {} dispatched successfully", event.getEventId());
+            log.info("Event {} published successfully", eventType);
 
         } catch (Exception e) {
-            log.error("Error dispatching event {}: {}", event.getEventId(), e.getMessage(), e);
-            throw new RuntimeException("Failed to dispatch event", e);
+            log.error("Error publishing event {}: {}", event.getClass().getSimpleName(), e.getMessage(), e);
+            throw new RuntimeException("Failed to publish event", e);
         }
     }
 
     @Override
     @Async
     @Transactional(rollbackFor = Exception.class)
-    public void dispatchAsync(DomainEvent event) {
-        log.info("Dispatching async event: {} from class: {}", event.getEventType(), event.getSourceClass());
-        dispatch(event);
+    public void publishAsync(Object event) {
+        log.info("Publishing async event: {}", event.getClass().getSimpleName());
+        publishSync(event);
     }
 
     /**
      * Sérialise un événement en JSON
      */
-    private String serializeEvent(DomainEvent event) {
+    private String serializeEvent(Object event) {
         try {
             return objectMapper.writeValueAsString(event);
         } catch (JsonProcessingException e) {

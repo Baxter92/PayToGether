@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Adaptateur pour les tokens de validation (implémentation du port ValidationTokenProvider)
@@ -28,6 +29,13 @@ public class ValidationTokenProviderAdapter implements ValidationTokenProvider {
     public Optional<ValidationTokenModele> trouverParToken(String token) {
         log.debug("Provider - Recherche du token: {}", token);
         return tokenRepository.findByToken(token)
+                .map(mapper::versModele);
+    }
+
+    @Override
+    public Optional<ValidationTokenModele> trouverParUtilisateur(UUID utilisateurUuid) {
+        log.debug("Provider - Recherche du token pour l'utilisateur: {}", utilisateurUuid);
+        return tokenRepository.findByUtilisateurUuid(utilisateurUuid)
                 .map(mapper::versModele);
     }
 
@@ -50,6 +58,16 @@ public class ValidationTokenProviderAdapter implements ValidationTokenProvider {
         ValidationTokenJpa tokenJpa = mapper.versEntite(token);
         ValidationTokenJpa sauvegarde = tokenRepository.save(tokenJpa);
         return mapper.versModele(sauvegarde);
+    }
+
+    @Override
+    @Transactional
+    public int supprimerTokensExpires() {
+        log.debug("Provider - Suppression des tokens expirés");
+        LocalDateTime maintenant = LocalDateTime.now();
+        int nombreSupprime = tokenRepository.deleteByDateExpirationBefore(maintenant);
+        log.info("Provider - {} tokens expirés supprimés", nombreSupprime);
+        return nombreSupprime;
     }
 }
 
