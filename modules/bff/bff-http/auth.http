@@ -1,8 +1,8 @@
 ### Tests des API d'Authentification
 
 ### Variables
-@username = admin.test@hana.com
-@password = MotDePasse123!
+@username = user@example.com
+@password = 12345678
 ### =========================================================================================
 ### 1. Login - Authentification d'un utilisateur
 ### =========================================================================================

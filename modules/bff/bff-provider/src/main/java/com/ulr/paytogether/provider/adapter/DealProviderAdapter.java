@@ -17,15 +17,12 @@ import com.ulr.paytogether.provider.repository.ImageDealRepository;
 import com.ulr.paytogether.provider.repository.UtilisateurRepository;
 import com.ulr.paytogether.provider.utils.FileManager;
 import com.ulr.paytogether.provider.utils.Tools;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -48,31 +45,56 @@ public class DealProviderAdapter implements DealProvider {
     private final FileManager fileManager;
 
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public DealModele sauvegarder(DealModele deal) {
+        log.info("💾 Début de sauvegarde du deal: {}", deal.getTitre());
+
+        // 1. ✅ Charger les entités JPA existantes depuis la BDD (pour éviter TransientPropertyValueException)
+        UtilisateurJpa createurJpa = utilisateurRepository.findById(deal.getCreateur().getUuid())
+                .orElseThrow(() -> new IllegalArgumentException("Créateur non trouvé pour l'UUID : " + deal.getCreateur().getUuid()));
+
+        CategorieJpa categorieJpa = categorieRepository.findById(deal.getCategorie().getUuid())
+                .orElseThrow(() -> new IllegalArgumentException("Catégorie non trouvée pour l'UUID : " + deal.getCategorie().getUuid()));
+
+        // 2. Mapper le deal vers l'entité JPA
         DealJpa entite = mapper.versEntite(deal);
 
-        // Mettre à jour les noms des fichiers associés de façon unique au deal avant de les sauvegarder
+        // 3. ✅ Forcer l'assignation des entités chargées (remplace les entités "transient" créées par le mapper)
+        entite.setMarchandJpa(createurJpa);
+        entite.setCategorieJpa(categorieJpa);
+
+        // 4. Gérer les images avec noms uniques et relation bidirectionnelle
         if (deal.getListeImages() != null && !deal.getListeImages().isEmpty()) {
-            List<ImageDealJpa> imageDealJpas = deal.getListeImages().stream()
-                    .map(imageDealModele -> ImageDealJpa.builder()
-                            .urlImage(FilenameUtils.getBaseName(imageDealModele.getUrlImage())
-                                    + "_" + System.currentTimeMillis()
-                                    + "." + FilenameUtils.getExtension(imageDealModele.getUrlImage()))
-                            .isPrincipal(imageDealModele.getIsPrincipal())
-                            .statut(imageDealModele.getStatut())
-                            .dealJpa(entite)
-                            .build())
-                    .toList();
+            // Créer les images avec la relation bidirectionnelle
+            List<ImageDealJpa> imageDealJpas = new ArrayList<>();
+
+            for (ImageDealModele imageDealModele : deal.getListeImages()) {
+                ImageDealJpa imageJpa = ImageDealJpa.builder()
+                        .urlImage(FilenameUtils.getBaseName(imageDealModele.getUrlImage())
+                                + "_" + System.currentTimeMillis()
+                                + "." + FilenameUtils.getExtension(imageDealModele.getUrlImage()))
+                        .isPrincipal(imageDealModele.getIsPrincipal())
+                        .statut(imageDealModele.getStatut() != null ? imageDealModele.getStatut() : StatutImage.PENDING)
+                        .dealJpa(entite)  // ✅ Relation bidirectionnelle
+                        .build();
+                imageDealJpas.add(imageJpa);
+            }
+
             entite.setImageDealJpas(imageDealJpas);
         }
 
+        // 5. ✅ Sauvegarder le deal (JPA cascade sauvegarde automatiquement les images grâce à CascadeType.ALL)
+        log.info("💾 Sauvegarde en base de données avec cascade...");
         DealJpa sauvegarde = jpaRepository.save(entite);
+
+        // 6. Mapper vers le modèle
         DealModele modeleSauvegarde = mapper.versModele(sauvegarde);
 
+        // 7. Générer les URLs présignées pour les images PENDING
         setPresignUrl(modeleSauvegarde);
 
-        log.info("🎉 Sauvegarde complète terminée");
+        log.info("🎉 Sauvegarde complète terminée - UUID: {}", modeleSauvegarde.getUuid());
         return modeleSauvegarde;
     }
 
