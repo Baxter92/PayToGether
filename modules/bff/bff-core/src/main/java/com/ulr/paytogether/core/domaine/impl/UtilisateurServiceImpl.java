@@ -1,14 +1,21 @@
 package com.ulr.paytogether.core.domaine.impl;
 
+import com.ulr.paytogether.bff.event.model.AccountValidationEvent;
+import com.ulr.paytogether.bff.event.model.EventDispatcher;
 import com.ulr.paytogether.core.domaine.service.UtilisateurService;
+import com.ulr.paytogether.core.domaine.validator.ActivationCompteValidator;
+import com.ulr.paytogether.core.domaine.validator.ReinitialiserMotDePasseValidator;
 import com.ulr.paytogether.core.domaine.validator.UtilisateurValidator;
 import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
+import com.ulr.paytogether.core.modele.ValidationTokenModele;
 import com.ulr.paytogether.core.provider.UtilisateurProvider;
+import com.ulr.paytogether.core.provider.ValidationTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,6 +30,10 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
     private final UtilisateurProvider utilisateurProvider;
     private final UtilisateurValidator utilisateurValidator;
+    private final EventDispatcher eventDispatcher;
+    private final ValidationTokenProvider validationTokenProvider;
+    private final ActivationCompteValidator activationCompteValidator;
+    private final ReinitialiserMotDePasseValidator reinitialiserMotDePasseValidator;
 
     @Override
     public UtilisateurModele creer(UtilisateurModele utilisateur) {
@@ -30,7 +41,37 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
         utilisateurValidator.validerPourCreation(utilisateur);
 
-        return utilisateurProvider.sauvegarder(utilisateur);
+        UtilisateurModele cree = utilisateurProvider.sauvegarder(utilisateur);
+
+        // Dispatcher l'événement de validation de compte
+        try {
+            String token = genererToken();
+            LocalDateTime expiration = LocalDateTime.now().plusHours(24);
+
+            AccountValidationEvent event = new AccountValidationEvent(
+                cree.getUuid(),
+                cree.getEmail(),
+                cree.getPrenom(),
+                cree.getNom(),
+                token,
+                expiration
+            );
+
+            eventDispatcher.dispatchAsync(event);
+            log.info("Événement de validation de compte dispatché pour: {}", cree.getEmail());
+        } catch (Exception e) {
+            log.error("Erreur lors du dispatch de l'événement de validation: {}", e.getMessage(), e);
+            // On ne propage pas l'erreur pour ne pas bloquer la création du compte
+        }
+
+        return cree;
+    }
+
+    /**
+     * Génère un token unique pour la validation de compte
+     */
+    private String genererToken() {
+        return UUID.randomUUID().toString().replace("-", "");
     }
 
     @Override
@@ -106,5 +147,77 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         }
 
         utilisateurProvider.assignerRole(utilisateurUuid, nomRole, token);
+    }
+
+    @Override
+    public void activerCompteAvecToken(String token) {
+        log.info("Service - Activation de compte avec token");
+
+        // 1. Validation métier du token
+        activationCompteValidator.valider(token);
+
+        // 2. Récupérer le token en base
+        ValidationTokenModele tokenModele = validationTokenProvider.trouverParToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Token invalide ou expiré"));
+
+        // 3. Vérifier que le token n'a pas été utilisé
+        if (tokenModele.getUtilise()) {
+            throw new IllegalArgumentException("Ce token a déjà été utilisé");
+        }
+
+        // 4. Vérifier que le token n'est pas expiré
+        if (tokenModele.getDateExpiration().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Ce token a expiré");
+        }
+
+        // 5. Vérifier le type de token
+        if (!"VALIDATION_COMPTE".equals(tokenModele.getTypeToken())) {
+            throw new IllegalArgumentException("Type de token invalide");
+        }
+
+        // 6. Activer le compte utilisateur
+        UUID utilisateurUuid = tokenModele.getUtilisateurUuid();
+        utilisateurProvider.activerUtilisateur(utilisateurUuid, true, "system");
+
+        // 7. Marquer le token comme utilisé
+        validationTokenProvider.marquerCommeUtilise(token);
+
+        log.info("Compte activé avec succès pour l'utilisateur: {}", utilisateurUuid);
+    }
+
+    @Override
+    public void reinitialiserMotDePasseAvecToken(String token, String nouveauMotDePasse) {
+        log.info("Service - Réinitialisation de mot de passe avec token");
+
+        // 1. Validation métier
+        reinitialiserMotDePasseValidator.valider(token, nouveauMotDePasse);
+
+        // 2. Récupérer le token en base
+        ValidationTokenModele tokenModele = validationTokenProvider.trouverParToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Token invalide ou expiré"));
+
+        // 3. Vérifier que le token n'a pas été utilisé
+        if (tokenModele.getUtilise()) {
+            throw new IllegalArgumentException("Ce token a déjà été utilisé");
+        }
+
+        // 4. Vérifier que le token n'est pas expiré
+        if (tokenModele.getDateExpiration().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Ce token a expiré");
+        }
+
+        // 5. Vérifier le type de token
+        if (!"REINITIALISATION_MOT_DE_PASSE".equals(tokenModele.getTypeToken())) {
+            throw new IllegalArgumentException("Type de token invalide");
+        }
+
+        // 6. Réinitialiser le mot de passe
+        UUID utilisateurUuid = tokenModele.getUtilisateurUuid();
+        utilisateurProvider.reinitialiserMotDePasse(utilisateurUuid, nouveauMotDePasse, "system");
+
+        // 7. Marquer le token comme utilisé
+        validationTokenProvider.marquerCommeUtilise(token);
+
+        log.info("Mot de passe réinitialisé avec succès pour l'utilisateur: {}", utilisateurUuid);
     }
 }

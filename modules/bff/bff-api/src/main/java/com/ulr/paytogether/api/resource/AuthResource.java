@@ -3,7 +3,6 @@ package com.ulr.paytogether.api.resource;
 import com.ulr.paytogether.api.apiadapter.AuthApiAdapter;
 import com.ulr.paytogether.api.apiadapter.UtilisateurApiAdapter;
 import com.ulr.paytogether.api.dto.*;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -14,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 /**
  * Resource REST pour l'authentification
  * Utilise l'ApiAdapter selon l'architecture hexagonale
+ * Validation gérée par les Validators du core (pas d'annotations @Valid)
  */
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
@@ -29,7 +29,7 @@ public class AuthResource {
      * Authentifier un utilisateur
      */
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginDTO loginDTO) {
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginDTO loginDTO) {
         log.info("Requête de connexion pour l'utilisateur: {}", loginDTO.getUsername());
 
         try {
@@ -55,6 +55,7 @@ public class AuthResource {
                 .body(cree);
     }
 
+
     /**
      * Obtenir les informations de l'utilisateur connecté
      */
@@ -69,6 +70,46 @@ public class AuthResource {
         } catch (RuntimeException e) {
             log.error("Erreur lors de la récupération des informations utilisateur: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+    /**
+     * Réinitialiser le mot de passe avec un token
+     * Route publique accessible sans authentification
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@RequestBody ReinitialiserMotDePasseDTO dto) {
+        log.info("Requête de réinitialisation de mot de passe");
+
+        try {
+            utilisateurApiAdapter.reinitialiserMotDePasseAvecToken(dto);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            log.error("Erreur lors de la réinitialisation: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        } catch (Exception e) {
+            log.error("Erreur inattendue lors de la réinitialisation: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Activer un compte utilisateur avec un token
+     * Route publique accessible sans authentification
+     */
+    @GetMapping("/activate-account")
+    public ResponseEntity<Void> activateAccount(@RequestParam("token") String token) {
+        log.info("Requête d'activation de compte avec token");
+
+        try {
+            utilisateurApiAdapter.activerCompteAvecToken(token);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            log.error("Erreur lors de l'activation: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        } catch (Exception e) {
+            log.error("Erreur inattendue lors de l'activation: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

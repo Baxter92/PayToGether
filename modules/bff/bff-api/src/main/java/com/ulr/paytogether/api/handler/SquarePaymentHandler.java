@@ -1,4 +1,4 @@
-package com.ulr.paytogether.bff.api.handler;
+package com.ulr.paytogether.api.handler;
 
 import com.ulr.paytogether.bff.event.annotation.FunctionalHandler;
 import com.ulr.paytogether.bff.event.handler.ConsumerHandler;

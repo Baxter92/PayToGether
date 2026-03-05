@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="create-validation-token-table" author="paytogether">
+        <createTable tableName="validation_token">
+            <column name="uuid" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="token" type="VARCHAR(64)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="utilisateur_uuid" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_expiration" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type_token" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="utilise" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_creation" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="idx_token" tableName="validation_token" unique="true">
+            <column name="token"/>
+        </createIndex>
+
+        <createIndex indexName="idx_utilisateur_uuid" tableName="validation_token">
+            <column name="utilisateur_uuid"/>
+        </createIndex>
+
+        <addForeignKeyConstraint
+                baseTableName="validation_token"
+                baseColumnNames="utilisateur_uuid"
+                constraintName="fk_validation_token_utilisateur"
+                referencedTableName="utilisateur"
+                referencedColumnNames="uuid"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>
+

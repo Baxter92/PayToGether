@@ -1610,6 +1610,126 @@ private LocalDateTime dateCreation;
 
 ---
 
+## 🚨 Gestion Globale des Exceptions
+
+### GlobalExceptionHandler
+
+Un **GlobalExceptionHandler** intercepte TOUTES les exceptions non gérées et retourne des réponses structurées au frontend.
+
+**Fichier** : `bff-api/handler/GlobalExceptionHandler.java`
+
+**Annotation** : `@RestControllerAdvice`
+
+### Structure de réponse d'erreur
+
+```json
+{
+  "timestamp": "2026-03-05T10:30:00",
+  "status": 500,
+  "error": "Erreur serveur",
+  "message": "Description claire de l'erreur",
+  "path": "/api/deals/123",
+  "validationErrors": {
+    "nom": "Le nom est obligatoire",
+    "email": "Email invalide"
+  },
+  "technicalDetails": "NullPointerException: Cannot invoke method..."
+}
+```
+
+### Exceptions gérées
+
+| Exception | Status | Message | Utilisation |
+|-----------|--------|---------|-------------|
+| `IllegalArgumentException` | 400 | Message de l'exception | Validation métier |
+| `MethodArgumentNotValidException` | 400 | Détails des champs invalides | Validation Jakarta (@NotNull, @Size) |
+| `ResourceNotFoundException` | 404 | "Ressource non trouvée" | Ressource inexistante |
+| `AccessDeniedException` | 403 | "Accès refusé" | Sécurité |
+| `IllegalStateException` | 409 | Message de l'exception | État invalide |
+| `RuntimeException` | 500 | Message ou "Erreur serveur" | Erreurs d'exécution |
+| `Exception` (catch-all) | 500 | "Raison inconnue. Veuillez contacter le support technique." | Toutes les autres erreurs |
+
+### Règles importantes
+
+1. ✅ **TOUJOURS** lancer des exceptions avec des messages clairs
+   ```java
+   throw new IllegalArgumentException("Le deal avec l'UUID " + uuid + " n'existe pas");
+   ```
+
+2. ✅ **JAMAIS** lancer d'exception sans message
+   ```java
+   throw new RuntimeException(); // ❌ Mauvais
+   throw new RuntimeException("Token invalide"); // ✅ Bon
+   ```
+
+3. ✅ **Utiliser les bonnes exceptions** selon le contexte
+   - `IllegalArgumentException` : Paramètres invalides
+   - `IllegalStateException` : État invalide (ex: commande déjà payée)
+   - `ResourceNotFoundException` : Ressource non trouvée
+
+4. ✅ **Le GlobalExceptionHandler log automatiquement** toutes les erreurs
+   - Pas besoin de logger manuellement dans les services
+
+5. ✅ **Les erreurs 500 incluent des détails techniques** pour le débogage
+   - Visible dans les logs serveur
+   - Peut être retourné au frontend (env dev uniquement)
+
+### Exemple d'utilisation dans les services
+
+```java
+@Service
+public class DealServiceImpl implements DealService {
+    
+    @Override
+    public DealModele lireParUuid(UUID uuid) {
+        return dealProvider.trouverParUuid(uuid)
+            .orElseThrow(() -> new IllegalArgumentException(
+                "Le deal avec l'UUID " + uuid + " n'existe pas"
+            ));
+    }
+    
+    @Override
+    public void validerDeal(UUID uuid) {
+        DealModele deal = lireParUuid(uuid);
+        
+        if (deal.getStatut() == StatutDeal.VALIDE) {
+            throw new IllegalStateException(
+                "Ce deal a déjà été validé"
+            );
+        }
+        
+        // ... logique de validation
+    }
+}
+```
+
+### Réponse côté Frontend
+
+Le frontend reçoit TOUJOURS une structure d'erreur claire :
+
+```typescript
+try {
+  await api.post('/api/deals', dealData);
+} catch (error) {
+  // Structure garantie
+  console.error(error.response.data.message); // Message clair
+  console.error(error.response.data.status);  // 400, 404, 500, etc.
+  
+  // Afficher le message à l'utilisateur
+  toast.error(error.response.data.message);
+}
+```
+
+### Avantages
+
+- ✅ **Plus de 500 sans message** : Toujours un message clair
+- ✅ **Logs centralisés** : Toutes les erreurs sont loggées
+- ✅ **Structure uniforme** : Le frontend sait toujours quoi attendre
+- ✅ **Débogage facile** : Détails techniques inclus
+- ✅ **UX améliorée** : Messages clairs pour l'utilisateur
+
+---
+
 ## 📚 Documentation
 
 ### Avant de créer de la documentation
@@ -1639,32 +1759,57 @@ Chaque module a son `pom.xml` avec dépendances spécifiques.
 2. ✅ **Jamais** de dépendance technique dans bff-core
 3. ✅ **Toujours** utiliser des suffixes explicites (`Modele`, `Jpa`, `DTO`)
 4. ✅ **Toujours** mapper entre les couches (ne pas exposer les entités JPA)
+5. ✅ **RÈGLE ABSOLUE** : La logique métier s'exécute **TOUJOURS** côté Service (bff-core), **JAMAIS** côté ApiAdapter (bff-api)
 
-### Validation et Exceptions
-5. ✅ **TOUTES les règles métier doivent être dans les Validators** (bff-core/domaine/validator/)
-6. ✅ **TOUJOURS** valider dans le Service avant d'appeler le Provider
-7. ✅ **TOUJOURS** utiliser des exceptions avec codes d'erreur traduisibles (ValidationException, ResourceNotFoundException, etc.)
-8. ✅ **JAMAIS** utiliser IllegalArgumentException ou RuntimeException directement
+### Responsabilités par couche (Architecture Hexagonale)
+- **Resource (bff-api)** : Point d'entrée HTTP uniquement - Reçoit la requête, retourne la réponse
+- **ApiAdapter (bff-api)** : Conversion DTO ↔ Modèle + Appel au service - **AUCUNE logique métier**
+- **Service (bff-core)** : **TOUTE la logique métier** - Validation, orchestration, appel aux providers
+- **Provider (bff-core)** : Interface du port - Définit le contrat
+- **ProviderAdapter (bff-provider)** : Implémentation technique - Accès BDD, services externes
+
+### Validation métier
+6. ✅ **TOUTES les règles métier doivent être dans les Validators** (bff-core/domaine/validator/)
+7. ✅ **TOUJOURS** valider dans le Service avant d'appeler le Provider
+8. ✅ **NE PAS utiliser @Valid** dans les Resources - Utiliser les Validators métier explicitement
 9. ✅ **TOUJOURS** créer un Validator pour chaque entité métier
-10. ✅ **TOUJOURS** documenter les nouveaux codes d'erreur dans CODES_ERREUR_TRADUISIBLES.md
+10. ✅ **Les DTOs sont simples** - Pas d'annotations Jakarta Validation (@NotNull, @Size, etc.)
+
+### Exceptions et gestion des erreurs
+11. ✅ **TOUJOURS** lancer des exceptions avec des messages clairs et descriptifs
+12. ✅ **JAMAIS** lancer d'exception sans message (sera interceptée par GlobalExceptionHandler)
+13. ✅ **Le GlobalExceptionHandler gère automatiquement toutes les exceptions** et retourne des réponses structurées
+14. ✅ **Toujours** utiliser `IllegalArgumentException` pour les paramètres invalides
+15. ✅ **Toujours** utiliser `IllegalStateException` pour les états invalides
+
+### Gestion des dates (JPA/Hibernate)
+16. ✅ **NE JAMAIS** définir manuellement `dateCreation` ou `dateModification` dans le code
+17. ✅ **TOUJOURS** utiliser les annotations Hibernate pour la gestion automatique :
+    - `@CreationTimestamp` pour `dateCreation`
+    - `@UpdateTimestamp` pour `dateModification`
+18. ✅ **Exemple dans une entité JPA** :
+    ```java
+    @CreationTimestamp
+    @Column(name = "date_creation", nullable = false, updatable = false)
+    private LocalDateTime dateCreation;
+    
+    @UpdateTimestamp
+    @Column(name = "date_modification")
+    private LocalDateTime dateModification;
+    ```
 
 ### Gestion des images (MinIO)
-11. ✅ **Toujours** générer les URL présignées pour images avec statut PENDING
-12. ✅ **Toujours** ajouter timestamp unique aux noms de fichiers
-13. ✅ **Toujours** utiliser FileManager pour MinIO
-14. ✅ **Toujours** suivre le pattern : Frontend → MinIO (direct) → Backend (confirmation)
+19. ✅ **Toujours** générer les URL présignées pour images avec statut PENDING
+20. ✅ **Toujours** ajouter timestamp unique aux noms de fichiers
+21. ✅ **Toujours** utiliser FileManager pour MinIO
+22. ✅ **Toujours** suivre le pattern : Frontend → MinIO (direct) → Backend (confirmation)
 
 ### Tests et Documentation
-15. ✅ **Toujours** créer les tests unitaires (minimum 10+ par ServiceImpl)
-16. ✅ **Toujours** documenter les endpoints dans fichiers .http
-17. ✅ **Toujours** demander confirmation avant de créer de la documentation
-
-### Codes d'erreur traduisibles
-18. ✅ **Format** : `{entité}.{attribut}.{type}` (ex: `deal.titre.obligatoire`)
-19. ✅ **Avec paramètres** : `new ValidationException("deal.description.longueur", 5000)`
-20. ✅ **ResourceNotFoundException** : `ResourceNotFoundException.parUuid("deal", uuid)`
+23. ✅ **Toujours** créer les tests unitaires (minimum 10+ par ServiceImpl)
+24. ✅ **Toujours** documenter les endpoints dans fichiers .http
+25. ✅ **Toujours** demander confirmation avant de créer de la documentation
 
 ---
 
-**Date de dernière mise à jour** : 28 février 2026  
+**Date de dernière mise à jour** : 5 mars 2026  
 **Auteur** : Équipe PayToGether

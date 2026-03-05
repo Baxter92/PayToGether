@@ -210,8 +210,6 @@ public class DealProviderAdapter implements DealProvider {
                 .orElseThrow(() -> new IllegalArgumentException("Deal non trouvé pour l'UUID : " + uuid));
 
         deal.setStatut(statut);
-        deal.setDateModification(LocalDateTime.now());
-
         DealJpa sauvegarde = jpaRepository.save(deal);
         return mapper.versModele(sauvegarde);
     }
@@ -287,13 +285,12 @@ public class DealProviderAdapter implements DealProvider {
                     // Vérifier si isPrincipal a changé
                     if (imageExistante.getIsPrincipal() != imageModele.getIsPrincipal()) {
                         imageExistante.setIsPrincipal(imageModele.getIsPrincipal());
-                        imageExistante.setDateModification(java.time.LocalDateTime.now());
                     }
                 }
             }
         }
 
-        deal.setDateModification(java.time.LocalDateTime.now());
+        // dateModification du deal est gérée automatiquement par @UpdateTimestamp
         DealJpa sauvegarde = jpaRepository.save(deal);
         DealModele modeleSauvegarde = mapper.versModele(sauvegarde);
 
@@ -323,7 +320,6 @@ public class DealProviderAdapter implements DealProvider {
                 .ifPresentOrElse(
                         image -> {
                             image.setStatut(statut);
-                            image.setDateModification(java.time.LocalDateTime.now());
                             jpaRepository.save(deal);
                         },
                         () -> {
@@ -422,7 +418,6 @@ public class DealProviderAdapter implements DealProvider {
         }
 
         if (modifie) {
-            imageExistante.setDateModification(java.time.LocalDateTime.now());
             imageDealRepository.save(imageExistante);
             log.info("Image {} du deal {} mise à jour", imageUuid, dealUuid);
         }

@@ -1,8 +1,8 @@
-package com.ulr.paytogether.bff.api.resource;
+package com.ulr.paytogether.api.resource;
 
-import com.ulr.paytogether.bff.api.apiadapter.SquarePaymentApiAdapter;
-import com.ulr.paytogether.bff.api.dto.CreerPaiementSquareDTO;
-import com.ulr.paytogether.bff.api.dto.PaiementSquareResponseDTO;
+import com.ulr.paytogether.api.apiadapter.SquarePaymentApiAdapter;
+import com.ulr.paytogether.api.dto.CreerPaiementSquareDTO;
+import com.ulr.paytogether.api.dto.PaiementSquareResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Activation de votre compte</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; padding: 30px; text-align: center; }
+        .content { padding: 40px 30px; }
+        .button { display: inline-block; padding: 15px 40px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 20px 0; }
+        .footer { background: #f8f9fa; padding: 20px 30px; text-align: center; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header"><h1>✅ Compte activé !</h1></div>
+        <div class="content">
+            <p>Bonjour <strong th:text="${prenom}">Prénom</strong> <strong th:text="${nom}">Nom</strong>,</p>
+            <p>Votre compte PayToGether a été activé avec succès le <span th:text="${dateActivation}">date</span>.</p>
+            <p>Vous pouvez maintenant profiter de toutes les fonctionnalités de notre plateforme.</p>
+            <div style="text-align: center;"><a th:href="${lienConnexion}" class="button">Se connecter</a></div>
+        </div>
+        <div class="footer"><p>© 2026 PayToGether - Tous droits réservés</p></div>
+    </div>
+</body>
+</html>
+

@@ -3,10 +3,9 @@ package com.ulr.paytogether.provider.adapter;
 import com.ulr.paytogether.core.modele.LoginModele;
 import com.ulr.paytogether.core.modele.LoginResponseModele;
 import com.ulr.paytogether.core.modele.MeResponseModele;
+import com.ulr.paytogether.core.modele.UtilisateurModele;
 import com.ulr.paytogether.core.provider.AuthProvider;
 import com.ulr.paytogether.core.provider.UtilisateurProvider;
-import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
-import com.ulr.paytogether.provider.repository.UtilisateurRepository;
 import com.ulr.paytogether.wsclient.client.apiclient.AuthApiCLient;
 import com.ulr.paytogether.wsclient.client.apiclient.UserApiClient;
 import com.ulr.paytogether.wsclient.dto.LoginResponse;
@@ -34,9 +33,11 @@ public class AuthProviderAdapter implements AuthProvider {
 
     private final AuthApiCLient authApiClient;
     private final UserApiClient userApiClient;
-    private final UtilisateurRepository utilisateurRepository;
+    private final UtilisateurProvider utilisateurProvider;
+
     @Value("${api.auth.admin.user}")
     private String adminUtilisateur;
+
     @Value("${api.auth.admin.user-id}")
     private String adminUserId;
 
@@ -51,7 +52,7 @@ public class AuthProviderAdapter implements AuthProvider {
             login.setUsername(adminUtilisateur);
         }
 
-        boolean utilisateurExiste = utilisateurRepository.existsByEmail(nomUtilisateur);
+        boolean utilisateurExiste = utilisateurProvider.existeParEmail(nomUtilisateur);
         if (!estSuperAdmin && !utilisateurExiste) {
             log.warn("Tentative d'authentification pour un utilisateur qui n'existe pas: {}", nomUtilisateur);
             throw new RuntimeException("Le utilisateur n'existe pas");
@@ -81,13 +82,13 @@ public class AuthProviderAdapter implements AuthProvider {
             // Extraire l'ID utilisateur du JWT
             String userId = extractUserIdFromToken(token);
 
-            if (!userId.equals(adminUserId) && !utilisateurRepository.existsByKeycloakId(userId)) {
+            if (!userId.equals(adminUserId) && !utilisateurProvider.existeParKeycloakId(userId)) {
                 log.warn("Tentative d'authentification pour un utilisateur id qui n'existe pas: {}", userId);
                 throw new RuntimeException("Utilisateur non trouvé. Vérifiez vos identifiants.");
             }
-            Optional<UtilisateurJpa> utilisateurJpaOptional = utilisateurRepository.findByKeycloakId(userId);
-            String username = utilisateurJpaOptional.map(UtilisateurJpa::getEmail).orElse(null);
-            List<String> roles = utilisateurJpaOptional.map(u-> u.getRole().name()).stream().toList();
+            Optional<UtilisateurModele> utilisateurModeleOptional = utilisateurProvider.trouverParKeycloakId(userId);
+            String username = utilisateurModeleOptional.map(UtilisateurModele::getEmail).orElse(null);
+            List<String> roles = utilisateurModeleOptional.map(u-> u.getRole().name()).stream().toList();
             if (userId.equals(adminUserId)) {
                 log.info("Authentification de l'administrateur super admin: {}", adminUtilisateur);
                 username = adminUtilisateur;
@@ -95,13 +96,13 @@ public class AuthProviderAdapter implements AuthProvider {
             // Récupérer les détails de l'utilisateur depuis Keycloak
             UserResponse userResponse = userApiClient.getUser(token, username);
 
-            UtilisateurJpa utilisateurJpa = utilisateurJpaOptional.orElse(null);
+            UtilisateurModele utilisateurModele = utilisateurModeleOptional.orElse(null);
             return MeResponseModele.builder()
-                    .id(utilisateurJpa != null ? utilisateurJpa.getUuid().toString() : userResponse.getId())
+                    .id(utilisateurModele != null ? utilisateurModele.getUuid().toString() : userResponse.getId())
                     .username(userResponse.getUsername())
                     .email(userResponse.getEmail())
-                    .prenom(utilisateurJpa != null ? utilisateurJpa.getPrenom() : userResponse.getFirstName())
-                    .nom(utilisateurJpa != null ? utilisateurJpa.getNom() : userResponse.getLastName())
+                    .prenom(utilisateurModele != null ? utilisateurModele.getPrenom() : userResponse.getFirstName())
+                    .nom(utilisateurModele != null ? utilisateurModele.getNom() : userResponse.getLastName())
                     .actif(userResponse.isEnabled())
                     .emailVerifie(userResponse.isEmailVerified())
                     .dateCreationTimestamp(userResponse.getCreatedTimestamp())
@@ -119,7 +120,7 @@ public class AuthProviderAdapter implements AuthProvider {
 
         try {
             String userId = extractUserIdFromToken(token);
-            if (!userId.equals(adminUserId) && !utilisateurRepository.existsByKeycloakId(userId)) {
+            if (!userId.equals(adminUserId) && !utilisateurProvider.existeParKeycloakId(userId)) {
                 log.warn("Tentative de déconnexion pour un utilisateur id qui n'existe pas: {}", userId);
                 throw new RuntimeException("Utilisateur non trouvé. Vérifiez vos identifiants.");
             }

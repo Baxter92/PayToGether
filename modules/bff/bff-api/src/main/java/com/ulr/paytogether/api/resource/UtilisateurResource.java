@@ -3,7 +3,6 @@ package com.ulr.paytogether.api.resource;
 import com.ulr.paytogether.api.apiadapter.UtilisateurApiAdapter;
 import com.ulr.paytogether.api.dto.*;
 import com.ulr.paytogether.core.enumeration.StatutImage;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -164,7 +163,7 @@ public class UtilisateurResource {
     @PatchMapping("/{uuid}/reset-password")
     public ResponseEntity<Void> reinitialiserMotDePasse(
             @PathVariable UUID uuid,
-            @Valid @RequestBody ReinitialiserMotDePasseDTO dto,
+             @RequestBody ReinitialiserMotDePasseDTO dto,
             JwtAuthenticationToken token) {
         log.info("Réinitialisation du mot de passe pour l'utilisateur: {}", uuid);
 
@@ -185,7 +184,7 @@ public class UtilisateurResource {
     @PatchMapping("/{uuid}/enable")
     public ResponseEntity<Void> activerUtilisateur(
             @PathVariable UUID uuid,
-            @Valid @RequestBody ActiverUtilisateurDTO dto,
+           @RequestBody ActiverUtilisateurDTO dto,
             JwtAuthenticationToken token) {
         log.info("Activation/Désactivation de l'utilisateur: {} - actif: {}", uuid, dto.getActif());
 
@@ -206,7 +205,7 @@ public class UtilisateurResource {
     @PatchMapping("/{uuid}/assign-role")
     public ResponseEntity<Void> assignerRole(
             @PathVariable UUID uuid,
-            @Valid @RequestBody AssignerRoleDTO dto,
+            @RequestBody AssignerRoleDTO dto,
             JwtAuthenticationToken token) {
         log.info("Assignation du rôle {} à l'utilisateur: {}", dto.getNomRole(), uuid);
 

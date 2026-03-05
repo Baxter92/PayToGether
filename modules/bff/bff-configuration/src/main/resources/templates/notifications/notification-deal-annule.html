@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Deal annulé</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; padding: 30px; text-align: center; }
+        .content { padding: 40px 30px; }
+        .footer { background: #f8f9fa; padding: 20px 30px; text-align: center; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header"><h1>❌ Deal annulé</h1></div>
+        <div class="content">
+            <p>Bonjour <strong th:text="${prenom}">Prénom</strong> <strong th:text="${nom}">Nom</strong>,</p>
+            <p>Votre deal "<span th:text="${titreDeal}">Deal</span>" a été annulé le <span th:text="${dateAnnulation}">date</span>.</p>
+            <p><strong>Raison de l'annulation :</strong> <span th:text="${raisonAnnulation}">raison</span></p>
+            <p>Pour plus d'informations, contactez notre support à <a th:href="'mailto:' + ${supportEmail}" th:text="${supportEmail}">support</a></p>
+        </div>
+        <div class="footer"><p>© 2026 PayToGether - Tous droits réservés</p></div>
+    </div>
+</body>
+</html>
+

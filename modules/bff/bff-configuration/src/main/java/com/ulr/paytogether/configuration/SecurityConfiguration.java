@@ -61,6 +61,8 @@ public class SecurityConfiguration {
                         // Endpoints publics
                         .requestMatchers("/api/public/**", "/api/auth/login").permitAll()
                         .requestMatchers("/api/public/**", "/api/auth/register").permitAll()
+                        .requestMatchers("/api/auth/reset-password").permitAll()
+                        .requestMatchers("/api/auth/activate-account").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/deals/statut/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/deals/villes").permitAll()

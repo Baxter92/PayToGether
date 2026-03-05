@@ -12,6 +12,7 @@ import com.ulr.paytogether.bff.eventdispatcher.entity.EventRecordJpa;
 import com.ulr.paytogether.bff.eventdispatcher.repository.EventRecordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,7 @@ public class EventConsumerService {
     private final ObjectMapper objectMapper;
     private final List<HandlerInfo> registeredHandlers = new ArrayList<>();
 
+    @Autowired
     public EventConsumerService(EventRecordRepository eventRecordRepository,
                                ApplicationContext applicationContext,
                                EventDispatcher eventDispatcher) {

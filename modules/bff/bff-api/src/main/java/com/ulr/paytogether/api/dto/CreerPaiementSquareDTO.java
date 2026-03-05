@@ -1,4 +1,4 @@
-package com.ulr.paytogether.bff.api.dto;
+package com.ulr.paytogether.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

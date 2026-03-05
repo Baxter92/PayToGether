@@ -1,0 +1,100 @@
+### Tests du GlobalExceptionHandler
+
+### 1. Test IllegalArgumentException (400 BAD_REQUEST)
+# Appeler un endpoint avec un UUID invalide
+GET http://localhost:8080/api/deals/00000000-0000-0000-0000-000000000000
+
+### Réponse attendue :
+# {
+#   "timestamp": "2026-03-05T10:30:00",
+#   "status": 400,
+#   "error": "Requête invalide",
+#   "message": "Le deal avec l'UUID ... n'existe pas",
+#   "path": "/api/deals/00000000-0000-0000-0000-000000000000"
+# }
+
+### 2. Test MethodArgumentNotValidException (400 BAD_REQUEST)
+# Créer un deal avec des champs invalides
+POST http://localhost:8080/api/deals
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "titre": "",
+  "prixDeal": -100,
+  "nbParticipants": 0
+}
+
+### Réponse attendue :
+# {
+#   "timestamp": "2026-03-05T10:30:00",
+#   "status": 400,
+#   "error": "Erreur de validation",
+#   "message": "Des champs sont invalides",
+#   "path": "/api/deals",
+#   "validationErrors": {
+#     "titre": "Le titre est obligatoire",
+#     "prixDeal": "Le prix doit être positif",
+#     "nbParticipants": "Le nombre de participants doit être supérieur à 0"
+#   }
+# }
+
+### 3. Test ResourceNotFoundException (404 NOT_FOUND)
+# Accéder à une ressource inexistante
+GET http://localhost:8080/api/deals/99999999-9999-9999-9999-999999999999
+
+### Réponse attendue :
+# {
+#   "timestamp": "2026-03-05T10:30:00",
+#   "status": 404,
+#   "error": "Ressource non trouvée",
+#   "message": "Le deal avec l'UUID ... n'existe pas",
+#   "path": "/api/deals/99999999-9999-9999-9999-999999999999"
+# }
+
+### 4. Test AccessDeniedException (403 FORBIDDEN)
+# Accéder à une ressource sans droits
+DELETE http://localhost:8080/api/deals/{{dealUuid}}
+
+### Réponse attendue :
+# {
+#   "timestamp": "2026-03-05T10:30:00",
+#   "status": 403,
+#   "error": "Accès refusé",
+#   "message": "Vous n'avez pas les droits nécessaires pour effectuer cette action",
+#   "path": "/api/deals/..."
+# }
+
+### 5. Test IllegalStateException (409 CONFLICT)
+# Tenter de valider un deal déjà validé
+POST http://localhost:8080/api/deals/{{dealUuid}}/valider
+Authorization: Bearer {{token}}
+
+### Réponse attendue :
+# {
+#   "timestamp": "2026-03-05T10:30:00",
+#   "status": 409,
+#   "error": "État invalide",
+#   "message": "Ce deal a déjà été validé",
+#   "path": "/api/deals/.../valider"
+# }
+
+### 6. Test Exception générale (500 INTERNAL_SERVER_ERROR)
+# Provoquer une erreur serveur (dépend de l'implémentation)
+
+### Réponse attendue :
+# {
+#   "timestamp": "2026-03-05T10:30:00",
+#   "status": 500,
+#   "error": "Erreur interne",
+#   "message": "Raison inconnue. Veuillez contacter le support technique.",
+#   "path": "/api/...",
+#   "technicalDetails": "NullPointerException: Cannot invoke method..."
+# }
+
+### Notes :
+# - Toutes les erreurs retournent une structure JSON uniforme
+# - Les messages sont clairs et descriptifs
+# - Les erreurs 500 incluent des détails techniques pour le débogage
+# - Le frontend peut afficher directement le champ "message" à l'utilisateur
+

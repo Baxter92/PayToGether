@@ -19,6 +19,13 @@
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
 
+    <!-- Dépendance vers bff-event pour les handlers -->
+    <dependency>
+      <groupId>com.ulr.paytogether</groupId>
+      <artifactId>bff-event</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+
     <!-- Dépendance vers bff-provider -->
     <dependency>
       <groupId>com.ulr.paytogether</groupId>

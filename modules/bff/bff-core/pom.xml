@@ -13,6 +13,13 @@
 
   <dependencies>
 
+    <!-- BFF Event pour EventDispatcher et événements -->
+    <dependency>
+      <groupId>com.ulr.paytogether</groupId>
+      <artifactId>bff-event</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+
     <!-- JPA pour les entités et repositories -->
     <dependency>
       <groupId>org.springframework.boot</groupId>

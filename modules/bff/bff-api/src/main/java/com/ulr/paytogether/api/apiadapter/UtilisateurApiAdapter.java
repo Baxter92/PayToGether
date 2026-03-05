@@ -2,6 +2,7 @@ package com.ulr.paytogether.api.apiadapter;
 
 import com.ulr.paytogether.api.dto.CreerUtilisateurDTO;
 import com.ulr.paytogether.api.dto.MettreUtilisateurDto;
+import com.ulr.paytogether.api.dto.ReinitialiserMotDePasseDTO;
 import com.ulr.paytogether.api.dto.UtilisateurDTO;
 import com.ulr.paytogether.api.mapper.UtilisateurMapper;
 import com.ulr.paytogether.core.domaine.service.UtilisateurService;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
  * ApiAdapter pour les utilisateurs
  * Fait le pont entre les Resources (API REST) et le Service Core
  * Gère la conversion entre DTO (API) et Modèle (Core)
+ * Architecture hexagonale : PAS de logique métier ici, juste conversion + appel service
  */
 @Component
 @RequiredArgsConstructor
@@ -31,12 +33,14 @@ public class UtilisateurApiAdapter {
 
     /**
      * Créer un utilisateur
+     * Le service dispatche automatiquement un AccountValidationEvent
      */
     public UtilisateurDTO creer(CreerUtilisateurDTO dto) {
         log.info("ApiAdapter - Création d'un utilisateur: {}", dto.getEmail());
 
         UtilisateurModele modele = mapper.dtoVersModele(dto);
         UtilisateurModele cree = utilisateurService.creer(modele);
+
 
         return mapper.modeleVersDto(cree);
     }
@@ -85,6 +89,7 @@ public class UtilisateurApiAdapter {
         return mapper.modeleVersDto(mis_a_jour);
     }
 
+
     /**
      * Supprimer un utilisateur
      */
@@ -120,6 +125,28 @@ public class UtilisateurApiAdapter {
     public void reinitialiserMotDePasse(UUID utilisateurUuid, String nouveauMotDePasse, String token) {
         log.info("ApiAdapter - Réinitialisation du mot de passe pour l'utilisateur: {}", utilisateurUuid);
         utilisateurService.reinitialiserMotDePasse(utilisateurUuid, nouveauMotDePasse, token);
+    }
+
+    /**
+     * Réinitialiser le mot de passe avec validation du token
+     * Conversion DTO → appel service métier (logique dans le core)
+     */
+    public void reinitialiserMotDePasseAvecToken(ReinitialiserMotDePasseDTO dto) {
+        log.info("ApiAdapter - Réinitialisation du mot de passe avec token");
+
+        // Pas de logique métier ici - juste appel au service
+        utilisateurService.reinitialiserMotDePasseAvecToken(dto.getToken(), dto.getNouveauMotDePasse());
+    }
+
+    /**
+     * Activer un compte utilisateur avec validation du token
+     * Conversion → appel service métier (logique dans le core)
+     */
+    public void activerCompteAvecToken(String token) {
+        log.info("ApiAdapter - Activation de compte avec token");
+
+        // Pas de logique métier ici - juste appel au service
+        utilisateurService.activerCompteAvecToken(token);
     }
 
     /**

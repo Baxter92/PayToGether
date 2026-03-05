@@ -1,7 +1,7 @@
-package com.ulr.paytogether.bff.api.apiadapter;
+package com.ulr.paytogether.api.apiadapter;
 
-import com.ulr.paytogether.bff.api.dto.CreerPaiementSquareDTO;
-import com.ulr.paytogether.bff.api.dto.PaiementSquareResponseDTO;
+import com.ulr.paytogether.api.dto.CreerPaiementSquareDTO;
+import com.ulr.paytogether.api.dto.PaiementSquareResponseDTO;
 import com.ulr.paytogether.core.domaine.service.SquarePaymentService;
 import com.ulr.paytogether.core.enumeration.MethodePaiement;
 import com.ulr.paytogether.core.enumeration.StatutPaiement;
@@ -13,9 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * API Adapter pour les paiements Square.

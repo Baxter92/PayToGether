@@ -35,9 +35,9 @@ public class SquareClientConfig {
             ? Environment.PRODUCTION
             : Environment.SANDBOX;
 
-        SquareClient client = new SquareClient.Builder()
+        SquareClient client = SquareClient.builder()
             .environment(env)
-            .accessToken(accessToken)
+                .token(accessToken)
             .build();
 
         log.info("Square Client initialized successfully");

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Rappel de paiement</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: white; padding: 30px; text-align: center; }
+        .content { padding: 40px 30px; }
+        .button { display: inline-block; padding: 15px 40px; background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 20px 0; }
+        .footer { background: #f8f9fa; padding: 20px 30px; text-align: center; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header"><h1>⏰ Rappel de paiement</h1></div>
+        <div class="content">
+            <p>Bonjour <strong th:text="${prenom}">Prénom</strong> <strong th:text="${nom}">Nom</strong>,</p>
+            <p>Nous vous rappelons que vous avez un paiement en attente pour le deal : <strong th:text="${titreDeal}">Deal</strong></p>
+            <p><strong>Montant :</strong> <span th:text="${montant}">0</span> $</p>
+            <p><strong>Date d'échéance :</strong> <span th:text="${dateEcheance}">date</span></p>
+            <div style="text-align: center;"><a th:href="${lienPaiement}" class="button">Payer maintenant</a></div>
+        </div>
+        <div class="footer"><p>© 2026 PayToGether - Tous droits réservés</p></div>
+    </div>
+</body>
+</html>
+
