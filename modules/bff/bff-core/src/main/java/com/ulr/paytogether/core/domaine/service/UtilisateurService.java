@@ -59,6 +59,13 @@ public interface UtilisateurService {
     void reinitialiserMotDePasse(UUID utilisateurUuid, String nouveauMotDePasse, String token);
 
     /**
+     * Demander la réinitialisation du mot de passe (étape 1)
+     * Génère un token et envoie un événement pour envoyer l'email
+     * @param email Email de l'utilisateur
+     */
+    void demanderReinitialisationMotDePasse(String email);
+
+    /**
      * Activer/Désactiver un utilisateur
      */
     void activerUtilisateur(UUID utilisateurUuid, boolean actif, String token);

@@ -104,3 +104,109 @@ Authorization: Bearer INVALID_TOKEN
 
 POST {{base_url}}/api/auth/logout
 
+### =========================================================================================
+### 5. Activate Account - Activer un compte avec le token reçu par email (PUBLIC)
+### =========================================================================================
+
+GET {{base_url}}/api/auth/activate-account?token=VOTRE_TOKEN_RECU_PAR_EMAIL
+
+### Notes :
+# - Cette route est PUBLIQUE (pas besoin d'authentification)
+# - Le token est généré lors de l'inscription et envoyé par email
+# - Le token expire après 24 heures
+# - Le token ne peut être utilisé qu'une seule fois
+# - Le type de token doit être "VALIDATION_COMPTE"
+# - L'utilisateur est automatiquement activé après validation du token
+
+### =========================================================================================
+### 6. Forgot Password - Demander la réinitialisation de mot de passe (PUBLIC)
+### =========================================================================================
+
+POST {{base_url}}/api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "test@example.com"
+}
+
+### Notes :
+# - Cette route est PUBLIQUE (pas besoin d'authentification)
+# - Envoie un email avec un lien contenant le token
+# - Format du lien: https://dev.dealtogether.ca/reset-password?token=xxx
+# - Le token est valide pendant 1 heure
+# - Retourne toujours 200 pour sécurité (même si l'email n'existe pas)
+
+### =========================================================================================
+### 7. Reset Password - Réinitialiser le mot de passe avec le token (PUBLIC)
+### =========================================================================================
+
+POST {{base_url}}/api/auth/reset-password
+Content-Type: application/json
+
+{
+  "token": "VOTRE_TOKEN_ICI",
+  "nouveauMotDePasse": "NouveauMotDePasse123!"
+}
+
+### Notes :
+# - Cette route est PUBLIQUE (pas besoin d'authentification)
+# - Token reçu par email après demande de réinitialisation
+# - Le nouveau mot de passe doit respecter les règles de sécurité
+
+### =========================================================================================
+### Tests avec erreurs - Activate Account avec token invalide
+### =========================================================================================
+
+GET {{base_url}}/api/auth/activate-account?token=token_invalide_ou_expire
+
+### =========================================================================================
+### Tests avec erreurs - Forgot Password avec email inexistant (retourne 200 pour sécurité)
+### =========================================================================================
+
+POST {{base_url}}/api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "email.inexistant@example.com"
+}
+
+### =========================================================================================
+### Tests avec erreurs - Reset Password avec token invalide
+### =========================================================================================
+
+POST {{base_url}}/api/auth/reset-password
+Content-Type: application/json
+
+{
+  "token": "token_invalide_ou_expire",
+  "nouveauMotDePasse": "NouveauMotDePasse123!"
+}
+
+### =========================================================================================
+### Tests avec erreurs - Reset Password avec mot de passe vide
+### =========================================================================================
+
+POST {{base_url}}/api/auth/reset-password
+Content-Type: application/json
+
+{
+  "token": "VOTRE_TOKEN_ICI",
+  "nouveauMotDePasse": ""
+}
+
+### =========================================================================================
+### FLUX COMPLETS DE TEST
+### =========================================================================================
+
+### Flux 1 : Inscription et activation de compte
+# 1. Créer un utilisateur avec register → POST /api/auth/register
+# 2. Récupérer le token dans l'email ou la base de données (validation_token)
+# 3. Activer le compte → GET /api/auth/activate-account?token=xxx
+# 4. Se connecter → POST /api/auth/login
+
+### Flux 2 : Réinitialisation de mot de passe
+# 1. Demander réinitialisation → POST /api/auth/forgot-password
+# 2. Récupérer le token dans l'email ou la base de données (validation_token)
+# 3. Réinitialiser → POST /api/auth/reset-password
+# 4. Se connecter avec le nouveau mot de passe → POST /api/auth/login
+

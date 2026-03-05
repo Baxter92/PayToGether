@@ -18,10 +18,12 @@ Content-Type: application/json
 
 ###
 # Récupérer un commentaire par UUID
+# Retourne maintenant le prénom et le nom de l'utilisateur
 GET {{baseUrl}}/commentaires/{{commentaireUuid}}
 
 ###
 # Récupérer tous les commentaires d'un deal
+# Chaque commentaire contient maintenant le prénom et le nom de l'utilisateur
 GET {{baseUrl}}/commentaires/deal/{{dealUuid}}
 
 ###

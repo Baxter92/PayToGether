@@ -26,6 +26,8 @@ public class CommentaireMapper {
                 .contenu(modele.getContenu())
                 .note(modele.getNote())
                 .utilisateurUuid(modele.getUtilisateur() != null ? modele.getUtilisateur().getUuid() : null)
+                .prenom(modele.getUtilisateur() != null ? modele.getUtilisateur().getPrenom() : null)
+                .nom(modele.getUtilisateur() != null ? modele.getUtilisateur().getNom() : null)
                 .dealUuid(modele.getDeal() != null ? modele.getDeal().getUuid() : null)
                 .commentaireParentUuid(modele.getCommentaireParentUuid())
                 .estPertinent(modele.getEstPertinent())

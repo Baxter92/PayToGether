@@ -7,6 +7,7 @@ import com.ulr.paytogether.core.domaine.validator.UtilisateurValidator;
 import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.event.AccountValidationEvent;
 import com.ulr.paytogether.core.event.EventPublisher;
+import com.ulr.paytogether.core.event.PasswordResetEvent;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
 import com.ulr.paytogether.core.modele.ValidationTokenModele;
 import com.ulr.paytogether.core.provider.UtilisateurProvider;
@@ -130,6 +131,41 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         }
 
         utilisateurProvider.reinitialiserMotDePasse(utilisateurUuid, nouveauMotDePasse, token);
+    }
+
+    @Override
+    public void demanderReinitialisationMotDePasse(String email) {
+        log.info("Demande de réinitialisation de mot de passe pour: {}", email);
+
+        if (email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException("L'email ne peut pas être vide");
+        }
+
+        // Récupérer l'utilisateur par email
+        UtilisateurModele utilisateur = utilisateurProvider.trouverParEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Aucun utilisateur trouvé avec cet email"));
+
+        // Générer un token de réinitialisation
+        String token = genererToken();
+        LocalDateTime expiration = LocalDateTime.now().plusHours(1); // Token valide 1h
+
+        // Publier l'événement PasswordResetEvent
+        try {
+            PasswordResetEvent event = new PasswordResetEvent(
+                    utilisateur.getUuid(),
+                    utilisateur.getEmail(),
+                    utilisateur.getPrenom(),
+                    utilisateur.getNom(),
+                    token,
+                    expiration
+            );
+
+            eventDispatcher.publishAsync(event);
+            log.info("Événement PasswordResetEvent dispatché pour: {}", utilisateur.getEmail());
+        } catch (Exception e) {
+            log.error("Erreur lors du dispatch de l'événement de réinitialisation: {}", e.getMessage(), e);
+            throw new RuntimeException("Erreur lors de l'envoi de l'email de réinitialisation", e);
+        }
     }
 
     @Override

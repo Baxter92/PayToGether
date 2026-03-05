@@ -14,6 +14,8 @@ COPY modules/bff/bff-provider/pom.xml /workspace/modules/bff/bff-provider/
 COPY modules/bff/bff-wsclient/pom.xml /workspace/modules/bff/bff-wsclient/
 COPY modules/bff/bff-api/pom.xml /workspace/modules/bff/bff-api/
 COPY modules/bff/bff-configuration/pom.xml /workspace/modules/bff/bff-configuration/
+COPY modules/bff/bff-event/pom.xml /workspace/modules/bff/bff-event/
+COPY modules/bff/bff-event-dispatcher/pom.xml /workspace/modules/bff/bff-event-dispatcher/
 COPY modules/front/pom.xml /workspace/modules/front/
 
 # Créer les répertoires de structure
@@ -22,6 +24,8 @@ RUN mkdir -p /workspace/modules/bff/bff-core/src/main/java && \
     mkdir -p /workspace/modules/bff/bff-wsclient/src/main/java && \
     mkdir -p /workspace/modules/bff/bff-api/src/main/java && \
     mkdir -p /workspace/modules/bff/bff-configuration/src/main/java && \
+    mkdir -p /workspace/modules/bff/bff-event/src/main/java && \
+    mkdir -p /workspace/modules/bff/bff-event-dispatcher/src/main/java && \
     mkdir -p /workspace/modules/front/src
 
 # Télécharger les dépendances (layer cachable)
