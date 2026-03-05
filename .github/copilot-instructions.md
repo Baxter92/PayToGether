@@ -2158,5 +2158,27 @@ public class AccountValidationHandler implements ConsumerHandler {
 
 ---
 
-**Date de dernière mise à jour** : 5 mars 2026  
+## 🗃️ Gestion des Migrations SQL (Flyway)
+
+Le projet utilise **Flyway** avec des **scripts SQL purs** (pas de XML).
+
+### Convention de nommage
+`V{N}__{description_en_snake_case}.sql`
+
+**Exemples** : `V1__schema_initial.sql`, `V2__ajout_table_paiement.sql`
+
+### Ajouter une migration
+1. Créer `V4__ma_migration.sql` dans `db/migration/`
+2. Redémarrer l'application (`mvn spring-boot:run`)
+
+Flyway applique automatiquement la migration au démarrage.
+
+### Documentation complète
+📄 `modules/bff/bff-configuration/src/main/resources/db/migration/GUIDE_RAPIDE.md` (guide rapide)  
+📄 `modules/bff/bff-configuration/src/main/resources/db/migration/GUIDE_MODIFICATIONS_RELATIONS.md` (modifications de relations JPA)  
+📄 `modules/bff/bff-configuration/src/main/resources/db/migration/EXEMPLES__modifications_relations.sql` (10 cas : OneToOne↔ManyToOne, ManyToMany, FK, etc.)
+
+---
+
+**Date de dernière mise à jour** : 6 mars 2026  
 **Auteur** : Équipe PayToGether

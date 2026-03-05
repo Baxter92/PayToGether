@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        Version 1.1.0 - Ajout table Paiement
+        Date: 2026-03-05
+        Auteur: Équipe PayToGether
+    -->
+
+    <changeSet id="v1.1.0-ajout-table-paiement" author="paytogether">
+        <comment>Ajout de la table paiement et relations avec deal/utilisateur</comment>
+        <sqlFile
+            path="db/changelog/sql/V1.1.0__ajout_table_paiement.sql"
+            relativeToChangelogFile="false"
+            splitStatements="true"
+            stripComments="false"/>
+        <rollback>
+            DROP TABLE IF EXISTS paiement CASCADE;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
+

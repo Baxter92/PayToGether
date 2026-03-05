@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        Version 1.2.0 - Ajout téléphone utilisateur
+        Date: 2026-03-05
+        Auteur: Équipe PayToGether
+    -->
+
+    <changeSet id="v1.2.0-ajout-telephone-utilisateur" author="paytogether">
+        <comment>Ajout des colonnes telephone et statut_telephone à la table utilisateur</comment>
+        <sqlFile
+            path="db/changelog/sql/V1.2.0__ajout_telephone_utilisateur.sql"
+            relativeToChangelogFile="false"
+            splitStatements="true"
+            stripComments="false"/>
+        <rollback>
+            ALTER TABLE utilisateur DROP COLUMN IF EXISTS statut_telephone;
+            ALTER TABLE utilisateur DROP COLUMN IF EXISTS telephone;
+            DROP INDEX IF EXISTS idx_utilisateur_telephone;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
+
