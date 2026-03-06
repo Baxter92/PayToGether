@@ -76,7 +76,7 @@ export const useSquarePayment = () => {
     mutationFn: async (paymentData) => {
       const response = await apiClient.post<SquarePaymentResponse>(
         "/square-payments",
-        { body: paymentData }
+        { body: paymentData },
       );
       return response;
     },
@@ -90,7 +90,7 @@ export const useSquarePayment = () => {
   >({
     mutationFn: async (paiementUuid) => {
       const response = await apiClient.get<SquarePaymentResponse>(
-        `/square-payments/${paiementUuid}/status`
+        `/square-payments/${paiementUuid}/status`,
       );
       return response;
     },
@@ -105,7 +105,7 @@ export const useSquarePayment = () => {
     mutationFn: async (paiementUuid) => {
       const response = await apiClient.post<SquarePaymentResponse>(
         `/square-payments/${paiementUuid}/refund`,
-        { body: {} }
+        { body: {} },
       );
       return response;
     },

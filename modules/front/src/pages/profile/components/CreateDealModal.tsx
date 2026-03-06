@@ -297,23 +297,23 @@ function ImagesField({
   return (
     <div className="space-y-6">
       {/* ... header ... */}
-      <div className="flex items-center justify-between p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-100/50 shadow-sm">
+      <div className="flex items-center justify-between p-5 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-xl border-2 border-blue-100/50 dark:border-blue-900/50 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-white shadow-sm flex items-center justify-center border border-blue-100">
-            <ImageIcon className="w-5 h-5 text-blue-600" />
+          <div className="w-11 h-11 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center border border-blue-100 dark:border-blue-900">
+            <ImageIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <p className="text-sm font-bold text-gray-900">Galerie d'images</p>
-            <p className="text-xs text-gray-600">
+            <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Galerie d'images</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400">
               JPG, PNG, WEBP • Max 5 MB par image
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-sm border-2 border-blue-100">
+        <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-full shadow-sm border-2 border-blue-100 dark:border-blue-900">
           <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             {images.length}
           </span>
-          <span className="text-sm text-gray-500 font-medium">
+          <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
             / {maxFiles}
           </span>
         </div>
@@ -329,15 +329,15 @@ function ImagesField({
             onChange={handleFileChange}
             className="sr-only"
           />
-          <div className="border-2 border-dashed border-blue-200 rounded-2xl hover:border-blue-400 hover:bg-blue-50/30 transition-all duration-300 bg-white shadow-sm group-hover:shadow-md">
+          <div className="border-2 border-dashed border-blue-200 dark:border-blue-800 rounded-2xl hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50/30 dark:hover:bg-blue-950/30 transition-all duration-300 bg-white dark:bg-gray-900 shadow-sm group-hover:shadow-md">
             <div className="flex flex-col items-center justify-center py-10 px-6">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
                 <Upload className="w-8 h-8 text-white" />
               </div>
-              <p className="text-base font-bold text-gray-900 mb-2">
+              <p className="text-base font-bold text-gray-900 dark:text-gray-100 mb-2">
                 Cliquez ou glissez vos images ici
               </p>
-              <p className="text-sm text-gray-600 text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
                 Jusqu'à {maxFiles} images haute qualité
               </p>
             </div>
@@ -349,11 +349,11 @@ function ImagesField({
       {images.length > 0 ? (
         <div className="space-y-4">
           <div className="flex items-center justify-between px-1">
-            <p className="text-sm font-bold text-gray-900">
+            <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
               {images.length} image{images.length > 1 ? "s" : ""} sélectionnée
               {images.length > 1 ? "s" : ""}
             </p>
-            <p className="text-xs text-blue-600 font-medium bg-blue-50 px-3 py-1 rounded-full">
+            <p className="text-xs text-blue-600 dark:text-blue-400 font-medium bg-blue-50 dark:bg-blue-950/30 px-3 py-1 rounded-full">
               ⭐ Choisissez une image principale
             </p>
           </div>
@@ -375,15 +375,15 @@ function ImagesField({
           </div>
         </div>
       ) : (
-        <div className="border-2 border-dashed border-gray-200 rounded-2xl py-16 bg-gradient-to-br from-gray-50 to-blue-50/30">
+        <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl py-16 bg-gradient-to-br from-gray-50 to-blue-50/30 dark:from-gray-900 dark:to-blue-950/30">
           <div className="flex flex-col items-center text-center">
-            <div className="w-20 h-20 rounded-2xl bg-white shadow-md flex items-center justify-center mb-4 border-2 border-gray-100">
-              <ImageIcon className="w-10 h-10 text-gray-300" />
+            <div className="w-20 h-20 rounded-2xl bg-white dark:bg-gray-800 shadow-md flex items-center justify-center mb-4 border-2 border-gray-100 dark:border-gray-700">
+              <ImageIcon className="w-10 h-10 text-gray-300 dark:text-gray-600" />
             </div>
-            <p className="text-base text-gray-900 font-bold mb-1">
+            <p className="text-base text-gray-900 dark:text-gray-100 font-bold mb-1">
               Aucune image ajoutée
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Cliquez sur la zone ci-dessus pour commencer
             </p>
           </div>
@@ -440,16 +440,16 @@ function ImageThumbnail({
       )}
     >
       {src ? (
-        <div className="w-full h-full flex items-center justify-center bg-gray-50 dark:bg-gray-800">
+        <div className="w-full h-full bg-gray-50 dark:bg-gray-800">
           <img
             src={src}
             alt={`Upload ${index + 1}`}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-cover"
           />
         </div>
       ) : (
         <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-          <Loader2 className="w-6 h-6 text-gray-300 animate-spin" />
+          <Loader2 className="w-6 h-6 text-gray-300 dark:text-gray-600 animate-spin" />
         </div>
       )}
 
@@ -466,11 +466,11 @@ function ImageThumbnail({
                 type="button"
                 size="sm"
                 variant="secondary"
-                className="h-8 w-8 p-0 bg-white hover:bg-blue-50 shadow-md"
+                className="h-8 w-8 p-0 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 shadow-md"
                 onClick={onSetPrincipal}
                 title="Définir comme image principale"
               >
-                <Star className="w-4 h-4 text-yellow-500" />
+                <Star className="w-4 h-4 text-yellow-500 dark:text-yellow-400" />
               </Button>
             )}
             {isNewFile && (
@@ -478,11 +478,11 @@ function ImageThumbnail({
                 type="button"
                 size="sm"
                 variant="secondary"
-                className="h-8 w-8 p-0 bg-white hover:bg-blue-50 shadow-md"
+                className="h-8 w-8 p-0 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 shadow-md"
                 onClick={onCrop}
                 title="Recadrer"
               >
-                <Crop className="w-4 h-4 text-gray-700" />
+                <Crop className="w-4 h-4 text-gray-700 dark:text-gray-300" />
               </Button>
             )}
             <Button
@@ -510,7 +510,7 @@ function ImageThumbnail({
 
         {/* Numéro */}
         <div className="absolute top-3 right-3">
-          <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-sm font-bold text-gray-700 shadow-lg">
+          <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center text-sm font-bold text-gray-700 dark:text-gray-200 shadow-lg">
             {index + 1}
           </div>
         </div>
@@ -599,7 +599,7 @@ function HighlightsField({ field, form }: { field: any; form: any }) {
 
       {highlights.length > 0 ? (
         <div className="space-y-3">
-          <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+          <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
             {highlights.length} point{highlights.length > 1 ? "s" : ""} fort
             {highlights.length > 1 ? "s" : ""} ajouté
             {highlights.length > 1 ? "s" : ""}
@@ -608,14 +608,14 @@ function HighlightsField({ field, form }: { field: any; form: any }) {
             {highlights.map((highlight: string, idx: number) => (
               <div
                 key={idx}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200 rounded-lg text-sm font-medium group hover:from-blue-100 hover:to-indigo-100 hover:shadow-sm transition-all duration-200"
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-lg text-sm font-medium group hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/40 dark:hover:to-indigo-900/40 hover:shadow-sm transition-all duration-200"
               >
-                <Sparkles className="w-4 h-4 text-blue-500" />
+                <Sparkles className="w-4 h-4 text-blue-500 dark:text-blue-400" />
                 <span>{highlight}</span>
                 <button
                   type="button"
                   onClick={() => removeHighlight(idx)}
-                  className="ml-1 hover:bg-blue-200/60 rounded-md p-1 transition-colors"
+                  className="ml-1 hover:bg-blue-200/60 dark:hover:bg-blue-800/60 rounded-md p-1 transition-colors"
                   title="Supprimer ce point fort"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -625,15 +625,15 @@ function HighlightsField({ field, form }: { field: any; form: any }) {
           </div>
         </div>
       ) : (
-        <div className="border-2 border-dashed border-gray-200 rounded-xl py-8 px-4 bg-gray-50/50">
+        <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl py-8 px-4 bg-gray-50/50 dark:bg-gray-900/50">
           <div className="flex flex-col items-center text-center">
-            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-3">
-              <Sparkles className="w-7 h-7 text-gray-400" />
+            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center mb-3">
+              <Sparkles className="w-7 h-7 text-gray-400 dark:text-gray-600" />
             </div>
-            <p className="text-sm text-gray-600 font-semibold mb-1">
+            <p className="text-sm text-gray-600 dark:text-gray-400 font-semibold mb-1">
               Aucun point fort ajouté
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-gray-500">
               Ajoutez les avantages de votre offre
             </p>
           </div>
@@ -852,7 +852,7 @@ export function CreateDealModal({
         title: "📋 Informations générales",
         description: "Donnez vie à votre offre avec un titre accrocheur",
         columns: 1,
-        className: "bg-white rounded-xl shadow-sm border border-gray-100 p-6",
+        className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
         fields: [
           {
             type: "text",
@@ -877,7 +877,7 @@ export function CreateDealModal({
         title: "🏷️ Catégorie & Statut",
         description: "Classez votre offre et définissez sa visibilité",
         columns: 2,
-        className: "bg-white rounded-xl shadow-sm border border-gray-100 p-6",
+        className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
         fields: [
           {
             type: "select",
@@ -899,7 +899,7 @@ export function CreateDealModal({
         title: "💰 Tarification",
         description: "Définissez le prix et la valeur de votre offre",
         columns: 3,
-        className: "bg-white rounded-xl shadow-sm border border-gray-100 p-6",
+        className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
         fields: [
           {
             type: "number",
@@ -927,7 +927,7 @@ export function CreateDealModal({
         title: "📅 Disponibilité",
         description: "Configurez les dates de début, de fin et d'expiration",
         columns: 3,
-        className: "bg-white rounded-xl shadow-sm border border-gray-100 p-6",
+        className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
         fields: [
           {
             type: "date",
@@ -950,7 +950,7 @@ export function CreateDealModal({
         title: "📍 Localisation",
         description: "Où se déroule votre offre ?",
         columns: 1,
-        className: "bg-white rounded-xl shadow-sm border border-gray-100 p-6",
+        className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
         fields: [
           {
             type: "text",
@@ -964,7 +964,7 @@ export function CreateDealModal({
         title: "✨ Points forts de l'offre",
         description: "Mettez en avant ce qui rend votre offre unique",
         columns: 1,
-        className: "bg-white rounded-xl shadow-sm border border-gray-100 p-6",
+        className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
         fields: [
           {
             type: "textarea",
@@ -980,7 +980,7 @@ export function CreateDealModal({
         title: "👤 Fournisseur",
         description: "Qui propose cette offre ?",
         columns: 1,
-        className: "bg-white rounded-xl shadow-sm border border-gray-100 p-6",
+        className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
         hidden: hideMerchantField,
         fields: [
           {
@@ -995,7 +995,7 @@ export function CreateDealModal({
       {
         title: "📸 Galerie d'images",
         description: "Ajoutez jusqu'à 5 images attractives pour votre offre",
-        className: "bg-white rounded-xl shadow-sm border border-gray-100 p-6",
+        className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
         fields: [
           {
             type: "file" as const,
@@ -1067,18 +1067,18 @@ export function CreateDealModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent
         size="xl"
-        className="p-0 h-[90vh] overflow-hidden bg-gradient-to-br from-gray-50 to-blue-50/30"
+        className="p-0 h-[90vh] overflow-hidden bg-gradient-to-br from-gray-50 to-blue-50/30 dark:from-gray-950 dark:to-blue-950/30"
       >
-        <DialogTitle className="px-6 py-5 border-b border-gray-200 bg-white shadow-sm">
+        <DialogTitle className="px-6 py-5 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1">
-              <h2 className="text-xl font-bold text-gray-900">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 {initialData ? "Modifier le deal" : "Créer un nouveau deal"}
               </h2>
-              <p className="text-sm text-gray-600 font-normal mt-0.5">
+              <p className="text-sm text-gray-600 dark:text-gray-400 font-normal mt-0.5">
                 {initialData
                   ? "Mettre à jour les informations de l'offre"
                   : "Remplissez les informations pour publier votre offre exceptionnelle"}
@@ -1089,21 +1089,21 @@ export function CreateDealModal({
 
         {/* Indicateur de progression d'upload */}
         {(isUploading || isUploadingUpdate) && uploadProgress && (
-          <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200/50 shadow-sm">
+          <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-b border-blue-200/50 dark:border-blue-800/50 shadow-sm">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
-                  <span className="text-sm font-bold text-gray-900">
+                  <Loader2 className="w-5 h-5 text-blue-600 dark:text-blue-400 animate-spin" />
+                  <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
                     Upload des images en cours...
                   </span>
                 </div>
-                <span className="text-base font-bold text-blue-600">
+                <span className="text-base font-bold text-blue-600 dark:text-blue-400">
                   {uploadProgress.percentage}%
                 </span>
               </div>
 
-              <div className="w-full bg-white rounded-full h-3 overflow-hidden shadow-inner">
+              <div className="w-full bg-white dark:bg-gray-800 rounded-full h-3 overflow-hidden shadow-inner">
                 <div
                   className="bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 h-3 rounded-full transition-all duration-500 ease-out shadow-sm"
                   style={{ width: `${uploadProgress.percentage}%` }}
@@ -1112,18 +1112,18 @@ export function CreateDealModal({
 
               <div className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-4">
-                  <span className="flex items-center gap-1.5 text-green-700 font-semibold bg-green-50 px-2.5 py-1 rounded-full">
+                  <span className="flex items-center gap-1.5 text-green-700 dark:text-green-400 font-semibold bg-green-50 dark:bg-green-950/30 px-2.5 py-1 rounded-full">
                     <Check className="w-3.5 h-3.5" />
                     {uploadProgress.completed} réussie(s)
                   </span>
                   {uploadProgress.failed > 0 && (
-                    <span className="flex items-center gap-1.5 text-red-700 font-semibold bg-red-50 px-2.5 py-1 rounded-full">
+                    <span className="flex items-center gap-1.5 text-red-700 dark:text-red-400 font-semibold bg-red-50 dark:bg-red-950/30 px-2.5 py-1 rounded-full">
                       <X className="w-3.5 h-3.5" />
                       {uploadProgress.failed} échouée(s)
                     </span>
                   )}
                 </div>
-                <span className="text-gray-600 font-medium">
+                <span className="text-gray-600 dark:text-gray-400 font-medium">
                   {uploadProgress.completed + uploadProgress.failed} /{" "}
                   {uploadProgress.total}
                 </span>

@@ -34,6 +34,7 @@ import AdminPayouts from "./pages/admin/payouts";
 import AdminCategories from "./pages/admin/categories";
 import AdminReports from "./pages/admin/reports";
 import AdminHero from "./pages/admin/hero";
+import PaymentSuccess from "./pages/checkout/PaymentSuccess";
 
 function App(): JSX.Element {
   return (
@@ -75,6 +76,7 @@ function App(): JSX.Element {
               <Route element={<ProtectedRoutes />}>
                 <Route path={PATHS.PROFILE} element={<Profile />} />
                 <Route path={PATHS.CHECKOUT()} element={<Checkout />} />
+                <Route path="/checkout/payment-success" element={<PaymentSuccess />} />
                 <Route path={PATHS.ORDERS} element={<Orders />} />
                 <Route
                   path={PATHS.SUCCESS_SUBSCRIPTION()}

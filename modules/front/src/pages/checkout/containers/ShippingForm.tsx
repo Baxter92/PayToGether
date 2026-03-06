@@ -38,7 +38,7 @@ export default function ShippingForm({
       name: "phone",
       label: t("phone"),
       type: "text",
-      placeholder: defaultValues?.phone || "+237 6XX XXX XXX",
+      placeholder: defaultValues?.phone || "+1 XXX XXX XXX",
     },
     {
       name: "address",
