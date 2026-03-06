@@ -50,9 +50,9 @@ public class PaiementValidator {
             throw new ValidationException("paiement.utilisateurUuid.obligatoire");
         }
 
-        // Validation de la commande (obligatoire)
-        if (paiement.getCommande() == null || paiement.getCommande().getUuid() == null) {
-            throw new ValidationException("paiement.commandeUuid.obligatoire");
+        // Validation du deal (obligatoire)
+        if (paiement.getDeal() == null || paiement.getDeal().getUuid() == null) {
+            throw new ValidationException("paiement.dealUuid.obligatoire");
         }
 
         // Validations spécifiques Square

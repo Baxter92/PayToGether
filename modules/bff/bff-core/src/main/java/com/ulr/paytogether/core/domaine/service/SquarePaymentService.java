@@ -36,5 +36,7 @@ public interface SquarePaymentService {
      * @return le paiement remboursé
      */
     PaiementModele rembourserPaiement(UUID paiementUuid);
+
+    void mettreAJourStatutCommandeDeal(UUID paiementUuid, String statut);
 }
 

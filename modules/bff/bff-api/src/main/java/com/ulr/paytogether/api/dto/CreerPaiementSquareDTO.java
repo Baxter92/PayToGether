@@ -20,8 +20,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CreerPaiementSquareDTO {
 
-    @NotNull(message = "L'UUID de la commande est obligatoire")
-    private UUID commandeUuid;
+    @NotNull(message = "L'UUID du deal est obligatoire")
+    private UUID dealUuid;
 
     @NotNull(message = "L'UUID de l'utilisateur est obligatoire")
     private UUID utilisateurUuid;

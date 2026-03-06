@@ -1,8 +1,11 @@
 package com.ulr.paytogether.provider.adapter.mapper;
 
+import com.ulr.paytogether.core.enumeration.StatutCommande;
 import com.ulr.paytogether.core.modele.CommandeModele;
 import com.ulr.paytogether.provider.adapter.entity.CommandeJpa;
+import com.ulr.paytogether.provider.adapter.entity.DealJpa;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -39,5 +42,21 @@ public class CommandeJpaMapper {
                 .dateCreation(modele.getDateCreation())
                 .dateModification(modele.getDateModification())
                 .build();
+    }
+
+    public CommandeJpa fromDealJpa(DealJpa dealJpa) {
+        if (dealJpa == null) return null;
+        return CommandeJpa.builder()
+                .dealJpa(dealJpa)
+                .montantTotal(dealJpa.getPrixDeal())
+                .statut(StatutCommande.EN_COURS)
+                .marchandJpa(dealJpa.getMarchandJpa())
+                .numeroCommande(numeroCommande())
+                .build();
+    }
+
+
+    private String numeroCommande() {
+        return "CMD-" + StringUtils.leftPad(String.valueOf(Math.random()), 10, '0').toUpperCase();
     }
 }

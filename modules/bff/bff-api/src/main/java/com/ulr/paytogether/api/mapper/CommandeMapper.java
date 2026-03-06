@@ -2,7 +2,9 @@ package com.ulr.paytogether.api.mapper;
 
 import com.ulr.paytogether.api.dto.CommandeDTO;
 import com.ulr.paytogether.api.dto.PaiementDTO;
+import com.ulr.paytogether.core.enumeration.StatutCommande;
 import com.ulr.paytogether.core.modele.CommandeModele;
+import com.ulr.paytogether.core.modele.DealModele;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -81,5 +83,22 @@ public class CommandeMapper {
                 .dateModification(dto.getDateModification())
                 .build();
         // Note: L'utilisateur et le deal seront définis séparément par le service
+    }
+
+    public CommandeModele commandeFromDeal(DealModele deal) {
+        if (deal == null) {
+            return null;
+        }
+
+        CommandeModele commande = CommandeModele.builder()
+                .uuid(null) // UUID sera généré par le service
+                .montantTotal(deal.getPrixDeal())
+                .statut(StatutCommande.EN_COURS)
+                .build();
+
+        // Lier la commande au deal
+        commande.setDealModele(deal);
+
+        return commande;
     }
 }

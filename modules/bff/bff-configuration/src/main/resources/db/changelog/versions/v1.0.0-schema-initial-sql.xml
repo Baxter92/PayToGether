@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        Version 1.0.0 - Schéma initial
+        Date: 2026-03-05
+        Auteur: Équipe PayToGether
+
+        Contient toutes les tables de base du système
+    -->
+
+    <changeSet id="v1.0.0-schema-initial" author="paytogether">
+        <comment>Création du schéma initial de la base de données PayToGether</comment>
+        <sqlFile
+            path="db/changelog/sql/V1.0.0__schema_initial.sql"
+            relativeToChangelogFile="false"
+            splitStatements="true"
+            stripComments="false"/>
+        <rollback>
+            DROP TABLE IF EXISTS validation_token CASCADE;
+            DROP TABLE IF EXISTS commentaire CASCADE;
+            DROP TABLE IF EXISTS image_publicite CASCADE;
+            DROP TABLE IF EXISTS publicite CASCADE;
+            DROP TABLE IF EXISTS image_utilisateur CASCADE;
+            DROP TABLE IF EXISTS image_deal CASCADE;
+            DROP TABLE IF EXISTS point_fort_deal CASCADE;
+            DROP TABLE IF EXISTS deal CASCADE;
+            DROP TABLE IF EXISTS categorie CASCADE;
+            DROP TABLE IF EXISTS utilisateur CASCADE;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
+

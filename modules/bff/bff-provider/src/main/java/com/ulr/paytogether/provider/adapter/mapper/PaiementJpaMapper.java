@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 public class PaiementJpaMapper {
     private final UtilisateurJpaMapper utilisateurJpaMapper;
     private final CommandeJpaMapper commandeJpaMapper;
+    private final DealJpaMapper dealJpaMapper;
 
     public PaiementModele versModele(PaiementJpa jpaPaiement) {
         if (jpaPaiement == null) return null;
@@ -27,6 +28,7 @@ public class PaiementJpaMapper {
                 .messageErreur(jpaPaiement.getMessageErreur())
                 .utilisateur(jpaPaiement.getUtilisateurJpa() != null ? utilisateurJpaMapper.versModele(jpaPaiement.getUtilisateurJpa()) : null)
                 .commande(jpaPaiement.getCommandeJpa() != null ? commandeJpaMapper.versModele(jpaPaiement.getCommandeJpa()) : null)
+                .deal(jpaPaiement.getCommandeJpa() != null ? dealJpaMapper.versModele(jpaPaiement.getCommandeJpa().getDealJpa()) : null)
                 .datePaiement(jpaPaiement.getDatePaiement())
                 .dateCreation(jpaPaiement.getDateCreation())
                 .dateModification(jpaPaiement.getDateModification())

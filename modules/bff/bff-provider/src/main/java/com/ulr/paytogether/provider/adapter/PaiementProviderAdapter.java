@@ -1,10 +1,20 @@
 package com.ulr.paytogether.provider.adapter;
 
+import com.ulr.paytogether.core.enumeration.StatutCommande;
+import com.ulr.paytogether.core.enumeration.StatutDeal;
+import com.ulr.paytogether.core.enumeration.StatutPaiement;
 import com.ulr.paytogether.core.modele.PaiementModele;
+import com.ulr.paytogether.core.provider.DealProvider;
 import com.ulr.paytogether.core.provider.PaiementProvider;
+import com.ulr.paytogether.provider.adapter.entity.CommandeJpa;
+import com.ulr.paytogether.provider.adapter.entity.DealJpa;
 import com.ulr.paytogether.provider.adapter.entity.PaiementJpa;
 import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
+import com.ulr.paytogether.provider.adapter.mapper.CommandeJpaMapper;
+import com.ulr.paytogether.provider.adapter.mapper.DealJpaMapper;
 import com.ulr.paytogether.provider.adapter.mapper.PaiementJpaMapper;
+import com.ulr.paytogether.provider.repository.CommandeRepository;
+import com.ulr.paytogether.provider.repository.DealRepository;
 import com.ulr.paytogether.provider.repository.PaiementRepository;
 import com.ulr.paytogether.provider.repository.UtilisateurRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -28,10 +39,34 @@ public class PaiementProviderAdapter implements PaiementProvider {
     private final PaiementRepository jpaRepository;
     private final UtilisateurRepository utilisateurRepository;
     private final PaiementJpaMapper mapper;
+    private final DealJpaMapper dealJpaMapper;
+    private final CommandeJpaMapper commandeJpaMapper;
+    private final CommandeRepository commandeRepository;
+    private final DealRepository dealRepository;
+    private final DealProvider dealProvider;
 
     @Override
     public PaiementModele sauvegarder(PaiementModele paiement) {
         PaiementJpa entite = mapper.versEntite(paiement);
+        DealJpa dealJpa = dealProvider.trouverParUuid(paiement.getDeal().getUuid())
+                .map(dealJpaMapper::versEntite)
+                .orElseThrow(() -> new RuntimeException("Deal non trouvé pour l'UUID : " + paiement.getDeal().getUuid()));
+
+        Optional<UUID> utilisateurJpaOptional = dealJpa.getParticipants().stream().map(UtilisateurJpa::getUuid)
+                .filter(uuid -> uuid.equals(paiement.getUtilisateur().getUuid()))
+                .findFirst();
+        if (utilisateurJpaOptional.isPresent()) {
+            throw new IllegalArgumentException(("Utilisateur avec UUID " + paiement.getUtilisateur().getUuid() + " est déjà participant du deal " + dealJpa.getUuid()));
+        }
+        Optional<CommandeJpa> commandeJpaOptional = commandeRepository.findByDealJpa(dealJpa);
+        CommandeJpa commandeJpa;
+        if (commandeJpaOptional.isPresent()) {
+             commandeJpa = commandeJpaOptional.get();
+            entite.setCommandeJpa(commandeJpa);
+        }else {
+             commandeJpa = commandeJpaMapper.fromDealJpa(dealJpa);
+        }
+        entite.setCommandeJpa(commandeJpa);
         PaiementJpa sauvegarde = jpaRepository.save(entite);
         return mapper.versModele(sauvegarde);
     }
@@ -106,5 +141,26 @@ public class PaiementProviderAdapter implements PaiementProvider {
     @Override
     public void supprimerParUuid(UUID uuid) {
         jpaRepository.deleteById(uuid);
+    }
+
+    @Override
+    public PaiementModele mettreAJourStatutCommandeDeal(UUID paiementUuid, String statut) {
+        PaiementJpa paiementJpa = jpaRepository.findById(paiementUuid)
+                .orElseThrow(() -> new RuntimeException("Paiement non trouvé pour l'UUID : " + paiementUuid));
+
+        CommandeJpa commandeJpa = paiementJpa.getCommandeJpa();
+        if (commandeJpa != null && StatutPaiement.CONFIRME.name().equals(statut)) {
+            DealJpa dealJpa = commandeJpa.getDealJpa();
+            Set<UtilisateurJpa> participants = dealJpa.getParticipants();
+            participants.add(paiementJpa.getUtilisateurJpa());
+            dealJpa.setParticipants(participants);
+            var dealComplete = dealJpa.getNbParticipants() == dealJpa.getParticipants().size();
+            StatutCommande statutCommande = dealComplete ? StatutCommande.CONFIRMEE : StatutCommande.EN_COURS;
+
+            dealRepository.save(dealJpa);
+            commandeJpa.setStatut(statutCommande);
+            commandeRepository.save(commandeJpa);
+        }
+        return mapper.versModele(paiementJpa);
     }
 }

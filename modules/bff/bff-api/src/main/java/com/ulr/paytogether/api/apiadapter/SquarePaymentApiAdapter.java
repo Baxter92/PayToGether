@@ -2,10 +2,12 @@ package com.ulr.paytogether.api.apiadapter;
 
 import com.ulr.paytogether.api.dto.CreerPaiementSquareDTO;
 import com.ulr.paytogether.api.dto.PaiementSquareResponseDTO;
+import com.ulr.paytogether.api.mapper.SquarePaymentMapper;
 import com.ulr.paytogether.core.domaine.service.SquarePaymentService;
 import com.ulr.paytogether.core.enumeration.MethodePaiement;
 import com.ulr.paytogether.core.enumeration.StatutPaiement;
 import com.ulr.paytogether.core.modele.CommandeModele;
+import com.ulr.paytogether.core.modele.DealModele;
 import com.ulr.paytogether.core.modele.PaiementModele;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
 import lombok.RequiredArgsConstructor;
@@ -25,30 +27,18 @@ import java.util.UUID;
 public class SquarePaymentApiAdapter {
 
     private final SquarePaymentService squarePaymentService;
+    private final SquarePaymentMapper mapper;
 
     /**
      * Crée un paiement Square
      */
     public PaiementSquareResponseDTO creerPaiementSquare(CreerPaiementSquareDTO dto) {
-        log.info("API Adapter: Creating Square payment for commande={}", dto.getCommandeUuid());
-
-        // Créer le modèle métier
-        PaiementModele paiement = PaiementModele.builder()
-            .montant(dto.getMontant())
-            .statut(StatutPaiement.EN_ATTENTE)
-            .methodePaiement(MethodePaiement.valueOf(dto.getMethodePaiement()))
-            .squareToken(dto.getSquareToken())
-            .squareLocationId(dto.getLocationId())
-            .utilisateur(UtilisateurModele.builder().uuid(dto.getUtilisateurUuid()).build())
-            .commande(CommandeModele.builder().uuid(dto.getCommandeUuid()).build())
-            .datePaiement(LocalDateTime.now())
-            .build();
-
+        log.info("API Adapter: Creating Square payment for deal={}", dto.getDealUuid());
         // Appeler le service métier
-        PaiementModele paiementCree = squarePaymentService.creerPaiementSquare(paiement);
+        PaiementModele paiementCree = squarePaymentService.creerPaiementSquare(mapper.dtoVersModele(dto));
 
         // Convertir en DTO de réponse
-        return modeleVersDto(paiementCree);
+        return mapper.modeleVersDto(paiementCree);
     }
 
     /**
@@ -60,7 +50,7 @@ public class SquarePaymentApiAdapter {
         // Cette méthode sera appelée par un handler asynchrone
         // Pour l'instant, on retourne juste le paiement
         PaiementModele paiement = squarePaymentService.verifierStatutPaiement(paiementUuid);
-        return modeleVersDto(paiement);
+        return mapper.modeleVersDto(paiement);
     }
 
     /**
@@ -70,7 +60,7 @@ public class SquarePaymentApiAdapter {
         log.info("API Adapter: Checking Square payment status UUID={}", paiementUuid);
 
         PaiementModele paiement = squarePaymentService.verifierStatutPaiement(paiementUuid);
-        return modeleVersDto(paiement);
+        return mapper.modeleVersDto(paiement);
     }
 
     /**
@@ -80,30 +70,9 @@ public class SquarePaymentApiAdapter {
         log.info("API Adapter: Refunding Square payment UUID={}", paiementUuid);
 
         PaiementModele paiement = squarePaymentService.rembourserPaiement(paiementUuid);
-        return modeleVersDto(paiement);
+        return mapper.modeleVersDto(paiement);
     }
 
-    /**
-     * Convertit un modèle métier en DTO de réponse
-     */
-    private PaiementSquareResponseDTO modeleVersDto(PaiementModele modele) {
-        return PaiementSquareResponseDTO.builder()
-            .uuid(modele.getUuid())
-            .montant(modele.getMontant())
-            .statut(modele.getStatut().name())
-            .methodePaiement(modele.getMethodePaiement().name())
-            .transactionId(modele.getTransactionId())
-            .squarePaymentId(modele.getSquarePaymentId())
-            .squareOrderId(modele.getSquareOrderId())
-            .squareLocationId(modele.getSquareLocationId())
-            .squareReceiptUrl(modele.getSquareReceiptUrl())
-            .messageErreur(modele.getMessageErreur())
-            .utilisateurUuid(modele.getUtilisateur() != null ? modele.getUtilisateur().getUuid() : null)
-            .commandeUuid(modele.getCommande() != null ? modele.getCommande().getUuid() : null)
-            .datePaiement(modele.getDatePaiement())
-            .dateCreation(modele.getDateCreation())
-            .dateModification(modele.getDateModification())
-            .build();
-    }
+
 }
 

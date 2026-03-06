@@ -17,7 +17,7 @@ public interface CommandeProvider {
 
     List<CommandeModele> trouverParUtilisateur(UUID utilisateurUuid);
 
-    List<CommandeModele> trouverParDeal(UUID dealUuid);
+    CommandeModele trouverParDeal(UUID dealUuid);
 
     List<CommandeModele> trouverTous();
 

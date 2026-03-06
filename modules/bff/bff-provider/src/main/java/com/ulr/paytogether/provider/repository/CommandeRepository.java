@@ -36,7 +36,7 @@ public interface CommandeRepository extends JpaRepository<CommandeJpa, UUID> {
      * @param dealJpa le deal
      * @return la liste des commandes
      */
-    List<CommandeJpa> findByDealJpa(DealJpa dealJpa);
+    Optional<CommandeJpa> findByDealJpa(DealJpa dealJpa);
 
     /**
      * Recherche toutes les commandes par statut

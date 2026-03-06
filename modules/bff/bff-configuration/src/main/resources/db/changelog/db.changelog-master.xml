@@ -5,11 +5,45 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
+    <!--
+        ==========================================================================
+        MIGRATIONS SQL PURES
+        Format: v{VERSION}-{description}.xml qui référence un fichier SQL
+        Voir: db/changelog/README_MIGRATIONS_SQL.md
+        ==========================================================================
+    -->
+
+    <!-- Version 1.0.0 - Schéma initial -->
+    <!-- DÉSACTIVÉ: Utilise spring.jpa.hibernate.ddl-auto=update pour l'instant -->
+    <!-- <include file="db/changelog/versions/v1.0.0-schema-initial-sql.xml"/> -->
+
+    <!-- Version 1.1.0 - Table paiement (exemple) -->
+    <!-- <include file="db/changelog/versions/v1.1.0-ajout-table-paiement.xml"/> -->
+
+    <!-- Version 1.2.0 - Téléphone utilisateur (exemple) -->
+    <!-- <include file="db/changelog/versions/v1.2.0-ajout-telephone-utilisateur.xml"/> -->
+
+    <!--
+        ==========================================================================
+        MIGRATIONS EXISTANTES (XML Liquibase classique)
+        À conserver pour l'historique
+        ==========================================================================
+    -->
+
     <!-- Migration pour ajouter le support des commentaires parents/réponses et flag pertinent -->
     <include file="db/changelog/changes/20260301-add-commentaire-parent-pertinent.xml"/>
 
     <!-- Migration pour ajouter la table validation_token pour les notifications -->
     <include file="db/changelog/validation-token-migration.xml"/>
+
+    <!--
+        ==========================================================================
+        AJOUTER ICI LES NOUVELLES MIGRATIONS SQL
+        ==========================================================================
+
+        Exemple:
+        <include file="db/changelog/versions/v1.3.0-ajout-table-adresse.xml"/>
+    -->
 
 </databaseChangeLog>
 

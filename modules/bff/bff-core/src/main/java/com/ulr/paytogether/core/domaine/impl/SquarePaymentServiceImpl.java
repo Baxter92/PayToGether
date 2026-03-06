@@ -3,6 +3,10 @@ package com.ulr.paytogether.core.domaine.impl;
 import com.ulr.paytogether.core.domaine.service.SquarePaymentService;
 import com.ulr.paytogether.core.domaine.validator.PaiementValidator;
 import com.ulr.paytogether.core.enumeration.StatutPaiement;
+import com.ulr.paytogether.core.event.EventPublisher;
+import com.ulr.paytogether.core.event.PaymentInitiatedEvent;
+import com.ulr.paytogether.core.event.PaymentNotificationEvent;
+import com.ulr.paytogether.core.event.PaymentSuccessfulEvent;
 import com.ulr.paytogether.core.exception.ResourceNotFoundException;
 import com.ulr.paytogether.core.exception.ValidationException;
 import com.ulr.paytogether.core.modele.PaiementModele;
@@ -27,10 +31,11 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
     private final PaiementProvider paiementProvider;
     private final SquarePaymentProvider squarePaymentProvider;
     private final PaiementValidator paiementValidator;
+    private final EventPublisher eventPublisher;
 
     @Override
     public PaiementModele creerPaiementSquare(PaiementModele paiement) {
-        log.info("Création paiement Square pour commande {}", paiement.getCommande().getUuid());
+        log.info("Création paiement Square pour deal {}", paiement.getDeal().getUuid());
 
         // Validation métier
         paiementValidator.valider(paiement);
@@ -42,6 +47,17 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
         PaiementModele paiementCree = paiementProvider.sauvegarder(paiement);
 
         log.info("Paiement Square créé avec UUID: {}", paiementCree.getUuid());
+
+        PaymentInitiatedEvent paymentInitiatedEvent = PaymentInitiatedEvent
+                .builder()
+                .squareToken(paiementCree.getSquareToken())
+                .methodePaiement(paiementCree.getMethodePaiement().name())
+                .montant(paiementCree.getMontant())
+                .commandeUuid(paiementCree.getCommande().getUuid())
+                .utilisateurUuid(paiementCree.getUtilisateur().getUuid())
+                .build();
+
+        eventPublisher.publishAsync(paymentInitiatedEvent);
         return paiementCree;
     }
 
@@ -83,6 +99,18 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
             );
 
             log.info("Paiement Square traité avec succès: {}", squarePaymentId);
+            PaymentSuccessfulEvent paymentSuccessfulEvent = PaymentSuccessfulEvent
+                    .builder()
+                    .paiementUuid(paiementFinal.getUuid())
+                    .montant(paiementFinal.getMontant())
+                    .squarePaymentId(squarePaymentId)
+                    .commandeUuid(paiementFinal.getCommande().getUuid())
+                    .squareReceiptUrl(paiementFinal.getSquareReceiptUrl())
+                    .methodePaiement(paiementFinal.getMethodePaiement().name())
+                    .utilisateurUuid(paiementFinal.getUtilisateur().getUuid())
+                    .build();
+
+            eventPublisher.publishAsync(paymentSuccessfulEvent);
             return paiementFinal;
 
         } catch (Exception e) {
@@ -92,6 +120,23 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
             paiement.setStatut(StatutPaiement.ECHOUE);
             paiement.setMessageErreur(e.getMessage());
             paiementProvider.mettreAJour(paiement.getUuid(), paiement);
+
+            PaymentNotificationEvent paymentNotificationEvent = PaymentNotificationEvent
+                    .builder()
+                    .paiementUuid(paiement.getUuid())
+                    .utilisateurUuid(paiement.getUtilisateur().getUuid())
+                    .email(paiement.getUtilisateur().getEmail())
+                    .sujetNotification("Échec du paiement du deal " + paiement.getDeal().getTitre())
+                    .statutPaiement(StatutPaiement.ECHOUE.name())
+                    .typeNotification("EMAIL")
+                    .datePaiement(paiement.getDatePaiement())
+                    .methodePaiement(paiement.getMethodePaiement().name())
+                    .titreDeal(paiement.getDeal().getTitre())
+                    .descriptionDeal(paiement.getDeal().getDescription())
+                    .montantPaiement(paiement.getMontant())
+                    .build();
+
+            eventPublisher.publishAsync(paymentNotificationEvent);
 
             throw new ValidationException("paiement.traitement.echec", e.getMessage());
         }
@@ -162,6 +207,28 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
             throw new ValidationException("paiement.remboursement.echec", e.getMessage());
         }
     }
+
+    @Override
+    public void mettreAJourStatutCommandeDeal(UUID paiementUuid, String statut) {
+        PaiementModele paiementModele = paiementProvider.mettreAJourStatutCommandeDeal(paiementUuid, statut);
+        PaymentNotificationEvent paymentNotificationEvent = PaymentNotificationEvent
+                .builder()
+                .paiementUuid(paiementUuid)
+                .utilisateurUuid(paiementModele.getUtilisateur().getUuid())
+                .email(paiementModele.getUtilisateur().getEmail())
+                .sujetNotification("Confirmation de paiement du deal " + paiementModele.getDeal().getTitre())
+                .statutPaiement(statut)
+                .typeNotification("EMAIL")
+                .datePaiement(paiementModele.getDatePaiement())
+                .methodePaiement(paiementModele.getMethodePaiement().name())
+                .titreDeal(paiementModele.getDeal().getTitre())
+                .descriptionDeal(paiementModele.getDeal().getDescription())
+                .montantPaiement(paiementModele.getMontant())
+                .build();
+
+        eventPublisher.publishAsync(paymentNotificationEvent);
+    }
+
 
     /**
      * Mapper le statut Square vers notre énumération

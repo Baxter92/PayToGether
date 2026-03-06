@@ -4,11 +4,8 @@ import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.modele.DealModele;
 import com.ulr.paytogether.core.modele.ImageDealModele;
 import com.ulr.paytogether.core.provider.DealProvider;
-import com.ulr.paytogether.provider.adapter.entity.CategorieJpa;
-import com.ulr.paytogether.provider.adapter.entity.DealJpa;
+import com.ulr.paytogether.provider.adapter.entity.*;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
-import com.ulr.paytogether.provider.adapter.entity.ImageDealJpa;
-import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
 import com.ulr.paytogether.provider.adapter.mapper.DealJpaMapper;
 import com.ulr.paytogether.provider.repository.CategorieRepository;
 import com.ulr.paytogether.provider.repository.CommandeRepository;
@@ -181,12 +178,13 @@ public class DealProviderAdapter implements DealProvider {
                 deal.getImageDealJpas() != null ? deal.getImageDealJpas().size() : 0,
                 deal.getListePointsForts() != null ? deal.getListePointsForts().size() : 0,
                 deal.getCommentaires() != null ? deal.getCommentaires().size() : 0,
-                commandes.size());
+                commandes.isPresent()? 1 : 0);
 
         // 1. Supprimer les commandes liées AVANT tout (relation OneToOne sans cascade inverse)
-        if (!commandes.isEmpty()) {
-            log.info("🔄 Suppression de {} commandes", commandes.size());
-            commandeRepository.deleteAll(commandes);
+        if (commandes.isPresent()) {
+            CommandeJpa commandeJpa = commandes.get();
+            log.info("🔄 Suppression de {} commandes", commandeJpa.getUuid());
+            commandeRepository.delete(commandeJpa);
             commandeRepository.flush();
             log.info("✅ Commandes supprimées et flush effectué");
         }
