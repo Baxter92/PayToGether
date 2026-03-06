@@ -112,7 +112,7 @@ export function useFormattedCurrency() {
   useLanguageRefresh();
 
   const formatCurrency = useCallback(
-    (amount: number, currency: string = "XAF"): string => {
+    (amount: number, currency: string = "CAD"): string => {
       return new Intl.NumberFormat(language, {
         style: "currency",
         currency,
