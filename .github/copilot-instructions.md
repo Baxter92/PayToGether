@@ -2165,18 +2165,98 @@ Le projet utilise **Flyway** avec des **scripts SQL purs** (pas de XML).
 ### Convention de nommage
 `V{N}__{description_en_snake_case}.sql`
 
-**Exemples** : `V1__schema_initial.sql`, `V2__ajout_table_paiement.sql`
+**Exemples** : 
+- `V1__schema_initial.sql`
+- `V2__ajout_table_paiement.sql`
+- `V5__ajout_code_promo_deal.sql`
 
 ### Ajouter une migration
-1. Créer `V4__ma_migration.sql` dans `db/migration/`
-2. Redémarrer l'application (`mvn spring-boot:run`)
+1. Créer le fichier SQL dans `db/migration/`
+   ```bash
+   touch V5__ajout_code_promo_deal.sql
+   ```
 
-Flyway applique automatiquement la migration au démarrage.
+2. Écrire le SQL
+   ```sql
+   -- =========================================================================
+   -- Migration: V5__ajout_code_promo_deal
+   -- Date: 2026-03-07
+   -- Auteur: Votre nom
+   -- Description: Ajout colonne code_promo dans deal
+   -- =========================================================================
+   
+   ALTER TABLE deal ADD COLUMN code_promo VARCHAR(50);
+   COMMENT ON COLUMN deal.code_promo IS 'Code promotionnel optionnel';
+   CREATE INDEX idx_deal_code_promo ON deal(code_promo);
+   ```
+
+3. Redémarrer l'application
+   ```bash
+   ./mvnw -pl modules/bff/bff-configuration spring-boot:run
+   ```
+
+Flyway applique automatiquement la migration au démarrage !
+
+### Configuration actuelle
+```properties
+spring.jpa.hibernate.ddl-auto=none           # Hibernate ne modifie plus le schéma
+spring.flyway.enabled=true                    # Flyway activé
+spring.flyway.baseline-on-migrate=false       # Baseline désactivé
+spring.flyway.validate-on-migrate=true        # Validation activée
+```
+
+### Migrations existantes
+- ✅ **V1__schema_initial.sql** : Schéma complet initial
+- ✅ **V2__ajout_table_paiement.sql** : Tables de paiement
+- ✅ **V3__ajout_telephone_utilisateur.sql** : Téléphone utilisateur
+- ✅ **V4__ajout_tables_manquantes.sql** : Tables manquantes (adresse, commande, etc.)
+
+### Règles ABSOLUES
+1. ✅ **Jamais modifier un script déjà appliqué** (créer une nouvelle migration)
+2. ✅ **Toujours vérifier les entités JPA** avant de créer une migration
+3. ✅ **Toujours ajouter des commentaires SQL** (COMMENT ON TABLE/COLUMN)
+4. ✅ **Toujours créer des index sur les FK**
+5. ✅ **Toujours définir ON DELETE** (CASCADE, RESTRICT, SET NULL)
+6. ✅ **Correspondance avec JPA** : Vérifier types de données, contraintes, noms de colonnes
 
 ### Documentation complète
-📄 `modules/bff/bff-configuration/src/main/resources/db/migration/GUIDE_RAPIDE.md` (guide rapide)  
-📄 `modules/bff/bff-configuration/src/main/resources/db/migration/GUIDE_MODIFICATIONS_RELATIONS.md` (modifications de relations JPA)  
-📄 `modules/bff/bff-configuration/src/main/resources/db/migration/EXEMPLES__modifications_relations.sql` (10 cas : OneToOne↔ManyToOne, ManyToMany, FK, etc.)
+**Emplacement** : `modules/bff/bff-configuration/src/main/resources/db/doc/`
+
+- 📄 **GUIDE_RAPIDE.md** : Guide en 2 étapes pour ajouter une migration
+- 📄 **GUIDE_MODIFICATIONS_RELATIONS.md** : 10 cas d'usage pour modifier les relations
+- 📄 **EXEMPLES__modifications_relations.sql** : 500+ lignes d'exemples SQL (OneToOne, ManyToOne, ManyToMany, FK, etc.)
+- 📄 **TEMPLATE__migration.sql** : Template à copier
+- 📄 **INIT_flyway_schema_history.sql** : Script d'initialisation (déjà appliqué)
+- 📄 **INSTRUCTIONS_INIT_FLYWAY.md** : Instructions de configuration
+
+### FlywayInitializer (à supprimer après première exécution)
+**Emplacement** : `modules/bff/bff-configuration/src/main/java/com/ulr/paytogether/configuration/flyway/FlywayInitializer.java`
+
+**Fonction** : Initialise `flyway_schema_history` au premier démarrage et marque V1-V4 comme appliquées.
+
+**⚠️ À SUPPRIMER** après la première exécution réussie :
+```bash
+rm modules/bff/bff-configuration/src/main/java/com/ulr/paytogether/configuration/flyway/FlywayInitializer.java
+```
+
+Ou désactiver en supprimant `@Component`.
+
+### Vérifier l'historique Flyway
+```sql
+SELECT installed_rank, version, description, installed_on, success 
+FROM flyway_schema_history 
+ORDER BY installed_rank;
+```
+
+**Résultat attendu** :
+```
+ installed_rank | version |        description        | success 
+----------------+---------+---------------------------+---------
+              1 | 1       | schema initial            | t
+              2 | 2       | ajout table paiement      | t
+              3 | 3       | ajout telephone utilisat… | t
+              4 | 4       | ajout tables manquantes   | t
+```
 
 ---
 

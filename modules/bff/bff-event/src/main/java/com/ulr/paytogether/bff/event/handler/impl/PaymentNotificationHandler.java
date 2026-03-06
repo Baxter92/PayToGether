@@ -2,14 +2,20 @@ package com.ulr.paytogether.bff.event.handler.impl;
 
 import com.ulr.paytogether.bff.event.annotation.FunctionalHandler;
 import com.ulr.paytogether.bff.event.handler.ConsumerHandler;
+import com.ulr.paytogether.core.domaine.service.UtilisateurService;
+import com.ulr.paytogether.core.enumeration.StatutPaiement;
 import com.ulr.paytogether.core.event.PaymentNotificationEvent;
 import com.ulr.paytogether.core.domaine.service.EmailNotificationService;
+import com.ulr.paytogether.core.modele.UtilisateurModele;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+
+import static com.ulr.paytogether.bff.event.utils.EventUtils.DATE_FORMATTER;
 
 /**
  * Handler pour traiter les événements de notification de paiement.
@@ -31,6 +37,7 @@ import java.util.Map;
 public class PaymentNotificationHandler implements ConsumerHandler {
 
     private final EmailNotificationService emailNotificationService;
+    private final UtilisateurService utilisateurService;
 
     /**
      * Handler pour traiter l'événement PaymentNotificationEvent.
@@ -77,15 +84,29 @@ public class PaymentNotificationHandler implements ConsumerHandler {
     private void envoyerEmail(PaymentNotificationEvent event) {
         log.info("Sending email to: {} with subject: {}", event.getEmail(), event.getSujetNotification());
 
-        // Préparer les variables du template
-        Map<String, Object> variables = new HashMap<>();
-        variables.put("message", event.getMessageNotification());
+        var isCondirmed = StatutPaiement.CONFIRME.name().equals(event.getStatutPaiement());
 
+        UtilisateurModele utilisateur = utilisateurService.lireParUuid(event.getUtilisateurUuid()).orElse(null);
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("nom", Optional.ofNullable(utilisateur).map(UtilisateurModele::getNom).orElse(""));
+        variables.put("prenom", Optional.ofNullable(utilisateur).map(UtilisateurModele::getPrenom).orElse(""));
+        variables.put("titreDeal", event.getTitreDeal());
+        variables.put("montant", event.getMontantPaiement());
+        if (isCondirmed) {
+            variables.put("datePaiement", event.getDatePaiement().format(DATE_FORMATTER));
+            variables.put("methodePaiement", event.getMethodePaiement());
+            variables.put("descriptionDeal", event.getDescriptionDeal());
+        }else {
+            variables.put("dateTentative", event.getDatePaiement());
+            variables.put("raisonEchec", "Veuillez vérifier les informations de votre carte ou contacter votre banque.");
+        }
+
+        String template = isCondirmed ? "notification-paiement-reussi" : "notification-paiement-echoue";
         // Appeler le service métier pour envoyer l'email
         emailNotificationService.envoyerNotification(
             event.getEmail(),
             event.getSujetNotification(),
-            "notification-payment", // Template par défaut
+            template,
             variables
         );
 

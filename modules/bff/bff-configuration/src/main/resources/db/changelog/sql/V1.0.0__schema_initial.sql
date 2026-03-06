@@ -45,14 +45,14 @@ CREATE TABLE IF NOT EXISTS deal (
     statut VARCHAR(50) NOT NULL DEFAULT 'BROUILLON',
     date_debut TIMESTAMP NOT NULL,
     date_fin TIMESTAMP NOT NULL,
-    createur_uuid UUID NOT NULL,
+    utilisateur_uuid UUID NOT NULL,
     categorie_uuid UUID NOT NULL,
     ville VARCHAR(100) NOT NULL,
     pays VARCHAR(100) NOT NULL DEFAULT 'Canada',
     date_creation TIMESTAMP NOT NULL DEFAULT NOW(),
     date_modification TIMESTAMP NOT NULL DEFAULT NOW(),
 
-    CONSTRAINT fk_deal_createur FOREIGN KEY (createur_uuid)
+    CONSTRAINT fk_deal_createur FOREIGN KEY (utilisateur_uuid)
         REFERENCES utilisateur(uuid) ON DELETE CASCADE,
     CONSTRAINT fk_deal_categorie FOREIGN KEY (categorie_uuid)
         REFERENCES categorie(uuid) ON DELETE RESTRICT
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS deal (
 COMMENT ON TABLE deal IS 'Deals créés par les utilisateurs';
 COMMENT ON COLUMN deal.statut IS 'Statut: BROUILLON, PUBLIE, EXPIRE, ANNULE';
 
-CREATE INDEX idx_deal_createur_uuid ON deal(createur_uuid);
+CREATE INDEX utilisateur_uuid ON deal(utilisateur_uuid);
 CREATE INDEX idx_deal_categorie_uuid ON deal(categorie_uuid);
 CREATE INDEX idx_deal_statut ON deal(statut);
 CREATE INDEX idx_deal_date_fin ON deal(date_fin);

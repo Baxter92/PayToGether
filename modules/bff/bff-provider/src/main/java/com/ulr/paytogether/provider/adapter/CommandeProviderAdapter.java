@@ -56,14 +56,13 @@ public class CommandeProviderAdapter implements CommandeProvider {
     }
 
     @Override
-    public List<CommandeModele> trouverParDeal(UUID dealUuid) {
+    public CommandeModele trouverParDeal(UUID dealUuid) {
         DealJpa dealJpa = dealRepository.findById(dealUuid)
                 .orElseThrow(() -> new RuntimeException("Deal non trouvé avec l'UUID : " + dealUuid));
 
         return jpaRepository.findByDealJpa(dealJpa)
-                .stream()
                 .map(mapper::versModele)
-                .collect(Collectors.toList());
+                .orElseThrow(() -> new RuntimeException("Commande non trouvée pour le deal avec l'UUID : " + dealUuid));
     }
 
     @Override

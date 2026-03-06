@@ -2,6 +2,7 @@ package com.ulr.paytogether.bff.event.handler.impl;
 
 import com.ulr.paytogether.bff.event.annotation.FunctionalHandler;
 import com.ulr.paytogether.bff.event.handler.ConsumerHandler;
+import com.ulr.paytogether.core.enumeration.StatutPaiement;
 import com.ulr.paytogether.core.event.PaymentInitiatedEvent;
 import com.ulr.paytogether.core.event.PaymentSuccessfulEvent;
 import com.ulr.paytogether.core.event.PaymentFailedEvent;
@@ -44,7 +45,7 @@ public class SquarePaymentHandler implements ConsumerHandler {
      */
     @FunctionalHandler(
         eventType = PaymentInitiatedEvent.class,
-        maxAttempts = 3,
+        maxAttempts = 5,
         description = "Traite les paiements Square initiés"
     )
     public void handlePaymentInitiated(PaymentInitiatedEvent event) {
@@ -80,7 +81,6 @@ public class SquarePaymentHandler implements ConsumerHandler {
      */
     @FunctionalHandler(
         eventType = PaymentSuccessfulEvent.class,
-        maxAttempts = 3,
         description = "Actions post-paiement Square réussi"
     )
     public void handlePaymentSuccessful(PaymentSuccessfulEvent event) {
@@ -93,6 +93,7 @@ public class SquarePaymentHandler implements ConsumerHandler {
             log.info("Statistics updated for successful payment: {}", event.getPaiementUuid());
 
             // 2. Mettre à jour le statut de la commande
+            squarePaymentService.mettreAJourStatutCommandeDeal(event.getPaiementUuid(), StatutPaiement.CONFIRME.name());
             // commandeService.marquerCommePayee(event.getCommandeUuid());
             log.info("Order marked as paid: {}", event.getCommandeUuid());
 

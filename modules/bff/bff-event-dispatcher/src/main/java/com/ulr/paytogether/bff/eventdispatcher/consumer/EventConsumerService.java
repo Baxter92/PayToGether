@@ -27,7 +27,6 @@ import java.util.List;
  * Utilise un scheduler pour traiter les événements en attente.
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class EventConsumerService {
 

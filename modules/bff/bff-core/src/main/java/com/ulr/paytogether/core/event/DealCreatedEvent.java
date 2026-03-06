@@ -5,10 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -16,6 +18,7 @@ import java.util.UUID;
  */
 @Getter
 @NoArgsConstructor
+@Builder
 public class DealCreatedEvent extends DomainEvent {
 
     private UUID dealUuid;
@@ -24,7 +27,10 @@ public class DealCreatedEvent extends DomainEvent {
     private String prenomMarchand;
     private String nomMarchand;
     private String titreDeal;
+    private String descriptionDeal;
     private BigDecimal montant;
+    private BigDecimal montantPart;
+    private LocalDateTime dateCreation;
     private Integer nbParticipants;
 
     @JsonCreator
@@ -35,7 +41,10 @@ public class DealCreatedEvent extends DomainEvent {
             @JsonProperty("prenomMarchand") String prenomMarchand,
             @JsonProperty("nomMarchand") String nomMarchand,
             @JsonProperty("titreDeal") String titreDeal,
+            @JsonProperty("descriptionDeal") String descriptionDeal,
             @JsonProperty("montant") BigDecimal montant,
+            @JsonProperty("montantPart") BigDecimal montantPart,
+            @JsonProperty("dateCreation") LocalDateTime dateCreation,
             @JsonProperty("nbParticipants") Integer nbParticipants) {
         super("DealService");
         this.dealUuid = dealUuid;
@@ -44,7 +53,10 @@ public class DealCreatedEvent extends DomainEvent {
         this.prenomMarchand = prenomMarchand;
         this.nomMarchand = nomMarchand;
         this.titreDeal = titreDeal;
+        this.descriptionDeal = descriptionDeal;
         this.montant = montant;
+        this.montantPart = montantPart;
+        this.dateCreation = dateCreation;
         this.nbParticipants = nbParticipants;
     }
 

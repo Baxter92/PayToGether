@@ -37,6 +37,7 @@ public class PaiementModele {
 
     private UtilisateurModele utilisateur;
     private CommandeModele commande;
+    private DealModele deal;
     private LocalDateTime datePaiement;
     private LocalDateTime dateCreation;
     private LocalDateTime dateModification;

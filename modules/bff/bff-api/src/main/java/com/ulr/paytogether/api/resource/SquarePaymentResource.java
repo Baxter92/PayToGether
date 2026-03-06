@@ -32,8 +32,8 @@ public class SquarePaymentResource {
     @PostMapping
     public ResponseEntity<PaiementSquareResponseDTO> creerPaiementSquare(
              @RequestBody CreerPaiementSquareDTO dto) {
-        log.info("POST /api/square-payments - Création paiement Square pour commande: {}",
-                 dto.getCommandeUuid());
+        log.info("POST /api/square-payments - Création paiement Square pour le deal: {}",
+                 dto.getDealUuid());
 
         try {
             PaiementSquareResponseDTO response = apiAdapter.creerPaiementSquare(dto);

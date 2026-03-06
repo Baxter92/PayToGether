@@ -29,4 +29,6 @@ public interface PaiementProvider {
     List<PaiementModele> trouverTous();
 
     void supprimerParUuid(UUID uuid);
+
+    PaiementModele mettreAJourStatutCommandeDeal(UUID paiementUuid, String statut);
 }

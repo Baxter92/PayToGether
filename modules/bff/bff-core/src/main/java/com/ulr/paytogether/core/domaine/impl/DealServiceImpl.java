@@ -3,6 +3,9 @@ package com.ulr.paytogether.core.domaine.impl;
 import com.ulr.paytogether.core.domaine.service.DealService;
 import com.ulr.paytogether.core.domaine.validator.DealValidator;
 import com.ulr.paytogether.core.enumeration.StatutImage;
+import com.ulr.paytogether.core.event.DealCancelledEvent;
+import com.ulr.paytogether.core.event.DealCreatedEvent;
+import com.ulr.paytogether.core.event.EventPublisher;
 import com.ulr.paytogether.core.exception.ResourceNotFoundException;
 import com.ulr.paytogether.core.modele.DealModele;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
@@ -26,6 +29,7 @@ public class DealServiceImpl implements DealService {
 
     private final DealProvider dealProvider;
     private final DealValidator dealValidator;
+    private final EventPublisher eventPublisher;
 
     @Transactional
     @Override
@@ -33,6 +37,20 @@ public class DealServiceImpl implements DealService {
         // Validation du deal avant création
         dealValidator.valider(deal);
 
+        var dealEvent = DealCreatedEvent.builder()
+                .dealUuid(deal.getUuid())
+                .marchandUuid(deal.getCreateur().getUuid())
+                .emailMarchand(deal.getCreateur().getEmail())
+                .prenomMarchand(deal.getCreateur().getPrenom())
+                .nomMarchand(deal.getCreateur().getNom())
+                .titreDeal(deal.getTitre())
+                .descriptionDeal(deal.getDescription())
+                .montant(deal.getPrixDeal())
+                .montantPart(deal.getPrixPart())
+                .nbParticipants(deal.getNbParticipants())
+                .build();
+
+        eventPublisher.publishAsync(dealEvent);
         return dealProvider.sauvegarder(deal);
     }
 
@@ -152,7 +170,23 @@ public class DealServiceImpl implements DealService {
 
     @Override
     public void supprimerParUuid(UUID uuid) {
+        DealModele dealModele = dealProvider.trouverParUuid(uuid)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "deal.non.trouve", uuid.toString()));
+
         dealProvider.supprimerParUuid(uuid);
+        var dealAnnuleEvent = DealCancelledEvent.builder()
+                .dealUuid(uuid)
+                .nomMarchand(dealModele.getCreateur().getNom())
+                .emailMarchand(dealModele.getCreateur().getEmail())
+                .prenomMarchand(dealModele.getCreateur().getPrenom())
+                .marchandUuid(dealModele.getCreateur().getUuid())
+                .titreDeal(dealModele.getTitre())
+                .dateAnnulation(LocalDateTime.now())
+                .raisonAnnulation("Suppression du deal par le marchand")
+                .build();
+
+        eventPublisher.publishAsync(dealAnnuleEvent);
     }
 
     @Override
@@ -191,6 +225,18 @@ public class DealServiceImpl implements DealService {
                 log.info("Deal {} expiré (date expiration: {})", deal.getUuid(), deal.getDateExpiration());
                 dealProvider.mettreAJourStatut(deal.getUuid(), StatutDeal.EXPIRE);
                 nombreDealsExpires++;
+                var dealAnnuleEvent = DealCancelledEvent.builder()
+                        .dealUuid(deal.getUuid())
+                        .nomMarchand(deal.getCreateur().getNom())
+                        .emailMarchand(deal.getCreateur().getEmail())
+                        .prenomMarchand(deal.getCreateur().getPrenom())
+                        .marchandUuid(deal.getCreateur().getUuid())
+                        .titreDeal(deal.getTitre())
+                        .dateAnnulation(LocalDateTime.now())
+                        .raisonAnnulation("Expiration du deal")
+                        .build();
+
+                eventPublisher.publishAsync(dealAnnuleEvent);
             }
         }
 
