@@ -3,9 +3,12 @@ import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { PATHS } from "@/common/constants/path";
 import { useI18n } from "@hooks/useI18n";
+import { useAuth } from "@/common/context/AuthContext";
+import { toast } from "sonner";
 
 export default function ForgotPassword() {
   const { t } = useI18n("auth");
+  const { forgotPassword } = useAuth();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -17,10 +20,11 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await forgotPassword(email);
+      toast.success(t("emailSent"));
       setSent(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("errorOccurred"));
+      setError(err instanceof Error ? err.message : t("forgotPasswordError"));
     } finally {
       setLoading(false);
     }
@@ -64,7 +68,9 @@ export default function ForgotPassword() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             {t("forgotPasswordTitle")}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">{t("forgotPasswordSubtitle")}</p>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">
+            {t("forgotPasswordSubtitle")}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">

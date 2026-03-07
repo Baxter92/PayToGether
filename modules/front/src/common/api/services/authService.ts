@@ -27,6 +27,15 @@ export type MeResponse = {
   roles: RoleUtilisateurType[];
 };
 
+export type RegisterRequest = {
+  nom: string;
+  prenom: string;
+  email: string;
+  motDePasse: string;
+  role: RoleUtilisateurType;
+  photoProfil?: string;
+};
+
 export const authService = {
   login: (username: string, password: string) =>
     apiClient.post<LoginResponse>("/auth/login", {
@@ -35,6 +44,21 @@ export const authService = {
         password,
       },
     }),
+  register: (payload: RegisterRequest) =>
+    apiClient.post<void>("/auth/register", { body: payload }),
   me: () => apiClient.get<MeResponse>("/auth/me"),
   logout: () => apiClient.post<void>("/auth/logout"),
+  forgotPassword: (email: string) =>
+    apiClient.post<void>("/auth/forgot-password", { body: { email } }),
+  activateAccount: (token: string) =>
+    apiClient.get<void>("/auth/activate-account", {
+      queryParams: { token },
+    }),
+  resetPassword: (token: string, newPassword: string) =>
+    apiClient.post<void>("/auth/reset-password", {
+      body: {
+        token,
+        nouveauMotDePasse: newPassword,
+      },
+    }),
 };

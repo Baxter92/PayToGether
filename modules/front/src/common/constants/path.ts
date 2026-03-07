@@ -4,6 +4,7 @@ export const PATHS = {
   REGISTER: "/register",
   FORGOT_PASSWORD: "/forgot-password",
   RESET_PASSWORD: "/reset-password",
+  ACTIVATE_ACCOUNT: "/account-validation",
   PROFILE: "/profile",
   CHECKOUT: (id: string | number = ":id") => `/deals/${id}/checkout`,
   SUCCESS_SUBSCRIPTION: (id: string | number = ":id") =>

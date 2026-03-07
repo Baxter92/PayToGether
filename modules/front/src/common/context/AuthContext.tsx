@@ -35,8 +35,16 @@ export interface IAuthContextType {
   isMerchant: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<IUser>;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    prenom: string,
+    nom: string,
+  ) => Promise<void>;
   logout: () => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
+  activateAccount: (token: string) => Promise<void>;
+  resetPassword: (token: string, newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<IAuthContextType | undefined>(undefined);
@@ -177,11 +185,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const register = async (
-    _email: string,
-    _password: string,
-    _name: string,
+    email: string,
+    password: string,
+    prenom: string,
+    nom: string,
   ): Promise<void> => {
-    throw new Error("Inscription non disponible pour le moment");
+    try {
+      await authService.register({
+        prenom: prenom.trim(),
+        nom: nom.trim(),
+        email,
+        motDePasse: password,
+        role: "UTILISATEUR",
+      });
+    } catch (error) {
+      if (error instanceof HttpError) {
+        if (error.status === 409) throw new Error("auth:registerEmailExists");
+        if (error.status === 400) throw new Error("auth:registerError");
+        if (error.status >= 500) throw new Error("auth:serverError");
+      }
+      throw new Error("auth:registerError");
+    }
   };
 
   const logout = async (): Promise<void> => {
@@ -198,6 +222,36 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  const forgotPassword = async (email: string): Promise<void> => {
+    try {
+      await authService.forgotPassword(email);
+    } catch (error) {
+      console.error("Forgot password failed:", error);
+      throw new Error("auth:forgotPasswordError");
+    }
+  };
+
+  const resetPassword = async (
+    token: string,
+    newPassword: string,
+  ): Promise<void> => {
+    try {
+      await authService.resetPassword(token, newPassword);
+    } catch (error) {
+      console.error("Reset password failed:", error);
+      throw new Error("auth:resetPasswordError");
+    }
+  };
+
+  const activateAccount = async (token: string): Promise<void> => {
+    try {
+      await authService.activateAccount(token);
+    } catch (error) {
+      console.error("Account activation failed:", error);
+      throw new Error("auth:activateAccountError");
+    }
+  };
+
   const value: IAuthContextType = {
     user,
     loading,
@@ -208,6 +262,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     role,
     isAdmin,
     isMerchant,
+    forgotPassword,
+    activateAccount,
+    resetPassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
