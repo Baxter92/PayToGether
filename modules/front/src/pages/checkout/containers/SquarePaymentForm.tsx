@@ -138,9 +138,11 @@ export default function SquarePaymentForm({
 
         const response = await createPayment(paymentData);
 
+        // Gestion des différents statuts de paiement
         if (
           response.statut === "CONFIRME" ||
-          response.statut === "PROCESSING"
+          response.statut === "PROCESSING" ||
+          response.statut === "EN_ATTENTE"
         ) {
           onSuccess(response.uuid);
           // Redirection vers la page de succès
@@ -148,6 +150,11 @@ export default function SquarePaymentForm({
         } else if (response.statut === "ECHOUE") {
           setIsProcessing(false);
           onError?.(response.messageErreur || "Paiement échoué");
+        } else {
+          // Statut inattendu
+          console.warn("Statut de paiement inattendu:", response.statut);
+          setIsProcessing(false);
+          onError?.(`Statut de paiement inattendu: ${response.statut}`);
         }
       } else {
         // Gérer les erreurs de tokenisation

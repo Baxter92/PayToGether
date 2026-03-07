@@ -54,13 +54,8 @@ public class SquarePaymentHandler implements ConsumerHandler {
 
         try {
             // Récupérer le paiement via le Service métier
-            PaiementModele paiement = paiementService.trouverParCommande(event.getCommandeUuid())
-                .stream()
-                .filter(p -> p.getSquareToken() != null && p.getSquareToken().equals(event.getSquareToken()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException(
-                    "Paiement non trouvé pour la commande: " + event.getCommandeUuid()
-                ));
+            PaiementModele paiement = paiementService.lireParUuid(event.getPaiementUuid())
+                    .orElseThrow(() -> new RuntimeException("Paiement non trouvé pour l'UUID : " + event.getPaiementUuid()));
 
             // Traiter le paiement via Square (Service métier)
             squarePaymentService.traiterPaiementSquare(paiement);

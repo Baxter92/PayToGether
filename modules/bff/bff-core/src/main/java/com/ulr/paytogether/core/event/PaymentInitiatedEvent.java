@@ -22,6 +22,7 @@ public class PaymentInitiatedEvent extends DomainEvent {
 
     private UUID utilisateurUuid;
     private UUID commandeUuid;
+    private UUID paiementUuid;
     private BigDecimal montant;
     private String methodePaiement;
     private String squareToken;
@@ -30,12 +31,14 @@ public class PaymentInitiatedEvent extends DomainEvent {
     public PaymentInitiatedEvent(
             @JsonProperty("utilisateurUuid") UUID utilisateurUuid,
             @JsonProperty("commandeUuid") UUID commandeUuid,
+            @JsonProperty("paiementUuid") UUID paiementUuid,
             @JsonProperty("montant") BigDecimal montant,
             @JsonProperty("methodePaiement") String methodePaiement,
             @JsonProperty("squareToken") String squareToken) {
         super("SquarePaymentService");
         this.utilisateurUuid = utilisateurUuid;
         this.commandeUuid = commandeUuid;
+        this.paiementUuid = paiementUuid;
         this.montant = montant;
         this.methodePaiement = methodePaiement;
         this.squareToken = squareToken;

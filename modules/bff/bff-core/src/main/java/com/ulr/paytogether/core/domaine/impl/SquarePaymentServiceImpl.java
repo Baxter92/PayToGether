@@ -15,6 +15,7 @@ import com.ulr.paytogether.core.provider.SquarePaymentProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -33,6 +34,7 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
     private final PaiementValidator paiementValidator;
     private final EventPublisher eventPublisher;
 
+    @Transactional
     @Override
     public PaiementModele creerPaiementSquare(PaiementModele paiement) {
         log.info("Création paiement Square pour deal {}", paiement.getDeal().getUuid());
@@ -54,6 +56,7 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
                 .methodePaiement(paiementCree.getMethodePaiement().name())
                 .montant(paiementCree.getMontant())
                 .commandeUuid(paiementCree.getCommande().getUuid())
+                .paiementUuid(paiementCree.getUuid())
                 .utilisateurUuid(paiementCree.getUtilisateur().getUuid())
                 .build();
 
@@ -61,6 +64,7 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
         return paiementCree;
     }
 
+    @Transactional
     @Override
     public PaiementModele traiterPaiementSquare(PaiementModele paiement) {
         log.info("Traitement du paiement Square UUID: {}", paiement.getUuid());
@@ -142,6 +146,7 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
         }
     }
 
+    @Transactional
     @Override
     public PaiementModele verifierStatutPaiement(UUID paiementUuid) {
         log.info("Vérification du statut du paiement: {}", paiementUuid);
@@ -170,6 +175,7 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
         return paiement;
     }
 
+    @Transactional
     @Override
     public PaiementModele rembourserPaiement(UUID paiementUuid) {
         log.info("Remboursement du paiement: {}", paiementUuid);

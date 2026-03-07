@@ -1,7 +1,8 @@
-package com.ulr.paytogether.bff.event.handler;
+package com.ulr.paytogether.bff.event.handler.impl;
 
 import com.ulr.paytogether.bff.event.annotation.FunctionalHandler;
-import com.ulr.paytogether.bff.event.model.PaymentMadeEvent;
+import com.ulr.paytogether.bff.event.handler.ConsumerHandler;
+import com.ulr.paytogether.core.event.PaymentMadeEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

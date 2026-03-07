@@ -64,7 +64,7 @@ public class PaiementJpa {
     @Column(length = 1000)
     private String messageErreur;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "utilisateur_uuid", nullable = false)
     private UtilisateurJpa utilisateurJpa;
 

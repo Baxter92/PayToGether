@@ -19,15 +19,17 @@ export interface SquarePaymentResponse {
   montant: number;
   statut: string;
   methodePaiement: string;
-  transactionId: string;
-  squarePaymentId: string;
-  squareOrderId: string;
+  transactionId: string | null;
+  squarePaymentId: string | null;
+  squareOrderId: string | null;
   squareLocationId: string;
-  squareReceiptUrl: string;
-  messageErreur?: string;
+  squareReceiptUrl: string | null;
+  messageErreur?: string | null;
   utilisateurUuid: string;
-  dealUuid: string;
+  commandeUuid: string;
   datePaiement: string;
+  dateCreation: string | null;
+  dateModification: string | null;
 }
 
 /**

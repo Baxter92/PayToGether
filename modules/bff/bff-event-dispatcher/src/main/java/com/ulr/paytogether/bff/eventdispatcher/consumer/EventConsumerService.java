@@ -55,12 +55,26 @@ public class EventConsumerService {
         log.info("Discovering event handlers...");
 
         String[] beanNames = applicationContext.getBeanNamesForType(ConsumerHandler.class);
+        log.info("Found {} beans implementing ConsumerHandler", beanNames.length);
 
         for (String beanName : beanNames) {
+            log.info("Scanning bean: {}", beanName);
             Object bean = applicationContext.getBean(beanName);
             Class<?> beanClass = bean.getClass();
 
-            for (Method method : beanClass.getDeclaredMethods()) {
+            log.info("Bean class: {}", beanClass.getName());
+            log.info("Bean superclass: {}", beanClass.getSuperclass().getName());
+
+            // Scanner la classe réelle (pas le proxy)
+            Class<?> targetClass = org.springframework.aop.support.AopUtils.getTargetClass(bean);
+            log.info("Target class (unwrapped): {}", targetClass.getName());
+
+            Method[] methods = targetClass.getDeclaredMethods();
+            log.info("Found {} methods in target class", methods.length);
+
+            for (Method method : methods) {
+                log.debug("Checking method: {}", method.getName());
+
                 if (method.isAnnotationPresent(FunctionalHandler.class)) {
                     FunctionalHandler annotation = method.getAnnotation(FunctionalHandler.class);
 
@@ -69,18 +83,25 @@ public class EventConsumerService {
                             method,
                             annotation.eventType(),
                             annotation.maxAttempts(),
-                            beanClass.getSimpleName() + "." + method.getName()
+                            targetClass.getSimpleName() + "." + method.getName()
                     );
 
                     registeredHandlers.add(handlerInfo);
-                    log.info("Registered handler: {} for event type: {}",
+                    log.info("✅ Registered handler: {} for event type: {} (class: {})",
                             handlerInfo.getHandlerName(),
-                            handlerInfo.getEventType().getSimpleName());
+                            handlerInfo.getEventType().getSimpleName(),
+                            handlerInfo.getEventType().getName());
                 }
             }
         }
 
+        log.info("========================================");
         log.info("Total handlers registered: {}", registeredHandlers.size());
+        log.info("========================================");
+
+        if (registeredHandlers.isEmpty()) {
+            log.warn("⚠️  NO HANDLERS REGISTERED! Check if bff-event module is properly scanned.");
+        }
     }
 
     /**
@@ -166,13 +187,22 @@ public class EventConsumerService {
     private List<HandlerInfo> findCompatibleHandlers(EventRecordJpa eventRecord) {
         List<HandlerInfo> compatible = new ArrayList<>();
 
+        log.debug("Searching for handlers for event type: {}", eventRecord.getEventType());
+        log.debug("Total registered handlers: {}", registeredHandlers.size());
+
         for (HandlerInfo handlerInfo : registeredHandlers) {
+            log.debug("Checking handler: {} with event type: {}",
+                    handlerInfo.getHandlerName(),
+                    handlerInfo.getEventType().getSimpleName());
+
             if (handlerInfo.getEventType().getSimpleName().equals(eventRecord.getEventType()) ||
                 handlerInfo.getEventType().equals(Object.class)) {
                 compatible.add(handlerInfo);
+                log.debug("Handler {} is compatible!", handlerInfo.getHandlerName());
             }
         }
 
+        log.info("Found {} compatible handlers for event type: {}", compatible.size(), eventRecord.getEventType());
         return compatible;
     }
 

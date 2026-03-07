@@ -2,8 +2,8 @@ package com.ulr.paytogether.bff.event.handler.impl;
 
 import com.ulr.paytogether.bff.event.annotation.FunctionalHandler;
 import com.ulr.paytogether.bff.event.handler.ConsumerHandler;
-import com.ulr.paytogether.bff.event.model.DealCancelledEvent;
 import com.ulr.paytogether.core.domaine.service.EmailNotificationService;
+import com.ulr.paytogether.core.event.DealCancelledEvent;
 import com.ulr.paytogether.core.event.DealCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
