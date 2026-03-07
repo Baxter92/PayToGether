@@ -1,21 +1,22 @@
 import { useAuth } from "@/common/context/AuthContext";
-import { Eye, EyeOff, Lock, Mail, User, UserPlus } from "lucide-react";
+import { ArrowLeft, CheckCircle, Eye, EyeOff, Lock, Mail, User, UserPlus } from "lucide-react";
 import { useState, type FormEvent } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { PATHS } from "@/common/constants/path";
 import { useI18n } from "@hooks/useI18n";
 
 export default function Register() {
-  const navigate = useNavigate();
-  const { login } = useAuth();
-  const { t } = useI18n("auth");
+  const { register } = useAuth();
+  const { t, i18n } = useI18n("auth");
 
-  const [name, setName] = useState("");
+  const [prenom, setPrenom] = useState("");
+  const [nom, setNom] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -28,22 +29,51 @@ export default function Register() {
       return;
     }
 
-    if (password.length < 6) {
-      setError(t("passwordTooShort"));
+    if (password.length < 8) {
+      setError(t("registerPasswordTooShort"));
       return;
     }
 
     setLoading(true);
 
     try {
-      await login(email, password);
-      navigate(PATHS.HOME, { replace: true });
+      await register(email, password, prenom, nom);
+      setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("registerError"));
+      if (err instanceof Error) {
+        setError(i18n.exists(err.message) ? t(err.message) : t("registerError"));
+      } else {
+        setError(t("registerError"));
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  if (success) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-teal-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-8 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/50 rounded-full mb-4">
+            <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            {t("registerSuccessTitle")}
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            {t("registerSuccessMessage")}
+          </p>
+          <Link
+            to={PATHS.LOGIN}
+            className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {t("backToLogin")}
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-teal-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
@@ -61,16 +91,33 @@ export default function Register() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t("fullName")}
+              {t("firstName")}
             </label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
               <input
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={prenom}
+                onChange={(e) => setPrenom(e.target.value)}
                 className="w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                placeholder={t("fullNamePlaceholder")}
+                placeholder={t("firstNamePlaceholder")}
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              {t("lastName")}
+            </label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+              <input
+                type="text"
+                value={nom}
+                onChange={(e) => setNom(e.target.value)}
+                className="w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+                placeholder={t("lastNamePlaceholder")}
                 required
               />
             </div>
@@ -106,7 +153,7 @@ export default function Register() {
                 className="w-full pl-11 pr-11 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
                 placeholder={t("passwordPlaceholder")}
                 required
-                minLength={6}
+                minLength={8}
               />
               <button
                 type="button"
@@ -135,7 +182,7 @@ export default function Register() {
                 className="w-full pl-11 pr-11 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
                 placeholder={t("passwordPlaceholder")}
                 required
-                minLength={6}
+                minLength={8}
               />
               <button
                 type="button"

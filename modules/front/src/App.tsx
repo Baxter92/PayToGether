@@ -6,6 +6,8 @@ import { ProtectedRoutes } from "./routing/ProtectedRoutes";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
+import ActivateAccount from "./pages/auth/ActivateAccount";
 import Home from "./pages/home";
 import { MainLayout } from "./common/layouts/MainLayout";
 import { AdminLayout } from "./common/layouts/AdminLayout";
@@ -47,6 +49,8 @@ function App(): JSX.Element {
             <Route path={PATHS.LOGIN} element={<Login />} />
             <Route path={PATHS.REGISTER} element={<Register />} />
             <Route path={PATHS.FORGOT_PASSWORD} element={<ForgotPassword />} />
+            <Route path={PATHS.RESET_PASSWORD} element={<ResetPassword />} />
+            <Route path={PATHS.ACTIVATE_ACCOUNT} element={<ActivateAccount />} />
 
             {/* Admin Login */}
             <Route path="/admin/login" element={<AdminLogin />} />
