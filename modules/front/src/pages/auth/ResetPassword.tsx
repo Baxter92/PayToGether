@@ -20,11 +20,11 @@ export default function ResetPassword() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
-  const validatePassword = (password: string): boolean =>
-    password.length >= 8 &&
-    /[A-Z]/.test(password) &&
-    /[a-z]/.test(password) &&
-    /\d/.test(password);
+  // const validatePassword = (password: string): boolean =>
+  //   password.length >= 8 &&
+  //   /[A-Z]/.test(password) &&
+  //   /[a-z]/.test(password) &&
+  //   /\d/.test(password);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
