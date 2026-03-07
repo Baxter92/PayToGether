@@ -49,7 +49,8 @@ public class CommandeJpa {
     private DealJpa dealJpa;
 
     @Column(nullable = false)
-    private LocalDateTime dateCommande;
+    @Builder.Default
+    private LocalDateTime dateCommande = LocalDateTime.now();
 
     @JsonIgnore
     @OneToMany(mappedBy = "commandeJpa", cascade = CascadeType.ALL,

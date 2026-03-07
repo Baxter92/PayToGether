@@ -5,6 +5,8 @@ import com.ulr.paytogether.provider.adapter.entity.PaiementJpa;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 @RequiredArgsConstructor
 public class PaiementJpaMapper {
@@ -50,7 +52,7 @@ public class PaiementJpaMapper {
                 .messageErreur(modele.getMessageErreur())
                 .utilisateurJpa(modele.getUtilisateur() != null ? utilisateurJpaMapper.versEntite(modele.getUtilisateur()) : null)
                 .commandeJpa(modele.getCommande() != null ? commandeJpaMapper.versEntite(modele.getCommande()) : null)
-                .datePaiement(modele.getDatePaiement())
+                .datePaiement(modele.getDatePaiement()== null ? LocalDateTime.now() : modele.getDatePaiement())
                 .dateCreation(modele.getDateCreation())
                 .dateModification(modele.getDateModification())
                 .build();

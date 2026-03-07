@@ -73,7 +73,8 @@ public class PaiementJpa {
     private CommandeJpa commandeJpa;
 
     @Column(nullable = false)
-    private LocalDateTime datePaiement;
+    @Builder.Default
+    private LocalDateTime datePaiement = LocalDateTime.now();
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

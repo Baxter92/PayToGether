@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 @RequiredArgsConstructor
 public class CommandeJpaMapper {
@@ -52,6 +54,7 @@ public class CommandeJpaMapper {
                 .statut(StatutCommande.EN_COURS)
                 .marchandJpa(dealJpa.getMarchandJpa())
                 .numeroCommande(numeroCommande())
+                .dateCommande(LocalDateTime.now())
                 .build();
     }
 
