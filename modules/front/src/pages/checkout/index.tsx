@@ -160,7 +160,7 @@ export default function CheckoutPage(): JSX.Element {
                     isCompleted={false}
                   >
                     <SquarePaymentForm
-                      commandeUuid={checkoutState.dealId || deal?.id || ""}
+                      dealUuid={checkoutState.dealId || deal?.id || ""}
                       utilisateurUuid={user?.id || ""}
                       montant={total}
                       onSuccess={handleSquarePaymentSuccess}

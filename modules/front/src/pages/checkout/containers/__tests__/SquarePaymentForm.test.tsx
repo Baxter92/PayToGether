@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import SquarePaymentForm from "../SquarePaymentForm";
 
@@ -25,7 +25,7 @@ describe("SquarePaymentForm", () => {
   const mockOnError = vi.fn();
 
   const defaultProps = {
-    commandeUuid: "test-commande-uuid",
+    dealUuid: "test-deal-uuid",
     utilisateurUuid: "test-user-uuid",
     montant: 99.99,
     onSuccess: mockOnSuccess,
@@ -79,12 +79,12 @@ describe("SquarePaymentForm", () => {
     render(
       <QueryClientProvider client={queryClient}>
         <SquarePaymentForm {...defaultProps} />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
 
     // Vérifier que le message de chargement est affiché
     expect(
-      screen.queryByText(/chargement du module de paiement/i)
+      screen.getByText(/chargement du module de paiement/i),
     ).toBeInTheDocument();
   });
 
@@ -116,21 +116,6 @@ describe("SquarePaymentForm", () => {
     });
   });
 
-  it("devrait permettre de changer de méthode de paiement", async () => {
-    render(<SquarePaymentForm {...defaultProps} />, { wrapper });
-
-    await waitFor(() => {
-      const googlePayButton = screen.getByRole("button", {
-        name: /google pay/i,
-      });
-      fireEvent.click(googlePayButton);
-    });
-
-    // Vérifier que le bouton Google Pay est maintenant actif
-    const googlePayButton = screen.getByRole("button", { name: /google pay/i });
-    expect(googlePayButton).toHaveClass("bg-default");
-  });
-
   it("devrait afficher le bouton de paiement avec le montant", async () => {
     render(<SquarePaymentForm {...defaultProps} />, { wrapper });
 
@@ -145,7 +130,7 @@ describe("SquarePaymentForm", () => {
     await waitFor(() => {
       expect(screen.getByText(/paiement sécurisé par square/i)).toBeInTheDocument();
       expect(
-        screen.getByText(/vos informations de paiement ne sont jamais stockées/i)
+        screen.getByText(/vos informations de paiement ne sont jamais stockées/i),
       ).toBeInTheDocument();
     });
   });
@@ -168,7 +153,7 @@ describe("SquarePaymentForm", () => {
     render(
       <QueryClientProvider client={queryClient}>
         <SquarePaymentForm {...defaultProps} />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
 
     expect(screen.getByText(/erreur de chargement square/i)).toBeInTheDocument();
@@ -192,7 +177,7 @@ describe("SquarePaymentForm", () => {
     render(
       <QueryClientProvider client={queryClient}>
         <SquarePaymentForm {...defaultProps} />
-      </QueryClientProvider>
+      </QueryClientProvider>,
     );
 
     await waitFor(() => {

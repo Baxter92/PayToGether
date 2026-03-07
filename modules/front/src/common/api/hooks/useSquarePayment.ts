@@ -6,7 +6,7 @@ import { apiClient } from "@/common/api/services/apiClient";
 export type SquarePaymentMethod = "card" | "googlePay" | "applePay" | "cashAppPay";
 
 export interface SquarePaymentRequest {
-  commandeUuid: string;
+  dealUuid: string;
   utilisateurUuid: string;
   montant: number;
   squareToken: string;
@@ -26,7 +26,7 @@ export interface SquarePaymentResponse {
   squareReceiptUrl: string;
   messageErreur?: string;
   utilisateurUuid: string;
-  commandeUuid: string;
+  dealUuid: string;
   datePaiement: string;
 }
 

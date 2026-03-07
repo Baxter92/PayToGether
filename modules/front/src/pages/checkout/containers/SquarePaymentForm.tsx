@@ -30,7 +30,7 @@ import VStack from "@components/VStack";
 import HStack from "@components/HStack";
 
 interface SquarePaymentFormProps {
-  commandeUuid: string;
+  dealUuid: string;
   utilisateurUuid: string;
   montant: number;
   onSuccess: (paymentId: string) => void;
@@ -42,7 +42,7 @@ interface SquarePaymentFormProps {
  * Supporte: Card, Google Pay, Apple Pay, Cash App Pay
  */
 export default function SquarePaymentForm({
-  commandeUuid,
+  dealUuid,
   utilisateurUuid,
   montant,
   onSuccess,
@@ -128,7 +128,7 @@ export default function SquarePaymentForm({
       if (result.status === "OK" && result.token) {
         // Envoyer le token au backend
         const paymentData = {
-          commandeUuid,
+          dealUuid,
           utilisateurUuid,
           montant,
           squareToken: result.token,

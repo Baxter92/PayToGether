@@ -1,7 +1,6 @@
 package com.ulr.paytogether.provider.adapter;
 
 import com.ulr.paytogether.core.enumeration.StatutCommande;
-import com.ulr.paytogether.core.enumeration.StatutDeal;
 import com.ulr.paytogether.core.enumeration.StatutPaiement;
 import com.ulr.paytogether.core.modele.PaiementModele;
 import com.ulr.paytogether.core.provider.DealProvider;
@@ -61,10 +60,11 @@ public class PaiementProviderAdapter implements PaiementProvider {
         Optional<CommandeJpa> commandeJpaOptional = commandeRepository.findByDealJpa(dealJpa);
         CommandeJpa commandeJpa;
         if (commandeJpaOptional.isPresent()) {
-             commandeJpa = commandeJpaOptional.get();
-            entite.setCommandeJpa(commandeJpa);
-        }else {
-             commandeJpa = commandeJpaMapper.fromDealJpa(dealJpa);
+            commandeJpa = commandeJpaOptional.get();
+        } else {
+            // Créer et sauvegarder la nouvelle commande AVANT de l'assigner au paiement
+            commandeJpa = commandeJpaMapper.fromDealJpa(dealJpa);
+            commandeJpa = commandeRepository.save(commandeJpa);
         }
         entite.setCommandeJpa(commandeJpa);
         PaiementJpa sauvegarde = jpaRepository.save(entite);
