@@ -38,5 +38,9 @@
   "lastNameLabel": "Nom",
   "phoneLabel": "Téléphone",
   "changePassword": "Modifier le mot de passe",
-  "changePasswordDescription": "Définissez un nouveau mot de passe pour votre compte."
+  "changePasswordDescription": "Définissez un nouveau mot de passe pour votre compte.",
+  "deleteAccount": "Supprimer le compte",
+  "deleteAccountDescription": "Supprimez votre compte et supprimez toutes vos données.",
+  "cancel": "Annuler",
+  "confirm": "Confirmer"
 }

@@ -30,9 +30,18 @@ import VStack from "@components/VStack";
 import HStack from "@components/HStack";
 
 interface SquarePaymentFormProps {
-  dealUuid: string;
-  utilisateurUuid: string;
-  montant: number;
+  data: {
+    dealUuid: string;
+    utilisateurUuid: string;
+    montant: number;
+    rue: string;
+    ville: string;
+    codePostal: string;
+    numeroPhone: string;
+    appartement: string;
+    homeDelivery: boolean;
+    quantity: number;
+  };
   onSuccess: (paymentId: string) => void;
   onError?: (error: string) => void;
   onBack?: () => void;
@@ -43,9 +52,7 @@ interface SquarePaymentFormProps {
  * Supporte: Card, Google Pay, Apple Pay, Cash App Pay
  */
 export default function SquarePaymentForm({
-  dealUuid,
-  utilisateurUuid,
-  montant,
+  data,
   onSuccess,
   onError,
   onBack,
@@ -128,14 +135,17 @@ export default function SquarePaymentForm({
       const result = await card.tokenize();
 
       if (result.status === "OK" && result.token) {
+        const { dealUuid, utilisateurUuid, montant, ...rest } = data;
         // Envoyer le token au backend
         const paymentData = {
-          dealUuid,
-          utilisateurUuid,
-          montant,
+          dealUuid: dealUuid,
+          utilisateurUuid: utilisateurUuid,
+          montant: montant,
           squareToken: result.token,
+          adresse: rest,
           methodePaiement: getMethodePaiementEnum(selectedMethod),
           locationId: SQUARE_LOCATION_ID,
+          nombreDePart: data.quantity,
         } as SquarePaymentRequest;
 
         const response = await createPayment(paymentData);
@@ -284,7 +294,7 @@ export default function SquarePaymentForm({
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium">Montant total :</span>
                     <span className="text-2xl font-bold text-primary">
-                      {montant.toFixed(2)} CAD
+                      {data.montant.toFixed(2)} CAD
                     </span>
                   </div>
                 </div>
@@ -334,7 +344,9 @@ export default function SquarePaymentForm({
               <div className="text-sm text-muted-foreground">
                 Montant à payer
               </div>
-              <div className="text-2xl font-bold">{montant.toFixed(2)} CAD</div>
+              <div className="text-2xl font-bold">
+                {data.montant.toFixed(2)} CAD
+              </div>
             </div>
 
             {/* Sélection de la méthode de paiement */}
@@ -431,7 +443,7 @@ export default function SquarePaymentForm({
                 ) : (
                   <HStack spacing={2}>
                     <ShieldCheck className="w-5 h-5" />
-                    <span>Payer {montant.toFixed(2)} CAD</span>
+                    <span>Payer {data.montant.toFixed(2)} CAD</span>
                   </HStack>
                 )}
               </Button>

@@ -32,18 +32,20 @@ import { cn } from "@/common/lib/utils";
 import { ADMIN_PATHS } from "../constants/adminPaths";
 import { toast } from "sonner";
 import { useI18n } from "@/common/hooks/useI18n";
+import { useAuth } from "@/common/context/AuthContext";
 
 export function AdminSidebar(): ReactElement {
   const { t } = useI18n("admin");
   const location = useLocation();
   const navigate = useNavigate();
   const { state } = useSidebar();
+  const { logout } = useAuth();
   const isCollapsed = state === "collapsed";
 
   const isActive = (path: string): boolean => location.pathname === path;
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("adminAuthenticated");
+  const handleLogout = async () => {
+    await logout();
     toast.success(t("sidebar.logout"), {
       description: t("sidebar.logoutMessage"),
     });

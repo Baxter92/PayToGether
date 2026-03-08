@@ -13,25 +13,23 @@ import Favorites from "./containers/Favorites";
 import { useAuth } from "@/common/context/AuthContext";
 import {
   type CommentaireDTO,
+  StatutDeal,
   useCommentaires,
-  useDeals,
   useDealsByCreateur,
+  useDealsByStatut,
   useUsers,
 } from "@/common/api";
 
 export default function Profile() {
-  const { roles, role, user } = useAuth();
+  const { user, isMerchant } = useAuth();
   const [activeTab, setActiveTab] =
     useState<(typeof PROFILE_TABS)[number]["key"]>("overview");
   const { data: commentaires = [], isLoading: commentairesLoading } =
     useCommentaires();
-  const { data: deals = [] } = useDeals();
+  const { data: deals = [] } = useDealsByStatut(StatutDeal.PUBLIE);
   const { data: users = [] } = useUsers();
-  const { data: merchantDeals = [] } = useDealsByCreateur(user?.id ?? "");
-
-  const isMerchant = useMemo(
-    () => role === "VENDEUR" || roles.includes("VENDEUR"),
-    [role, roles],
+  const { data: merchantDeals = [] } = useDealsByCreateur(
+    user?.id && isMerchant ? user.id : undefined,
   );
 
   const dealsByUuid = useMemo(

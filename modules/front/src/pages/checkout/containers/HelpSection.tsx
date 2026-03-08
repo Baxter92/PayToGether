@@ -30,7 +30,7 @@ export default function HelpSection({
             {t("back")}
           </Button>
           <Button variant="ghost" size="sm" onClick={onHome} className="flex-1">
-            {t("nav.home")}
+            {t("nav:home")}
           </Button>
         </HStack>
       </CardContent>

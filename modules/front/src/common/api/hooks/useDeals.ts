@@ -96,7 +96,9 @@ export const useUpdateDeal = () => {
       queryClient.invalidateQueries({
         queryKey: dealKeys.detail(updatedDeal.uuid),
       });
-      queryClient.invalidateQueries({ queryKey: dealKeys.byCreateur(updatedDeal.createurUuid) });
+      queryClient.invalidateQueries({
+        queryKey: dealKeys.byCreateur(updatedDeal.createurUuid),
+      });
     },
   });
 
@@ -118,10 +120,10 @@ export const useDealsByStatut = (statut: StatutDealType) => {
   });
 };
 
-export const useDealsByCreateur = (createurUuid: string) => {
+export const useDealsByCreateur = (createurUuid?: string) => {
   return useQuery<DealDTO[], Error>({
     queryKey: dealKeys.byCreateur(createurUuid),
-    queryFn: () => dealService.getByCreateur(createurUuid),
+    queryFn: () => dealService.getByCreateur(createurUuid ?? ""),
     enabled: !!createurUuid,
   });
 };
@@ -211,7 +213,9 @@ export const useCreateDeal = () => {
     onSuccess: (deal) => {
       // invalider listes / cache
       queryClient.invalidateQueries({ queryKey: dealKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: dealKeys.byCreateur(deal.createurUuid) });
+      queryClient.invalidateQueries({
+        queryKey: dealKeys.byCreateur(deal.createurUuid),
+      });
       // si tu as d'autres keys (detail), invalide-les aussi
     },
 
@@ -238,7 +242,9 @@ export const useUpdateDealStatus = () => {
   >({
     mutationFn: ({ id, statut }) => dealService.updateStatus(id, statut),
     onSuccess: (updatedDeal) => {
-      queryClient.invalidateQueries({ queryKey: dealKeys.byCreateur(updatedDeal.createurUuid) });
+      queryClient.invalidateQueries({
+        queryKey: dealKeys.byCreateur(updatedDeal.createurUuid),
+      });
       queryClient.invalidateQueries({
         queryKey: dealKeys.detail(updatedDeal.uuid),
       });

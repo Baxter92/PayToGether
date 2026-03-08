@@ -126,6 +126,7 @@ export default function CheckoutPage(): JSX.Element {
                     <ShippingForm
                       defaultValues={{
                         fullName: user?.name,
+                        ...shippingData,
                       }}
                       onSubmit={handleShippingSubmit}
                       isSubmitting={isSubmitting}
@@ -156,9 +157,18 @@ export default function CheckoutPage(): JSX.Element {
                     isCompleted={false}
                   >
                     <SquarePaymentForm
-                      dealUuid={checkoutState.dealId || deal?.id || ""}
-                      utilisateurUuid={user?.id || ""}
-                      montant={total}
+                      data={{
+                        dealUuid: checkoutState.dealId || deal?.id || "",
+                        utilisateurUuid: user?.id || "",
+                        montant: total,
+                        quantity: qty,
+                        rue: shippingData?.address || "",
+                        ville: shippingData?.city || "",
+                        codePostal: shippingData?.postalCode || "",
+                        numeroPhone: shippingData?.phone || "",
+                        appartement: shippingData?.complementAddress || "",
+                        homeDelivery: deliveryData?.deliveryMethod === "home",
+                      }}
                       onSuccess={handleSquarePaymentSuccess}
                       onError={handleSquarePaymentError}
                       onBack={() => setCurrentStep(currentStep - 1)}

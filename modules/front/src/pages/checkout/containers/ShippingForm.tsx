@@ -21,10 +21,15 @@ export default function ShippingForm({
 
   const shippingSchema = z.object({
     // fullName: z.string().min(2, t("nameRequired")),
-    // phone: z.string().min(6, t("phoneInvalid")),
-    // address: z.string().min(5, t("addressTooShort")),
-    // city: z.string().min(2, t("cityRequired")),
-    // postalCode: z.string().optional(),
+    phone: z.string().refine((val) => {
+      const cleaned = val.replace(/\D/g, "");
+      if (cleaned.length <= 0) return true;
+      return cleaned.length >= 10;
+    }, t("phoneInvalid")),
+    address: z.string().min(5, t("addressTooShort")),
+    complementAddress: z.string().optional(),
+    city: z.string().min(2, t("cityRequired")),
+    postalCode: z.string().min(3, t("postalCodeRequired")),
   });
 
   const fields: IFieldConfig[] = [
@@ -32,6 +37,7 @@ export default function ShippingForm({
       name: "fullName",
       label: t("fullName"),
       type: "text",
+      defaultValue: defaultValues?.fullName,
       placeholder: defaultValues?.fullName || t("fullNamePlaceholder"),
     },
     {
@@ -45,6 +51,12 @@ export default function ShippingForm({
       label: t("address"),
       type: "text",
       placeholder: t("addressPlaceholder"),
+    },
+    {
+      name: "complementAddress",
+      label: t("complementAddress"),
+      type: "text",
+      placeholder: t("complementAddressPlaceholder"),
     },
     {
       name: "city",
@@ -64,6 +76,7 @@ export default function ShippingForm({
     <Form
       fields={fields}
       schema={shippingSchema}
+      defaultValues={defaultValues}
       onSubmit={({ data }) => onSubmit(data as ShippingData)}
       submitLabel={isSubmitting ? t("processing") : t("continue")}
       resetLabel={onBack ? t("back") : undefined}

@@ -15,6 +15,7 @@ export type ShippingData = {
   address: string;
   city: string;
   postalCode?: string;
+  complementAddress?: string;
 };
 
 export type DeliveryData = {

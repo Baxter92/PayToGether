@@ -4,6 +4,7 @@ import Form, { type IFieldConfig } from "@/common/containers/Form";
 import { Heading } from "@/common/containers/Heading";
 import { useAuth } from "@/common/context/AuthContext";
 import {
+  useDeleteUser,
   useResetUserPassword,
   useUpdateUser,
 } from "@/common/api/hooks/useUtilisateurs";
@@ -18,6 +19,7 @@ import {
 import { toast } from "sonner";
 import * as z from "zod";
 import type { UpdateUtilisateurDTO } from "@/common/api";
+import { HStack } from "@/common/components";
 
 type PasswordFormValues = {
   nouveauMotDePasse: string;
@@ -27,10 +29,13 @@ export default function Settings() {
   const { t } = useI18n();
   const { user, logout } = useAuth();
   const [openChangePasswordModal, setOpenChangePasswordModal] = useState(false);
+  const [openDeleteAccountModal, setOpenDeleteAccountModal] = useState(false);
   const { mutateAsync: resetUserPassword, isPending: isResettingPassword } =
     useResetUserPassword();
   const { mutateAsync: updateUser, isPending: isUpdatingUser } =
     useUpdateUser();
+  const { mutateAsync: deleteUser, isPending: isDeletingUser } =
+    useDeleteUser();
 
   const fields: IFieldConfig[] = [
     {
@@ -125,11 +130,18 @@ export default function Settings() {
         isLoading={isUpdatingUser}
       />
 
-      <div className="mt-6">
+      <HStack className="mt-6" justify="end" spacing={2}>
         <Button onClick={() => setOpenChangePasswordModal(true)}>
           {t("profile:changePassword")}
         </Button>
-      </div>
+
+        <Button
+          colorScheme="danger"
+          onClick={() => setOpenDeleteAccountModal(true)}
+        >
+          {t("profile:deleteAccount")}
+        </Button>
+      </HStack>
 
       <Dialog
         open={openChangePasswordModal}
@@ -163,6 +175,48 @@ export default function Settings() {
             isLoading={isResettingPassword}
             showResetButton={false}
           />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={openDeleteAccountModal}
+        onOpenChange={setOpenDeleteAccountModal}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("profile:deleteAccount")}</DialogTitle>
+            <DialogDescription>
+              {t("profile:deleteAccountDescription")}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-2">
+            <Button
+              variant="outline"
+              colorScheme="danger"
+              onClick={() => setOpenDeleteAccountModal(false)}
+              loading={isDeletingUser}
+            >
+              {t("profile:cancel")}
+            </Button>
+            <Button
+              colorScheme="danger"
+              loading={isDeletingUser}
+              onClick={async () => {
+                try {
+                  await deleteUser(user?.id ?? "");
+                  await logout();
+                  setOpenDeleteAccountModal(false);
+                } catch (err: any) {
+                  toast.error("Erreur lors de la suppression du compte", {
+                    description: err?.message ?? "Une erreur est survenue",
+                  });
+                }
+              }}
+            >
+              {t("profile:confirm")}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </section>

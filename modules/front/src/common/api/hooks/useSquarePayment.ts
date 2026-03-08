@@ -3,14 +3,31 @@ import { useMutation } from "@tanstack/react-query";
 import { apiClient } from "@/common/api/services/apiClient";
 
 // Types pour Square Payment
-export type SquarePaymentMethod = "card" | "googlePay" | "applePay" | "cashAppPay";
+export type SquarePaymentMethod =
+  | "card"
+  | "googlePay"
+  | "applePay"
+  | "cashAppPay";
 
 export interface SquarePaymentRequest {
   dealUuid: string;
   utilisateurUuid: string;
-  montant: number;
+  montant: number; // Montant total de la commande
+  adresse: {
+    rue: string;
+    ville: string;
+    codePostal: string;
+    numeroPhone: string;
+    appartement: string;
+    homeDelivery: boolean;
+  };
+  nombreDePart: number;
   squareToken: string;
-  methodePaiement: "SQUARE_CARD" | "SQUARE_GOOGLE_PAY" | "SQUARE_APPLE_PAY" | "SQUARE_CASH_APP_PAY";
+  methodePaiement:
+    | "SQUARE_CARD"
+    | "SQUARE_GOOGLE_PAY"
+    | "SQUARE_APPLE_PAY"
+    | "SQUARE_CASH_APP_PAY";
   locationId?: string;
 }
 
@@ -130,4 +147,3 @@ declare global {
     Square?: any;
   }
 }
-

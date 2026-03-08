@@ -28,6 +28,7 @@ export function DeliveryForm({
       name: "deliveryMethod",
       label: t("deliveryTitle"),
       type: "radio",
+      defaultValue: "pickup",
       items: [
         { label: `${t("homeDelivery")}`, value: "home" },
         { label: t("pickupDelivery"), value: "pickup" },
@@ -36,9 +37,12 @@ export function DeliveryForm({
   ];
 
   return (
-    <Form
+    <Form<DeliveryData>
       fields={fields}
       schema={deliverySchema}
+      defaultValues={{
+        deliveryMethod: "pickup",
+      }}
       onSubmit={({ data }) => onSubmit(data as DeliveryData)}
       submitLabel={isSubmitting ? t("processing") : t("continue")}
       resetLabel={onBack ? t("back") : undefined}
