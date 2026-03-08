@@ -21,7 +21,7 @@ export function DeliveryForm({
   onBack,
   isSubmitting,
 }: IDeliveryFormProps): JSX.Element {
-  const { t } = useTranslation();
+  const { t } = useTranslation("checkout");
 
   const fields: IFieldConfig[] = [
     {
@@ -29,7 +29,7 @@ export function DeliveryForm({
       label: t("deliveryTitle"),
       type: "radio",
       items: [
-        { label: `${t("homeDelivery")} (+3.50€)`, value: "home" },
+        { label: `${t("homeDelivery")}`, value: "home" },
         { label: t("pickupDelivery"), value: "pickup" },
       ],
     },
@@ -42,9 +42,7 @@ export function DeliveryForm({
       onSubmit={({ data }) => onSubmit(data as DeliveryData)}
       submitLabel={isSubmitting ? t("processing") : t("continue")}
       resetLabel={onBack ? t("back") : undefined}
-      onReset={() => {
-        onBack?.();
-      }}
+      resetBtnProps={{ onClick: onBack, disabled: isSubmitting }}
     />
   );
 }
