@@ -112,6 +112,22 @@
                 <p th:text="${descriptionDeal}" style="margin-bottom: 0;">Description</p>
             </div>
 
+            <div class="deal-box">
+                <h3 style="margin-top: 0;">📍 Adresse de livraison</h3>
+                <p style="margin: 5px 0;">
+                    <strong th:text="${adresseRue}">Rue</strong>
+                </p>
+                <p style="margin: 5px 0;" th:if="${adresseVille != null and !adresseVille.isEmpty()}">
+                    <span th:text="${adresseVille}">Ville</span><span th:if="${adresseProvince != null and !adresseProvince.isEmpty()}">, <span th:text="${adresseProvince}">Province</span></span>
+                </p>
+                <p style="margin: 5px 0;" th:if="${adresseCodePostal != null and !adresseCodePostal.isEmpty()}">
+                    <span th:text="${adresseCodePostal}">Code postal</span>
+                </p>
+                <p style="margin: 5px 0;" th:if="${adressePays != null and !adressePays.isEmpty()}">
+                    <span th:text="${adressePays}">Pays</span>
+                </p>
+            </div>
+
             <p>
                 Merci pour votre confiance ! Vous recevrez bientôt plus d'informations sur la suite
                 de votre participation à ce deal.

@@ -41,6 +41,11 @@ public class AdresseMapper {
                 .rue(dto.getRue())
                 .ville(dto.getVille())
                 .codePostal(dto.getCodePostal())
+                .numeroPhone(dto.getNumeroPhone())
+                .appartement(dto.getAppartement())
+                .pays("Canada") // Valeur par défaut, à adapter selon les besoins
+                .homeDelivery(dto.isHomeDelivery())
+                .province("Alberta") // Valeur par défaut, à adapter selon les besoins
                 .dateCreation(dto.getDateCreation())
                 .dateModification(dto.getDateModification())
                 .build();

@@ -24,7 +24,7 @@ public class ReinitialiserMotDePasseValidator {
             throw new IllegalArgumentException("Le mot de passe doit contenir au moins 8 caractères");
         }
 
-        // Règles de complexité optionnelles
+       /* // Règles de complexité optionnelles
         if (!nouveauMotDePasse.matches(".*[A-Z].*")) {
             throw new IllegalArgumentException("Le mot de passe doit contenir au moins une majuscule");
         }
@@ -35,7 +35,7 @@ public class ReinitialiserMotDePasseValidator {
 
         if (!nouveauMotDePasse.matches(".*[0-9].*")) {
             throw new IllegalArgumentException("Le mot de passe doit contenir au moins un chiffre");
-        }
+        }*/
     }
 }
 

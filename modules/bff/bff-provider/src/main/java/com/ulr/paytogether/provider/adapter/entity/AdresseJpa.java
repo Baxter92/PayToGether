@@ -40,11 +40,11 @@ public class AdresseJpa {
     private String appartement;
 
     @Builder.Default
-    @Column(nullable = false, length = 100)
+    @Column(length = 100)
     private String province = "Alberta";
 
     @Builder.Default
-    @Column(nullable = false, length = 100)
+    @Column(length = 100)
     private String pays = "Canada";
 
     @Builder.Default

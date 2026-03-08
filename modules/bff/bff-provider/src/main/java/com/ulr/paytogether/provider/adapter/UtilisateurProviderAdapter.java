@@ -116,8 +116,11 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
     }
 
     @Override
-    public void supprimerParUuid(UUID uuid) {
+    public void supprimerParUuid(UUID uuid, String token) {
+        UtilisateurJpa utilisateurJpa = jpaRepository.findById(uuid)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'UUID: " + uuid));
         jpaRepository.deleteById(uuid);
+        userApiClient.deleteUser(token, utilisateurJpa.getKeycloakId());
     }
 
     @Override
@@ -144,6 +147,7 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
                 .username(entite.getEmail())
                 .email(entite.getEmail())
                 .password(entite.getMotDePasse())
+                .enabled(entite.getStatut() == StatutUtilisateur.ACTIF)
                 .build();
         UserResponse userResponse = userApiClient.createUser(loginResponse.getAccessToken(), userRequest);
         entite.setKeycloakId(userResponse.getId());

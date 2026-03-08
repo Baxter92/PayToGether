@@ -42,7 +42,7 @@ public interface UtilisateurProvider {
     /**
      * Supprimer un utilisateur par son UUID
      */
-    void supprimerParUuid(UUID uuid);
+    void supprimerParUuid(UUID uuid, String token);
 
     /**
      * Vérifier si un email existe

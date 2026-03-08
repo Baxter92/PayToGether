@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,6 +36,13 @@ public class PaymentNotificationEvent extends DomainEvent {
     private int nombreDePart;
     private String typeNotification; // EMAIL, SMS, PUSH
 
+    // Informations d'adresse de paiement
+    private String adresseRue;
+    private String adresseVille;
+    private String adresseProvince;
+    private String adresseCodePostal;
+    private String adressePays;
+
     @JsonCreator
     public PaymentNotificationEvent(
             @JsonProperty("utilisateurUuid") UUID utilisateurUuid,
@@ -51,7 +57,12 @@ public class PaymentNotificationEvent extends DomainEvent {
             @JsonProperty("descriptionDeal") String descriptionDeal,
             @JsonProperty("montantPaiement") BigDecimal montantPaiement,
             @JsonProperty("nombreDePart") int nombreDePart,
-            @JsonProperty("typeNotification") String typeNotification) {
+            @JsonProperty("typeNotification") String typeNotification,
+            @JsonProperty("adresseRue") String adresseRue,
+            @JsonProperty("adresseVille") String adresseVille,
+            @JsonProperty("adresseProvince") String adresseProvince,
+            @JsonProperty("adresseCodePostal") String adresseCodePostal,
+            @JsonProperty("adressePays") String adressePays) {
         super("NotificationService");
         this.utilisateurUuid = utilisateurUuid;
         this.paiementUuid = paiementUuid;
@@ -66,6 +77,11 @@ public class PaymentNotificationEvent extends DomainEvent {
         this.descriptionDeal = descriptionDeal;
         this.montantPaiement = montantPaiement;
         this.nombreDePart = nombreDePart;
+        this.adresseRue = adresseRue;
+        this.adresseVille = adresseVille;
+        this.adresseProvince = adresseProvince;
+        this.adresseCodePostal = adresseCodePostal;
+        this.adressePays = adressePays;
     }
 
     @Override
