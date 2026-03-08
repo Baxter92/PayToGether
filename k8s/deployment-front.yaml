@@ -17,6 +17,6 @@ spec:
     spec:
       containers:
         - name: front
-          image: docker.io/14152021/dealtogether:front-v1.0.18
+          image: docker.io/14152021/dealtogether:front-v1.0.19
           ports:
             - containerPort: 80
