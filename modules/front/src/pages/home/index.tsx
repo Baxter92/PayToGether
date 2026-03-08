@@ -1,4 +1,8 @@
-import { publiciteService, useDealsByStatut, usePublicitesActives } from "@/common/api";
+import {
+  publiciteService,
+  useDealsByStatut,
+  usePublicitesActives,
+} from "@/common/api";
 import { mapDealToView } from "@/common/api/mappers/catalog";
 import { StatutDeal } from "@/common/api/types/deal";
 import { useI18n } from "@hooks/useI18n";
@@ -23,8 +27,15 @@ export default function Home(): JSX.Element {
     queries: publicitesData.map((publicite) => {
       const imageUuid = publicite.listeImages?.[0]?.imageUuid;
       return {
-        queryKey: ["publicites", "detail", publicite.uuid, "image-url", imageUuid],
-        queryFn: () => publiciteService.getImageUrl(publicite.uuid, imageUuid as string),
+        queryKey: [
+          "publicites",
+          "detail",
+          publicite.uuid,
+          "image-url",
+          imageUuid,
+        ],
+        queryFn: () =>
+          publiciteService.getImageUrl(publicite.uuid, imageUuid as string),
         enabled: !!publicite.uuid && !!imageUuid,
       };
     }),
@@ -46,7 +57,7 @@ export default function Home(): JSX.Element {
     [heroImageQueries, publicitesData, t],
   );
 
-  const featuredDeals = useMemo(() => allDeals.slice(0, 4), [allDeals]);
+  // const featuredDeals = useMemo(() => allDeals.slice(0, 4), [allDeals]);
   const popularDeals = useMemo(
     () =>
       [...allDeals]
@@ -60,7 +71,7 @@ export default function Home(): JSX.Element {
       {heroSlides.length > 0 ? <Hero slides={heroSlides} /> : null}
 
       {/* Promotional Deals Section */}
-      <section className="py-16 bg-background">
+      {/* <section className="py-16 bg-background">
         <VStack spacing={10} className="max-w-7xl mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 w-full">
             <Heading
@@ -88,7 +99,7 @@ export default function Home(): JSX.Element {
             itemsPerPage={4}
           />
         </VStack>
-      </section>
+      </section> */}
 
       {/* Popular Section */}
       <section className="py-16 bg-gradient-to-b from-muted/50 to-background relative">
