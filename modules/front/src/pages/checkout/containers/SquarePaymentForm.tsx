@@ -35,6 +35,7 @@ interface SquarePaymentFormProps {
   montant: number;
   onSuccess: (paymentId: string) => void;
   onError?: (error: string) => void;
+  onBack?: () => void;
 }
 
 /**
@@ -47,6 +48,7 @@ export default function SquarePaymentForm({
   montant,
   onSuccess,
   onError,
+  onBack,
 }: SquarePaymentFormProps) {
   const navigate = useNavigate();
   const { isSquareLoaded, squareError, createPayment, isCreatingPayment } =
@@ -221,7 +223,10 @@ export default function SquarePaymentForm({
                 <div className="relative">
                   <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl animate-pulse" />
                   <div className="relative">
-                    <Loader2 className="w-20 h-20 text-primary animate-spin" strokeWidth={2} />
+                    <Loader2
+                      className="w-20 h-20 text-primary animate-spin"
+                      strokeWidth={2}
+                    />
                     <div className="absolute inset-0 flex items-center justify-center">
                       <ShieldCheck className="w-10 h-10 text-primary/50" />
                     </div>
@@ -230,9 +235,12 @@ export default function SquarePaymentForm({
 
                 {/* Texte de chargement */}
                 <VStack spacing={2} align="center">
-                  <h3 className="text-xl font-semibold">Traitement du paiement</h3>
+                  <h3 className="text-xl font-semibold">
+                    Traitement du paiement
+                  </h3>
                   <p className="text-sm text-muted-foreground text-center">
-                    Veuillez patienter pendant que nous sécurisons votre transaction...
+                    Veuillez patienter pendant que nous sécurisons votre
+                    transaction...
                   </p>
                 </VStack>
 
@@ -283,11 +291,15 @@ export default function SquarePaymentForm({
 
                 <div className="text-left space-y-2">
                   <p className="text-sm">
-                    Vous êtes sur le point d'effectuer un paiement sécurisé via Square.
+                    Vous êtes sur le point d'effectuer un paiement sécurisé via
+                    Square.
                   </p>
                   <div className="flex items-start gap-2 text-xs text-muted-foreground">
                     <CheckCircle2 className="w-4 h-4 mt-0.5 text-green-500 flex-shrink-0" />
-                    <span>Vos informations sont protégées par un chiffrement de niveau bancaire</span>
+                    <span>
+                      Vos informations sont protégées par un chiffrement de
+                      niveau bancaire
+                    </span>
                   </div>
                 </div>
               </VStack>
@@ -319,7 +331,9 @@ export default function SquarePaymentForm({
           <VStack spacing={4}>
             {/* Montant à payer */}
             <div className="bg-primary/10 p-4 rounded-md">
-              <div className="text-sm text-muted-foreground">Montant à payer</div>
+              <div className="text-sm text-muted-foreground">
+                Montant à payer
+              </div>
               <div className="text-2xl font-bold">{montant.toFixed(2)} CAD</div>
             </div>
 
@@ -341,7 +355,9 @@ export default function SquarePaymentForm({
                 </Button>
                 <Button
                   type="button"
-                  variant={selectedMethod === "googlePay" ? "default" : "outline"}
+                  variant={
+                    selectedMethod === "googlePay" ? "default" : "outline"
+                  }
                   onClick={() => setSelectedMethod("googlePay")}
                   className="flex items-center gap-2"
                   disabled={isProcessing}
@@ -351,7 +367,9 @@ export default function SquarePaymentForm({
                 </Button>
                 <Button
                   type="button"
-                  variant={selectedMethod === "applePay" ? "default" : "outline"}
+                  variant={
+                    selectedMethod === "applePay" ? "default" : "outline"
+                  }
                   onClick={() => setSelectedMethod("applePay")}
                   className="flex items-center gap-2"
                   disabled={isProcessing}
@@ -389,24 +407,35 @@ export default function SquarePaymentForm({
             )}
 
             {/* Bouton de paiement */}
-            <Button
-              onClick={handleInitiatePayment}
-              disabled={isCreatingPayment || !isInitialized || isProcessing}
-              className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all duration-300"
-              size="lg"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Traitement en cours...
-                </>
-              ) : (
-                <HStack spacing={2}>
-                  <ShieldCheck className="w-5 h-5" />
-                  <span>Payer {montant.toFixed(2)} CAD</span>
-                </HStack>
+            <HStack spacing={2} justify="end">
+              {onBack && (
+                <Button
+                  variant="outline"
+                  onClick={onBack}
+                  disabled={isProcessing}
+                >
+                  Retour
+                </Button>
               )}
-            </Button>
+              <Button
+                onClick={handleInitiatePayment}
+                disabled={isCreatingPayment || !isInitialized || isProcessing}
+                className="flex-1 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all duration-300"
+                size="lg"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Traitement en cours...
+                  </>
+                ) : (
+                  <HStack spacing={2}>
+                    <ShieldCheck className="w-5 h-5" />
+                    <span>Payer {montant.toFixed(2)} CAD</span>
+                  </HStack>
+                )}
+              </Button>
+            </HStack>
 
             {/* Informations de sécurité */}
             <div className="text-xs text-muted-foreground text-center space-y-1">

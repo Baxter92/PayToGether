@@ -5,11 +5,7 @@ import { useI18n } from "@hooks/useI18n";
 import { useAuth } from "@/common/context/AuthContext";
 import { Card, CardContent } from "@components/ui/card";
 import VStack from "@components/VStack";
-import type {
-  CheckoutState,
-  DeliveryData,
-  ShippingData,
-} from "./types";
+import type { CheckoutState, DeliveryData, ShippingData } from "./types";
 import CheckoutStep from "./components/CheckoutStep";
 import ShippingForm from "./containers/ShippingForm";
 import { DeliveryForm } from "./containers/DeliveryForm";
@@ -146,7 +142,7 @@ export default function CheckoutPage(): JSX.Element {
                   >
                     <DeliveryForm
                       onSubmit={handleDeliverySubmit}
-                      onBack={() => setCurrentStep(0)}
+                      onBack={() => setCurrentStep(currentStep - 1)}
                       isSubmitting={isSubmitting}
                     />
                   </CheckoutStep>
@@ -165,6 +161,7 @@ export default function CheckoutPage(): JSX.Element {
                       montant={total}
                       onSuccess={handleSquarePaymentSuccess}
                       onError={handleSquarePaymentError}
+                      onBack={() => setCurrentStep(currentStep - 1)}
                     />
                   </CheckoutStep>
                 </VStack>

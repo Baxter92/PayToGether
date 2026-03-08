@@ -85,7 +85,7 @@ export default function OrderSummary({
           </span>
         </HStack>
 
-        <p className="text-xs text-muted-foreground">✓ {t("refundNotice")}</p>
+        {/* <p className="text-xs text-muted-foreground">✓ {t("refundNotice")}</p> */}
       </CardContent>
     </Card>
   );
