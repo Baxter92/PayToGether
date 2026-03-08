@@ -16,6 +16,7 @@ import com.ulr.paytogether.wsclient.dto.LoginResponse;
 import com.ulr.paytogether.wsclient.dto.UserRequest;
 import com.ulr.paytogether.wsclient.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -205,9 +206,9 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
         // Mettre à jour le mot de passe dans la base de données locale
         utilisateur.setMotDePasse(passwordEncoder.encode(nouveauMotDePasse));
         jpaRepository.save(utilisateur);
-
+        LoginResponse loginResponse = authApiCLient.loginAdmin();
         // Réinitialiser le mot de passe dans Keycloak
-        userApiClient.resetPassword(token, utilisateur.getKeycloakId(), nouveauMotDePasse);
+        userApiClient.resetPassword(loginResponse.getAccessToken(), utilisateur.getKeycloakId(), nouveauMotDePasse);
     }
 
     @Transactional
@@ -222,8 +223,9 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
                                     : StatutUtilisateur.INACTIF);
         jpaRepository.save(utilisateur);
 
+        LoginResponse loginResponse = authApiCLient.loginAdmin();
         // Activer/Désactiver l'utilisateur dans Keycloak
-        userApiClient.enableUser(token, utilisateur.getKeycloakId(), actif);
+        userApiClient.enableUser(loginResponse.getAccessToken(), utilisateur.getKeycloakId(), actif);
     }
 
     @Transactional

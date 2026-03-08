@@ -1,6 +1,7 @@
 package com.ulr.paytogether.core.domaine.impl;
 
 import com.ulr.paytogether.core.domaine.service.SquarePaymentService;
+import com.ulr.paytogether.core.domaine.validator.AdresseValidator;
 import com.ulr.paytogether.core.domaine.validator.PaiementValidator;
 import com.ulr.paytogether.core.enumeration.StatutPaiement;
 import com.ulr.paytogether.core.event.EventPublisher;
@@ -32,6 +33,7 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
     private final PaiementProvider paiementProvider;
     private final SquarePaymentProvider squarePaymentProvider;
     private final PaiementValidator paiementValidator;
+    private final AdresseValidator adresseValidator;
     private final EventPublisher eventPublisher;
 
     @Transactional
@@ -41,6 +43,7 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
 
         // Validation métier
         paiementValidator.valider(paiement);
+        adresseValidator.valider(paiement.getAdresse());
 
         // Initialiser avec statut EN_ATTENTE
         paiement.setStatut(StatutPaiement.EN_ATTENTE);
@@ -112,6 +115,7 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
                     .squareReceiptUrl(paiementFinal.getSquareReceiptUrl())
                     .methodePaiement(paiementFinal.getMethodePaiement().name())
                     .utilisateurUuid(paiementFinal.getUtilisateur().getUuid())
+                    .nombreDePart(paiement.getNombreDePart())
                     .build();
 
             eventPublisher.publishAsync(paymentSuccessfulEvent);
@@ -138,6 +142,7 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
                     .titreDeal(paiement.getDeal().getTitre())
                     .descriptionDeal(paiement.getDeal().getDescription())
                     .montantPaiement(paiement.getMontant())
+                    .nombreDePart(paiement.getNombreDePart())
                     .build();
 
             eventPublisher.publishAsync(paymentNotificationEvent);
@@ -215,8 +220,8 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
     }
 
     @Override
-    public void mettreAJourStatutCommandeDeal(UUID paiementUuid, String statut) {
-        PaiementModele paiementModele = paiementProvider.mettreAJourStatutCommandeDeal(paiementUuid, statut);
+    public void mettreAJourStatutCommandeDeal(UUID paiementUuid, String statut, int nombreDePart) {
+        PaiementModele paiementModele = paiementProvider.mettreAJourStatutCommandeDeal(paiementUuid, statut, nombreDePart);
         PaymentNotificationEvent paymentNotificationEvent = PaymentNotificationEvent
                 .builder()
                 .paiementUuid(paiementUuid)
@@ -230,6 +235,7 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
                 .titreDeal(paiementModele.getDeal().getTitre())
                 .descriptionDeal(paiementModele.getDeal().getDescription())
                 .montantPaiement(paiementModele.getMontant())
+                .nombreDePart(nombreDePart)
                 .build();
 
         eventPublisher.publishAsync(paymentNotificationEvent);

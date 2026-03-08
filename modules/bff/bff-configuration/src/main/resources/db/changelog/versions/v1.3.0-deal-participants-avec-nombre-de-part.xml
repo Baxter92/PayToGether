@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        Migration: v1.3.0 - Deal Participants avec nombre de part
+        Description: Transformer la relation ManyToMany Deal-Utilisateur en table d'association
+                     avec colonne nombre_de_part
+        Date: 2026-03-08
+    -->
+
+    <changeSet id="v1.3.0-deal-participants-avec-nombre-de-part" author="system">
+        <comment>
+            Transformer la relation ManyToMany entre Deal et Utilisateur
+            en table d'association avec colonne nombre_de_part
+        </comment>
+
+        <sqlFile
+                path="db/changelog/sql/v1.3.0-deal-participants-avec-nombre-de-part.sql"
+                relativeToChangelogFile="false"
+                splitStatements="true"
+                stripComments="false"
+                endDelimiter=";">
+        </sqlFile>
+
+        <rollback>
+            <comment>Rollback: Recréer la table simple sans nombre_de_part</comment>
+            <sql>
+                DROP TABLE IF EXISTS deal_participants CASCADE;
+
+                CREATE TABLE deal_participants (
+                    deal_uuid UUID NOT NULL,
+                    utilisateur_uuid UUID NOT NULL,
+                    PRIMARY KEY (deal_uuid, utilisateur_uuid),
+                    CONSTRAINT fk_deal_participants_deal FOREIGN KEY (deal_uuid) REFERENCES deal(uuid) ON DELETE CASCADE,
+                    CONSTRAINT fk_deal_participants_utilisateur FOREIGN KEY (utilisateur_uuid) REFERENCES utilisateur(uuid) ON DELETE CASCADE
+                );
+
+                CREATE INDEX idx_deal_participants_deal ON deal_participants(deal_uuid);
+                CREATE INDEX idx_deal_participants_utilisateur ON deal_participants(utilisateur_uuid);
+            </sql>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
+

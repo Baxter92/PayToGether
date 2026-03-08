@@ -30,5 +30,5 @@ public interface PaiementProvider {
 
     void supprimerParUuid(UUID uuid);
 
-    PaiementModele mettreAJourStatutCommandeDeal(UUID paiementUuid, String statut);
+    PaiementModele mettreAJourStatutCommandeDeal(UUID paiementUuid, String statut, int nombreDePart);
 }

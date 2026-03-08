@@ -23,14 +23,6 @@ public class AdresseMapper {
                 .rue(modele.getRue())
                 .ville(modele.getVille())
                 .codePostal(modele.getCodePostal())
-                .province(modele.getProvince())
-                .pays(modele.getPays())
-                .utilisateurUuid(modele.getUtilisateur() != null
-                        ? modele.getUtilisateur().getUuid()
-                        : null)
-                .utilisateurNom(modele.getUtilisateur() != null
-                        ? modele.getUtilisateur().getNom() + " " + modele.getUtilisateur().getPrenom()
-                        : null)
                 .dateCreation(modele.getDateCreation())
                 .dateModification(modele.getDateModification())
                 .build();
@@ -49,8 +41,6 @@ public class AdresseMapper {
                 .rue(dto.getRue())
                 .ville(dto.getVille())
                 .codePostal(dto.getCodePostal())
-                .province(dto.getProvince())
-                .pays(dto.getPays())
                 .dateCreation(dto.getDateCreation())
                 .dateModification(dto.getDateModification())
                 .build();

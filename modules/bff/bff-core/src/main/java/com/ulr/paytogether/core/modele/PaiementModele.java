@@ -38,7 +38,10 @@ public class PaiementModele {
     private UtilisateurModele utilisateur;
     private CommandeModele commande;
     private DealModele deal;
+    private int nombreDePart; // Nombre de parts achetées (pour les paiements liés à des deals)
     private LocalDateTime datePaiement;
     private LocalDateTime dateCreation;
     private LocalDateTime dateModification;
+
+    private AdresseModele adresse;
 }

@@ -26,6 +26,7 @@ public class PaymentSuccessfulEvent extends DomainEvent {
     private BigDecimal montant;
     private String methodePaiement;
     private String squarePaymentId;
+    private int nombreDePart;
     private String squareReceiptUrl;
 
     @JsonCreator
@@ -36,6 +37,7 @@ public class PaymentSuccessfulEvent extends DomainEvent {
             @JsonProperty("montant") BigDecimal montant,
             @JsonProperty("methodePaiement") String methodePaiement,
             @JsonProperty("squarePaymentId") String squarePaymentId,
+            @JsonProperty("nombreDePart") int nombreDePart,
             @JsonProperty("squareReceiptUrl") String squareReceiptUrl) {
         super("SquarePaymentService");
         this.utilisateurUuid = utilisateurUuid;
@@ -45,6 +47,7 @@ public class PaymentSuccessfulEvent extends DomainEvent {
         this.methodePaiement = methodePaiement;
         this.squarePaymentId = squarePaymentId;
         this.squareReceiptUrl = squareReceiptUrl;
+        this.nombreDePart = nombreDePart;
     }
 
     @Override

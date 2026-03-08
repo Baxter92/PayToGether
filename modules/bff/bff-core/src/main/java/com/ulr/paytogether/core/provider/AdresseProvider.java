@@ -15,7 +15,7 @@ public interface AdresseProvider {
 
     Optional<AdresseModele> trouverParUuid(UUID uuid);
 
-    List<AdresseModele> trouverParUtilisateur(UUID utilisateurUuid);
+    List<AdresseModele> trouverParPaiement(UUID paiementUuid);
 
     List<AdresseModele> trouverTous();
 

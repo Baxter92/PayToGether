@@ -13,11 +13,6 @@ import java.util.regex.Pattern;
 @Component
 public class AdresseValidator {
 
-    // Pattern pour valider le code postal canadien (format: A1A 1A1)
-    private static final Pattern CODE_POSTAL_PATTERN = Pattern.compile(
-            "^[A-Za-z]\\d[A-Za-z] ?\\d[A-Za-z]\\d$"
-    );
-
     // Longueur maximale de la rue
     private static final int MAX_RUE_LENGTH = 200;
 
@@ -37,7 +32,6 @@ public class AdresseValidator {
         if (adresse == null) {
             throw new ValidationException("adresse.null");
         }
-
         // Validation de la rue (obligatoire et non vide)
         if (adresse.getRue() == null || adresse.getRue().isBlank()) {
             throw new ValidationException("adresse.rue.obligatoire");
@@ -54,30 +48,9 @@ public class AdresseValidator {
             throw new ValidationException("adresse.ville.longueur", MAX_VILLE_LENGTH);
         }
 
-        // Validation de la province (obligatoire et non vide)
-        if (adresse.getProvince() == null || adresse.getProvince().isBlank()) {
-            throw new ValidationException("adresse.province.obligatoire");
-        }
-        if (adresse.getProvince().length() > MAX_PROVINCE_LENGTH) {
-            throw new ValidationException("adresse.province.longueur", MAX_PROVINCE_LENGTH);
-        }
-
         // Validation du code postal (obligatoire et format valide)
         if (adresse.getCodePostal() == null || adresse.getCodePostal().isBlank()) {
             throw new ValidationException("adresse.codePostal.obligatoire");
-        }
-        if (!CODE_POSTAL_PATTERN.matcher(adresse.getCodePostal()).matches()) {
-            throw new ValidationException("adresse.codePostal.format");
-        }
-
-        // Validation du pays (obligatoire et non vide)
-        if (adresse.getPays() == null || adresse.getPays().isBlank()) {
-            throw new ValidationException("adresse.pays.obligatoire");
-        }
-
-        // Validation de l'utilisateur (obligatoire)
-        if (adresse.getUtilisateur() == null || adresse.getUtilisateur().getUuid() == null) {
-            throw new ValidationException("adresse.utilisateurUuid.obligatoire");
         }
     }
 
@@ -110,9 +83,6 @@ public class AdresseValidator {
     public void validerCodePostal(String codePostal) {
         if (codePostal == null || codePostal.isBlank()) {
             throw new ValidationException("adresse.codePostal.obligatoire");
-        }
-        if (!CODE_POSTAL_PATTERN.matcher(codePostal).matches()) {
-            throw new ValidationException("adresse.codePostal.format");
         }
     }
 }

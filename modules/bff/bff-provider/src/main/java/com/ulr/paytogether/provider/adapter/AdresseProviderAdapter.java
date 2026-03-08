@@ -4,9 +4,11 @@ package com.ulr.paytogether.provider.adapter;
 import com.ulr.paytogether.core.modele.AdresseModele;
 import com.ulr.paytogether.core.provider.AdresseProvider;
 import com.ulr.paytogether.provider.adapter.entity.AdresseJpa;
+import com.ulr.paytogether.provider.adapter.entity.PaiementJpa;
 import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
 import com.ulr.paytogether.provider.adapter.mapper.AdresseJpaMapper;
 import com.ulr.paytogether.provider.repository.AdresseRepository;
+import com.ulr.paytogether.provider.repository.PaiementRepository;
 import com.ulr.paytogether.provider.repository.UtilisateurRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AdresseProviderAdapter implements AdresseProvider {
     private final UtilisateurRepository utilisateurRepository;
+    private final PaiementRepository paiementRepository;
 
     private final AdresseRepository jpaRepository;
     private final AdresseJpaMapper mapper;
@@ -43,11 +46,11 @@ public class AdresseProviderAdapter implements AdresseProvider {
     }
 
     @Override
-    public List<AdresseModele> trouverParUtilisateur(UUID utilisateurUuid) {
-        UtilisateurJpa utilisateurJpa = utilisateurRepository.findById(utilisateurUuid)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'UUID : " + utilisateurUuid));
+    public List<AdresseModele> trouverParPaiement(UUID paiementUuid) {
+        PaiementJpa paiementJpa = paiementRepository.findById(paiementUuid)
+                .orElseThrow(() -> new RuntimeException("Paiement non trouvé avec l'UUID : " + paiementUuid));
 
-        return jpaRepository.findByUtilisateurJpa(utilisateurJpa)
+        return jpaRepository.findByPaiement(paiementJpa)
                 .stream()
                 .map(mapper::versModele)
                 .collect(Collectors.toList());

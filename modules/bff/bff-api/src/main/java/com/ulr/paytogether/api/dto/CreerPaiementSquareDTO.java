@@ -37,5 +37,9 @@ public class CreerPaiementSquareDTO {
     private String methodePaiement; // SQUARE_CARD, SQUARE_GOOGLE_PAY, SQUARE_APPLE_PAY, SQUARE_CASH_APP_PAY
 
     private String locationId; // Optionnel, utilisera la valeur par défaut si non fourni
+
+    private int nombreDePart; // Optionnel, nombre de parts achetées (par défaut 1)
+
+    private AdresseDTO adresse;
 }
 

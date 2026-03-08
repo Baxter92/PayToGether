@@ -34,18 +34,11 @@ public class AdresseDTO {
     @Size(max = 20, message = "Le code postal ne doit pas dépasser 20 caractères")
     private String codePostal;
 
-    @NotBlank(message = "La province est obligatoire")
-    @Size(max = 100, message = "La province ne doit pas dépasser 100 caractères")
-    private String province;
+    private String numeroPhone;
 
-    @NotBlank(message = "Le pays est obligatoire")
-    @Size(max = 100, message = "Le pays ne doit pas dépasser 100 caractères")
-    private String pays;
+    private String Appartement;
 
-    @NotNull(message = "L'UUID de l'utilisateur est obligatoire")
-    private UUID utilisateurUuid;
-
-    private String utilisateurNom;
+    private boolean homeDelivery;
 
     private LocalDateTime dateCreation;
 

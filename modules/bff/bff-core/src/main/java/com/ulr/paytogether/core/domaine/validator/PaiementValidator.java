@@ -59,6 +59,7 @@ public class PaiementValidator {
         if (isSquarePayment(paiement.getMethodePaiement())) {
             validerPaiementSquare(paiement);
         }
+
     }
 
     /**

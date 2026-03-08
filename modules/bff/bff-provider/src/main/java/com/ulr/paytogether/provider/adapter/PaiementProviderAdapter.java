@@ -3,25 +3,20 @@ package com.ulr.paytogether.provider.adapter;
 import com.ulr.paytogether.core.enumeration.StatutCommande;
 import com.ulr.paytogether.core.enumeration.StatutPaiement;
 import com.ulr.paytogether.core.modele.PaiementModele;
+import com.ulr.paytogether.core.provider.DealParticipantProvider;
 import com.ulr.paytogether.core.provider.DealProvider;
 import com.ulr.paytogether.core.provider.PaiementProvider;
-import com.ulr.paytogether.provider.adapter.entity.CommandeJpa;
-import com.ulr.paytogether.provider.adapter.entity.DealJpa;
-import com.ulr.paytogether.provider.adapter.entity.PaiementJpa;
-import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
+import com.ulr.paytogether.provider.adapter.entity.*;
+import com.ulr.paytogether.provider.adapter.mapper.AdresseJpaMapper;
 import com.ulr.paytogether.provider.adapter.mapper.CommandeJpaMapper;
 import com.ulr.paytogether.provider.adapter.mapper.DealJpaMapper;
 import com.ulr.paytogether.provider.adapter.mapper.PaiementJpaMapper;
-import com.ulr.paytogether.provider.repository.CommandeRepository;
-import com.ulr.paytogether.provider.repository.DealRepository;
-import com.ulr.paytogether.provider.repository.PaiementRepository;
-import com.ulr.paytogether.provider.repository.UtilisateurRepository;
+import com.ulr.paytogether.provider.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -43,6 +38,9 @@ public class PaiementProviderAdapter implements PaiementProvider {
     private final CommandeRepository commandeRepository;
     private final DealRepository dealRepository;
     private final DealProvider dealProvider;
+    private final DealParticipantRepository dealParticipantRepository;
+    private final AdresseRepository adresseRepository;
+    private final AdresseJpaMapper adresseJpaMapper;
 
     @Override
     public PaiementModele sauvegarder(PaiementModele paiement) {
@@ -51,12 +49,19 @@ public class PaiementProviderAdapter implements PaiementProvider {
                 .map(dealJpaMapper::versEntite)
                 .orElseThrow(() -> new RuntimeException("Deal non trouvé pour l'UUID : " + paiement.getDeal().getUuid()));
 
-        Optional<UUID> utilisateurJpaOptional = dealJpa.getParticipants().stream().map(UtilisateurJpa::getUuid)
+        Optional<UUID> utilisateurJpaOptional = dealJpa.getParticipants().stream()
+                .map(participant -> participant.getUtilisateurJpa().getUuid())
                 .filter(uuid -> uuid.equals(paiement.getUtilisateur().getUuid()))
                 .findFirst();
         if (utilisateurJpaOptional.isPresent()) {
             throw new IllegalArgumentException(("Utilisateur avec UUID " + paiement.getUtilisateur().getUuid() + " est déjà participant du deal " + dealJpa.getUuid()));
         }
+
+        int nbParticipants = dealParticipantRepository.findByIdDealUuid(dealJpa.getUuid()).stream().map(DealParticipantJpa::getNombreDePart).reduce(0, Integer::sum);
+        if (nbParticipants >= dealJpa.getNbParticipants()) {
+            throw new IllegalStateException("Le deal " + dealJpa.getUuid() + " a déjà atteint le nombre maximum de participants (" + dealJpa.getNbParticipants() + ").");
+        }
+
         Optional<CommandeJpa> commandeJpaOptional = commandeRepository.findByDealJpa(dealJpa);
         CommandeJpa commandeJpa;
         if (commandeJpaOptional.isPresent()) {
@@ -68,7 +73,15 @@ public class PaiementProviderAdapter implements PaiementProvider {
         }
         entite.setCommandeJpa(commandeJpa);
         PaiementJpa sauvegarde = jpaRepository.save(entite);
-        return mapper.versModele(sauvegarde);
+
+        AdresseJpa adresseJpa = adresseJpaMapper.versEntite(paiement.getAdresse());
+        adresseJpa.setPaiement(sauvegarde);
+        adresseRepository.save(adresseJpa);
+
+        PaiementModele paiementCree = mapper.versModele(sauvegarde);
+        paiementCree.setNombreDePart(paiement.getNombreDePart());
+
+        return paiementCree;
     }
 
     @Override
@@ -144,16 +157,29 @@ public class PaiementProviderAdapter implements PaiementProvider {
     }
 
     @Override
-    public PaiementModele mettreAJourStatutCommandeDeal(UUID paiementUuid, String statut) {
+    public PaiementModele mettreAJourStatutCommandeDeal(UUID paiementUuid, String statut, int nombreDePart) {
         PaiementJpa paiementJpa = jpaRepository.findById(paiementUuid)
                 .orElseThrow(() -> new RuntimeException("Paiement non trouvé pour l'UUID : " + paiementUuid));
 
         CommandeJpa commandeJpa = paiementJpa.getCommandeJpa();
         if (commandeJpa != null && StatutPaiement.CONFIRME.name().equals(statut)) {
             DealJpa dealJpa = commandeJpa.getDealJpa();
-            Set<UtilisateurJpa> participants = dealJpa.getParticipants();
-            participants.add(paiementJpa.getUtilisateurJpa());
-            dealJpa.setParticipants(participants);
+
+            // Vérifier si l'utilisateur n'est pas déjà participant
+            boolean dejaParticipant = dealJpa.getParticipants().stream()
+                    .anyMatch(p -> p.getUtilisateurJpa().getUuid().equals(paiementJpa.getUtilisateurJpa().getUuid()));
+
+            if (!dejaParticipant) {
+                // Créer une nouvelle participation
+                DealParticipantJpa participation = DealParticipantJpa.builder()
+                        .id(new DealParticipantJpa.DealParticipantId(dealJpa.getUuid(), paiementJpa.getUtilisateurJpa().getUuid()))
+                        .dealJpa(dealJpa)
+                        .utilisateurJpa(paiementJpa.getUtilisateurJpa())
+                        .nombreDePart(nombreDePart) // Par défaut 1 part si non spécifié
+                        .build();
+                dealJpa.getParticipants().add(participation);
+            }
+
             var dealComplete = dealJpa.getNbParticipants() == dealJpa.getParticipants().size();
             StatutCommande statutCommande = dealComplete ? StatutCommande.CONFIRMEE : StatutCommande.EN_COURS;
 

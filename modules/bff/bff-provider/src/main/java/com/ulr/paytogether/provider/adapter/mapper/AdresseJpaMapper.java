@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class AdresseJpaMapper {
-    private final UtilisateurJpaMapper utilisateurJpaMapper;
+    private final PaiementJpaMapper paiementJpaMapper;
 
     public AdresseModele versModele(AdresseJpa jpaAdresse) {
         if (jpaAdresse == null) return null;
@@ -20,7 +20,10 @@ public class AdresseJpaMapper {
                 .codePostal(jpaAdresse.getCodePostal())
                 .province(jpaAdresse.getProvince())
                 .pays(jpaAdresse.getPays())
-                .utilisateur(jpaAdresse.getUtilisateurJpa() != null ? utilisateurJpaMapper.versModele(jpaAdresse.getUtilisateurJpa()) : null)
+                .paiementModele(jpaAdresse.getPaiement() != null ? paiementJpaMapper.versModele(jpaAdresse.getPaiement()) : null)
+                .numeroPhone(jpaAdresse.getNumeroPhone())
+                .appartement(jpaAdresse.getAppartement())
+                .homeDelivery(jpaAdresse.isHomeDelivery())
                 .dateCreation(jpaAdresse.getDateCreation())
                 .dateModification(jpaAdresse.getDateModification())
                 .build();
@@ -34,7 +37,11 @@ public class AdresseJpaMapper {
                 .codePostal(modele.getCodePostal())
                 .province(modele.getProvince())
                 .pays(modele.getPays())
-                .utilisateurJpa(modele.getUtilisateur() != null ? utilisateurJpaMapper.versEntite(modele.getUtilisateur()) : null)
+                .paiement(modele.getPaiementModele() != null ? paiementJpaMapper.versEntite(modele.getPaiementModele()) : null)
+                .numeroPhone(modele.getNumeroPhone())
+                .appartement(modele.getAppartement())
+                .homeDelivery(modele.isHomeDelivery())
+                .dateCreation(modele.getDateCreation())
                 .dateModification(modele.getDateModification())
                 .build();
     }

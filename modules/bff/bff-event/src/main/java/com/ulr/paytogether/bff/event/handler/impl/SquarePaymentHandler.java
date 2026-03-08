@@ -57,6 +57,7 @@ public class SquarePaymentHandler implements ConsumerHandler {
             PaiementModele paiement = paiementService.lireParUuid(event.getPaiementUuid())
                     .orElseThrow(() -> new RuntimeException("Paiement non trouvé pour l'UUID : " + event.getPaiementUuid()));
 
+            paiement.setNombreDePart(event.getNombreDePart());
             // Traiter le paiement via Square (Service métier)
             squarePaymentService.traiterPaiementSquare(paiement);
 
@@ -88,7 +89,7 @@ public class SquarePaymentHandler implements ConsumerHandler {
             log.info("Statistics updated for successful payment: {}", event.getPaiementUuid());
 
             // 2. Mettre à jour le statut de la commande
-            squarePaymentService.mettreAJourStatutCommandeDeal(event.getPaiementUuid(), StatutPaiement.CONFIRME.name());
+            squarePaymentService.mettreAJourStatutCommandeDeal(event.getPaiementUuid(), StatutPaiement.CONFIRME.name(), event.getNombreDePart());
             // commandeService.marquerCommePayee(event.getCommandeUuid());
             log.info("Order marked as paid: {}", event.getCommandeUuid());
 

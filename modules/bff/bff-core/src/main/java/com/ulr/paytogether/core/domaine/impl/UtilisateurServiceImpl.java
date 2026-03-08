@@ -213,7 +213,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
         // 6. Activer le compte utilisateur
         UUID utilisateurUuid = tokenModele.getUtilisateurUuid();
-        utilisateurProvider.activerUtilisateur(utilisateurUuid, true, "system");
+        utilisateurProvider.activerUtilisateur(utilisateurUuid, true, token);
 
         // 7. Marquer le token comme utilisé
         validationTokenProvider.marquerCommeUtilise(token);
@@ -249,7 +249,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
 
         // 6. Réinitialiser le mot de passe
         UUID utilisateurUuid = tokenModele.getUtilisateurUuid();
-        utilisateurProvider.reinitialiserMotDePasse(utilisateurUuid, nouveauMotDePasse, "system");
+        utilisateurProvider.reinitialiserMotDePasse(utilisateurUuid, nouveauMotDePasse, token);
 
         // 7. Marquer le token comme utilisé
         validationTokenProvider.marquerCommeUtilise(token);

@@ -35,15 +35,24 @@ public class AdresseJpa {
     @Column(nullable = false, length = 20)
     private String codePostal;
 
-    @Column(nullable = false, length = 100)
-    private String province;
+    private String numeroPhone;
 
+    private String appartement;
+
+    @Builder.Default
     @Column(nullable = false, length = 100)
-    private String pays;
+    private String province = "Alberta";
+
+    @Builder.Default
+    @Column(nullable = false, length = 100)
+    private String pays = "Canada";
+
+    @Builder.Default
+    private boolean homeDelivery = false;
 
     @OneToOne
-    @JoinColumn(name = "utilisateur_uuid", nullable = false)
-    private UtilisateurJpa utilisateurJpa;
+    @JoinColumn(name = "paiement_uuid", nullable = false)
+    private PaiementJpa paiement;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

@@ -40,7 +40,7 @@ public class CommandeJpa {
     @Column(nullable = false)
     private StatutCommande statut;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "utilisateur_uuid", nullable = false)
     private UtilisateurJpa marchandJpa;
 

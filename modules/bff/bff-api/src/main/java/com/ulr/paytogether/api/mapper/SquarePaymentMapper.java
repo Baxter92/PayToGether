@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class SquarePaymentMapper {
 
-    private final CommandeMapper commandeMapper;
+    private final AdresseMapper adresseMapper;
 
     public PaiementModele dtoVersModele(CreerPaiementSquareDTO dto) {
         if (dto == null) {
@@ -31,7 +31,9 @@ public class SquarePaymentMapper {
                 .squareLocationId(dto.getLocationId())
                 .utilisateur(UtilisateurModele.builder().uuid(dto.getUtilisateurUuid()).build())
                 .deal(DealModele.builder().uuid(dto.getDealUuid()).build())
+                .nombreDePart(dto.getNombreDePart())
                 .datePaiement(LocalDateTime.now())
+                .adresse(adresseMapper.dtoVersModele(dto.getAdresse()))
                 .build();
 
     }

@@ -1,11 +1,10 @@
 package com.ulr.paytogether.provider.repository;
 
 import com.ulr.paytogether.provider.adapter.entity.AdresseJpa;
-import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
+import com.ulr.paytogether.provider.adapter.entity.PaiementJpa;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,9 +15,9 @@ import java.util.UUID;
 public interface AdresseRepository extends JpaRepository<AdresseJpa, UUID> {
 
     /**
-     * Recherche toutes les adresses d'un utilisateur
-     * @param utilisateurJpa l'utilisateur
-     * @return la liste des adresses
+     * Trouve une adresse par son utilisateur
+     * @param paiementJpa
+     * @return
      */
-    List<AdresseJpa> findByUtilisateurJpa(UtilisateurJpa utilisateurJpa);
+    Optional<AdresseJpa> findByPaiement(PaiementJpa paiementJpa);
 }

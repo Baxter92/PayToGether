@@ -1,0 +1,297 @@
+### =========================================================================
+### Tests DealParticipant - Gestion des participations avec nombre de parts
+### Endpoint: /api/deals/{dealUuid}/participants
+### =========================================================================
+
+### Variables
+@baseUrl = http://localhost:8080/api
+@dealUuid = {{$uuid}}
+@utilisateurUuid = {{$uuid}}
+@authToken = Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+
+### =========================================================================
+### 1. Ajouter un participant à un deal (1 part par défaut)
+### =========================================================================
+POST {{baseUrl}}/deals/{{dealUuid}}/participants
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "utilisateurUuid": "{{utilisateurUuid}}",
+  "nombreDePart": 1
+}
+
+### =========================================================================
+### 2. Ajouter un participant avec plusieurs parts
+### =========================================================================
+POST {{baseUrl}}/deals/{{dealUuid}}/participants
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "utilisateurUuid": "{{utilisateurUuid}}",
+  "nombreDePart": 3
+}
+
+### =========================================================================
+### 3. Lister tous les participants d'un deal
+### =========================================================================
+GET {{baseUrl}}/deals/{{dealUuid}}/participants
+Authorization: {{authToken}}
+
+### =========================================================================
+### 4. Récupérer une participation spécifique
+### =========================================================================
+GET {{baseUrl}}/deals/{{dealUuid}}/participants/{{utilisateurUuid}}
+Authorization: {{authToken}}
+
+### =========================================================================
+### 5. Mettre à jour le nombre de parts d'un participant
+### =========================================================================
+PATCH {{baseUrl}}/deals/{{dealUuid}}/participants/{{utilisateurUuid}}
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "nombreDePart": 5
+}
+
+### =========================================================================
+### 6. Vérifier si un utilisateur participe à un deal
+### =========================================================================
+GET {{baseUrl}}/deals/{{dealUuid}}/participants/{{utilisateurUuid}}/exists
+Authorization: {{authToken}}
+
+### =========================================================================
+### 7. Compter le nombre de participants d'un deal
+### =========================================================================
+GET {{baseUrl}}/deals/{{dealUuid}}/participants/count
+Authorization: {{authToken}}
+
+### =========================================================================
+### 8. Lister toutes les participations d'un utilisateur
+### =========================================================================
+GET {{baseUrl}}/utilisateurs/{{utilisateurUuid}}/participations
+Authorization: {{authToken}}
+
+### =========================================================================
+### 9. Supprimer un participant d'un deal
+### =========================================================================
+DELETE {{baseUrl}}/deals/{{dealUuid}}/participants/{{utilisateurUuid}}
+Authorization: {{authToken}}
+
+### =========================================================================
+### 10. Supprimer tous les participants d'un deal
+### =========================================================================
+DELETE {{baseUrl}}/deals/{{dealUuid}}/participants
+Authorization: {{authToken}}
+
+### =========================================================================
+### TESTS D'ERREUR
+### =========================================================================
+
+### Erreur : Ajouter un participant avec 0 part
+POST {{baseUrl}}/deals/{{dealUuid}}/participants
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "utilisateurUuid": "{{utilisateurUuid}}",
+  "nombreDePart": 0
+}
+
+### Expected: 400 Bad Request - Le nombre de parts doit être supérieur à 0
+
+###
+
+### Erreur : Ajouter un participant avec nombre de parts négatif
+POST {{baseUrl}}/deals/{{dealUuid}}/participants
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "utilisateurUuid": "{{utilisateurUuid}}",
+  "nombreDePart": -1
+}
+
+### Expected: 400 Bad Request - Le nombre de parts doit être supérieur à 0
+
+###
+
+### Erreur : Ajouter un doublon (utilisateur participe déjà)
+POST {{baseUrl}}/deals/{{dealUuid}}/participants
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "utilisateurUuid": "{{utilisateurUuid}}",
+  "nombreDePart": 2
+}
+
+### Expected: 409 Conflict - L'utilisateur participe déjà à ce deal
+
+###
+
+### Erreur : Deal inexistant
+POST {{baseUrl}}/deals/00000000-0000-0000-0000-000000000000/participants
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "utilisateurUuid": "{{utilisateurUuid}}",
+  "nombreDePart": 1
+}
+
+### Expected: 404 Not Found - Deal non trouvé
+
+###
+
+### Erreur : Utilisateur inexistant
+POST {{baseUrl}}/deals/{{dealUuid}}/participants
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "utilisateurUuid": "00000000-0000-0000-0000-000000000000",
+  "nombreDePart": 1
+}
+
+### Expected: 404 Not Found - Utilisateur non trouvé
+
+###
+
+### Erreur : Mettre à jour une participation inexistante
+PATCH {{baseUrl}}/deals/{{dealUuid}}/participants/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "nombreDePart": 3
+}
+
+### Expected: 404 Not Found - Participation non trouvée
+
+###
+
+### =========================================================================
+### SCÉNARIO COMPLET
+### =========================================================================
+
+### Scénario 1 : Créer un deal et ajouter 3 participants
+
+# 1. Créer un deal
+POST {{baseUrl}}/deals
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "titre": "Deal Test Participants",
+  "description": "Test de gestion des participants",
+  "prixDeal": 300.00,
+  "prixPart": 100.00,
+  "nbParticipants": 3,
+  "dateDebut": "2026-04-01T10:00:00",
+  "dateFin": "2026-04-30T23:59:59",
+  "statut": "PUBLIE",
+  "createurUuid": "{{utilisateurUuid}}",
+  "categorieUuid": "{{categorieUuid}}",
+  "ville": "Montreal",
+  "pays": "Canada"
+}
+
+###
+
+# 2. Ajouter participant 1 (1 part)
+POST {{baseUrl}}/deals/{{dealUuid}}/participants
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "utilisateurUuid": "{{utilisateur1Uuid}}",
+  "nombreDePart": 1
+}
+
+###
+
+# 3. Ajouter participant 2 (2 parts)
+POST {{baseUrl}}/deals/{{dealUuid}}/participants
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "utilisateurUuid": "{{utilisateur2Uuid}}",
+  "nombreDePart": 2
+}
+
+###
+
+# 4. Ajouter participant 3 (1 part)
+POST {{baseUrl}}/deals/{{dealUuid}}/participants
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "utilisateurUuid": "{{utilisateur3Uuid}}",
+  "nombreDePart": 1
+}
+
+###
+
+# 5. Vérifier le nombre total de participants
+GET {{baseUrl}}/deals/{{dealUuid}}/participants/count
+Authorization: {{authToken}}
+
+### Expected: 3 participants
+
+###
+
+# 6. Mettre à jour le nombre de parts du participant 2 (2 → 5)
+PATCH {{baseUrl}}/deals/{{dealUuid}}/participants/{{utilisateur2Uuid}}
+Content-Type: application/json
+Authorization: {{authToken}}
+
+{
+  "nombreDePart": 5
+}
+
+###
+
+# 7. Lister tous les participants pour vérifier
+GET {{baseUrl}}/deals/{{dealUuid}}/participants
+Authorization: {{authToken}}
+
+### Expected:
+### - Participant 1: 1 part
+### - Participant 2: 5 parts
+### - Participant 3: 1 part
+
+###
+
+# 8. Supprimer le participant 3
+DELETE {{baseUrl}}/deals/{{dealUuid}}/participants/{{utilisateur3Uuid}}
+Authorization: {{authToken}}
+
+###
+
+# 9. Vérifier qu'il reste 2 participants
+GET {{baseUrl}}/deals/{{dealUuid}}/participants/count
+Authorization: {{authToken}}
+
+### Expected: 2 participants
+
+###
+
+### =========================================================================
+### NOTES
+### =========================================================================
+
+# Les endpoints ci-dessus sont des recommandations.
+# Pour les implémenter, créer dans bff-api :
+#   - DealParticipantResource.java
+#   - DealParticipantApiAdapter.java
+#   - DealParticipantMapper.java
+#   - DealParticipantDTO.java
+#   - AjouterParticipantDTO.java
+
+# Le service et le provider sont déjà implémentés dans bff-core et bff-provider.
+

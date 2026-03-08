@@ -157,7 +157,7 @@ Content-Type: application/json
 ### Tests avec erreurs - Activate Account avec token invalide
 ### =========================================================================================
 
-GET {{base_url}}/api/auth/activate-account?token=token_invalide_ou_expire
+GET {{base_url}}/api/auth/activate-account?token=81b8068fa3eb41e4a91c97a8009107d3
 
 ### =========================================================================================
 ### Tests avec erreurs - Forgot Password avec email inexistant (retourne 200 pour sécurité)
@@ -190,8 +190,8 @@ POST {{base_url}}/api/auth/reset-password
 Content-Type: application/json
 
 {
-  "token": "VOTRE_TOKEN_ICI",
-  "nouveauMotDePasse": ""
+  "token": "81b8068fa3eb41e4a91c97a8009107d3",
+  "nouveauMotDePasse": "Test123!"
 }
 
 ### =========================================================================================

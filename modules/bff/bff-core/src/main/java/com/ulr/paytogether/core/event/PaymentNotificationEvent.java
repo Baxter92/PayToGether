@@ -34,6 +34,7 @@ public class PaymentNotificationEvent extends DomainEvent {
     private String titreDeal;
     private String descriptionDeal;
     private BigDecimal montantPaiement;
+    private int nombreDePart;
     private String typeNotification; // EMAIL, SMS, PUSH
 
     @JsonCreator
@@ -49,6 +50,7 @@ public class PaymentNotificationEvent extends DomainEvent {
             @JsonProperty("titreDeal") String titreDeal,
             @JsonProperty("descriptionDeal") String descriptionDeal,
             @JsonProperty("montantPaiement") BigDecimal montantPaiement,
+            @JsonProperty("nombreDePart") int nombreDePart,
             @JsonProperty("typeNotification") String typeNotification) {
         super("NotificationService");
         this.utilisateurUuid = utilisateurUuid;
@@ -63,6 +65,7 @@ public class PaymentNotificationEvent extends DomainEvent {
         this.titreDeal = titreDeal;
         this.descriptionDeal = descriptionDeal;
         this.montantPaiement = montantPaiement;
+        this.nombreDePart = nombreDePart;
     }
 
     @Override

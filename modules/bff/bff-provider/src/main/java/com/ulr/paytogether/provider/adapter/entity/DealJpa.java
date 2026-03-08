@@ -44,12 +44,10 @@ public class DealJpa {
     @Column(nullable = false)
     private Integer nbParticipants;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = "deal_participants",
-            joinColumns = @JoinColumn(name = "deal_uuid"),
-            inverseJoinColumns = @JoinColumn(name = "utilisateur_uuid"))
+    @OneToMany(mappedBy = "dealJpa", cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
-    private Set<UtilisateurJpa> participants = new HashSet<>();
+    private List<DealParticipantJpa> participants = new ArrayList<>();
 
     @Column(nullable = false)
     private LocalDateTime dateDebut;
@@ -79,6 +77,8 @@ public class DealJpa {
     @Builder.Default
     private List<CommentaireJpa> commentaires = new ArrayList<>();
 
+    @Builder.Default
+    private int nombreDeVues = 0;
 
     @ElementCollection
     @CollectionTable(name = "deal_points_forts", joinColumns = @JoinColumn(name = "deal_uuid"))

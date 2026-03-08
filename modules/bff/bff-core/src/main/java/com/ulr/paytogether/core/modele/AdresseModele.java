@@ -23,7 +23,10 @@ public class AdresseModele {
     private String codePostal;
     private String province;
     private String pays;
-    private UtilisateurModele utilisateur;
+    private String numeroPhone;
+    private boolean homeDelivery;
+    private String appartement;
+    private PaiementModele paiementModele;
     private LocalDateTime dateCreation;
     private LocalDateTime dateModification;
 }
