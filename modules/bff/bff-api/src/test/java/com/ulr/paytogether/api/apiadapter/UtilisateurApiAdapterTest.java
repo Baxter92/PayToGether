@@ -205,13 +205,13 @@ class UtilisateurApiAdapterTest {
     @Test
     void testSupprimer_DevraitSupprimerUtilisateur() {
         // Given
-        doNothing().when(utilisateurService).supprimerParUuid(uuidUtilisateur);
+        doNothing().when(utilisateurService).supprimerParUuid(uuidUtilisateur, anyString());
 
         // When
-        apiAdapter.supprimer(uuidUtilisateur);
+        apiAdapter.supprimer(uuidUtilisateur, "token");
 
         // Then
-        verify(utilisateurService, times(1)).supprimerParUuid(uuidUtilisateur);
+        verify(utilisateurService, times(1)).supprimerParUuid(uuidUtilisateur, "token");
     }
 
     @Test
