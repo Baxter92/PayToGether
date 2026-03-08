@@ -246,24 +246,24 @@ class UtilisateurServiceTest {
     @Test
     void testSupprimerParUuid_DevraitSupprimerUtilisateur() {
         // Given
-        doNothing().when(utilisateurProvider).supprimerParUuid(uuidUtilisateur);
+        doNothing().when(utilisateurProvider).supprimerParUuid(uuidUtilisateur, anyString());
 
         // When
-        utilisateurService.supprimerParUuid(uuidUtilisateur);
+        utilisateurService.supprimerParUuid(uuidUtilisateur, "tokenDeTest");
 
         // Then
-        verify(utilisateurProvider, times(1)).supprimerParUuid(uuidUtilisateur);
+        verify(utilisateurProvider, times(1)).supprimerParUuid(uuidUtilisateur, "tokenDeTest");
     }
 
     @Test
     void testSupprimerParUuid_AvecUuidNull() {
         // Given
         doThrow(new IllegalArgumentException("L'UUID ne peut pas être null"))
-                .when(utilisateurProvider).supprimerParUuid(null);
+                .when(utilisateurProvider).supprimerParUuid(null, anyString());
 
         // When & Then
-        assertThrows(IllegalArgumentException.class, () -> utilisateurService.supprimerParUuid(null));
-        verify(utilisateurProvider, times(1)).supprimerParUuid(null);
+        assertThrows(IllegalArgumentException.class, () -> utilisateurService.supprimerParUuid(null, anyString()));
+        verify(utilisateurProvider, times(1)).supprimerParUuid(null, "tokenDeTest");
     }
 
     // ==================== Tests pour existeParEmail() ====================

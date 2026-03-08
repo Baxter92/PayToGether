@@ -93,9 +93,9 @@ public class UtilisateurApiAdapter {
     /**
      * Supprimer un utilisateur
      */
-    public void supprimer(UUID uuid) {
+    public void supprimer(UUID uuid, String token) {
         log.info("ApiAdapter - Suppression utilisateur: {}", uuid);
-        utilisateurService.supprimerParUuid(uuid);
+        utilisateurService.supprimerParUuid(uuid, token);
     }
 
     /**

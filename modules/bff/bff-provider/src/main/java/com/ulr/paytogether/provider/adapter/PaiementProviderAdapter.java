@@ -3,7 +3,6 @@ package com.ulr.paytogether.provider.adapter;
 import com.ulr.paytogether.core.enumeration.StatutCommande;
 import com.ulr.paytogether.core.enumeration.StatutPaiement;
 import com.ulr.paytogether.core.modele.PaiementModele;
-import com.ulr.paytogether.core.provider.DealParticipantProvider;
 import com.ulr.paytogether.core.provider.DealProvider;
 import com.ulr.paytogether.core.provider.PaiementProvider;
 import com.ulr.paytogether.provider.adapter.entity.*;

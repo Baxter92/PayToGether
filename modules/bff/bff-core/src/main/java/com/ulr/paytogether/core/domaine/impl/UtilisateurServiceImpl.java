@@ -101,9 +101,9 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     }
 
     @Override
-    public void supprimerParUuid(UUID uuid) {
+    public void supprimerParUuid(UUID uuid, String token) {
         log.info("Suppression de l'utilisateur: {}", uuid);
-        utilisateurProvider.supprimerParUuid(uuid);
+        utilisateurProvider.supprimerParUuid(uuid, token);
     }
 
     @Override

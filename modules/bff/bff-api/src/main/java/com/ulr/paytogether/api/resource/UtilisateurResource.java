@@ -102,11 +102,17 @@ public class UtilisateurResource {
      * Supprimer un utilisateur
      */
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<Void> supprimer(@PathVariable UUID uuid) {
+    public ResponseEntity<Void> supprimer(@PathVariable UUID uuid, JwtAuthenticationToken token) {
         log.info("Suppression de l'utilisateur: {}", uuid);
 
-        apiAdapter.supprimer(uuid);
-        return ResponseEntity.noContent().build();
+        try {
+            var tokenValue = token.getToken().getTokenValue();
+            apiAdapter.supprimer(uuid, tokenValue);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            log.error("Erreur lors de la mise à jour de l'utilisateur: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
     }
 
     /**

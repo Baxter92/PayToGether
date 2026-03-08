@@ -144,8 +144,8 @@ POST {{base_url}}/api/auth/reset-password
 Content-Type: application/json
 
 {
-  "token": "VOTRE_TOKEN_ICI",
-  "nouveauMotDePasse": "NouveauMotDePasse123!"
+  "token": "313b4ceca5cb4140b05e9b601d0025fe",
+  "nouveauMotDePasse": "12345678"
 }
 
 ### Notes :

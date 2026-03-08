@@ -143,6 +143,11 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
                     .descriptionDeal(paiement.getDeal().getDescription())
                     .montantPaiement(paiement.getMontant())
                     .nombreDePart(paiement.getNombreDePart())
+                    .adresseRue(paiement.getAdresse() != null ? paiement.getAdresse().getRue() : null)
+                    .adresseVille(paiement.getAdresse() != null ? paiement.getAdresse().getVille() : null)
+                    .adresseProvince(paiement.getAdresse() != null ? paiement.getAdresse().getProvince() : null)
+                    .adresseCodePostal(paiement.getAdresse() != null ? paiement.getAdresse().getCodePostal() : null)
+                    .adressePays(paiement.getAdresse() != null ? paiement.getAdresse().getPays() : null)
                     .build();
 
             eventPublisher.publishAsync(paymentNotificationEvent);
@@ -236,6 +241,11 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
                 .descriptionDeal(paiementModele.getDeal().getDescription())
                 .montantPaiement(paiementModele.getMontant())
                 .nombreDePart(nombreDePart)
+                .adresseRue(paiementModele.getAdresse() != null ? paiementModele.getAdresse().getRue() : null)
+                .adresseVille(paiementModele.getAdresse() != null ? paiementModele.getAdresse().getVille() : null)
+                .adresseProvince(paiementModele.getAdresse() != null ? paiementModele.getAdresse().getProvince() : null)
+                .adresseCodePostal(paiementModele.getAdresse() != null ? paiementModele.getAdresse().getCodePostal() : null)
+                .adressePays(paiementModele.getAdresse() != null ? paiementModele.getAdresse().getPays() : null)
                 .build();
 
         eventPublisher.publishAsync(paymentNotificationEvent);

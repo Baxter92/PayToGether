@@ -92,6 +92,14 @@ public class PaymentNotificationHandler implements ConsumerHandler {
         variables.put("prenom", Optional.ofNullable(utilisateur).map(UtilisateurModele::getPrenom).orElse(""));
         variables.put("titreDeal", event.getTitreDeal());
         variables.put("montant", event.getMontantPaiement());
+
+        // Informations d'adresse
+        variables.put("adresseRue", event.getAdresseRue() != null ? event.getAdresseRue() : "Non renseignée");
+        variables.put("adresseVille", event.getAdresseVille() != null ? event.getAdresseVille() : "");
+        variables.put("adresseProvince", event.getAdresseProvince() != null ? event.getAdresseProvince() : "");
+        variables.put("adresseCodePostal", event.getAdresseCodePostal() != null ? event.getAdresseCodePostal() : "");
+        variables.put("adressePays", event.getAdressePays() != null ? event.getAdressePays() : "");
+
         if (isCondirmed) {
             variables.put("datePaiement", event.getDatePaiement().format(DATE_FORMATTER));
             variables.put("methodePaiement", event.getMethodePaiement());
