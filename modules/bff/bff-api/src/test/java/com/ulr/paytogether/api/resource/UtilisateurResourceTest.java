@@ -296,26 +296,26 @@ class UtilisateurResourceTest {
     @Test
     void testSupprimer_DevraitSupprimerUtilisateur() throws Exception {
         // Given
-        doNothing().when(apiAdapter).supprimer(uuidUtilisateur);
+        doNothing().when(apiAdapter).supprimer(uuidUtilisateur, anyString());
 
         // When & Then
         mockMvc.perform(delete("/api/utilisateurs/{uuid}", uuidUtilisateur))
                 .andExpect(status().isNoContent());
 
-        verify(apiAdapter, times(1)).supprimer(uuidUtilisateur);
+        verify(apiAdapter, times(1)).supprimer(uuidUtilisateur, "TokenValue");
     }
 
     @Test
     void testSupprimer_AvecUuidValide() throws Exception {
         // Given
         UUID uuidASupprimer = UUID.randomUUID();
-        doNothing().when(apiAdapter).supprimer(uuidASupprimer);
+        doNothing().when(apiAdapter).supprimer(uuidASupprimer, anyString());
 
         // When & Then
         mockMvc.perform(delete("/api/utilisateurs/{uuid}", uuidASupprimer))
                 .andExpect(status().isNoContent());
 
-        verify(apiAdapter, times(1)).supprimer(uuidASupprimer);
+        verify(apiAdapter, times(1)).supprimer(uuidASupprimer, "TokenValue");
     }
 
     // ==================== Tests pour GET /api/utilisateurs/existe/{email} ====================

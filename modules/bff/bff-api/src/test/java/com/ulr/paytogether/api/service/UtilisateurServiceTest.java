@@ -259,7 +259,7 @@ class UtilisateurServiceTest {
     void testSupprimerParUuid_AvecUuidNull() {
         // Given
         doThrow(new IllegalArgumentException("L'UUID ne peut pas être null"))
-                .when(utilisateurProvider).supprimerParUuid(null);
+                .when(utilisateurProvider).supprimerParUuid(null, anyString());
 
         // When & Then
         assertThrows(IllegalArgumentException.class, () -> utilisateurService.supprimerParUuid(null, anyString()));
