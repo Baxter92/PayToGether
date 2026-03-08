@@ -159,13 +159,13 @@ class UtilisateurServiceImplTest {
     @Test
     void testSupprimerParUuid_DevraitSupprimerUtilisateur() {
         // Given
-        doNothing().when(utilisateurProvider).supprimerParUuid(uuidUtilisateur);
+        doNothing().when(utilisateurProvider).supprimerParUuid(uuidUtilisateur, anyString());
 
         // When
-        utilisateurService.supprimerParUuid(uuidUtilisateur);
+        utilisateurService.supprimerParUuid(uuidUtilisateur, "Token123");
 
         // Then
-        verify(utilisateurProvider, times(1)).supprimerParUuid(uuidUtilisateur);
+        verify(utilisateurProvider, times(1)).supprimerParUuid(uuidUtilisateur, "Token123");
     }
 
     @Test

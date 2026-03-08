@@ -229,7 +229,7 @@ class UtilisateurProviderAdapterTest {
         doNothing().when(jpaRepository).deleteById(uuidUtilisateur);
 
         // When
-        providerAdapter.supprimerParUuid(uuidUtilisateur);
+        providerAdapter.supprimerParUuid(uuidUtilisateur, anyString());
 
         // Then
         verify(jpaRepository, times(1)).deleteById(uuidUtilisateur);
