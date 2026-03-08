@@ -1,5 +1,6 @@
 package com.ulr.paytogether.core.domaine.impl;
 
+import com.ulr.paytogether.core.domaine.service.AdresseService;
 import com.ulr.paytogether.core.domaine.service.SquarePaymentService;
 import com.ulr.paytogether.core.domaine.validator.AdresseValidator;
 import com.ulr.paytogether.core.domaine.validator.PaiementValidator;
@@ -10,7 +11,9 @@ import com.ulr.paytogether.core.event.PaymentNotificationEvent;
 import com.ulr.paytogether.core.event.PaymentSuccessfulEvent;
 import com.ulr.paytogether.core.exception.ResourceNotFoundException;
 import com.ulr.paytogether.core.exception.ValidationException;
+import com.ulr.paytogether.core.modele.AdresseModele;
 import com.ulr.paytogether.core.modele.PaiementModele;
+import com.ulr.paytogether.core.provider.AdresseProvider;
 import com.ulr.paytogether.core.provider.PaiementProvider;
 import com.ulr.paytogether.core.provider.SquarePaymentProvider;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +38,7 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
     private final PaiementValidator paiementValidator;
     private final AdresseValidator adresseValidator;
     private final EventPublisher eventPublisher;
+    private final AdresseProvider adresseProvider;
 
     @Transactional
     @Override
@@ -61,6 +65,7 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
                 .commandeUuid(paiementCree.getCommande().getUuid())
                 .paiementUuid(paiementCree.getUuid())
                 .utilisateurUuid(paiementCree.getUtilisateur().getUuid())
+                .nombreDePart(paiement.getNombreDePart())
                 .build();
 
         eventPublisher.publishAsync(paymentInitiatedEvent);
@@ -227,6 +232,9 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
     @Override
     public void mettreAJourStatutCommandeDeal(UUID paiementUuid, String statut, int nombreDePart) {
         PaiementModele paiementModele = paiementProvider.mettreAJourStatutCommandeDeal(paiementUuid, statut, nombreDePart);
+
+        AdresseModele adresseModele = adresseProvider.trouverParPaiement(paiementUuid);
+
         PaymentNotificationEvent paymentNotificationEvent = PaymentNotificationEvent
                 .builder()
                 .paiementUuid(paiementUuid)
@@ -241,11 +249,11 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
                 .descriptionDeal(paiementModele.getDeal().getDescription())
                 .montantPaiement(paiementModele.getMontant())
                 .nombreDePart(nombreDePart)
-                .adresseRue(paiementModele.getAdresse() != null ? paiementModele.getAdresse().getRue() : null)
-                .adresseVille(paiementModele.getAdresse() != null ? paiementModele.getAdresse().getVille() : null)
-                .adresseProvince(paiementModele.getAdresse() != null ? paiementModele.getAdresse().getProvince() : null)
-                .adresseCodePostal(paiementModele.getAdresse() != null ? paiementModele.getAdresse().getCodePostal() : null)
-                .adressePays(paiementModele.getAdresse() != null ? paiementModele.getAdresse().getPays() : null)
+                .adresseRue(adresseModele.getRue())
+                .adresseVille(adresseModele.getVille())
+                .adresseProvince("")
+                .adresseCodePostal(adresseModele.getCodePostal())
+                .adressePays("")
                 .build();
 
         eventPublisher.publishAsync(paymentNotificationEvent);

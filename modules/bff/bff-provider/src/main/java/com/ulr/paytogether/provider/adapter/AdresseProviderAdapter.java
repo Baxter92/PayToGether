@@ -46,14 +46,13 @@ public class AdresseProviderAdapter implements AdresseProvider {
     }
 
     @Override
-    public List<AdresseModele> trouverParPaiement(UUID paiementUuid) {
+    public AdresseModele trouverParPaiement(UUID paiementUuid) {
         PaiementJpa paiementJpa = paiementRepository.findById(paiementUuid)
                 .orElseThrow(() -> new RuntimeException("Paiement non trouvé avec l'UUID : " + paiementUuid));
 
         return jpaRepository.findByPaiement(paiementJpa)
-                .stream()
                 .map(mapper::versModele)
-                .collect(Collectors.toList());
+                .orElseThrow(() -> new RuntimeException("Adresse non trouvée pour le paiement avec l'UUID : " + paiementUuid));
     }
 
     @Override
