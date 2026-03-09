@@ -6,9 +6,7 @@ import com.ulr.paytogether.provider.adapter.entity.DealJpa;
 import com.ulr.paytogether.provider.adapter.entity.DealParticipantJpa;
 import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
 import com.ulr.paytogether.provider.adapter.mapper.DealParticipantJpaMapper;
-import com.ulr.paytogether.provider.repository.DealParticipantRepository;
-import com.ulr.paytogether.provider.repository.DealRepository;
-import com.ulr.paytogether.provider.repository.UtilisateurRepository;
+import com.ulr.paytogether.provider.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -31,6 +29,8 @@ public class DealParticipantProviderAdapter implements DealParticipantProvider {
     private final DealRepository dealRepository;
     private final UtilisateurRepository utilisateurRepository;
     private final DealParticipantJpaMapper mapper;
+    private final PaiementRepository paiementRepository;
+    private final AdresseRepository adresseRepository;
 
     @Override
     @Transactional
@@ -106,6 +106,33 @@ public class DealParticipantProviderAdapter implements DealParticipantProvider {
         log.debug("Recherche de tous les participants du deal {}", dealUuid);
         return participantRepository.findByIdDealUuid(dealUuid).stream()
                 .map(mapper::versModele)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DealParticipantModele> trouverParticipantsParDealAvecUtilisateur(UUID dealUuid) {
+        log.debug("Recherche de tous les participants du deal {} avec infos utilisateur, paiement et adresse", dealUuid);
+
+        // Récupérer le deal pour obtenir le prix par part
+        var deal = dealRepository.findById(dealUuid).orElse(null);
+        var prixPart = deal != null ? deal.getPrixPart() : null;
+
+        return participantRepository.findByIdDealUuid(dealUuid).stream()
+                .map(participantJpa -> {
+                    // Récupérer le paiement associé
+                    var paiementOpt = paiementRepository.findFirstByUtilisateurJpaUuidAndCommandeJpaDealJpaUuidOrderByDatePaiementDesc(
+                            participantJpa.getUtilisateurJpa().getUuid(),
+                            dealUuid
+                    );
+
+                    // Récupérer l'adresse si le paiement existe
+                    var adresseOpt = paiementOpt.flatMap(paiement ->
+                            adresseRepository.findByPaiementUuid(paiement.getUuid())
+                    );
+
+                    return mapper.versModeleComplet(participantJpa, paiementOpt.orElse(null), adresseOpt.orElse(null), prixPart);
+                })
                 .toList();
     }
 

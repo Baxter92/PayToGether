@@ -21,6 +21,7 @@ import java.util.UUID;
 public class CommandeModele {
 
     private UUID uuid;
+    private String numeroCommande;
     private BigDecimal montantTotal;
     private StatutCommande statut;
     private UtilisateurModele utilisateur;
@@ -29,4 +30,7 @@ public class CommandeModele {
     private LocalDateTime dateCommande;
     private LocalDateTime dateCreation;
     private LocalDateTime dateModification;
+
+    // Champ calculé
+    private BigDecimal montantTotalPaiements; // Somme des paiements associés
 }

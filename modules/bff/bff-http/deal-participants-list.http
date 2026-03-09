@@ -1,0 +1,186 @@
+### =========================================================================
+### Tests DealParticipantResource - Liste des participants d'un deal
+### Endpoint: GET /api/deals/{dealUuid}/participants
+### Rôles autorisés: ADMIN, VENDEUR uniquement
+### =========================================================================
+
+### Variables
+@baseUrl = http://localhost:8080/api
+@dealUuid = {{$uuid}}
+@adminToken = Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+@vendeurToken = Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+@userToken = Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+
+### =========================================================================
+### 1. Lister les participants d'un deal (ADMIN)
+### =========================================================================
+GET {{baseUrl}}/deals/{{dealUuid}}/participants
+Authorization: {{adminToken}}
+
+### Expected: 200 OK
+### Response: Liste des participants avec:
+### - utilisateurUuid
+### - utilisateurNom
+### - utilisateurPrenom
+### - utilisateurEmail
+### - nombreDePart
+### - dateParticipation
+
+###
+
+### =========================================================================
+### 2. Lister les participants d'un deal (VENDEUR)
+### =========================================================================
+GET {{baseUrl}}/deals/{{dealUuid}}/participants
+Authorization: {{vendeurToken}}
+
+### Expected: 200 OK
+### Response: Liste des participants
+
+###
+
+### =========================================================================
+### 3. Tentative d'accès avec rôle UTILISATEUR (REFUSÉ)
+### =========================================================================
+GET {{baseUrl}}/deals/{{dealUuid}}/participants
+Authorization: {{userToken}}
+
+### Expected: 403 Forbidden
+### Message: Accès refusé - Rôle insuffisant
+
+###
+
+### =========================================================================
+### 4. Tentative d'accès sans authentification (REFUSÉ)
+### =========================================================================
+GET {{baseUrl}}/deals/{{dealUuid}}/participants
+
+### Expected: 401 Unauthorized
+### Message: Non autorisé
+
+###
+
+### =========================================================================
+### TESTS D'ERREUR
+### =========================================================================
+
+### Erreur : Deal inexistant
+GET {{baseUrl}}/deals/00000000-0000-0000-0000-000000000000/participants
+Authorization: {{adminToken}}
+
+### Expected: 200 OK avec liste vide []
+
+###
+
+### Erreur : UUID invalide
+GET {{baseUrl}}/deals/invalid-uuid/participants
+Authorization: {{adminToken}}
+
+### Expected: 400 Bad Request
+
+###
+
+### =========================================================================
+### EXEMPLE DE RÉPONSE ATTENDUE
+### =========================================================================
+# [
+#   {
+#     "dealUuid": "123e4567-e89b-12d3-a456-426614174000",
+#     "utilisateurUuid": "987f6543-e21a-12d3-a456-426614174000",
+#     "utilisateurNom": "Dupont",
+#     "utilisateurPrenom": "Jean",
+#     "utilisateurEmail": "jean.dupont@example.com",
+#     "nombreDePart": 3,
+#     "dateParticipation": "2026-03-01T10:00:00",
+#     "dateModification": "2026-03-05T14:30:00",
+#     "montantTotal": 300.00,
+#     "statutPaiement": "CONFIRME",
+#     "adresseRue": "123 Rue Saint-Denis",
+#     "adresseVille": "Montreal",
+#     "adresseProvince": "Quebec",
+#     "adresseCodePostal": "H2X 3K8",
+#     "adressePays": "Canada",
+#     "adresseAppartement": "Apt 5",
+#     "adresseNumeroPhone": "+1 514 555 1234"
+#   },
+#   {
+#     "dealUuid": "123e4567-e89b-12d3-a456-426614174000",
+#     "utilisateurUuid": "456d7890-e12b-34c5-d678-901234567890",
+#     "utilisateurNom": "Martin",
+#     "utilisateurPrenom": "Sophie",
+#     "utilisateurEmail": "sophie.martin@example.com",
+#     "nombreDePart": 2,
+#     "dateParticipation": "2026-03-02T15:30:00",
+#     "dateModification": "2026-03-02T15:30:00",
+#     "montantTotal": 200.00,
+#     "statutPaiement": "CONFIRME",
+#     "adresseRue": "456 Boulevard René-Lévesque",
+#     "adresseVille": "Montreal",
+#     "adresseProvince": "Quebec",
+#     "adresseCodePostal": "H3B 1L8",
+#     "adressePays": "Canada",
+#     "adresseAppartement": null,
+#     "adresseNumeroPhone": "+1 514 555 5678"
+#   }
+# ]
+
+### =========================================================================
+### SCÉNARIO COMPLET
+### =========================================================================
+
+# 1. Créer un deal (VENDEUR)
+POST {{baseUrl}}/deals
+Content-Type: application/json
+Authorization: {{vendeurToken}}
+
+{
+  "titre": "Deal Test Participants",
+  "description": "Test de listing des participants",
+  "prixDeal": 300.00,
+  "prixPart": 100.00,
+  "nbParticipants": 5,
+  "dateDebut": "2026-04-01T10:00:00",
+  "dateFin": "2026-04-30T23:59:59",
+  "statut": "PUBLIE",
+  "createurUuid": "{{vendeurUuid}}",
+  "categorieUuid": "{{categorieUuid}}",
+  "ville": "Montreal",
+  "pays": "Canada"
+}
+
+###
+
+# 2. Ajouter des participants au deal
+# (Utiliser l'endpoint POST /api/deals/{dealUuid}/participants si disponible)
+
+###
+
+# 3. Lister tous les participants (ADMIN)
+GET {{baseUrl}}/deals/{{dealUuid}}/participants
+Authorization: {{adminToken}}
+
+###
+
+# 4. Vérifier les informations détaillées de chaque participant
+# Données retournées:
+# - Nom complet
+# - Email
+# - Nombre de parts achetées
+# - Date de participation
+
+###
+
+### =========================================================================
+### NOTES
+### =========================================================================
+
+# Cet endpoint est PROTÉGÉ et accessible uniquement aux:
+# - ADMIN : Accès total à tous les deals
+# - VENDEUR : Accès à leurs propres deals (peut nécessiter une vérification supplémentaire)
+
+# Cas d'usage:
+# - Dashboard vendeur pour voir qui a acheté
+# - Administration pour gérer les participants
+# - Génération de rapports et statistiques
+# - Suivi des ventes par participant
+

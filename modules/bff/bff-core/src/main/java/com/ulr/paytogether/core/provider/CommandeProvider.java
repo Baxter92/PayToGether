@@ -3,6 +3,7 @@ package com.ulr.paytogether.core.provider;
 import com.ulr.paytogether.core.modele.CommandeModele;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,4 +23,16 @@ public interface CommandeProvider {
     List<CommandeModele> trouverTous();
 
     void supprimerParUuid(UUID uuid);
+
+    /**
+     * Récupère toutes les commandes avec les informations complètes (marchand, deal, montant total paiements)
+     * @return Liste des commandes enrichies
+     */
+    List<CommandeModele> trouverToutesAvecInfosCompletes();
+
+    /**
+     * Calcule les statistiques globales des commandes par statut
+     * @return Map avec les statistiques (totalCommandes, confirmees, enCours, annulees, remboursees)
+     */
+    Map<String, Long> calculerStatistiquesCommandes();
 }

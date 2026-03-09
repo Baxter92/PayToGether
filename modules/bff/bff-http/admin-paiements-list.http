@@ -1,0 +1,117 @@
+### =========================================================================
+### Tests Admin - Liste des paiements
+### Endpoint: GET /api/admin/paiements
+### Rôle autorisé: ADMIN uniquement
+### =========================================================================
+
+### Variables
+@baseUrl = http://localhost:8080/api
+@adminToken = Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+
+### =========================================================================
+### 1. Lister tous les paiements avec statistiques (ADMIN)
+### =========================================================================
+GET {{baseUrl}}/admin/paiements
+Authorization: {{adminToken}}
+
+### Expected: 200 OK
+### Response:
+### {
+###   "paiements": [
+###     {
+###       "uuid": "...",
+###       "clientUuid": "...",
+###       "clientNom": "Dupont",
+###       "clientPrenom": "Jean",
+###       "clientEmail": "jean.dupont@example.com",
+###       "commandeUuid": "...",
+###       "numeroCommande": "CMD-2026-00001",
+###       "dealUuid": "...",
+###       "dealTitre": "Restaurant 5 étoiles",
+###       "marchandUuid": "...",
+###       "marchandNom": "Martin",
+###       "marchandPrenom": "Sophie",
+###       "marchandEmail": "sophie.martin@example.com",
+###       "montant": 300.00,
+###       "datePaiement": "2026-03-01T10:00:00",
+###       "nombreDePart": 3,
+###       "methodePaiement": "CARTE_BANCAIRE",
+###       "statutPaiement": "CONFIRME"
+###     }
+###   ],
+###   "statistiques": {
+###     "totalTransactions": 150,
+###     "transactionsReussies": 145,
+###     "transactionsEchouees": 5,
+###     "montantTotal": 45000.00
+###   }
+### }
+
+###
+
+### =========================================================================
+### 2. Tentative d'accès avec rôle VENDEUR (REFUSÉ)
+### =========================================================================
+GET {{baseUrl}}/admin/paiements
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...VENDEUR_TOKEN
+
+### Expected: 403 Forbidden
+
+###
+
+### =========================================================================
+### 3. Tentative d'accès sans authentification (REFUSÉ)
+### =========================================================================
+GET {{baseUrl}}/admin/paiements
+
+### Expected: 401 Unauthorized
+
+###
+
+### =========================================================================
+### INFORMATIONS INCLUSES
+### =========================================================================
+
+# Informations client:
+# - UUID, nom, prénom, email
+
+# Informations commande:
+# - UUID, numéro de commande
+
+# Informations deal:
+# - UUID, titre
+
+# Informations marchand:
+# - UUID, nom, prénom, email
+
+# Détails paiement:
+# - Montant, date, nombre de parts, méthode, statut
+
+# Statistiques globales (non dans la liste):
+# - Total des transactions
+# - Transactions réussies
+# - Transactions échouées
+# - Montant total des paiements confirmés
+
+###
+
+### =========================================================================
+### CAS D'USAGE
+### =========================================================================
+
+# Dashboard admin:
+# - Vue d'ensemble de tous les paiements
+# - Suivi des revenus
+# - Détection des problèmes de paiement
+# - Export comptable
+
+# Analyse:
+# - Taux de réussite des paiements
+# - Montant total généré
+# - Identification des marchands actifs
+
+# Support:
+# - Résolution de litiges
+# - Remboursements
+# - Vérification des transactions
+

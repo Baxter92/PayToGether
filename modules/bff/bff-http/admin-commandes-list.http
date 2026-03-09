@@ -1,0 +1,114 @@
+### =========================================================================
+### Tests Admin - Liste des commandes
+### Endpoint: GET /api/admin/commandes
+### Rôle autorisé: ADMIN uniquement
+### =========================================================================
+
+### Variables
+@baseUrl = http://localhost:8080/api
+@adminToken = Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+
+### =========================================================================
+### 1. Lister toutes les commandes avec statistiques (ADMIN)
+### =========================================================================
+GET {{baseUrl}}/admin/commandes
+Authorization: {{adminToken}}
+
+### Expected: 200 OK
+### Response:
+### {
+###   "commandes": [
+###     {
+###       "uuid": "...",
+###       "numeroCommande": "CMD-2026-00001",
+###       "marchandUuid": "...",
+###       "marchandNom": "Martin",
+###       "marchandPrenom": "Sophie",
+###       "marchandEmail": "sophie.martin@example.com",
+###       "dealUuid": "...",
+###       "dealTitre": "Restaurant 5 étoiles",
+###       "dateCreation": "2026-03-01T09:00:00",
+###       "montantTotalPaiements": 1500.00,
+###       "statut": "CONFIRMEE"
+###     }
+###   ],
+###   "statistiques": {
+###     "totalCommandes": 200,
+###     "commandesConfirmees": 180,
+###     "commandesEnCours": 15,
+###     "commandesAnnulees": 3,
+###     "commandesRemboursees": 2
+###   }
+### }
+
+###
+
+### =========================================================================
+### 2. Tentative d'accès avec rôle VENDEUR (REFUSÉ)
+### =========================================================================
+GET {{baseUrl}}/admin/commandes
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...VENDEUR_TOKEN
+
+### Expected: 403 Forbidden
+
+###
+
+### =========================================================================
+### 3. Tentative d'accès sans authentification (REFUSÉ)
+### =========================================================================
+GET {{baseUrl}}/admin/commandes
+
+### Expected: 401 Unauthorized
+
+###
+
+### =========================================================================
+### INFORMATIONS INCLUSES
+### =========================================================================
+
+# Informations commande:
+# - UUID, numéro de commande
+# - Date de création
+# - Montant total des paiements
+# - Statut
+
+# Informations marchand:
+# - UUID, nom, prénom, email
+
+# Informations deal:
+# - UUID, titre
+
+# Statistiques globales (non dans la liste):
+# - Total des commandes (tous statuts confondus)
+# - Commandes confirmées
+# - Commandes en cours
+# - Commandes annulées
+# - Commandes remboursées
+
+###
+
+### =========================================================================
+### CAS D'USAGE
+### =========================================================================
+
+# Dashboard admin:
+# - Vue d'ensemble de toutes les commandes
+# - Suivi de l'activité de la plateforme
+# - Détection des commandes problématiques
+
+# Analyse:
+# - Taux de confirmation des commandes
+# - Taux d'annulation
+# - Identification des marchands actifs
+# - Performance de la plateforme
+
+# Support:
+# - Suivi des commandes
+# - Résolution de problèmes
+# - Gestion des remboursements
+
+# Comptabilité:
+# - Export des commandes
+# - Calcul des revenus par marchand
+# - Rapports financiers
+

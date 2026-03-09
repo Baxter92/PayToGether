@@ -12,7 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.UUID;
 
 /**
@@ -114,4 +116,17 @@ public class PaiementServiceImpl implements PaiementService {
         paiementProvider.supprimerParUuid(uuid);
         log.info("Paiement supprimé avec succès: {}", uuid);
     }
+
+    @Override
+    public List<PaiementModele> lireTousAvecInfosCompletes() {
+        log.info("Récupération de tous les paiements avec informations complètes");
+        return paiementProvider.trouverTousAvecInfosCompletes();
+    }
+
+    @Override
+    public Map<String, Object> calculerStatistiques() {
+        log.info("Calcul des statistiques des paiements");
+        return paiementProvider.calculerStatistiquesPaiements();
+    }
 }
+

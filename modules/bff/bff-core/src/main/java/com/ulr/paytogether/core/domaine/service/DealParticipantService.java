@@ -44,6 +44,13 @@ public interface DealParticipantService {
     List<DealParticipantModele> trouverParticipantsParDeal(UUID dealUuid);
 
     /**
+     * Trouve tous les participants d'un deal avec les informations utilisateur complètes
+     * @param dealUuid UUID du deal
+     * @return Liste des participants enrichis
+     */
+    List<DealParticipantModele> trouverParticipantsParDealAvecUtilisateur(UUID dealUuid);
+
+    /**
      * Trouve toutes les participations d'un utilisateur
      * @param utilisateurUuid UUID de l'utilisateur
      * @return Liste des participations

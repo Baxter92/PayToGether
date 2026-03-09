@@ -6,6 +6,7 @@ import com.ulr.paytogether.core.modele.PaiementModele;
 import com.ulr.paytogether.core.enumeration.StatutPaiement;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -53,4 +54,15 @@ public interface PaiementService {
      * Supprimer un paiement par son UUID
      */
     void supprimerParUuid(UUID uuid);
+
+    /**
+     * Lire tous les paiements avec informations complètes (pour l'admin)
+     */
+    List<PaiementModele> lireTousAvecInfosCompletes();
+
+    /**
+     * Calculer les statistiques des paiements (pour l'admin)
+     */
+    Map<String, Object> calculerStatistiques();
 }
+

@@ -57,4 +57,26 @@ public class PaiementJpaMapper {
                 .dateModification(modele.getDateModification())
                 .build();
     }
+
+    /**
+     * Convertit une entité JPA en modèle complet avec toutes les informations enrichies
+     * (utilisateur, commande avec numero, deal avec marchand)
+     */
+    public PaiementModele versModeleComplet(PaiementJpa jpaPaiement) {
+        if (jpaPaiement == null) return null;
+
+        PaiementModele paiement = versModele(jpaPaiement);
+
+        // Enrichir avec le numéro de commande
+        if (jpaPaiement.getCommandeJpa() != null && paiement.getCommande() != null) {
+            paiement.getCommande().setNumeroCommande(jpaPaiement.getCommandeJpa().getNumeroCommande());
+
+            // Enrichir avec le deal et le marchand
+            if (jpaPaiement.getCommandeJpa().getDealJpa() != null) {
+                paiement.setDeal(dealJpaMapper.versModele(jpaPaiement.getCommandeJpa().getDealJpa()));
+            }
+        }
+
+        return paiement;
+    }
 }

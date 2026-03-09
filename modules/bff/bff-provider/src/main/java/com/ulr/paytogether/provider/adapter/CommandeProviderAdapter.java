@@ -1,5 +1,6 @@
 package com.ulr.paytogether.provider.adapter;
 
+import com.ulr.paytogether.core.enumeration.StatutCommande;
 import com.ulr.paytogether.core.modele.CommandeModele;
 import com.ulr.paytogether.core.provider.CommandeProvider;
 import com.ulr.paytogether.provider.adapter.entity.CommandeJpa;
@@ -8,11 +9,14 @@ import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
 import com.ulr.paytogether.provider.adapter.mapper.CommandeJpaMapper;
 import com.ulr.paytogether.provider.repository.CommandeRepository;
 import com.ulr.paytogether.provider.repository.DealRepository;
+import com.ulr.paytogether.provider.repository.PaiementRepository;
 import com.ulr.paytogether.provider.repository.UtilisateurRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -29,6 +33,7 @@ public class CommandeProviderAdapter implements CommandeProvider {
     private final CommandeRepository jpaRepository;
     private final UtilisateurRepository utilisateurRepository;
     private final DealRepository dealRepository;
+    private final PaiementRepository paiementRepository;
     private final CommandeJpaMapper mapper;
 
     @Override
@@ -76,5 +81,52 @@ public class CommandeProviderAdapter implements CommandeProvider {
     @Override
     public void supprimerParUuid(UUID uuid) {
         jpaRepository.deleteById(uuid);
+    }
+
+    @Override
+    public List<CommandeModele> trouverToutesAvecInfosCompletes() {
+        return jpaRepository.findAll().stream()
+                .map(commandeJpa -> {
+                    CommandeModele commande = mapper.versModele(commandeJpa);
+
+                    // Calculer le montant total des paiements pour cette commande
+                    var montantTotal = paiementRepository.findByCommandeJpaUuid(commandeJpa.getUuid())
+                            .stream()
+                            .map(p -> p.getMontant())
+                            .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+                    commande.setMontantTotalPaiements(montantTotal);
+
+                    return commande;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<String, Long> calculerStatistiquesCommandes() {
+        List<CommandeJpa> toutesLesCommandes = jpaRepository.findAll();
+
+        long totalCommandes = toutesLesCommandes.size();
+        long commandesConfirmees = toutesLesCommandes.stream()
+                .filter(c -> c.getStatut() == StatutCommande.CONFIRMEE)
+                .count();
+        long commandesEnCours = toutesLesCommandes.stream()
+                .filter(c -> c.getStatut() == StatutCommande.EN_COURS)
+                .count();
+        long commandesAnnulees = toutesLesCommandes.stream()
+                .filter(c -> c.getStatut() == StatutCommande.ANNULEE)
+                .count();
+        long commandesRemboursees = toutesLesCommandes.stream()
+                .filter(c -> c.getStatut() == StatutCommande.REMBOURSEE)
+                .count();
+
+        Map<String, Long> stats = new HashMap<>();
+        stats.put("totalCommandes", totalCommandes);
+        stats.put("commandesConfirmees", commandesConfirmees);
+        stats.put("commandesEnCours", commandesEnCours);
+        stats.put("commandesAnnulees", commandesAnnulees);
+        stats.put("commandesRemboursees", commandesRemboursees);
+
+        return stats;
     }
 }

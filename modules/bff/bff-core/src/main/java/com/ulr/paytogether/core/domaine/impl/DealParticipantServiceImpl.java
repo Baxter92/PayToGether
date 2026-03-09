@@ -78,6 +78,17 @@ public class DealParticipantServiceImpl implements DealParticipantService {
     }
 
     @Override
+    public List<DealParticipantModele> trouverParticipantsParDealAvecUtilisateur(UUID dealUuid) {
+        log.debug("Recherche de tous les participants du deal {} avec infos utilisateur", dealUuid);
+
+        if (dealUuid == null) {
+            throw new IllegalArgumentException("L'UUID du deal est obligatoire");
+        }
+
+        return dealParticipantProvider.trouverParticipantsParDealAvecUtilisateur(dealUuid);
+    }
+
+    @Override
     public List<DealParticipantModele> trouverParticipationsParUtilisateur(UUID utilisateurUuid) {
         log.debug("Recherche de toutes les participations de l'utilisateur {}", utilisateurUuid);
 

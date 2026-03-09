@@ -66,4 +66,12 @@ public interface PaiementRepository extends JpaRepository<PaiementJpa, UUID> {
      * @return le paiement trouvé
      */
     Optional<PaiementJpa> findBySquareOrderId(String squareOrderId);
+
+    /**
+     * Recherche le paiement le plus récent d'un utilisateur pour un deal spécifique
+     * @param utilisateurUuid UUID de l'utilisateur
+     * @param dealUuid UUID du deal
+     * @return le paiement trouvé
+     */
+    Optional<PaiementJpa> findFirstByUtilisateurJpaUuidAndCommandeJpaDealJpaUuidOrderByDatePaiementDesc(UUID utilisateurUuid, UUID dealUuid);
 }

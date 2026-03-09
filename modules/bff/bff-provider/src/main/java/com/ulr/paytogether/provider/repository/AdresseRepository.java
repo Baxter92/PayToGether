@@ -20,4 +20,11 @@ public interface AdresseRepository extends JpaRepository<AdresseJpa, UUID> {
      * @return
      */
     Optional<AdresseJpa> findByPaiement(PaiementJpa paiementJpa);
+
+    /**
+     * Trouve une adresse par l'UUID du paiement
+     * @param paiementUuid UUID du paiement
+     * @return l'adresse trouvée
+     */
+    Optional<AdresseJpa> findByPaiementUuid(UUID paiementUuid);
 }

@@ -14,9 +14,8 @@ import com.ulr.paytogether.provider.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -187,5 +186,37 @@ public class PaiementProviderAdapter implements PaiementProvider {
             commandeRepository.save(commandeJpa);
         }
         return mapper.versModele(paiementJpa);
+    }
+
+    @Override
+    public List<PaiementModele> trouverTousAvecInfosCompletes() {
+        return jpaRepository.findAll().stream()
+                .map(mapper::versModeleComplet)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Map<String, Object> calculerStatistiquesPaiements() {
+        List<PaiementJpa> tousLesPaiements = jpaRepository.findAll();
+
+        long totalTransactions = tousLesPaiements.size();
+        long transactionsReussies = tousLesPaiements.stream()
+                .filter(p -> p.getStatut() == StatutPaiement.CONFIRME)
+                .count();
+        long transactionsEchouees = tousLesPaiements.stream()
+                .filter(p -> p.getStatut() == StatutPaiement.ECHOUE)
+                .count();
+        BigDecimal montantTotal = tousLesPaiements.stream()
+                .filter(p -> p.getStatut() == StatutPaiement.CONFIRME)
+                .map(PaiementJpa::getMontant)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("totalTransactions", totalTransactions);
+        stats.put("transactionsReussies", transactionsReussies);
+        stats.put("transactionsEchouees", transactionsEchouees);
+        stats.put("montantTotal", montantTotal);
+
+        return stats;
     }
 }

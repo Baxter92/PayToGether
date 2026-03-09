@@ -1,8 +1,11 @@
 package com.ulr.paytogether.core.provider;
 
+import com.ulr.paytogether.core.enumeration.StatutPaiement;
 import com.ulr.paytogether.core.modele.PaiementModele;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,4 +34,16 @@ public interface PaiementProvider {
     void supprimerParUuid(UUID uuid);
 
     PaiementModele mettreAJourStatutCommandeDeal(UUID paiementUuid, String statut, int nombreDePart);
+
+    /**
+     * Récupère tous les paiements avec les informations complètes (client, marchand, deal, commande)
+     * @return Liste des paiements enrichis
+     */
+    List<PaiementModele> trouverTousAvecInfosCompletes();
+
+    /**
+     * Calcule les statistiques globales des paiements
+     * @return Map avec les statistiques (totalTransactions, transactionsReussies, transactionsEchouees, montantTotal)
+     */
+    Map<String, Object> calculerStatistiquesPaiements();
 }
