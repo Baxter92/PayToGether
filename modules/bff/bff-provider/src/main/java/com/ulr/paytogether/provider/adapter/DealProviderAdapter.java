@@ -483,4 +483,14 @@ public class DealProviderAdapter implements DealProvider {
                 .map(deal -> (long) deal.getParticipants().size())
                 .orElse(0L);
     }
+
+    @Override
+    public Long calculerNombrePartsAchetees(UUID dealUuid) {
+        log.debug("Calcul du nombre total de parts achetées pour le deal: {}", dealUuid);
+        return jpaRepository.findById(dealUuid)
+                .map(deal -> deal.getParticipants().stream()
+                        .mapToLong(participant -> participant.getNombreDePart() != null ? participant.getNombreDePart() : 0)
+                        .sum())
+                .orElse(0L);
+    }
 }

@@ -43,4 +43,5 @@ public class DealModele {
     // Champs calculés (non persistés)
     private Double moyenneCommentaires;  // Moyenne des notes des commentaires
     private Long nombreParticipantsReel; // Nombre réel de participants actuels
+    private Long nombrePartsAchetees;    // Nombre total de parts achetées par tous les participants
 }

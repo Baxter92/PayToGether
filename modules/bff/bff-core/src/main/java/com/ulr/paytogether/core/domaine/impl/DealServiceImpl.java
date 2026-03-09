@@ -76,6 +76,7 @@ public class DealServiceImpl implements DealService {
         if (deal != null && deal.getUuid() != null) {
             deal.setMoyenneCommentaires(dealProvider.calculerMoyenneCommentaires(deal.getUuid()));
             deal.setNombreParticipantsReel(dealProvider.compterParticipantsReels(deal.getUuid()));
+            deal.setNombrePartsAchetees(dealProvider.calculerNombrePartsAchetees(deal.getUuid()));
         }
         return deal;
     }

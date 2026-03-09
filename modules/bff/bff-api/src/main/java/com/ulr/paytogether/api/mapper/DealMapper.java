@@ -53,6 +53,7 @@ public class DealMapper {
                 .dateModification(deal.getDateModification())
                 .moyenneCommentaires(deal.getMoyenneCommentaires())
                 .nombreParticipantsReel(deal.getNombreParticipantsReel())
+                .nombrePartsAchetees(deal.getNombrePartsAchetees())
                 .build();
     }
 

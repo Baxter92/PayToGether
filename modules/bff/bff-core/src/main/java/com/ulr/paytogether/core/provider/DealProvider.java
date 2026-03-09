@@ -83,4 +83,11 @@ public interface DealProvider {
      * @return Nombre de participants
      */
     Long compterParticipantsReels(UUID dealUuid);
+
+    /**
+     * Calculer le nombre total de parts achetées pour un deal
+     * @param dealUuid UUID du deal
+     * @return Nombre total de parts achetées
+     */
+    Long calculerNombrePartsAchetees(UUID dealUuid);
 }

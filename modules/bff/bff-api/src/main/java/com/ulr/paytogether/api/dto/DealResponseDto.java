@@ -52,5 +52,6 @@ private LocalDateTime dateModification;
 // Champs calculés
 private Double moyenneCommentaires;  // Moyenne des notes des commentaires (0-5)
 private Long nombreParticipantsReel; // Nombre réel de participants actuels
+private Long nombrePartsAchetees;    // Nombre total de parts achetées
 }
 
