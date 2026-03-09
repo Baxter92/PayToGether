@@ -1,3 +1,4 @@
+import { useI18n } from "@/common/hooks/useI18n";
 import { Card, CardContent } from "@components/ui/card";
 import { Button } from "@components/ui/button";
 import { Separator } from "@components/ui/separator";
@@ -31,12 +32,15 @@ export default function PurchaseCard({
   partsRemaining,
   totalPrice,
 }: PurchaseCardProps) {
+  const { t } = useI18n("deals");
   return (
     <Card>
       <CardContent>
         <div className="flex items-baseline gap-3">
           <div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">Prix par part</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              {t("pricePerPart")}
+            </div>
             <div className="text-2xl font-bold text-foreground">
               {formatCurrency(deal.priceDeal ?? 0)}
             </div>
@@ -48,7 +52,7 @@ export default function PurchaseCard({
 
         <div className="mt-4">
           <div className="text-sm text-gray-600 dark:text-gray-400">
-            Choisir le nombre de parts
+            {t("chooseParts")}
           </div>
           <Counter
             qty={qty}
@@ -58,12 +62,14 @@ export default function PurchaseCard({
             className="mt-3"
           />
           <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            {partsRemaining - qty} part(s) disponibles
+            {t("partsAvailable", { count: partsRemaining - qty })}
           </div>
         </div>
 
         <div className="mt-4">
-          <div className="text-sm text-gray-600 dark:text-gray-400">Total</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            {t("total")}
+          </div>
           <div className="text-xl font-semibold text-foreground">
             {formatCurrency(totalPrice)}
           </div>
@@ -77,9 +83,9 @@ export default function PurchaseCard({
               {new Date(deal.expiryDate ?? "").toLocaleDateString()}.
             </div>
           ) : ( */}
-          <div className="text-sm text-green-700 dark:text-green-400">
+          {/* <div className="text-sm text-green-700 dark:text-green-400">
             Offre activée — Vous recevrez votre part.
-          </div>
+          </div> */}
           {/* )} */}
         </div>
 
@@ -87,9 +93,9 @@ export default function PurchaseCard({
           <Button className="mt-4 w-full" onClick={onBuy} disabled={!canBuy}>
             {canBuy
               ? activated || willReachMin
-                ? "Acheter maintenant"
-                : "Réserver (en attente d'activation)"
-              : "Quantité non disponible"}
+                ? t("buyNow")
+                : t("reserve")
+              : t("unavailableQuantity")}
           </Button>
         )}
 
@@ -105,10 +111,7 @@ export default function PurchaseCard({
             >
               <path d="M2 5a2 2 0 012-2h2.5a.5.5 0 01.5.5V5h6V3.5a.5.5 0 01.5-.5H16a2 2 0 012 2v2h-2V6H4v9a1 1 0 001 1h9v2H5a3 3 0 01-3-3V5z" />
             </svg>
-            <span>
-              Livraison réfrigérée disponible • Remboursement si l'offre n'est
-              pas activée
-            </span>
+            <span>{t("deliveryInfo")}</span>
           </div>
         </div>
 
@@ -117,13 +120,13 @@ export default function PurchaseCard({
         <HStack>
           <Button
             leftIcon={<Share className="w-4 h-4" />}
-            tooltip={"Partager"}
+            tooltip={t("share")}
           />
           <Button
             variant="outline"
             leftIcon={<Heart className="w-4 h-4 fill-current text-red-600" />}
           >
-            Mettre en favoris
+            {t("addToFavorites")}
           </Button>
         </HStack>
       </CardContent>

@@ -20,6 +20,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/common/components/ui/button";
 import { useQueries } from "@tanstack/react-query";
 import { useAuth } from "@/common/context/AuthContext";
+import { useI18n } from "@/common/hooks/useI18n";
 export default function DealDetail(): JSX.Element {
   const { id = "" } = useParams<{ id: string }>();
   const { data: dealData, isLoading, isError } = useDeal(id);
@@ -30,6 +31,8 @@ export default function DealDetail(): JSX.Element {
     .filter((d) => d.uuid !== id)
     .map(mapDealToView);
   const navigate = useNavigate();
+
+  const { t } = useI18n("deals");
 
   const orderedImagesMeta = useMemo(() => {
     const images = [...(dealData?.listeImages ?? [])];
@@ -165,11 +168,8 @@ export default function DealDetail(): JSX.Element {
 
               <Card>
                 <CardContent>
-                  <h4 className="font-semibold">Lieu</h4>
+                  <h4 className="font-semibold">{t("location")}</h4>
                   <p className="text-sm text-gray-600 mt-2">{deal.location}</p>
-                  <div className="mt-3 h-32 bg-gray-100 rounded flex items-center justify-center text-sm text-gray-400">
-                    Carte (placeholder)
-                  </div>
                 </CardContent>
               </Card>
             </div>

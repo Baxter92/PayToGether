@@ -1,9 +1,11 @@
 import { useMemo } from "react";
+import { useI18n } from "@/common/hooks/useI18n";
 import { Badge } from "@components/ui/badge";
 import { Separator } from "@components/ui/separator";
 import type { Deal } from "../types";
 
 export default function ProductDetails({ deal }: { deal: Deal }) {
+  const { t } = useI18n("deals");
   const partsRemaining = deal.partsTotal - deal.partsSold;
   const percent = Math.min(
     100,
@@ -12,11 +14,11 @@ export default function ProductDetails({ deal }: { deal: Deal }) {
   const expiresIn = useMemo(() => {
     if (!deal.expiryDate) return null;
     const diff = new Date(deal.expiryDate).getTime() - Date.now();
-    if (diff <= 0) return "expiré";
+    if (diff <= 0) return t("expired");
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     return `${days}j ${hours}h`;
-  }, [deal.expiryDate]);
+  }, [deal.expiryDate, t]);
 
   return (
     <section className="mt-6 bg-white dark:bg-gray-800 rounded-lg p-5 shadow-sm">
@@ -24,21 +26,27 @@ export default function ProductDetails({ deal }: { deal: Deal }) {
 
       <div className="flex items-center gap-4 mt-4">
         <Badge>{deal.rating} ★</Badge>
-        <div className="text-sm text-gray-600 dark:text-gray-400">{deal.reviewsCount} avis</div>
-        <div className="text-sm text-gray-500 dark:text-gray-400">{deal.location}</div>
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          {deal.reviewsCount} {t("reviews")}
+        </div>
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          {deal.location}
+        </div>
         {deal.expiryDate && (
           <div className="ml-2 text-sm text-red-600 dark:text-red-400">
-            Expire dans {expiresIn}
+            {t("expiresIn")} {expiresIn}
           </div>
         )}
       </div>
 
       <Separator className="my-4" />
 
-      <p className="mt-3 text-gray-700 dark:text-gray-300 leading-relaxed">{deal.description}</p>
+      <p className="mt-3 text-gray-700 dark:text-gray-300 leading-relaxed">
+        {deal.description}
+      </p>
 
       <div className="mt-4">
-        <h4 className="font-medium text-foreground">Disponibilité</h4>
+        <h4 className="font-medium text-foreground">{t("availability")}</h4>
         <div className="mt-2">
           <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
             <div
@@ -47,11 +55,11 @@ export default function ProductDetails({ deal }: { deal: Deal }) {
             />
           </div>
           <div className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-            {deal.partsSold} vendues • {partsRemaining} restantes (sur{" "}
-            {deal.partsTotal})
+            {deal.partsSold} {t("sold_plural")} • {partsRemaining}{" "}
+            {t("remaining_plural")} {deal.partsTotal})
           </div>
           <div className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-            Nécessaire pour activer l'offre : {deal.minRequired} parts
+            {t("neededToActivate")} {deal.minRequired} {t("parts")}
           </div>
         </div>
       </div>
@@ -60,7 +68,7 @@ export default function ProductDetails({ deal }: { deal: Deal }) {
 
       <div className="mt-4 grid grid-cols-1 gap-4">
         <div>
-          <h3 className="font-semibold text-foreground">Points forts</h3>
+          <h3 className="font-semibold text-foreground">{t("highlights")}</h3>
           <ul className="mt-2 list-disc list-inside text-gray-700 dark:text-gray-300">
             {deal.highlights?.map((h) => (
               <li key={h}>{h}</li>

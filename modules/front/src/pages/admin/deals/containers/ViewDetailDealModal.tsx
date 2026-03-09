@@ -1,3 +1,4 @@
+import { useI18n } from "@/common/hooks/useI18n";
 import { Dialog, DialogContent } from "@/common/components/ui/dialog";
 import Form, { type IFieldGroup } from "@/common/containers/Form";
 import { useForm } from "react-hook-form";
@@ -31,7 +32,11 @@ import {
 } from "lucide-react";
 import { DataTable } from "@/common/components";
 import { formatCurrency } from "@/common/utils/formatCurrency";
-import { useCommentairesByDeal, useUsers, useGetDealImageUrl } from "@/common/api";
+import {
+  useCommentairesByDeal,
+  useUsers,
+  useGetDealImageUrl,
+} from "@/common/api";
 import { cn } from "@/common/utils";
 import { ImageLightbox } from "@/common/components/ImageLightbox";
 import { Button } from "@/common/components/ui/button";
@@ -279,15 +284,17 @@ function ReadOnlyImageLightbox({
   onClose: () => void;
 }) {
   // Charger toutes les URLs des images
-  const imageUrls = images.map((img) => {
-    const imageUuid = img.imageUuid || img.uuid;
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { data: imageUrlData } = useGetDealImageUrl(
-      dealUuid ?? "",
-      imageUuid ?? "",
-    );
-    return imageUrlData?.url || "";
-  }).filter(Boolean);
+  const imageUrls = images
+    .map((img) => {
+      const imageUuid = img.imageUuid || img.uuid;
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const { data: imageUrlData } = useGetDealImageUrl(
+        dealUuid ?? "",
+        imageUuid ?? "",
+      );
+      return imageUrlData?.url || "";
+    })
+    .filter(Boolean);
 
   return (
     <ImageLightbox
@@ -312,6 +319,7 @@ function ReadOnlyImageGallery({
 }) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const { t } = useI18n("deals");
 
   const handleImageClick = (index: number): void => {
     setCurrentImageIndex(index);
@@ -326,10 +334,10 @@ function ReadOnlyImageGallery({
             <ImageIcon className="w-10 h-10 text-gray-300 dark:text-gray-600" />
           </div>
           <p className="text-base text-gray-900 dark:text-gray-100 font-bold mb-1">
-            Aucune image disponible
+            {t("noImageAvailable")}
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Ce deal n'a pas encore d'images
+            {t("noImageAvailableDescription")}
           </p>
         </div>
       </div>
@@ -346,9 +354,11 @@ function ReadOnlyImageGallery({
               <ImageIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Galerie d'images</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                {t("imageGallery")}
+              </p>
               <p className="text-xs text-gray-600 dark:text-gray-400">
-                Cliquez sur une image pour l'agrandir
+                {t("enlargeImage")}
               </p>
             </div>
           </div>
@@ -357,7 +367,7 @@ function ReadOnlyImageGallery({
               {images.length}
             </span>
             <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-              image{images.length > 1 ? "s" : ""}
+              {t("images", { count: images.length })}
             </span>
           </div>
         </div>
@@ -403,6 +413,7 @@ export function ViewDetailDealModal({
   onClose: () => void;
   deal: any;
 }) {
+  const { t } = useI18n("admin.deals");
   const dealUuid = deal?.id ?? deal?.raw?.uuid ?? "";
   const { data: commentaires = [] } = useCommentairesByDeal(dealUuid);
   const { data: users = [] } = useUsers();
@@ -415,7 +426,7 @@ export function ViewDetailDealModal({
     () => [
       {
         accessorKey: "name",
-        header: "Nom du participant",
+        header: t("participantName"),
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md flex-shrink-0">
@@ -437,7 +448,7 @@ export function ViewDetailDealModal({
       },
       {
         accessorKey: "email",
-        header: "Email",
+        header: t("email"),
         cell: ({ row }) => (
           <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
             {row.original.email}
@@ -446,12 +457,16 @@ export function ViewDetailDealModal({
       },
       {
         accessorKey: "shippingAddress",
-        header: "Adresse de livraison",
+        header: t("shippingAddress"),
         cell: ({ row }) => {
           const address = row.original.shippingAddress;
 
           if (!address)
-            return <span className="text-gray-400 dark:text-gray-500 text-sm">—</span>;
+            return (
+              <span className="text-gray-400 dark:text-gray-500 text-sm">
+                —
+              </span>
+            );
 
           return (
             <div className="flex items-start gap-2">
@@ -468,7 +483,7 @@ export function ViewDetailDealModal({
       },
       {
         accessorKey: "parts",
-        header: "Nombre de parts",
+        header: t("partsCount"),
         cell: ({ row }) => (
           <div className="flex items-center justify-center">
             <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 font-bold px-3 py-1">
@@ -479,7 +494,7 @@ export function ViewDetailDealModal({
       },
       {
         accessorKey: "amount",
-        header: "Montant",
+        header: t("amount"),
         cell: ({ row }) => (
           <span className="font-bold text-green-600 text-base">
             {formatCurrency(row.original.amount)}
@@ -488,7 +503,7 @@ export function ViewDetailDealModal({
       },
       {
         accessorKey: "status",
-        header: "Statut",
+        header: t("status"),
         cell: ({ row }) => (
           <Badge
             className={
@@ -500,12 +515,12 @@ export function ViewDetailDealModal({
             {row.original.status === "confirmé" ? (
               <span className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-green-500" />
-                Confirmé
+                {t("statusConfirmed")}
               </span>
             ) : (
               <span className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
-                En attente
+                {t("statusPending")}
               </span>
             )}
           </Badge>
@@ -519,7 +534,7 @@ export function ViewDetailDealModal({
     () => [
       {
         accessorKey: "user",
-        header: "Auteur",
+        header: t("author"),
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-md flex-shrink-0">
@@ -535,7 +550,7 @@ export function ViewDetailDealModal({
       },
       {
         accessorKey: "rating",
-        header: "Note",
+        header: t("rating"),
         cell: ({ row }) => (
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-1">
@@ -558,7 +573,7 @@ export function ViewDetailDealModal({
       },
       {
         accessorKey: "comment",
-        header: "Commentaire",
+        header: t("comment"),
         cell: ({ row }) => (
           <div className="max-w-md">
             <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2 leading-relaxed">
@@ -569,7 +584,7 @@ export function ViewDetailDealModal({
       },
       {
         accessorKey: "date",
-        header: "Date",
+        header: t("date"),
         cell: ({ row }) => (
           <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
             <Calendar className="w-4 h-4" />
@@ -642,99 +657,99 @@ export function ViewDetailDealModal({
 
   const viewDetailDealFormGroups: IFieldGroup[] = [
     {
-      title: "📋 Informations générales",
-      description: "Vue complète de l'offre publiée",
+      title: t("generalInformation"),
+      description: t("generalInformationDescription"),
       columns: 2,
       className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
       fields: [
         {
           type: "text",
           name: "title",
-          label: "Titre du deal",
+          label: t("dealTitle"),
         },
         {
           type: "text",
           name: "shortSubtitle",
-          label: "Sous-titre",
+          label: t("subtitle"),
         },
         {
           type: "textarea",
           name: "description",
-          label: "Description",
+          label: t("descriptionField"),
           colSpan: 2,
         },
         {
           type: "text",
           name: "location",
-          label: "Lieu",
+          label: t("location"),
         },
         {
           type: "radio",
           name: "status",
-          label: "Statut",
+          label: t("status"),
           items: [
-            { label: "Publié", value: "published" },
-            { label: "Brouillon", value: "draft" },
+            { label: t("published"), value: "published" },
+            { label: t("draft"), value: "draft" },
           ],
         },
       ],
     },
     {
-      title: "💰 Tarification",
-      description: "Structure de prix de l'offre",
+      title: t("pricing"),
+      description: t("pricingDescription"),
       columns: 3,
       className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
       fields: [
         {
           type: "number",
           name: "price",
-          label: "Prix de la part (CAD)",
+          label: t("partPrice"),
         },
         {
           type: "number",
           name: "originalPrice",
-          label: "Prix initial (CAD)",
+          label: t("initialPrice"),
         },
         {
           type: "select",
           name: "currency",
-          label: "Devise",
-          items: [{ label: "Dollar", value: "CAD" }],
+          label: t("currency"),
+          items: [{ label: t("dollar"), value: "CAD" }],
         },
       ],
     },
     {
-      title: "📅 Disponibilité",
-      description: "Parts et date limite du deal",
+      title: t("availability"),
+      description: t("availabilityDescription"),
       columns: 3,
       className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
       fields: [
         {
           type: "number",
           name: "partsTotal",
-          label: "Parts totales",
+          label: t("totalParts"),
         },
         {
           type: "number",
           name: "minRequired",
-          label: "Parts minimum",
+          label: t("minParts"),
         },
         {
           type: "date",
           name: "expiryDate",
-          label: "Date d'expiration",
+          label: t("expirationDate"),
         },
       ],
     },
     {
-      title: "📸 Galerie d'images",
-      description: "Images associées au deal",
+      title: t("imageGallery"),
+      description: t("imageGalleryDescription"),
       className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
       fields: [
         {
           type: "file" as const,
           name: "images",
-          label: "Images",
+          label: t("images"),
           render: () => (
             <ReadOnlyImageGallery
               images={deal?.raw?.listeImages || []}
@@ -760,10 +775,10 @@ export function ViewDetailDealModal({
             </div>
             <div className="flex-1">
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                Détails du deal
+                {t("details")}
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 font-normal mt-0.5">
-                Vue complète de l'offre et des participants
+                {t("detailsDescription")}
               </p>
             </div>
           </div>
@@ -779,7 +794,7 @@ export function ViewDetailDealModal({
               >
                 <div className="flex items-center gap-2 px-2">
                   <FileText className="w-4 h-4" />
-                  <span className="text-sm font-medium">Détails</span>
+                  <span className="text-sm font-medium">{t("details")}</span>
                 </div>
               </TabsTrigger>
               <TabsTrigger
@@ -788,7 +803,7 @@ export function ViewDetailDealModal({
               >
                 <div className="flex items-center gap-2 px-2">
                   <Users className="w-4 h-4" />
-                  <span className="text-sm font-medium">Participants</span>
+                  <span className="text-sm font-medium">{t("participants")}</span>
                   <Badge className="ml-1 bg-blue-600 text-white text-xs px-2 py-0.5">
                     {participantsMock.length}
                   </Badge>
@@ -800,7 +815,7 @@ export function ViewDetailDealModal({
               >
                 <div className="flex items-center gap-2 px-2">
                   <Store className="w-4 h-4" />
-                  <span className="text-sm font-medium">Fournisseur</span>
+                  <span className="text-sm font-medium">{t("supplier")}</span>
                 </div>
               </TabsTrigger>
               <TabsTrigger
@@ -809,7 +824,7 @@ export function ViewDetailDealModal({
               >
                 <div className="flex items-center gap-2 px-2">
                   <MessageSquare className="w-4 h-4" />
-                  <span className="text-sm font-medium">Avis</span>
+                  <span className="text-sm font-medium">{t("reviews")}</span>
                   <Badge className="ml-1 bg-yellow-600 text-white text-xs px-2 py-0.5">
                     {reviews.length}
                   </Badge>
@@ -837,16 +852,19 @@ export function ViewDetailDealModal({
                           <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         </div>
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Participants
+                          {t("participants")}
                         </p>
                       </div>
                       <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
                         {participantsMock.length}
                       </p>
                       <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                        {participantsMock.filter((p) => p.status === "confirmé")
-                          .length}{" "}
-                        confirmé(s)
+                        {
+                          participantsMock.filter(
+                            (p) => p.status === "confirmé",
+                          ).length
+                        }{" "}
+                        {t("confirmed")}
                       </p>
                     </div>
 
@@ -856,7 +874,7 @@ export function ViewDetailDealModal({
                           <Package className="w-5 h-5 text-green-600 dark:text-green-400" />
                         </div>
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Parts vendues
+                          {t("partsSold")}
                         </p>
                       </div>
                       <p className="text-3xl font-bold text-green-600 dark:text-green-400">
@@ -874,7 +892,7 @@ export function ViewDetailDealModal({
                             partsTotal) *
                             100,
                         )}
-                        % de remplissage
+                        {t("fillingRate")}
                       </p>
                     </div>
 
@@ -884,7 +902,7 @@ export function ViewDetailDealModal({
                           <TrendingUp className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                         </div>
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Revenu total
+                          {t("totalRevenue")}
                         </p>
                       </div>
                       <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
@@ -896,7 +914,7 @@ export function ViewDetailDealModal({
                         )}
                       </p>
                       <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                        Montant collecté
+                        {t("collectedAmount")}
                       </p>
                     </div>
                   </div>
@@ -905,10 +923,10 @@ export function ViewDetailDealModal({
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                     <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-blue-50/30 dark:from-gray-900 dark:to-blue-950/30">
                       <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
-                        Liste des participants
+                        {t("participantList")}
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
-                        Détails de tous les participants au deal
+                        {t("participantListDescription")}
                       </p>
                     </div>
                     <div className="p-4">
@@ -916,7 +934,7 @@ export function ViewDetailDealModal({
                         columns={participantColumns}
                         data={participantsMock}
                         searchKey="name"
-                        searchPlaceholder="Rechercher un participant..."
+                        searchPlaceholder={t("searchParticipant")}
                         enableSelection={false}
                         enableRowNumber={true}
                         enableExport={true}
@@ -969,7 +987,7 @@ export function ViewDetailDealModal({
                           <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         </div>
                         <p className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wide">
-                          Localisation
+                          {t("location")}
                         </p>
                       </div>
                       <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -983,7 +1001,7 @@ export function ViewDetailDealModal({
                           <Phone className="w-5 h-5 text-green-600 dark:text-green-400" />
                         </div>
                         <p className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wide">
-                          Contact
+                          {t("contact")}
                         </p>
                       </div>
                       <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -997,14 +1015,14 @@ export function ViewDetailDealModal({
                           <Package className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                         </div>
                         <p className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wide">
-                          Deals publiés
+                          {t("dealsPublished")}
                         </p>
                       </div>
                       <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
                         {supplierMock.dealsCount}
                       </p>
                       <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                        Offres disponibles
+                        {t("offersAvailable")}
                       </p>
                     </div>
 
@@ -1014,7 +1032,7 @@ export function ViewDetailDealModal({
                           <Calendar className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                         </div>
                         <p className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wide">
-                          Membre depuis
+                          {t("memberSince")}
                         </p>
                       </div>
                       <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -1041,10 +1059,10 @@ export function ViewDetailDealModal({
                       </div>
                       <div>
                         <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                          Avis clients
+                          {t("reviews")}
                         </h3>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {reviews.length} avis reçu{reviews.length > 1 ? "s" : ""}
+                          {t("reviewsReceived", { count: reviews.length })}
                         </p>
                       </div>
                     </div>
@@ -1057,7 +1075,7 @@ export function ViewDetailDealModal({
                         columns={reviewColumns}
                         data={reviews}
                         searchKey="user"
-                        searchPlaceholder="Rechercher un avis..."
+                        searchPlaceholder={t("searchReview")}
                         enableSelection={false}
                         enableRowNumber={false}
                         enableExport={true}

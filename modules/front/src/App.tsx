@@ -50,7 +50,10 @@ function App(): JSX.Element {
             <Route path={PATHS.REGISTER} element={<Register />} />
             <Route path={PATHS.FORGOT_PASSWORD} element={<ForgotPassword />} />
             <Route path={PATHS.RESET_PASSWORD} element={<ResetPassword />} />
-            <Route path={PATHS.ACTIVATE_ACCOUNT} element={<ActivateAccount />} />
+            <Route
+              path={PATHS.ACTIVATE_ACCOUNT}
+              element={<ActivateAccount />}
+            />
 
             {/* Admin Login */}
             <Route path="/admin/login" element={<AdminLogin />} />
@@ -75,20 +78,23 @@ function App(): JSX.Element {
               <Route path={PATHS.HOME} element={<Home />} />
               <Route path={PATHS.DEAL_DETAIL()} element={<DealDetail />} />
               <Route path={PATHS.SEARCH} element={<SearchPage />} />
+              <Route path={PATHS.DEALS} element={<Deals />} />
+              <Route path={PATHS.CATEGORIES()} element={<Category />} />
 
               {/* Routes protégées */}
               <Route element={<ProtectedRoutes />}>
                 <Route path={PATHS.PROFILE} element={<Profile />} />
                 <Route path={PATHS.CHECKOUT()} element={<Checkout />} />
-                <Route path="/checkout/payment-success" element={<PaymentSuccess />} />
+                <Route
+                  path="/checkout/payment-success"
+                  element={<PaymentSuccess />}
+                />
                 <Route path={PATHS.ORDERS} element={<Orders />} />
                 <Route
                   path={PATHS.SUCCESS_SUBSCRIPTION()}
                   element={<OrderSuccess />}
                 />
-                <Route path={PATHS.CATEGORIES()} element={<Category />} />
                 <Route path={PATHS.ALL_CATEGORIES} element={<Categories />} />
-                <Route path={PATHS.DEALS} element={<Deals />} />
               </Route>
             </Route>
 
