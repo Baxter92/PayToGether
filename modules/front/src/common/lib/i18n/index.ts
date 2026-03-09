@@ -11,7 +11,7 @@ i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    fallbackLng: "fr-CA",
+    fallbackLng: "en-CA",
     supportedLngs: ["fr-CA", "en-CA"],
     ns: [
       "app",

@@ -21,14 +21,14 @@ const defaultT: TFunction = ((k: string) => k) as TFunction;
 export const I18nContext = createContext<I18nContextProps>({
   t: defaultT,
   i18n: {} as unknown as I18nType,
-  language: "fr-CA",
+  language: "en-CA",
   changeLanguage: () => {},
   availableLanguages: [],
 });
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const { t, i18n } = useTranslation();
-  const language = (i18n.language ?? "fr-CA") as ILanguages;
+  const language = (i18n.language ?? "en-CA") as ILanguages;
   const changeLanguage = (lng: ILanguages) => {
     i18n.changeLanguage(lng);
   };
