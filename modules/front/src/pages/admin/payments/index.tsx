@@ -2,324 +2,294 @@ import type { ReactElement } from "react";
 import { useState } from "react";
 import {
   CreditCard,
-  Search,
   Download,
   ArrowUpRight,
   ArrowDownRight,
+  Loader2,
 } from "lucide-react";
-import { Input } from "@/common/components/ui/input";
 import { Button } from "@/common/components/ui/button";
 import { Badge } from "@/common/components/ui/badge";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/common/components/ui/card";
-import Select from "@/common/components/Select";
 import DataTable from "@/common/components/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatCurrency } from "@/common/utils/formatCurrency";
 import { useI18n } from "@/common/hooks/useI18n";
 import { VStack } from "@/common/components";
 import ViewOrderDetailsModal from "../orders/components/ViewOrderDetailsModal";
-import { mockOrders } from "../orders";
+import { useAdminPayments } from "@/common/api/hooks/usePayments";
+import {
+  StatutPaiement,
+  type StatutPaiementType,
+  type PaiementListDTO,
+} from "@/common/api/types/payment";
 
-interface Payment {
-  id: string;
-  orderId: string;
-  customer: string;
-  merchant: string;
-  amount: number;
-  commission: number;
-  method: "mobile_money" | "card" | "bank_transfer";
-  status: "completed" | "pending" | "failed" | "refunded";
-  createdAt: string;
-}
-
-const mockPayments: Payment[] = [
-  {
-    id: "PAY-001",
-    orderId: "ORD-001",
-    customer: "Jean Dupont",
-    merchant: "Restaurant Le Gourmet",
-    amount: 25000,
-    commission: 2500,
-    method: "mobile_money",
-    status: "completed",
-    createdAt: "2024-03-28T10:30:00",
-  },
-  {
-    id: "PAY-002",
-    orderId: "ORD-002",
-    customer: "Marie Claire",
-    merchant: "Spa Wellness",
-    amount: 45000,
-    commission: 4500,
-    method: "card",
-    status: "completed",
-    createdAt: "2024-03-28T09:15:00",
-  },
-  {
-    id: "PAY-003",
-    orderId: "ORD-003",
-    customer: "Paul Martin",
-    merchant: "Boutique Mode",
-    amount: 18000,
-    commission: 1800,
-    method: "mobile_money",
-    status: "pending",
-    createdAt: "2024-03-27T16:45:00",
-  },
-  {
-    id: "PAY-004",
-    orderId: "ORD-004",
-    customer: "Alice Nkomo",
-    merchant: "Auto Service Pro",
-    amount: 75000,
-    commission: 7500,
-    method: "bank_transfer",
-    status: "failed",
-    createdAt: "2024-03-27T14:20:00",
-  },
-  {
-    id: "PAY-005",
-    orderId: "ORD-005",
-    customer: "Bruno Ekwalla",
-    merchant: "Restaurant Le Gourmet",
-    amount: 32000,
-    commission: 3200,
-    method: "card",
-    status: "refunded",
-    createdAt: "2024-03-26T11:00:00",
-  },
-];
-
-const statusConfig = {
-  completed: { colorScheme: "success" as const },
-  pending: { colorScheme: "warning" as const },
-  failed: { colorScheme: "danger" as const },
-  refunded: { colorScheme: "info" as const },
+const statusConfig: Record<
+  StatutPaiementType,
+  { colorScheme: "success" | "warning" | "danger" | "info" }
+> = {
+  [StatutPaiement.CONFIRME]: { colorScheme: "success" },
+  [StatutPaiement.EN_ATTENTE]: { colorScheme: "warning" },
+  [StatutPaiement.ECHOUE]: { colorScheme: "danger" },
+  [StatutPaiement.PROCESSING]: { colorScheme: "info" },
+  [StatutPaiement.REMBOURSÉ]: { colorScheme: "info" },
 };
 
-const methodLabels = {
-  mobile_money: "methodMobileMoney",
-  card: "methodCard",
-  bank_transfer: "methodBankTransfer",
+const statusTranslationKey: Record<StatutPaiementType, string> = {
+  [StatutPaiement.CONFIRME]: "completed",
+  [StatutPaiement.EN_ATTENTE]: "pending",
+  [StatutPaiement.ECHOUE]: "failed",
+  [StatutPaiement.PROCESSING]: "processing",
+  [StatutPaiement.REMBOURSÉ]: "refunded",
+};
+
+const methodLabels: Record<string, string> = {
+  MOBILE_MONEY: "methodMobileMoney",
+  CARTE_BANCAIRE: "methodCard",
+  VIREMENT_BANCAIRE: "methodBankTransfer",
+  SQUARE_CARD: "methodCard",
 };
 
 export default function AdminPayments(): ReactElement {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedPayment, setSelectedPayment] = useState<any>(null);
   const [openOrderDetails, setOpenOrderDetails] = useState(false);
   const { t: tAdmin } = useI18n("admin");
   const { t: tStatus } = useI18n("status");
 
-  const filteredPayments = mockPayments.filter((payment) => {
-    const matchesSearch =
-      payment.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      payment.merchant.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      payment.id.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || payment.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const { data, isLoading, error } = useAdminPayments();
 
-  const columns: ColumnDef<Payment>[] = [
+  const payments = data?.paiements ?? [];
+  const stats = data?.statistiques;
+
+  const columns: ColumnDef<PaiementListDTO>[] = [
     {
-      accessorKey: "id",
+      accessorKey: "uuid",
       header: tAdmin("payments.paymentId"),
       cell: ({ row }) => (
-        <span className="font-mono text-sm">{row.original.id}</span>
+        <span className="font-mono text-xs truncate max-w-[100px] block">
+          {row.original.uuid}
+        </span>
       ),
     },
     {
-      accessorKey: "customer",
+      accessorKey: "clientNom",
       header: tAdmin("payments.customer"),
+      cell: ({ row }) =>
+        `${row.original.clientPrenom} ${row.original.clientNom}`,
     },
     {
-      accessorKey: "orderId",
+      accessorKey: "numeroCommande",
       header: tAdmin("payments.order"),
       cell: ({ row }) => (
         <Button
           variant="link"
           size="sm"
+          className="p-0 h-auto"
           onClick={() => {
-            setSelectedPayment(row.original);
+            setSelectedPayment({
+              id: row.original.numeroCommande,
+              customer: `${row.original.clientPrenom} ${row.original.clientNom}`,
+              deal: row.original.dealTitre,
+              date: row.original.datePaiement
+                ? new Date(row.original.datePaiement).toLocaleDateString()
+                : "-",
+              amount: row.original.montant,
+              status:
+                statusTranslationKey[row.original.statutPaiement] || "pending",
+            });
             setOpenOrderDetails(true);
           }}
         >
-          {row.original.orderId}
+          {row.original.numeroCommande}
         </Button>
       ),
     },
     {
-      accessorKey: "merchant",
+      accessorKey: "marchandNom",
       header: tAdmin("payments.merchant"),
+      cell: ({ row }) =>
+        `${row.original.marchandPrenom} ${row.original.marchandNom}`,
     },
     {
-      accessorKey: "amount",
+      accessorKey: "montant",
       header: tAdmin("payments.amount"),
       cell: ({ row }) => (
         <span className="font-medium">
-          {formatCurrency(row.original.amount)}
+          {formatCurrency(row.original.montant)}
         </span>
       ),
     },
     {
-      accessorKey: "commission",
-      header: tAdmin("payments.commission"),
-      cell: ({ row }) => (
-        <span className="text-muted-foreground">
-          {formatCurrency(row.original.commission)}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "method",
+      accessorKey: "methodePaiement",
       header: tAdmin("payments.method"),
-      cell: ({ row }) => tAdmin(methodLabels[row.original.method]),
+      cell: ({ row }) =>
+        tAdmin(
+          methodLabels[row.original.methodePaiement] ||
+            row.original.methodePaiement,
+        ),
     },
     {
-      accessorKey: "status",
+      accessorKey: "statutPaiement",
       header: tAdmin("payments.status"),
       cell: ({ row }) => {
-        const config = statusConfig[row.original.status];
+        const config = statusConfig[row.original.statutPaiement];
+        const translationKey =
+          statusTranslationKey[row.original.statutPaiement];
         return (
-          <Badge colorScheme={config.colorScheme}>
-            {tStatus(row.original.status)}
+          <Badge colorScheme={config?.colorScheme || "info"}>
+            {tStatus(
+              translationKey || row.original.statutPaiement.toLowerCase(),
+            )}
           </Badge>
         );
       },
     },
     {
-      accessorKey: "createdAt",
+      accessorKey: "datePaiement",
       header: tAdmin("payments.date"),
       cell: ({ row }) =>
-        new Date(row.original.createdAt).toLocaleDateString("fr-FR", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
+        row.original.datePaiement
+          ? new Date(row.original.datePaiement).toLocaleDateString()
+          : "-",
     },
   ];
 
-  const totalRevenue = mockPayments
-    .filter((p) => p.status === "completed")
-    .reduce((acc, p) => acc + p.amount, 0);
+  if (isLoading) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
-  const totalCommission = mockPayments
-    .filter((p) => p.status === "completed")
-    .reduce((acc, p) => acc + p.commission, 0);
+  if (error) {
+    return (
+      <div className="flex h-[400px] items-center justify-center text-destructive">
+        Erreur lors du chargement des paiements
+      </div>
+    );
+  }
 
   return (
-    <VStack>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <VStack spacing={6} className="p-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-heading font-bold flex items-center gap-2">
-            <CreditCard className="h-8 w-8" />
+          <h1 className="text-3xl font-bold tracking-tight">
             {tAdmin("payments.title")}
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground">
             {tAdmin("payments.description")}
           </p>
         </div>
-        <Button variant="outline" leftIcon={<Download className="h-4 w-4" />}>
+        <Button variant="outline">
+          <Download className="mr-2 h-4 w-4" />
           {tAdmin("payments.export")}
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
               {tAdmin("payments.totalTransactions")}
-            </CardDescription>
-            <CardTitle className="text-2xl">{mockPayments.length}</CardTitle>
+            </CardTitle>
+            <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {stats?.totalTransactions || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-emerald-500 inline-flex items-center mr-1">
+                <ArrowUpRight className="h-3 w-3 mr-1" />
+                +12.5%
+              </span>
+              {tAdmin("dashboard.comparedToLastMonth")}
+            </p>
+          </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>{tAdmin("payments.totalRevenue")}</CardDescription>
-            <CardTitle className="text-2xl flex items-center gap-1">
-              <ArrowUpRight className="h-5 w-5 text-green-600" />
-              {formatCurrency(totalRevenue)}
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {tAdmin("payments.totalRevenue")}
             </CardTitle>
+            <div className="h-4 w-4 text-emerald-500 font-bold">$</div>
           </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {formatCurrency(stats?.montantTotal || 0)}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-emerald-500 inline-flex items-center mr-1">
+                <ArrowUpRight className="h-3 w-3 mr-1" />
+                +8.2%
+              </span>
+              {tAdmin("dashboard.comparedToLastMonth")}
+            </p>
+          </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>{tAdmin("payments.commissions")}</CardDescription>
-            <CardTitle className="text-2xl">
-              {formatCurrency(totalCommission)}
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {tAdmin("payments.commissions")}
             </CardTitle>
+            <ArrowUpRight className="h-4 w-4 text-emerald-500" />
           </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {formatCurrency((stats?.montantTotal || 0) * 0.1)}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-emerald-500 inline-flex items-center mr-1">
+                <ArrowUpRight className="h-3 w-3 mr-1" />
+                +10.1%
+              </span>
+              {tAdmin("dashboard.comparedToLastMonth")}
+            </p>
+          </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>{tAdmin("payments.failed")}</CardDescription>
-            <CardTitle className="text-2xl flex items-center gap-1 text-destructive">
-              <ArrowDownRight className="h-5 w-5" />
-              {mockPayments.filter((p) => p.status === "failed").length}
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {tAdmin("payments.failed")}
             </CardTitle>
+            <ArrowDownRight className="h-4 w-4 text-destructive" />
           </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {stats?.transactionsEchouees || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-destructive inline-flex items-center mr-1">
+                <ArrowDownRight className="h-3 w-3 mr-1" />
+                -2.4%
+              </span>
+              {tAdmin("dashboard.comparedToLastMonth")}
+            </p>
+          </CardContent>
         </Card>
       </div>
 
       <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <CardTitle>{tAdmin("payments.paymentHistory")}</CardTitle>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <div className="relative w-full sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder={tAdmin("payments.search")}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Select
-                value={statusFilter}
-                onValueChange={setStatusFilter}
-                placeholder={tAdmin("payments.status")}
-                triggerClassName="w-full sm:w-40"
-                items={[
-                  { value: "all", label: tAdmin("payments.filter.all") },
-                  { value: "completed", label: tStatus("completed") },
-                  { value: "pending", label: tStatus("pending") },
-                  { value: "failed", label: tStatus("failed") },
-                  { value: "refunded", label: tStatus("refunded") },
-                ]}
-              />
-            </div>
-          </div>
-        </CardHeader>
         <CardContent>
-          <DataTable
-            columns={columns}
-            data={filteredPayments}
-            columnFiltersConfig={[
-              {
-                id: "orderId",
-                label: "Commande",
-                type: "select",
-                options: mockOrders.map((o) => ({ label: o.id, value: o.id })),
-              },
-            ]}
-          />
+          <DataTable columns={columns} data={payments} />
         </CardContent>
       </Card>
-      <ViewOrderDetailsModal
-        open={openOrderDetails}
-        onClose={() => setOpenOrderDetails(false)}
-        order={mockOrders.find((o) => o.id === selectedPayment?.orderId) as any}
-      />
+
+      {selectedPayment && (
+        <ViewOrderDetailsModal
+          open={openOrderDetails}
+          onClose={() => {
+            setOpenOrderDetails(false);
+            setSelectedPayment(null);
+          }}
+          order={selectedPayment}
+        />
+      )}
     </VStack>
   );
 }

@@ -68,7 +68,9 @@ const MethodBadge: React.FC<{ method: PaymentMethod }> = ({ method }) => {
   const { label, icon, className } = config[method] || config.stripe;
 
   return (
-    <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md border text-xs font-medium ${className}`}>
+    <div
+      className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md border text-xs font-medium ${className}`}
+    >
       {icon}
       <span>{label}</span>
     </div>
@@ -205,27 +207,27 @@ export default function PaymentsList(): JSX.Element {
             },
             ...(canMarkPaid
               ? [
-                {
-                  tooltip: "Marquer payé",
-                  leftIcon: <CheckIcon className="w-4 h-4" />,
-                  colorScheme: "success" as const,
-                  onClick: () =>
-                    alert(
-                      `Marquer ${row.original.id} comme payé (simulation)`,
-                    ),
-                },
-              ]
+                  {
+                    tooltip: "Marquer payé",
+                    leftIcon: <CheckIcon className="w-4 h-4" />,
+                    colorScheme: "success" as const,
+                    onClick: () =>
+                      alert(
+                        `Marquer ${row.original.id} comme payé (simulation)`,
+                      ),
+                  },
+                ]
               : []),
             ...(canRefund
               ? [
-                {
-                  tooltip: "Rembourser",
-                  leftIcon: <Wallet2Icon className="w-4 h-4" />,
-                  colorScheme: "warning" as const,
-                  onClick: () =>
-                    alert(`Rembourser ${row.original.id} (simulation)`),
-                },
-              ]
+                  {
+                    tooltip: "Rembourser",
+                    leftIcon: <Wallet2Icon className="w-4 h-4" />,
+                    colorScheme: "warning" as const,
+                    onClick: () =>
+                      alert(`Rembourser ${row.original.id} (simulation)`),
+                  },
+                ]
               : []),
 
             {

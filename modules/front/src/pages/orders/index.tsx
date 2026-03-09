@@ -19,7 +19,9 @@ export default function Orders(): JSX.Element {
           underline
         />
         {isLoading ? (
-          <div className="text-center py-8 text-muted-foreground">Chargement...</div>
+          <div className="text-center py-8 text-muted-foreground">
+            Chargement...
+          </div>
         ) : (
           <DealsList
             deals={deals}
