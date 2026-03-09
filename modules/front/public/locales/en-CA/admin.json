@@ -248,6 +248,7 @@
     "totalTransactions": "Total Transactions",
     "totalRevenue": "Total Revenue",
     "commissions": "Commissions",
+    "completedTransactions": "Successful Transactions",
     "failed": "Failed",
     "paymentHistory": "Payment History",
     "search": "Search...",

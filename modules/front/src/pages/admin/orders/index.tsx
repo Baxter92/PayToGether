@@ -258,7 +258,12 @@ export default function AdminOrders(): ReactElement {
             </div>
           </div> */}
 
-          <DataTable columns={columns} data={orders} enableSelection={false} />
+          <DataTable
+            columns={columns}
+            data={orders}
+            enableSelection={false}
+            enableExport={false}
+          />
         </CardContent>
       </Card>
 
