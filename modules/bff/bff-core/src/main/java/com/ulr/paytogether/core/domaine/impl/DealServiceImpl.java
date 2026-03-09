@@ -56,12 +56,28 @@ public class DealServiceImpl implements DealService {
 
     @Override
     public Optional<DealModele> lireParUuid(UUID uuid) {
-        return dealProvider.trouverParUuid(uuid);
+        return dealProvider.trouverParUuid(uuid)
+                .map(this::enrichirAvecStatistiques);
     }
 
     @Override
     public List<DealModele> lireTous() {
-        return dealProvider.trouverTous();
+        return dealProvider.trouverTous().stream()
+                .map(this::enrichirAvecStatistiques)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Enrichit un deal avec les statistiques calculées
+     * @param deal Deal à enrichir
+     * @return Deal enrichi avec moyenne commentaires et nombre participants réels
+     */
+    private DealModele enrichirAvecStatistiques(DealModele deal) {
+        if (deal != null && deal.getUuid() != null) {
+            deal.setMoyenneCommentaires(dealProvider.calculerMoyenneCommentaires(deal.getUuid()));
+            deal.setNombreParticipantsReel(dealProvider.compterParticipantsReels(deal.getUuid()));
+        }
+        return deal;
     }
 
     @Transactional
@@ -70,17 +86,23 @@ public class DealServiceImpl implements DealService {
         // Vérifier et mettre à jour les deals expirés avant de retourner les résultats
         verifierEtMettreAJourDealsExpires();
 
-        return dealProvider.trouverParStatut(statut);
+        return dealProvider.trouverParStatut(statut).stream()
+                .map(this::enrichirAvecStatistiques)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<DealModele> lireParCreateur(UUID createurUuid) {
-        return dealProvider.trouverParCreateur(createurUuid);
+        return dealProvider.trouverParCreateur(createurUuid).stream()
+                .map(this::enrichirAvecStatistiques)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<DealModele> lireParCategorie(UUID categorieUuid) {
-        return dealProvider.trouverParCategorie(categorieUuid);
+        return dealProvider.trouverParCategorie(categorieUuid).stream()
+                .map(this::enrichirAvecStatistiques)
+                .collect(Collectors.toList());
     }
 
     @Transactional

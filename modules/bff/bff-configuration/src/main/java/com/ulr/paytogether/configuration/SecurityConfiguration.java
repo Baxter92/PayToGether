@@ -70,6 +70,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/deals/*/images/*/url").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/deals/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/deals/*/commentaires").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/deals/categorie/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/publicites/actives").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/publicites/*/images/*/url").permitAll()
@@ -124,6 +125,7 @@ public class SecurityConfiguration {
                path.startsWith("/api/auth/activate-account") ||
                path.startsWith("/api/deals/statut") ||
                path.startsWith("/api/deals/villes") ||
+               path.startsWith("/api/deals/categorie/") ||
                (path.startsWith("/api/deals/") && path.contains("/images/") && path.endsWith("/url")) ||
                (path.startsWith("/api/deals/") && path.contains("/commentaires")) ||
                (path.matches("/api/deals/[0-9a-fA-F\\-]+") && !path.contains("/")) ||

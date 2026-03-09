@@ -48,4 +48,9 @@ private String pays;
 
 private LocalDateTime dateCreation;
 private LocalDateTime dateModification;
+
+// Champs calculés
+private Double moyenneCommentaires;  // Moyenne des notes des commentaires (0-5)
+private Long nombreParticipantsReel; // Nombre réel de participants actuels
 }
+

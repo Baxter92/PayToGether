@@ -9,6 +9,7 @@ import com.ulr.paytogether.core.enumeration.StatutDeal;
 import com.ulr.paytogether.provider.adapter.mapper.DealJpaMapper;
 import com.ulr.paytogether.provider.repository.CategorieRepository;
 import com.ulr.paytogether.provider.repository.CommandeRepository;
+import com.ulr.paytogether.provider.repository.CommentaireRepository;
 import com.ulr.paytogether.provider.repository.DealRepository;
 import com.ulr.paytogether.provider.repository.ImageDealRepository;
 import com.ulr.paytogether.provider.repository.UtilisateurRepository;
@@ -40,6 +41,7 @@ public class DealProviderAdapter implements DealProvider {
     private final CommandeRepository commandeRepository;
     private final DealJpaMapper mapper;
     private final FileManager fileManager;
+    private final CommentaireRepository commentaireRepository;
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -465,5 +467,20 @@ public class DealProviderAdapter implements DealProvider {
                                 .dealUuid(dealUuid)
                                 .build())
                 );
+    }
+
+    @Override
+    public Double calculerMoyenneCommentaires(UUID dealUuid) {
+        log.debug("Calcul de la moyenne des commentaires pour le deal: {}", dealUuid);
+        Double moyenne = commentaireRepository.calculerMoyenneNotesPourDeal(dealUuid);
+        return moyenne != null ? Math.round(moyenne * 10.0) / 10.0 : null; // Arrondi à 1 décimale
+    }
+
+    @Override
+    public Long compterParticipantsReels(UUID dealUuid) {
+        log.debug("Comptage des participants réels pour le deal: {}", dealUuid);
+        return jpaRepository.findById(dealUuid)
+                .map(deal -> (long) deal.getParticipants().size())
+                .orElse(0L);
     }
 }

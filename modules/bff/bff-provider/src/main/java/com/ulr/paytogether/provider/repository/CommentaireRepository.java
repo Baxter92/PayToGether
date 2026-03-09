@@ -4,6 +4,8 @@ import com.ulr.paytogether.provider.adapter.entity.CommentaireJpa;
 import com.ulr.paytogether.provider.adapter.entity.DealJpa;
 import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -35,5 +37,13 @@ public interface CommentaireRepository extends JpaRepository<CommentaireJpa, UUI
      * @return liste des réponses (commentaires enfants)
      */
     List<CommentaireJpa> findByCommentaireParentJpa(CommentaireJpa commentaireParentJpa);
+
+    /**
+     * Calcule la moyenne des notes pour un deal
+     * @param dealUuid UUID du deal
+     * @return Moyenne des notes (null si aucun commentaire)
+     */
+    @Query("SELECT AVG(c.note) FROM CommentaireJpa c WHERE c.dealJpa.uuid = :dealUuid AND c.note IS NOT NULL")
+    Double calculerMoyenneNotesPourDeal(@Param("dealUuid") UUID dealUuid);
 
 }

@@ -69,4 +69,18 @@ public interface DealProvider {
      * Récupérer une image par son UUID et celui du deal
      */
     Optional<ImageDealModele> trouverImageParUuid(UUID dealUuid, UUID imageUuid);
+
+    /**
+     * Calculer la moyenne des notes des commentaires pour un deal
+     * @param dealUuid UUID du deal
+     * @return Moyenne des notes (null si aucun commentaire)
+     */
+    Double calculerMoyenneCommentaires(UUID dealUuid);
+
+    /**
+     * Compter le nombre réel de participants pour un deal
+     * @param dealUuid UUID du deal
+     * @return Nombre de participants
+     */
+    Long compterParticipantsReels(UUID dealUuid);
 }

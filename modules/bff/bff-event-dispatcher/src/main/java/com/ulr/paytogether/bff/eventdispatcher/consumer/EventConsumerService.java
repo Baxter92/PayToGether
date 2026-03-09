@@ -105,9 +105,10 @@ public class EventConsumerService {
     }
 
     /**
-     * Traite les événements en attente toutes les 5 secondes
+     * Traite les événements en attente toutes les 30 secondes
+     * Délai augmenté pour éviter les doublons lors de l'envoi d'emails
      */
-    @Scheduled(fixedDelay = 5000, initialDelay = 10000)
+    @Scheduled(fixedDelay = 30000, initialDelay = 10000)
     @Transactional
     public void processePendingEvents() {
         List<EventRecordJpa> pendingEvents = eventRecordRepository.findByStatus(EventRecordJpa.EventStatus.PENDING);

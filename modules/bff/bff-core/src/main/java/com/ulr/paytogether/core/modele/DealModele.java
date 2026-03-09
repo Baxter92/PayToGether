@@ -39,4 +39,8 @@ public class DealModele {
     private String pays;
     private LocalDateTime dateCreation;
     private LocalDateTime dateModification;
+
+    // Champs calculés (non persistés)
+    private Double moyenneCommentaires;  // Moyenne des notes des commentaires
+    private Long nombreParticipantsReel; // Nombre réel de participants actuels
 }

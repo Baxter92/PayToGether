@@ -86,9 +86,8 @@ public class DealResource {
     }
 
     /**
-     * Récupérer les deals d'une catégorie (AUTHENTIFICATION REQUISE)
+     * Récupérer les deals d'une catégorie (PUBLIC - Pas d'authentification requise)
      */
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/categorie/{categorieUuid}")
     public ResponseEntity<List<DealResponseDto>> lireParCategorie(@PathVariable UUID categorieUuid) {
         log.debug("Récupération des deals de la catégorie: {}", categorieUuid);
