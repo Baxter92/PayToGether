@@ -101,6 +101,7 @@ export default function ViewOrderDetailsModal({
       type: "select",
       name: "status",
       label: "Statut",
+      disabled: true,
       items: [
         { label: "Complété", value: "completed" },
         { label: "En attente", value: "pending" },
