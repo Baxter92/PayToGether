@@ -96,25 +96,40 @@ public class ElasticsearchAdminResource {
             boolean exists = indexOps.exists();
 
             if (!exists) {
-                log.warn("L'index 'deals' n'existe pas");
+                log.info("L'index 'deals' n'existe pas déjà");
 
                 Map<String, Object> response = new HashMap<>();
-                response.put("success", false);
-                response.put("message", "L'index 'deals' n'existe pas");
+                response.put("success", true);
+                response.put("message", "L'index 'deals' n'existe pas (déjà supprimé ou jamais créé)");
+                response.put("exists", false);
 
                 return ResponseEntity.ok(response);
             }
 
-            // Supprimer l'index
+            // Supprimer l'index (forcer la suppression)
             boolean deleted = indexOps.delete();
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", deleted);
-            response.put("message", deleted
-                ? "Index 'deals' supprimé avec succès"
-                : "Échec de la suppression de l'index 'deals'");
+            // Attendre un peu pour s'assurer que la suppression est propagée
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
 
-            log.warn("Index 'deals' supprimé : {}", deleted);
+            // Vérifier que l'index est bien supprimé
+            boolean stillExists = indexOps.exists();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", deleted && !stillExists);
+            response.put("deleted", deleted);
+            response.put("existsAfterDeletion", stillExists);
+            response.put("message", deleted && !stillExists
+                ? "Index 'deals' supprimé avec succès et vérifié"
+                : deleted
+                    ? "Index 'deals' supprimé mais existe toujours (attendre quelques secondes)"
+                    : "Échec de la suppression de l'index 'deals'");
+
+            log.warn("Index 'deals' supprimé : {}, existe encore : {}", deleted, stillExists);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
@@ -124,6 +139,7 @@ public class ElasticsearchAdminResource {
             error.put("success", false);
             error.put("error", "Impossible de supprimer l'index");
             error.put("message", e.getMessage());
+            error.put("type", e.getClass().getSimpleName());
 
             return ResponseEntity.internalServerError().body(error);
         }

@@ -3,6 +3,7 @@
 ### Serveur: http://31.97.132.132:8190 (Kubernetes)
 ### Serveur: http://localhost:8080 (Local)
 ### ====================================================
+@access_token = {{access_token}}
 
 ### 1. Vérifier la connexion Elasticsearch
 GET {{base_url}}/api/admin/elasticsearch/health
@@ -11,18 +12,18 @@ Content-Type: application/json
 ### 2. Lister tous les index Elasticsearch connus
 GET {{base_url}}/api/admin/elasticsearch/indices
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{access_token}}
 
 ### 3. Vérifier si l'index 'deals' existe
 GET {{base_url}}/api/admin/elasticsearch/indices/deals/exists
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{access_token}}
 
 ### 4. 🗑️ Supprimer l'index 'deals' (⚠️ ATTENTION : supprime toutes les données indexées)
 ### À utiliser si vous avez des erreurs de conversion UUID
 DELETE {{base_url}}/api/admin/elasticsearch/indices/deals
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{access_token}}
 
 ### ====================================================
 ### Workflow complet de correction (erreur UUID)
@@ -30,15 +31,15 @@ Authorization: Bearer {{token}}
 
 ### ÉTAPE 1 : Supprimer l'index 'deals'
 DELETE {{base_url}}/api/admin/elasticsearch/indices/deals
-Authorization: Bearer {{token}}
+Authorization: Bearer {{access_token}}
 
 ### ÉTAPE 2 : Vérifier que l'index est bien supprimé
 GET {{base_url}}/api/admin/elasticsearch/indices/deals/exists
-Authorization: Bearer {{token}}
+Authorization: Bearer {{access_token}}
 
 ### ÉTAPE 3 : Réindexer tous les deals (crée l'index avec la bonne structure)
 POST {{base_url}}/api/recherche/deals/reindex
-Authorization: Bearer {{token}}
+Authorization: Bearer {{access_token}}
 
 ### ÉTAPE 4 : Tester la recherche
 GET {{base_url}}/api/recherche/deals?q=deal

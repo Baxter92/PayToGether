@@ -44,8 +44,9 @@ public class DealSearchIndexHandler implements ConsumerHandler {
 
             log.info("Deal {} indexé avec succès dans Elasticsearch", event.getDealUuid());
         } catch (Exception e) {
-            log.error("Erreur lors de l'indexation du deal {}: {}", event.getDealUuid(), e.getMessage(), e);
-            throw new RuntimeException("Échec de l'indexation Elasticsearch", e);
+            log.error("⚠️ Erreur lors de l'indexation du deal {} : {} (ignorer si vous êtes en train de réindexer)",
+                event.getDealUuid(), e.getMessage());
+            // NE PAS lancer d'exception pour ne pas bloquer l'application
         }
     }
 
@@ -69,8 +70,9 @@ public class DealSearchIndexHandler implements ConsumerHandler {
 
             log.info("Index Elasticsearch du deal {} mis à jour avec succès", event.getDealUuid());
         } catch (Exception e) {
-            log.error("Erreur lors de la mise à jour de l'index du deal {}: {}", event.getDealUuid(), e.getMessage(), e);
-            throw new RuntimeException("Échec de la mise à jour Elasticsearch", e);
+            log.error("⚠️ Erreur lors de la mise à jour de l'index du deal {} : {} (ignorer si vous êtes en train de réindexer)",
+                event.getDealUuid(), e.getMessage());
+            // NE PAS lancer d'exception pour ne pas bloquer l'application
         }
     }
 
@@ -90,8 +92,9 @@ public class DealSearchIndexHandler implements ConsumerHandler {
 
             log.info("Deal {} supprimé de l'index Elasticsearch avec succès", event.getDealUuid());
         } catch (Exception e) {
-            log.error("Erreur lors de la suppression de l'index du deal {}: {}", event.getDealUuid(), e.getMessage(), e);
-            throw new RuntimeException("Échec de la suppression Elasticsearch", e);
+            log.error("⚠️ Erreur lors de la suppression de l'index du deal {} : {} (ignorer si vous êtes en train de réindexer)",
+                event.getDealUuid(), e.getMessage());
+            // NE PAS lancer d'exception pour ne pas bloquer l'application
         }
     }
 }
