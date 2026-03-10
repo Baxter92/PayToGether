@@ -10,6 +10,8 @@
 ###
 ### Documentation complète : GUIDE_RESOLUTION_RECHERCHE_ELASTICSEARCH.md
 
+@access_token = {{access_token}}
+
 ### 1. Recherche de deals par texte - Public (sans authentification)
 GET {{base_url}}/api/recherche/deals?q=deal
 Content-Type: application/json
@@ -48,7 +50,7 @@ Content-Type: application/json
 ### INFO  DealRechercheProviderAdapter - Réindexation terminée : X deals indexés
 POST {{base_url}}/api/recherche/deals/reindex
 Content-Type: application/json
-Authorization: Bearer {{token}}
+Authorization: Bearer {{access_token}}
 
 ### ====================================================
 ### Tests de vérification Elasticsearch (DEBUG)

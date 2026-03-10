@@ -1,7 +1,7 @@
 ### Tests des API d'Authentification
 
 ### Variables
-@username = user@example.com
+@username = admin@example.com
 @password = 12345678
 ### =========================================================================================
 ### 1. Login - Authentification d'un utilisateur

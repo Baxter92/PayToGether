@@ -39,9 +39,9 @@ public class DealRechercheProviderAdapter implements DealRechercheProvider {
                 .findByTitreContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrVilleContainingIgnoreCaseOrCategorieNomContainingIgnoreCase(
                         query, query, query, query);
 
-        // Filtrer uniquement les deals publiés
+        // Filtrer uniquement les deals publiés (statut stocké en String)
         List<DealRechercheModele> resultats = documents.stream()
-                .filter(doc -> doc.getStatut() == StatutDeal.PUBLIE)
+                .filter(doc -> StatutDeal.PUBLIE.name().equals(doc.getStatut()))
                 .map(searchMapper::versModeleRecherche)
                 .collect(Collectors.toList());
 

@@ -1,6 +1,5 @@
 package com.ulr.paytogether.provider.adapter.entity.elasticsearch;
 
-import com.ulr.paytogether.core.enumeration.StatutDeal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,11 +11,12 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * Document Elasticsearch pour l'indexation des deals
  * Index: deals
+ *
+ * NOTE: Tous les UUID sont stockés en String pour éviter les erreurs de conversion Elasticsearch
  */
 @Document(indexName = "deals")
 @Data
@@ -26,10 +26,7 @@ import java.util.UUID;
 public class DealDocument {
 
     @Id
-    private String id;
-
-    @Field(type = FieldType.Keyword)
-    private UUID uuid;
+    private String id; // UUID au format String
 
     @Field(type = FieldType.Text, analyzer = "french")
     private String titre;
@@ -53,7 +50,7 @@ public class DealDocument {
     private LocalDateTime dateFin;
 
     @Field(type = FieldType.Keyword)
-    private StatutDeal statut;
+    private String statut; // StatutDeal stocké en String
 
     @Field(type = FieldType.Text)
     private String ville;
@@ -62,13 +59,13 @@ public class DealDocument {
     private String pays;
 
     @Field(type = FieldType.Keyword)
-    private UUID categorieUuid;
+    private String categorieUuid; // UUID au format String
 
     @Field(type = FieldType.Text)
     private String categorieNom;
 
     @Field(type = FieldType.Keyword)
-    private UUID createurUuid;
+    private String createurUuid; // UUID au format String
 
     @Field(type = FieldType.Text)
     private String createurNom;
