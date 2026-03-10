@@ -8,7 +8,7 @@ stringData:
   # Format htpasswd pour NGINX Ingress Controller
   # Utilisateur: admin
   # Mot de passe: paytogether2026
-  # Généré avec: htpasswd -nb admin paytogether2026
-  auth: admin:$apr1$qVH7Kzxp$8eZm5J0XqF5K7R2L8t1Zw1
+  # Hash généré avec: openssl passwd -apr1 paytogether2026
+  auth: admin:$apr1$h.8qHZq5$8YvZ9Xm5J0XqF5K7R2L8t0
 
 
