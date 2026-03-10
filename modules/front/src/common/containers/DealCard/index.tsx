@@ -196,7 +196,7 @@ export default function DealCard({
             </div>
             <div className="flex items-center gap-1.5 bg-muted/50 px-2.5 py-1.5 rounded-lg">
               <Users className="w-3.5 h-3.5 text-primary" />
-              <span className="font-medium">{deal.sold}</span>
+              <span className="font-medium">{deal.participants}</span>
             </div>
           </div>
         </CardDescription>

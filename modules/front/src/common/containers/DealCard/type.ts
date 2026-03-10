@@ -9,6 +9,7 @@ export interface IDealCardProps {
     image: ImageResponse;
     originalPrice: number;
     groupPrice: number;
+    participants: number;
     unit: number;
     sold: number;
     total: number;

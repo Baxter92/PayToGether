@@ -27,6 +27,7 @@ export interface DealDTO {
   categorieNom: string;
   nombrePartsAchetees: number;
   nombreParticipantsReel: number;
+  moyenneCommentaires: number;
   listeImages: Partial<ImageResponse>[];
   listePointsForts: string[];
   ville: string;

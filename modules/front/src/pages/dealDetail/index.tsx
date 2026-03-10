@@ -62,15 +62,6 @@ export default function DealDetail(): JSX.Element {
     [commentaires],
   );
 
-  const noteMoyenne = useMemo(() => {
-    if (!commentairesRacine.length) return 0;
-    const total = commentairesRacine.reduce(
-      (sum, commentaire) => sum + (Number(commentaire.note) || 0),
-      0,
-    );
-    return Number((total / commentairesRacine.length).toFixed(1));
-  }, [commentairesRacine]);
-
   const deal = useMemo<Deal | null>(() => {
     if (!dealData) return null;
 
@@ -81,7 +72,7 @@ export default function DealDetail(): JSX.Element {
       priceOriginal: Number(dealData.prixDeal) || 0,
       priceDeal: Number(dealData.prixPart) || 0,
       pricePerPart: Number(dealData.prixPart) || 0,
-      rating: noteMoyenne,
+      rating: dealData.moyenneCommentaires,
       reviewsCount: commentairesRacine.length,
       images: dealImages,
       description: dealData.description,
@@ -89,11 +80,11 @@ export default function DealDetail(): JSX.Element {
       location: [dealData.ville, dealData.pays].filter(Boolean).join(", "),
       expiryDate: dealData.dateExpiration,
       partsTotal: Number(dealData.nbParticipants) || 0,
-      partsSold: 0,
+      partsSold: dealData.nombrePartsAchetees,
       minRequired: 1,
       supplier: { name: dealData.createurNom },
     };
-  }, [commentairesRacine.length, dealData, dealImages, noteMoyenne]);
+  }, [commentairesRacine.length, dealData, dealImages]);
 
   const [qty, setQty] = useState(1);
   const [partsSold, setPartsSold] = useState(0);
