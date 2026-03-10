@@ -497,6 +497,15 @@ export default function DealsList({
         },
       },
       {
+        accessorKey: "participants",
+        header: tTable("participants"),
+        cell: ({ row }) => (
+          <span className="text-sm text-muted-foreground">
+            {row.original.participants}
+          </span>
+        ),
+      },
+      {
         accessorKey: "deadline",
         header: tTable("deadline"),
         cell: ({ row }) => {

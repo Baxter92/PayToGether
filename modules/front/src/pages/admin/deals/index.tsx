@@ -41,6 +41,7 @@ export default function AdminDeals(): ReactElement {
       groupPrice: deal.prixPart,
       unit: 1,
       sold: deal.nombrePartsAchetees,
+      participants: deal.nombreParticipantsReel,
       total: deal.nbParticipants,
       deadline,
       category: deal.categorieNom,

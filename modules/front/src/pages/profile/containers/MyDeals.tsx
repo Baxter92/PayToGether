@@ -1,6 +1,11 @@
 import { HStack } from "@/common/components";
 import { Button } from "@/common/components/ui/button";
-import { useDealsByCreateur, useDealVilles, type DealDTO } from "@/common/api";
+import {
+  useCategories,
+  useDealsByCreateur,
+  useDealVilles,
+  type DealDTO,
+} from "@/common/api";
 import { mapDealToView } from "@/common/api/mappers/catalog";
 import DealsList from "@/common/containers/DealList";
 import { Heading } from "@/common/containers/Heading";
@@ -19,6 +24,7 @@ export default function MyDeals(): JSX.Element {
   const { data: villesData } = useDealVilles();
   const { data: dealsData, refetch } = useDealsByCreateur(user?.id || "");
   const deals = (dealsData ?? []).map(mapDealToView);
+  const { data: categoriesData } = useCategories();
   const [openDetail, setOpenDetail] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState<DealDTO | null>(null);
 
@@ -28,11 +34,10 @@ export default function MyDeals(): JSX.Element {
       id: "category",
       label: "Catégorie",
       type: "select",
-      options: [
-        { label: "Climatiseurs", value: "clim" },
-        { label: "Ventilateurs", value: "ventilo" },
-        { label: "Électroménager", value: "electromenager" },
-      ],
+      options: (categoriesData ?? []).map((category) => ({
+        label: category.nom,
+        value: category.uuid,
+      })),
     },
     {
       id: "city",
@@ -75,7 +80,7 @@ export default function MyDeals(): JSX.Element {
         viewMode="list"
         tableProps={{
           columnFiltersConfig,
-          enableExport: true,
+          enableExport: false,
           enableSorting: true,
           actionsRow: ({ row }) => [
             {

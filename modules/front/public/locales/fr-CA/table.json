@@ -20,5 +20,6 @@
   "hideColumn": "Masquer la colonne",
   "days_zero": "{{count}} jour",
   "days_one": "{{count}} jour",
-  "days_other": "{{count}} jours"
+  "days_other": "{{count}} jours",
+  "participants": "Participants"
 }
