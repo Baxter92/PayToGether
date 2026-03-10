@@ -65,7 +65,7 @@ public class DealRechercheProviderAdapter implements DealRechercheProvider {
 
         try {
             // Suppression puis réindexation
-            searchRepository.deleteById(deal.getUuid().toString());
+            searchRepository.deleteById(deal.getUuid());
 
             DealDocument document = searchMapper.versDocument(deal);
             searchRepository.save(document);
@@ -91,7 +91,7 @@ public class DealRechercheProviderAdapter implements DealRechercheProvider {
         log.debug("Suppression de l'index pour le deal: {}", uuid);
 
         try {
-            searchRepository.deleteById(uuid.toString());
+            searchRepository.deleteById(uuid);
             log.info("Index du deal {} supprimé avec succès", uuid);
         } catch (Exception e) {
             log.warn("Impossible de supprimer l'index du deal {} (probablement inexistant) : {}", uuid, e.getMessage());

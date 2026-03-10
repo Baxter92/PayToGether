@@ -5,12 +5,13 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Repository Elasticsearch pour la recherche de deals
  */
 @Repository
-public interface DealSearchRepository extends ElasticsearchRepository<DealDocument, String> {
+public interface DealSearchRepository extends ElasticsearchRepository<DealDocument, UUID> {
 
     /**
      * Recherche full-text dans les deals (titre, description, ville, catégorie)

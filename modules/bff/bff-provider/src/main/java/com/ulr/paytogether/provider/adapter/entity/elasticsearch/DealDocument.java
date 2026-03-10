@@ -43,12 +43,6 @@ public class DealDocument {
     @Field(type = FieldType.Integer)
     private Integer nbParticipants;
 
-    @Field(type = FieldType.Date)
-    private LocalDateTime dateDebut;
-
-    @Field(type = FieldType.Date)
-    private LocalDateTime dateFin;
-
     @Field(type = FieldType.Keyword)
     private String statut; // StatutDeal stocké en String
 
@@ -75,11 +69,5 @@ public class DealDocument {
 
     @Field(type = FieldType.Integer)
     private int nombreDeVues;
-
-    @Field(type = FieldType.Date)
-    private LocalDateTime dateCreation;
-
-    @Field(type = FieldType.Date)
-    private LocalDateTime dateModification;
 }
 

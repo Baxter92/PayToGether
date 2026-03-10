@@ -43,8 +43,6 @@ public class DealSearchMapper {
                 .prixDeal(dealJpa.getPrixDeal())
                 .prixPart(dealJpa.getPrixPart())
                 .nbParticipants(dealJpa.getNbParticipants())
-                .dateDebut(dealJpa.getDateDebut())
-                .dateFin(dealJpa.getDateFin())
                 .statut(dealJpa.getStatut() != null ? dealJpa.getStatut().name() : null)
                 .ville(dealJpa.getVille())
                 .pays(dealJpa.getPays())
@@ -56,8 +54,6 @@ public class DealSearchMapper {
                         : null)
                 .imagePrincipaleUrl(imagePrincipaleUrl)
                 .nombreDeVues(dealJpa.getNombreDeVues())
-                .dateCreation(dealJpa.getDateCreation())
-                .dateModification(dealJpa.getDateModification())
                 .build();
     }
 
@@ -87,8 +83,6 @@ public class DealSearchMapper {
                 .prixDeal(dealModele.getPrixDeal())
                 .prixPart(dealModele.getPrixPart())
                 .nbParticipants(dealModele.getNbParticipants())
-                .dateDebut(dealModele.getDateDebut())
-                .dateFin(dealModele.getDateFin())
                 .statut(dealModele.getStatut() != null ? dealModele.getStatut().name() : null)
                 .ville(dealModele.getVille())
                 .pays(dealModele.getPays())
@@ -100,8 +94,6 @@ public class DealSearchMapper {
                         : null)
                 .imagePrincipaleUrl(imagePrincipaleUrl)
                 .nombreDeVues(0) // DealModele n'a pas de nombreDeVues, on met 0 par défaut
-                .dateCreation(dealModele.getDateCreation())
-                .dateModification(dealModele.getDateModification())
                 .build();
     }
 
@@ -122,8 +114,6 @@ public class DealSearchMapper {
                 .prixDeal(document.getPrixDeal())
                 .prixPart(document.getPrixPart())
                 .nbParticipants(document.getNbParticipants())
-                .dateDebut(document.getDateDebut())
-                .dateFin(document.getDateFin())
                 .statut(document.getStatut() != null ? StatutDeal.valueOf(document.getStatut()) : null)
                 .ville(document.getVille())
                 .pays(document.getPays())
@@ -133,7 +123,6 @@ public class DealSearchMapper {
                 .createurNom(document.getCreateurNom())
                 .imagePrincipaleUrl(document.getImagePrincipaleUrl())
                 .nombreDeVues(document.getNombreDeVues())
-                .dateCreation(document.getDateCreation())
                 .build();
     }
 }
