@@ -12,6 +12,7 @@
 
 @access_token = {{access_token}}
 
+
 ### 1. Recherche de deals par texte - Public (sans authentification)
 GET {{base_url}}/api/recherche/deals?q=deal
 Content-Type: application/json
@@ -21,6 +22,7 @@ GET {{base_url}}/api/recherche/deals?q=Alberta
 Content-Type: application/json
 
 ### 3. Recherche de deals par catégorie (exemple : POISSON)
+
 GET {{base_url}}/api/recherche/deals?q=POISSON
 Content-Type: application/json
 
@@ -29,7 +31,7 @@ GET {{base_url}}/api/recherche/deals?q=Description
 Content-Type: application/json
 
 ### 5. Recherche de deals avec query vide (retourne une liste vide)
-GET {{base_url}}/api/recherche/deals?q=
+GET {{base_url}}/api/recherche/deals?q=dea
 Content-Type: application/json
 
 ### ====================================================
@@ -48,36 +50,46 @@ Content-Type: application/json
 ### INFO  DealRechercheProviderAdapter - Index nettoyé
 ### INFO  DealRechercheProviderAdapter - Trouvé X deals à réindexer
 ### INFO  DealRechercheProviderAdapter - Réindexation terminée : X deals indexés
+
 POST {{base_url}}/api/recherche/deals/reindex
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 ### ====================================================
 ### Tests de vérification Elasticsearch (DEBUG)
+### ⚠️ Pour accéder à Elasticsearch sur Kubernetes, utilisez :
+### kubectl port-forward -n paytogether svc/elasticsearch-service 9200:9200
+### Puis exécutez ces requêtes
 ### ====================================================
 
+### 6.1 🗑️ Supprimer l'index deals (OBLIGATOIRE avant réindexation)
+### ⚠️ À EXÉCUTER si vous avez une erreur de conversion UUID
+### Cette action supprime complètement l'index 'deals' avec tous ses documents
+### Raison : L'ancien index contient des documents avec l'ancienne structure (UUID au lieu de String)
+###
+### ÉTAPE 1 : Ouvrir un tunnel vers Elasticsearch (terminal) :
+### kubectl port-forward -n paytogether svc/elasticsearch-service 9200:9200
+###
+### ÉTAPE 2 : Exécuter cette requête :
+DELETE http://31.97.132.132:9200/deals
+
 ### 7. Vérifier qu'Elasticsearch est accessible
-### @no-log
 GET http://localhost:9200
 Content-Type: application/json
 
 ### 8. Voir tous les index Elasticsearch
-### @no-log
 GET http://localhost:9200/_cat/indices?v
 Content-Type: application/json
 
 ### 9. Compter les documents dans l'index deals
-### @no-log
 GET http://localhost:9200/deals/_count
 Content-Type: application/json
 
 ### 10. Voir tous les deals indexés dans Elasticsearch
-### @no-log
 GET http://localhost:9200/deals/_search?pretty
 Content-Type: application/json
 
 ### 11. Recherche directe dans Elasticsearch (par titre)
-### @no-log
 GET http://localhost:9200/deals/_search?q=titre:Deal
 Content-Type: application/json
 
