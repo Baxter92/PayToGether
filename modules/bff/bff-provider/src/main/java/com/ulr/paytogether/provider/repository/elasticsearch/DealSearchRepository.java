@@ -5,7 +5,6 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Repository Elasticsearch pour la recherche de deals
@@ -14,15 +13,11 @@ import java.util.UUID;
 public interface DealSearchRepository extends ElasticsearchRepository<DealDocument, String> {
 
     /**
-     * Recherche de deals par UUID
-     * @param uuid UUID du deal
-     * @return Document deal trouvé
-     */
-    DealDocument findByUuid(UUID uuid);
-
-    /**
      * Recherche full-text dans les deals (titre, description, ville, catégorie)
-     * @param query Texte de recherche
+     * @param titre Titre à rechercher
+     * @param description Description à rechercher
+     * @param ville Ville à rechercher
+     * @param categorieNom Catégorie à rechercher
      * @return Liste de deals correspondants
      */
     List<DealDocument> findByTitreContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrVilleContainingIgnoreCaseOrCategorieNomContainingIgnoreCase(
