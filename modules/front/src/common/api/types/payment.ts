@@ -3,7 +3,8 @@ export const StatutPaiement = {
   CONFIRME: "CONFIRME",
   ECHOUE: "ECHOUE",
   PROCESSING: "PROCESSING",
-  REMBOURSÉ: "REMBOURSÉ",
+  REFUNDED: "REFUNDED",
+  CANCELLED: "CANCELLED",
 } as const;
 
 export const MethodePaiement = {

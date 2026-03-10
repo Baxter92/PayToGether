@@ -1,21 +1,26 @@
 import { HStack } from "@/common/components";
 import { Button } from "@/common/components/ui/button";
-import { useDealsByCreateur, useDealVilles } from "@/common/api";
+import { useDealsByCreateur, useDealVilles, type DealDTO } from "@/common/api";
 import { mapDealToView } from "@/common/api/mappers/catalog";
 import DealsList from "@/common/containers/DealList";
 import { Heading } from "@/common/containers/Heading";
-import { Plus } from "lucide-react";
+import { Eye, Plus } from "lucide-react";
 import { useState, type JSX } from "react";
 import { CreateDealModal } from "../components/CreateDealModal";
 import type { IColumnFilter } from "@/common/components/DataTable";
 import { useAuth } from "@/common/context/AuthContext";
+import { ViewDetailDealModal } from "@/pages/admin/deals/containers/ViewDetailDealModal";
+import { useI18n } from "@/common/hooks/useI18n";
 
 export default function MyDeals(): JSX.Element {
   const [addDealModalOpen, setAddDealModalOpen] = useState(false);
+  const { t } = useI18n("profile");
   const { user } = useAuth();
   const { data: villesData } = useDealVilles();
   const { data: dealsData, refetch } = useDealsByCreateur(user?.id || "");
   const deals = (dealsData ?? []).map(mapDealToView);
+  const [openDetail, setOpenDetail] = useState(false);
+  const [selectedDeal, setSelectedDeal] = useState<DealDTO | null>(null);
 
   // Configuration des filtres pour le DataTable
   const columnFiltersConfig: IColumnFilter[] = [
@@ -72,6 +77,16 @@ export default function MyDeals(): JSX.Element {
           columnFiltersConfig,
           enableExport: true,
           enableSorting: true,
+          actionsRow: ({ row }) => [
+            {
+              leftIcon: <Eye />,
+              onClick: () => {
+                setSelectedDeal(row.original);
+                setOpenDetail(true);
+              },
+              tooltip: t("admin:deals.viewDetail"),
+            },
+          ],
         }}
         isAdmin
       />
@@ -80,6 +95,12 @@ export default function MyDeals(): JSX.Element {
         onClose={() => setAddDealModalOpen(false)}
         onSuccess={() => refetch()}
         connectedMerchantUuid={user?.id}
+      />
+
+      <ViewDetailDealModal
+        open={openDetail}
+        onClose={() => setOpenDetail(false)}
+        deal={selectedDeal}
       />
     </section>
   );

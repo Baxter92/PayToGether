@@ -1,4 +1,5 @@
 import type { ImageResponse } from "../hooks/useImageUpload";
+import type { StatutPaiementType } from "./payment";
 
 export const StatutDeal = {
   BROUILLON: "BROUILLON",
@@ -24,6 +25,8 @@ export interface DealDTO {
   createurNom: string;
   categorieUuid: string;
   categorieNom: string;
+  nombrePartsAchetees: number;
+  nombreParticipantsReel: number;
   listeImages: Partial<ImageResponse>[];
   listePointsForts: string[];
   ville: string;
@@ -65,4 +68,23 @@ export interface UpdateDealDTO {
   listePointsForts?: string[];
   ville?: string;
   pays?: string;
+}
+
+export interface ParticipantDto {
+  dealUuid: string;
+  utilisateurUuid: string;
+  utilisateurNom: string;
+  utilisateurPrenom: string;
+  utilisateurEmail: string;
+  nombreDePart: number;
+  dateParticipation: string;
+  montantTotal: number;
+  statutPaiement: StatutPaiementType;
+  adresseRue: string;
+  adresseCodePostal: string;
+  adresseVille: string;
+  adressePays: string;
+  adresseProvince: string;
+  adresseAppartement: string;
+  adresseNumeroPhone: string;
 }

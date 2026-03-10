@@ -3,6 +3,7 @@ import { dealService } from "../services/dealService";
 import type {
   CreateDealDTO,
   DealDTO,
+  ParticipantDto,
   StatutDealType,
   UpdateDealDTO,
 } from "../types";
@@ -25,6 +26,8 @@ const dealHooks = createResourceHooks<DealDTO, CreateDealDTO, UpdateDealDTO>({
     byCategorie: (categorieUuid: string) =>
       ["deals", "categorie", categorieUuid] as const,
     villes: () => ["deals", "villes"] as const,
+    participants: (dealUuid: string) =>
+      ["deals", "participants", dealUuid] as const,
   },
 });
 
@@ -338,5 +341,13 @@ export const useGetDealImageUrl = (dealUuid: string, imageUuid?: string) => {
     queryKey: [...dealKeys.detail(dealUuid), "image-url", imageUuid],
     queryFn: () => dealService.getImageUrl(dealUuid, imageUuid as any),
     enabled: !!dealUuid && !!imageUuid,
+  });
+};
+
+export const useDealParticipants = (dealUuid: string) => {
+  return useQuery<ParticipantDto[], Error>({
+    queryKey: dealKeys.participants(dealUuid),
+    queryFn: () => dealService.getParticipants(dealUuid),
+    enabled: !!dealUuid,
   });
 };

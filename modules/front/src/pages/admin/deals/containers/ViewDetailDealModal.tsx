@@ -36,6 +36,9 @@ import {
   useCommentairesByDeal,
   useUsers,
   useGetDealImageUrl,
+  useDealParticipants,
+  StatutPaiement,
+  type ParticipantDto,
 } from "@/common/api";
 import { cn } from "@/common/utils";
 import { ImageLightbox } from "@/common/components/ImageLightbox";
@@ -83,42 +86,6 @@ const viewDetailDealFormSchema = z.object({
   packagingMethod: z.string().optional(),
 });
 
-// Mock data for participants and reviews
-const participantsMock: ParticipantRow[] = [
-  {
-    id: "1",
-    name: "Participant 1",
-    phone: "123456789",
-    email: "participant1@example.com",
-    parts: 2,
-    amount: 100000,
-    status: "confirmé",
-    shippingAddress: {
-      street: "123 Rue Sainte-Catherine Ouest",
-      city: "Montréal",
-      province: "QC",
-      postalCode: "H3B 1E3",
-      country: "Canada",
-    },
-  },
-  {
-    id: "2",
-    name: "Participant 2",
-    phone: "987654321",
-    email: "participant2@example.com",
-    parts: 1,
-    amount: 50000,
-    status: "en attente",
-    shippingAddress: {
-      street: "456 King Street West",
-      city: "Toronto",
-      province: "ON",
-      postalCode: "M5V 1L7",
-      country: "Canada",
-    },
-  },
-];
-
 const supplierMock = {
   name: "Supplier Name",
   rating: 4.5,
@@ -126,23 +93,6 @@ const supplierMock = {
   contact: "Supplier Contact",
   dealsCount: 10,
   joinedAt: "2022-01-01",
-};
-
-type ParticipantRow = {
-  id: string;
-  name: string;
-  phone: string;
-  email: string;
-  parts: number;
-  amount: number;
-  status: "confirmé" | "en attente";
-  shippingAddress: {
-    street: string;
-    city: string;
-    province: string;
-    postalCode: string;
-    country: string;
-  };
 };
 
 type ReviewRow = {
@@ -334,10 +284,10 @@ function ReadOnlyImageGallery({
             <ImageIcon className="w-10 h-10 text-gray-300 dark:text-gray-600" />
           </div>
           <p className="text-base text-gray-900 dark:text-gray-100 font-bold mb-1">
-            {t("noImageAvailable")}
+            {t("deals.noImageAvailable")}
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {t("noImageAvailableDescription")}
+            {t("deals.noImageAvailableDescription")}
           </p>
         </div>
       </div>
@@ -355,10 +305,10 @@ function ReadOnlyImageGallery({
             </div>
             <div>
               <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                {t("imageGallery")}
+                {t("deals.imageGallery")}
               </p>
               <p className="text-xs text-gray-600 dark:text-gray-400">
-                {t("enlargeImage")}
+                {t("deals.enlargeImage")}
               </p>
             </div>
           </div>
@@ -367,7 +317,7 @@ function ReadOnlyImageGallery({
               {images.length}
             </span>
             <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-              {t("images", { count: images.length })}
+              {t("deals.images", { count: images.length })}
             </span>
           </div>
         </div>
@@ -413,34 +363,35 @@ export function ViewDetailDealModal({
   onClose: () => void;
   deal: any;
 }) {
-  const { t } = useI18n("admin.deals");
+  const { t } = useI18n("admin");
   const dealUuid = deal?.id ?? deal?.raw?.uuid ?? "";
   const { data: commentaires = [] } = useCommentairesByDeal(dealUuid);
   const { data: users = [] } = useUsers();
+  const { data: participants = [] } = useDealParticipants(dealUuid);
 
   const form = useForm<CreateDealInput>({
     resolver: zodResolver(viewDetailDealFormSchema),
   });
 
-  const participantColumns = useMemo<ColumnDef<ParticipantRow>[]>(
+  const participantColumns = useMemo<ColumnDef<ParticipantDto>[]>(
     () => [
       {
         accessorKey: "name",
-        header: t("participantName"),
+        header: t("deals.participantName"),
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md flex-shrink-0">
               <span className="text-white font-bold text-sm">
-                {row.original.name.charAt(0).toUpperCase()}
+                {row.original.utilisateurNom.charAt(0).toUpperCase()}
               </span>
             </div>
             <div className="flex flex-col">
               <span className="font-semibold text-gray-900 dark:text-gray-100">
-                {row.original.name}
+                {row.original.utilisateurNom}
               </span>
               <span className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                 <Phone className="w-3 h-3" />
-                {row.original.phone}
+                {row.original.adresseNumeroPhone}
               </span>
             </div>
           </div>
@@ -448,18 +399,25 @@ export function ViewDetailDealModal({
       },
       {
         accessorKey: "email",
-        header: t("email"),
+        header: t("deals.email"),
         cell: ({ row }) => (
           <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-            {row.original.email}
+            {row.original.utilisateurEmail}
           </span>
         ),
       },
       {
         accessorKey: "shippingAddress",
-        header: t("shippingAddress"),
+        header: t("deals.shippingAddress"),
         cell: ({ row }) => {
-          const address = row.original.shippingAddress;
+          const address = {
+            rue: row.original.adresseRue,
+            codePostal: row.original.adresseCodePostal,
+            ville: row.original.adresseVille,
+            pays: row.original.adressePays,
+            province: row.original.adresseProvince,
+            numeroPhone: row.original.adresseNumeroPhone,
+          };
 
           if (!address)
             return (
@@ -472,9 +430,9 @@ export function ViewDetailDealModal({
             <div className="flex items-start gap-2">
               <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
               <div className="text-sm text-gray-700 dark:text-gray-300">
-                <div className="font-medium">{address.street}</div>
+                <div className="font-medium">{address.rue}</div>
                 <div className="text-gray-500 dark:text-gray-400 text-xs">
-                  {address.city}, {address.province} {address.postalCode}
+                  {address.ville}, {address.province} {address.codePostal}
                 </div>
               </div>
             </div>
@@ -483,44 +441,45 @@ export function ViewDetailDealModal({
       },
       {
         accessorKey: "parts",
-        header: t("partsCount"),
+        header: t("deals.partsCount"),
         cell: ({ row }) => (
           <div className="flex items-center justify-center">
             <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 font-bold px-3 py-1">
-              {row.original.parts} part{row.original.parts > 1 ? "s" : ""}
+              {row.original.nombreDePart} part
+              {row.original.nombreDePart > 1 ? "s" : ""}
             </Badge>
           </div>
         ),
       },
       {
         accessorKey: "amount",
-        header: t("amount"),
+        header: t("deals.amount"),
         cell: ({ row }) => (
           <span className="font-bold text-green-600 text-base">
-            {formatCurrency(row.original.amount)}
+            {formatCurrency(row.original.montantTotal)}
           </span>
         ),
       },
       {
         accessorKey: "status",
-        header: t("status"),
+        header: t("deals.status"),
         cell: ({ row }) => (
           <Badge
             className={
-              row.original.status === "confirmé"
+              row.original.statutPaiement === StatutPaiement.CONFIRME
                 ? "bg-green-100 text-green-800 hover:bg-green-100 font-semibold"
                 : "bg-yellow-100 text-yellow-800 hover:bg-yellow-100 font-semibold"
             }
           >
-            {row.original.status === "confirmé" ? (
+            {row.original.statutPaiement === StatutPaiement.CONFIRME ? (
               <span className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-green-500" />
-                {t("statusConfirmed")}
+                {t("deals.statusConfirmed")}
               </span>
             ) : (
               <span className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
-                {t("statusPending")}
+                {t("deals.statusPending")}
               </span>
             )}
           </Badge>
@@ -534,7 +493,7 @@ export function ViewDetailDealModal({
     () => [
       {
         accessorKey: "user",
-        header: t("author"),
+        header: t("deals.author"),
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-md flex-shrink-0">
@@ -550,7 +509,7 @@ export function ViewDetailDealModal({
       },
       {
         accessorKey: "rating",
-        header: t("rating"),
+        header: t("deals.rating"),
         cell: ({ row }) => (
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-1">
@@ -573,7 +532,7 @@ export function ViewDetailDealModal({
       },
       {
         accessorKey: "comment",
-        header: t("comment"),
+        header: t("deals.comment"),
         cell: ({ row }) => (
           <div className="max-w-md">
             <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2 leading-relaxed">
@@ -584,7 +543,7 @@ export function ViewDetailDealModal({
       },
       {
         accessorKey: "date",
-        header: t("date"),
+        header: t("deals.date"),
         cell: ({ row }) => (
           <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
             <Calendar className="w-4 h-4" />
@@ -657,99 +616,103 @@ export function ViewDetailDealModal({
 
   const viewDetailDealFormGroups: IFieldGroup[] = [
     {
-      title: t("generalInformation"),
-      description: t("generalInformationDescription"),
+      title: t("deals.generalInformation"),
+      description: t("deals.generalInformationDescription"),
       columns: 2,
-      className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
+      className:
+        "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
       fields: [
         {
           type: "text",
           name: "title",
-          label: t("dealTitle"),
+          label: t("deals.dealTitle"),
         },
         {
           type: "text",
           name: "shortSubtitle",
-          label: t("subtitle"),
+          label: t("deals.subtitle"),
         },
         {
           type: "textarea",
           name: "description",
-          label: t("descriptionField"),
+          label: t("deals.descriptionField"),
           colSpan: 2,
         },
         {
           type: "text",
           name: "location",
-          label: t("location"),
+          label: t("deals.location"),
         },
         {
           type: "radio",
           name: "status",
-          label: t("status"),
+          label: t("deals.status"),
           items: [
-            { label: t("published"), value: "published" },
-            { label: t("draft"), value: "draft" },
+            { label: t("deals.published"), value: "published" },
+            { label: t("deals.draft"), value: "draft" },
           ],
         },
       ],
     },
     {
-      title: t("pricing"),
-      description: t("pricingDescription"),
+      title: t("deals.pricing"),
+      description: t("deals.pricingDescription"),
       columns: 3,
-      className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
+      className:
+        "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
       fields: [
         {
           type: "number",
           name: "price",
-          label: t("partPrice"),
+          label: t("deals.partPrice"),
         },
         {
           type: "number",
           name: "originalPrice",
-          label: t("initialPrice"),
+          label: t("deals.initialPrice"),
         },
         {
           type: "select",
           name: "currency",
-          label: t("currency"),
-          items: [{ label: t("dollar"), value: "CAD" }],
+          label: t("deals.currency"),
+          items: [{ label: t("deals.dollar"), value: "CAD" }],
         },
       ],
     },
     {
-      title: t("availability"),
-      description: t("availabilityDescription"),
+      title: t("deals.availability"),
+      description: t("deals.availabilityDescription"),
       columns: 3,
-      className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
+      className:
+        "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
       fields: [
         {
           type: "number",
           name: "partsTotal",
-          label: t("totalParts"),
+          label: t("deals.totalParts"),
         },
         {
           type: "number",
           name: "minRequired",
-          label: t("minParts"),
+          label: t("deals.minParts"),
         },
         {
           type: "date",
           name: "expiryDate",
-          label: t("expirationDate"),
+          label: t("deals.expirationDate"),
         },
       ],
     },
     {
-      title: t("imageGallery"),
-      description: t("imageGalleryDescription"),
-      className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
+      title: t("deals.imageGallery"),
+      description: t("deals.imageGalleryDescription"),
+      className:
+        "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
       fields: [
         {
           type: "file" as const,
           name: "images",
-          label: t("images"),
+          label: t("deals.images"),
           render: () => (
             <ReadOnlyImageGallery
               images={deal?.raw?.listeImages || []}
@@ -775,10 +738,10 @@ export function ViewDetailDealModal({
             </div>
             <div className="flex-1">
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                {t("details")}
+                {t("deals.details")}
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 font-normal mt-0.5">
-                {t("detailsDescription")}
+                {t("deals.detailsDescription")}
               </p>
             </div>
           </div>
@@ -794,7 +757,9 @@ export function ViewDetailDealModal({
               >
                 <div className="flex items-center gap-2 px-2">
                   <FileText className="w-4 h-4" />
-                  <span className="text-sm font-medium">{t("details")}</span>
+                  <span className="text-sm font-medium">
+                    {t("deals.details")}
+                  </span>
                 </div>
               </TabsTrigger>
               <TabsTrigger
@@ -803,9 +768,11 @@ export function ViewDetailDealModal({
               >
                 <div className="flex items-center gap-2 px-2">
                   <Users className="w-4 h-4" />
-                  <span className="text-sm font-medium">{t("participants")}</span>
+                  <span className="text-sm font-medium">
+                    {t("deals.participants")}
+                  </span>
                   <Badge className="ml-1 bg-blue-600 text-white text-xs px-2 py-0.5">
-                    {participantsMock.length}
+                    {participants.length}
                   </Badge>
                 </div>
               </TabsTrigger>
@@ -815,7 +782,9 @@ export function ViewDetailDealModal({
               >
                 <div className="flex items-center gap-2 px-2">
                   <Store className="w-4 h-4" />
-                  <span className="text-sm font-medium">{t("supplier")}</span>
+                  <span className="text-sm font-medium">
+                    {t("deals.supplier")}
+                  </span>
                 </div>
               </TabsTrigger>
               <TabsTrigger
@@ -824,7 +793,9 @@ export function ViewDetailDealModal({
               >
                 <div className="flex items-center gap-2 px-2">
                   <MessageSquare className="w-4 h-4" />
-                  <span className="text-sm font-medium">{t("reviews")}</span>
+                  <span className="text-sm font-medium">
+                    {t("deals.reviews")}
+                  </span>
                   <Badge className="ml-1 bg-yellow-600 text-white text-xs px-2 py-0.5">
                     {reviews.length}
                   </Badge>
@@ -852,19 +823,19 @@ export function ViewDetailDealModal({
                           <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         </div>
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          {t("participants")}
+                          {t("deals.participants")}
                         </p>
                       </div>
                       <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                        {participantsMock.length}
+                        {participants.length}
                       </p>
                       <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                         {
-                          participantsMock.filter(
-                            (p) => p.status === "confirmé",
+                          participants.filter(
+                            (p) => p.statutPaiement === StatutPaiement.CONFIRME,
                           ).length
                         }{" "}
-                        {t("confirmed")}
+                        {t("deals.confirmed")}
                       </p>
                     </div>
 
@@ -874,25 +845,28 @@ export function ViewDetailDealModal({
                           <Package className="w-5 h-5 text-green-600 dark:text-green-400" />
                         </div>
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          {t("partsSold")}
+                          {t("deals.partsSold")}
                         </p>
                       </div>
                       <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                        {participantsMock.reduce((sum, p) => sum + p.parts, 0)}
+                        {participants.reduce(
+                          (sum, p) => sum + p.nombreDePart,
+                          0,
+                        )}
                         <span className="text-lg text-gray-500 dark:text-gray-400 font-normal">
                           /{partsTotal}
                         </span>
                       </p>
                       <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                         {Math.round(
-                          (participantsMock.reduce(
-                            (sum, p) => sum + p.parts,
+                          (participants.reduce(
+                            (sum, p) => sum + p.nombreDePart,
                             0,
                           ) /
                             partsTotal) *
                             100,
                         )}
-                        {t("fillingRate")}
+                        {t("deals.fillingRate")}
                       </p>
                     </div>
 
@@ -902,19 +876,19 @@ export function ViewDetailDealModal({
                           <TrendingUp className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                         </div>
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          {t("totalRevenue")}
+                          {t("deals.totalRevenue")}
                         </p>
                       </div>
                       <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
                         {formatCurrency(
-                          participantsMock.reduce(
-                            (sum, p) => sum + p.amount,
+                          participants.reduce(
+                            (sum, p) => sum + p.montantTotal,
                             0,
                           ),
                         )}
                       </p>
                       <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                        {t("collectedAmount")}
+                        {t("deals.collectedAmount")}
                       </p>
                     </div>
                   </div>
@@ -923,21 +897,19 @@ export function ViewDetailDealModal({
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                     <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-blue-50/30 dark:from-gray-900 dark:to-blue-950/30">
                       <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
-                        {t("participantList")}
+                        {t("deals.participantList")}
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
-                        {t("participantListDescription")}
+                        {t("deals.participantListDescription")}
                       </p>
                     </div>
                     <div className="p-4">
-                      <DataTable<ParticipantRow, unknown>
+                      <DataTable<ParticipantDto, unknown>
                         columns={participantColumns}
-                        data={participantsMock}
-                        searchKey="name"
-                        searchPlaceholder={t("searchParticipant")}
+                        data={participants}
                         enableSelection={false}
                         enableRowNumber={true}
-                        enableExport={true}
+                        enableExport={false}
                         enableSorting={true}
                         pageSizeOptions={[5, 10, 20]}
                       />
@@ -987,7 +959,7 @@ export function ViewDetailDealModal({
                           <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         </div>
                         <p className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wide">
-                          {t("location")}
+                          {t("deals.location")}
                         </p>
                       </div>
                       <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -1001,7 +973,7 @@ export function ViewDetailDealModal({
                           <Phone className="w-5 h-5 text-green-600 dark:text-green-400" />
                         </div>
                         <p className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wide">
-                          {t("contact")}
+                          {t("deals.contact")}
                         </p>
                       </div>
                       <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -1015,14 +987,14 @@ export function ViewDetailDealModal({
                           <Package className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                         </div>
                         <p className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wide">
-                          {t("dealsPublished")}
+                          {t("deals.dealsPublished")}
                         </p>
                       </div>
                       <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
                         {supplierMock.dealsCount}
                       </p>
                       <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                        {t("offersAvailable")}
+                        {t("deals.offersAvailable")}
                       </p>
                     </div>
 
@@ -1032,7 +1004,7 @@ export function ViewDetailDealModal({
                           <Calendar className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                         </div>
                         <p className="text-sm font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wide">
-                          {t("memberSince")}
+                          {t("deals.memberSince")}
                         </p>
                       </div>
                       <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -1059,10 +1031,12 @@ export function ViewDetailDealModal({
                       </div>
                       <div>
                         <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                          {t("reviews")}
+                          {t("deals.reviews")}
                         </h3>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {t("reviewsReceived", { count: reviews.length })}
+                          {t("deals.reviewsReceived", {
+                            count: reviews.length,
+                          })}
                         </p>
                       </div>
                     </div>
@@ -1074,11 +1048,9 @@ export function ViewDetailDealModal({
                       <DataTable<ReviewRow, unknown>
                         columns={reviewColumns}
                         data={reviews}
-                        searchKey="user"
-                        searchPlaceholder={t("searchReview")}
                         enableSelection={false}
                         enableRowNumber={false}
-                        enableExport={true}
+                        enableExport={false}
                         enableSorting={true}
                         pageSizeOptions={[5, 10, 20]}
                       />

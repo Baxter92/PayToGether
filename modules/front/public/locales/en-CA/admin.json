@@ -186,6 +186,7 @@
     },
     "id": "ID",
     "customer": "Customer",
+    "merchant": "Merchant",
     "deal": "Purchased Deal",
     "date": "Order Date",
     "amount": "Amount",

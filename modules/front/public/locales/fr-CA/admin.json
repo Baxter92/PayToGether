@@ -185,7 +185,7 @@
       "refunded": "Remboursées"
     },
     "id": "Identifiant",
-    "customer": "Client",
+    "merchant": "Marchand",
     "deal": "Deal acheté",
     "date": "Date de commande",
     "amount": "Montant",

@@ -21,7 +21,7 @@ import {
 } from "@/common/api";
 
 export default function Profile() {
-  const { user, isMerchant } = useAuth();
+  const { user, isMerchant, isAdmin } = useAuth();
   const [activeTab, setActiveTab] =
     useState<(typeof PROFILE_TABS)[number]["key"]>("overview");
   const { data: commentaires = [], isLoading: commentairesLoading } =
@@ -29,7 +29,7 @@ export default function Profile() {
   const { data: deals = [] } = useDealsByStatut(StatutDeal.PUBLIE);
   const { data: users = [] } = useUsers();
   const { data: merchantDeals = [] } = useDealsByCreateur(
-    user?.id && isMerchant ? user.id : undefined,
+    user?.id && (isMerchant || isAdmin) ? user.id : undefined,
   );
 
   const dealsByUuid = useMemo(
@@ -118,7 +118,7 @@ export default function Profile() {
           <div className="bg-white dark:bg-slate-900 rounded-lg p-6 shadow-sm">
             {activeTab === "overview" && <Overview />}
 
-            {activeTab === "deals" && isMerchant && <MyDeals />}
+            {activeTab === "deals" && (isMerchant || isAdmin) && <MyDeals />}
 
             {activeTab === "purchases" && <MyPurchases />}
 
@@ -136,14 +136,16 @@ export default function Profile() {
                 />
               ))}
 
-            {activeTab === "payouts" && isMerchant && <PaymentsList />}
+            {activeTab === "payouts" && (isMerchant || isAdmin) && (
+              <PaymentsList />
+            )}
 
-            {activeTab === "orders-received" && isMerchant && (
+            {activeTab === "orders-received" && (isMerchant || isAdmin) && (
               <OrdersReceivedList data={mockOrdersReceived as any} />
             )}
 
             {activeTab === "client-reviews" &&
-              isMerchant &&
+              (isMerchant || isAdmin) &&
               (commentairesLoading ? (
                 <div className="text-sm text-muted-foreground">
                   Chargement des avis...

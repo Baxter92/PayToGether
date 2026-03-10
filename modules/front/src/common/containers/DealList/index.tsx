@@ -499,11 +499,14 @@ export default function DealsList({
       {
         accessorKey: "deadline",
         header: tTable("deadline"),
-        cell: ({ getValue }) => (
-          <span className="text-sm text-muted-foreground">
-            {String(getValue() ?? "")}
-          </span>
-        ),
+        cell: ({ row }) => {
+          const deadline = row.original.deadline ?? 0;
+          return (
+            <span className="text-sm text-muted-foreground">
+              {tTable("days", { count: Number(deadline) })}
+            </span>
+          );
+        },
       },
       {
         accessorKey: "city",
@@ -638,10 +641,9 @@ export default function DealsList({
                           setDeleteModalOpen(true);
                         }}
                         onToggleStatus={(id, title, currentStatus) => {
-                          const isPublished = [
-                            "PUBLIE",
-                            "PUBLISHED",
-                          ].includes(currentStatus);
+                          const isPublished = ["PUBLIE", "PUBLISHED"].includes(
+                            currentStatus,
+                          );
                           setStatusTarget({
                             id,
                             title,
@@ -680,70 +682,70 @@ export default function DealsList({
                     {...tableProps}
                     {...(isAdmin
                       ? {
-                        actionsRow: (props: any) => [
-                          ...(tableProps?.actionsRow?.(props) || []),
-                          {
-                            leftIcon: ["PUBLIE", "PUBLISHED"].includes(
-                              String(
-                                props.row.original.status ?? "",
-                              ).toUpperCase(),
-                            ) ? (
+                          actionsRow: (props: any) => [
+                            ...(tableProps?.actionsRow?.(props) || []),
+                            {
+                              leftIcon: ["PUBLIE", "PUBLISHED"].includes(
+                                String(
+                                  props.row.original.status ?? "",
+                                ).toUpperCase(),
+                              ) ? (
                                 <FileEdit />
                               ) : (
                                 <Globe />
                               ),
-                            tooltip: ["PUBLIE", "PUBLISHED"].includes(
-                              String(
-                                props.row.original.status ?? "",
-                              ).toUpperCase(),
-                            )
-                              ? "Remettre en brouillon"
-                              : "Publier",
-                            onClick: () => {
-                              const row = props.row.original;
-                              const currentStatus = String(
-                                row.status ?? "",
-                              ).toUpperCase();
-                              const isPublished = [
-                                "PUBLIE",
-                                "PUBLISHED",
-                              ].includes(currentStatus);
+                              tooltip: ["PUBLIE", "PUBLISHED"].includes(
+                                String(
+                                  props.row.original.status ?? "",
+                                ).toUpperCase(),
+                              )
+                                ? "Remettre en brouillon"
+                                : "Publier",
+                              onClick: () => {
+                                const row = props.row.original;
+                                const currentStatus = String(
+                                  row.status ?? "",
+                                ).toUpperCase();
+                                const isPublished = [
+                                  "PUBLIE",
+                                  "PUBLISHED",
+                                ].includes(currentStatus);
 
-                              setStatusTarget({
-                                id: row.id || row.uuid,
-                                title: row.title || "ce deal",
-                                nextStatus: isPublished
-                                  ? "BROUILLON"
-                                  : "PUBLIE",
-                              });
-                              setStatusModalOpen(true);
+                                setStatusTarget({
+                                  id: row.id || row.uuid,
+                                  title: row.title || "ce deal",
+                                  nextStatus: isPublished
+                                    ? "BROUILLON"
+                                    : "PUBLIE",
+                                });
+                                setStatusModalOpen(true);
+                              },
                             },
-                          },
-                          {
-                            leftIcon: <Edit2 className="w-4 h-4" />,
-                            onClick: () => {
-                              const uuid =
+                            {
+                              leftIcon: <Edit2 className="w-4 h-4" />,
+                              onClick: () => {
+                                const uuid =
                                   props.row.original.id ||
                                   props.row.original.uuid;
-                              setEditingDealUuid(uuid);
-                              setCreateModalOpen(true);
+                                setEditingDealUuid(uuid);
+                                setCreateModalOpen(true);
+                              },
                             },
-                          },
-                          {
-                            leftIcon: <Trash2 className="w-4 h-4" />,
-                            colorScheme: "danger",
-                            tooltip: "Supprimer",
-                            onClick: () => {
-                              const row = props.row.original;
-                              setDeleteTarget({
-                                id: row.id || row.uuid,
-                                title: row.title || row.titre || "ce deal",
-                              });
-                              setDeleteModalOpen(true);
+                            {
+                              leftIcon: <Trash2 className="w-4 h-4" />,
+                              colorScheme: "danger",
+                              tooltip: "Supprimer",
+                              onClick: () => {
+                                const row = props.row.original;
+                                setDeleteTarget({
+                                  id: row.id || row.uuid,
+                                  title: row.title || row.titre || "ce deal",
+                                });
+                                setDeleteModalOpen(true);
+                              },
                             },
-                          },
-                        ],
-                      }
+                          ],
+                        }
                       : {})}
                   />
                 </div>

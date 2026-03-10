@@ -17,5 +17,8 @@
   "showColumns": "Show columns",
   "sortAscending": "Sort ascending",
   "sortDescending": "Sort descending",
-  "hideColumn": "Hide column"
+  "hideColumn": "Hide column",
+  "days_zero": "{{count}} day",
+  "days_one": "{{count}} day",
+  "days_other": "{{count}} days"
 }

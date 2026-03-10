@@ -39,7 +39,7 @@ export default function AdminOrders(): ReactElement {
     },
     {
       id: "marchandNom",
-      header: tAdmin("orders.customer"),
+      header: tAdmin("orders.merchant"),
       cell: ({ row }: { row: any }) =>
         `${row.original.marchandPrenom} ${row.original.marchandNom}`,
     },

@@ -53,4 +53,7 @@ export const dealService = {
     apiClient.patch<DealDTO>(`/deals/${uuid}/images`, {
       body: images,
     }),
+
+  getParticipants: (dealUuid: string) =>
+    apiClient.get<any[]>(`/deals/${dealUuid}/participants`),
 };
