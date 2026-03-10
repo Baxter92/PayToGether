@@ -36,7 +36,8 @@ const statusConfig: Record<
   [StatutPaiement.EN_ATTENTE]: { colorScheme: "warning" },
   [StatutPaiement.ECHOUE]: { colorScheme: "danger" },
   [StatutPaiement.PROCESSING]: { colorScheme: "info" },
-  [StatutPaiement.REMBOURSÉ]: { colorScheme: "info" },
+  [StatutPaiement.REFUNDED]: { colorScheme: "info" },
+  [StatutPaiement.CANCELLED]: { colorScheme: "info" },
 };
 
 const statusTranslationKey: Record<StatutPaiementType, string> = {
@@ -44,7 +45,8 @@ const statusTranslationKey: Record<StatutPaiementType, string> = {
   [StatutPaiement.EN_ATTENTE]: "pending",
   [StatutPaiement.ECHOUE]: "failed",
   [StatutPaiement.PROCESSING]: "processing",
-  [StatutPaiement.REMBOURSÉ]: "refunded",
+  [StatutPaiement.REFUNDED]: "refunded",
+  [StatutPaiement.CANCELLED]: "cancelled",
 };
 
 const methodLabels: Record<string, string> = {

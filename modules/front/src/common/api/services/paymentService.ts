@@ -58,10 +58,6 @@ export const paymentAdminService = {
   // Lister tous les paiements avec statistiques
   listAll: () => apiClient.get<PaiementListResponseDTO>("/admin/paiements"),
 
-  // Récupérer uniquement les statistiques des paiements
-  getStats: () =>
-    apiClient.get<PaiementStatsDTO>("/admin/paiements/statistiques"),
-
   // Récupérer les paiements par statut (admin)
   getByStatut: (statut: string) =>
     apiClient.get<PaymentDTO[]>(`/admin/paiements/statut/${statut}`),

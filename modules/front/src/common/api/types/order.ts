@@ -1,3 +1,5 @@
+import type { PaymentDTO } from "./payment";
+
 export const StatutCommande = {
   EN_ATTENTE: "EN_ATTENTE",
   EN_COURS: "EN_COURS",
@@ -62,25 +64,4 @@ export interface CommandeStatsDTO {
 export interface OrderListResponseDTO {
   commandes: CommandeListDTO[];
   statistiques: CommandeStatsDTO;
-}
-
-// Import du type Payment si nécessaire
-export interface PaymentDTO {
-  uuid: string;
-  clientUuid: string;
-  clientNom: string;
-  clientPrenom: string;
-  commandeUuid: string;
-  numeroCommande: string;
-  dealUuid: string;
-  dealTitre: string;
-  marchandUuid: string;
-  marchandNom: string;
-  marchandPrenom: string;
-  marchandEmail: string;
-  montant: number;
-  datePaiement: string;
-  nombreDePart: number;
-  methodePaiement: string;
-  statutPaiement: string;
 }

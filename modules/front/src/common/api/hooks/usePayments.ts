@@ -141,14 +141,6 @@ export const useAdminPayments = () => {
   });
 };
 
-// Hook pour récupérer uniquement les statistiques des paiements (admin)
-export const useAdminPaymentStats = () => {
-  return useQuery<any, Error>({
-    queryKey: ["admin", "paiements", "statistiques"],
-    queryFn: () => paymentAdminService.getStats(),
-  });
-};
-
 // Hook pour récupérer les paiements par statut (admin)
 export const useAdminPaymentsByStatut = (statut: StatutPaiementType) => {
   return useQuery<PaymentDTO[], Error>({
