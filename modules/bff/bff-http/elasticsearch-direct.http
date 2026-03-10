@@ -1,0 +1,65 @@
+### ====================================================
+### Elasticsearch Admin via Ingress
+### URL: https://elasticsearch.dealtogether.ca
+### Auth: admin / paytogether2026
+### ====================================================
+
+@elasticsearch_url = https://elasticsearch.dealtogether.ca
+@username = admin
+@password = paytogether2026
+
+### 1. Vérifier la connexion Elasticsearch
+GET {{elasticsearch_url}}
+Authorization: Basic {{username}} {{password}}
+
+### 2. Obtenir les informations du cluster
+GET {{elasticsearch_url}}/_cluster/health?pretty
+Authorization: Basic {{username}} {{password}}
+
+### 3. Lister tous les index
+GET {{elasticsearch_url}}/_cat/indices?v
+Authorization: Basic {{username}} {{password}}
+
+### 4. Voir le mapping de l'index 'deals'
+GET {{elasticsearch_url}}/deals/_mapping?pretty
+Authorization: Basic {{username}} {{password}}
+
+### 5. Compter les documents dans l'index 'deals'
+GET {{elasticsearch_url}}/deals/_count
+Authorization: Basic {{username}} {{password}}
+
+### 6. Voir tous les documents de l'index 'deals'
+GET {{elasticsearch_url}}/deals/_search?pretty
+Authorization: Basic {{username}} {{password}}
+
+### 7. Rechercher dans l'index 'deals' par titre
+GET {{elasticsearch_url}}/deals/_search?q=titre:Deal&pretty
+Authorization: Basic {{username}} {{password}}
+
+### 8. 🗑️ Supprimer l'index 'deals' (⚠️ ATTENTION)
+DELETE {{elasticsearch_url}}/deals
+Authorization: Basic {{username}} {{password}}
+
+### 9. 🗑️ Supprimer un document spécifique par ID
+DELETE {{elasticsearch_url}}/deals/_doc/8d5a6631-4c41-48e6-aad5-22e9fec1a5e7
+Authorization: Basic {{username}} {{password}}
+
+### 10. Voir les statistiques de l'index 'deals'
+GET {{elasticsearch_url}}/deals/_stats?pretty
+Authorization: Basic {{username}} {{password}}
+
+### 11. Rafraîchir l'index 'deals' (rendre les changements visibles immédiatement)
+POST {{elasticsearch_url}}/deals/_refresh
+Authorization: Basic {{username}} {{password}}
+
+### 12. 🗑️ Supprimer tous les documents de l'index 'deals' (sans supprimer l'index)
+POST {{elasticsearch_url}}/deals/_delete_by_query
+Authorization: Basic {{username}} {{password}}
+Content-Type: application/json
+
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
