@@ -15,8 +15,11 @@ import org.springframework.stereotype.Component;
 /**
  * Handler pour l'indexation automatique des deals dans Elasticsearch
  * Écoute les événements de création, modification et suppression de deals
+ *
+ * ⚠️ TEMPORAIREMENT DÉSACTIVÉ : Ce handler recréait l'index avec la mauvaise structure UUID
+ * TODO : Réactiver après avoir corrigé le problème de structure d'index
  */
-@Component
+// @Component - DÉSACTIVÉ TEMPORAIREMENT
 @RequiredArgsConstructor
 @Slf4j
 public class DealSearchIndexHandler implements ConsumerHandler {

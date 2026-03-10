@@ -57,7 +57,9 @@ public class DealServiceImpl implements DealService {
 
         DealModele dealCree = dealProvider.sauvegarder(deal);
 
+        // TODO : Réactiver l'indexation automatique après avoir corrigé la structure d'index
         // Indexer le deal dans Elasticsearch si publié
+        /*
         if (dealCree.getStatut() == StatutDeal.PUBLIE) {
             try {
                 dealRechercheService.indexerDeal(dealCree);
@@ -66,6 +68,7 @@ public class DealServiceImpl implements DealService {
                 log.error("Erreur lors de l'indexation du deal {} : {}", dealCree.getUuid(), e.getMessage());
             }
         }
+        */
 
         return dealCree;
     }
@@ -199,6 +202,8 @@ public class DealServiceImpl implements DealService {
         // Mettre à jour le statut
         DealModele dealMisAJour = dealProvider.mettreAJourStatut(uuid, nouveauStatut);
 
+        // TODO : Réactiver l'indexation automatique après avoir corrigé la structure d'index
+        /*
         // Gérer l'indexation Elasticsearch selon le nouveau statut
         try {
             if (nouveauStatut == StatutDeal.PUBLIE) {
@@ -212,6 +217,7 @@ public class DealServiceImpl implements DealService {
         } catch (Exception e) {
             log.error("Erreur lors de la gestion de l'index Elasticsearch pour le deal {} : {}", uuid, e.getMessage());
         }
+        */
 
         return dealMisAJour;
     }
@@ -239,6 +245,8 @@ public class DealServiceImpl implements DealService {
 
         dealProvider.supprimerParUuid(uuid);
 
+        // TODO : Réactiver l'indexation automatique après avoir corrigé la structure d'index
+        /*
         // Supprimer de l'index Elasticsearch
         try {
             dealRechercheService.supprimerIndexDeal(uuid);
@@ -246,6 +254,7 @@ public class DealServiceImpl implements DealService {
         } catch (Exception e) {
             log.error("Erreur lors de la suppression de l'index Elasticsearch pour le deal {} : {}", uuid, e.getMessage());
         }
+        */
 
         var dealAnnuleEvent = DealCancelledEvent.builder()
                 .dealUuid(uuid)
