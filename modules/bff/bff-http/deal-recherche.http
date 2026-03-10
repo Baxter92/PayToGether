@@ -2,38 +2,86 @@
 ### API de Recherche de Deals avec Elasticsearch
 ### ====================================================
 
+### ⚠️ IMPORTANT : Réindexation initiale requise
+### Avant de tester la recherche, vous devez réindexer tous les deals existants :
+### 1. Lancez la requête #6 ci-dessous (POST /api/recherche/deals/reindex)
+### 2. Attendez le message "Réindexation terminée avec succès"
+### 3. Testez ensuite les recherches (#1 à #5)
+###
+### Documentation complète : GUIDE_RESOLUTION_RECHERCHE_ELASTICSEARCH.md
+
 ### 1. Recherche de deals par texte - Public (sans authentification)
-GET http://localhost:8080/api/recherche/deals?q=pizza
+GET {{base_url}}/api/recherche/deals?q=deal
 Content-Type: application/json
 
-### 2. Recherche de deals par ville
-GET http://localhost:8080/api/recherche/deals?q=Montreal
+### 2. Recherche de deals par ville (exemple : Alberta)
+GET {{base_url}}/api/recherche/deals?q=Alberta
 Content-Type: application/json
 
-### 3. Recherche de deals par catégorie
-GET http://localhost:8080/api/recherche/deals?q=restaurant
+### 3. Recherche de deals par catégorie (exemple : POISSON)
+GET {{base_url}}/api/recherche/deals?q=POISSON
 Content-Type: application/json
 
-### 4. Recherche de deals avec query vide (retourne une liste vide)
-GET http://localhost:8080/api/recherche/deals?q=
+### 4. Recherche de deals par description
+GET {{base_url}}/api/recherche/deals?q=Description
 Content-Type: application/json
 
-### 5. Recherche de deals sans query parameter (retourne une liste vide)
-GET http://localhost:8080/api/recherche/deals
+### 5. Recherche de deals avec query vide (retourne une liste vide)
+GET {{base_url}}/api/recherche/deals?q=
 Content-Type: application/json
 
 ### ====================================================
 ### ADMIN - Réindexation complète
 ### ====================================================
 
-### 6. Réindexer tous les deals dans Elasticsearch (nécessite authentification)
-POST http://localhost:8080/api/recherche/deals/reindex
+### 6. 🔄 Réindexer tous les deals dans Elasticsearch (nécessite authentification)
+### ⚠️ À EXÉCUTER EN PREMIER si la recherche retourne une liste vide
+### Cette action :
+### - Supprime tous les documents existants dans l'index Elasticsearch
+### - Récupère tous les deals de la base de données PostgreSQL
+### - Indexe tous les deals dans Elasticsearch
+###
+### Logs attendus :
+### INFO  DealRechercheProviderAdapter - Début de la réindexation de tous les deals
+### INFO  DealRechercheProviderAdapter - Index nettoyé
+### INFO  DealRechercheProviderAdapter - Trouvé X deals à réindexer
+### INFO  DealRechercheProviderAdapter - Réindexation terminée : X deals indexés
+POST {{base_url}}/api/recherche/deals/reindex
 Content-Type: application/json
 Authorization: Bearer {{token}}
+
+### ====================================================
+### Tests de vérification Elasticsearch (DEBUG)
+### ====================================================
+
+### 7. Vérifier qu'Elasticsearch est accessible
+### @no-log
+GET http://localhost:9200
+Content-Type: application/json
+
+### 8. Voir tous les index Elasticsearch
+### @no-log
+GET http://localhost:9200/_cat/indices?v
+Content-Type: application/json
+
+### 9. Compter les documents dans l'index deals
+### @no-log
+GET http://localhost:9200/deals/_count
+Content-Type: application/json
+
+### 10. Voir tous les deals indexés dans Elasticsearch
+### @no-log
+GET http://localhost:9200/deals/_search?pretty
+Content-Type: application/json
+
+### 11. Recherche directe dans Elasticsearch (par titre)
+### @no-log
+GET http://localhost:9200/deals/_search?q=titre:Deal
+Content-Type: application/json
 
 ### ====================================================
 ### Variables d'environnement
 ### ====================================================
 # @name token
-# Remplacer par votre JWT token
+# Remplacer par votre JWT token admin pour la réindexation
 

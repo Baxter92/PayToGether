@@ -6,6 +6,7 @@ import com.ulr.paytogether.core.domaine.validator.DealValidator;
 import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.event.DealCancelledEvent;
 import com.ulr.paytogether.core.event.DealCreatedEvent;
+import com.ulr.paytogether.core.event.DealUpdatedEvent;
 import com.ulr.paytogether.core.event.EventPublisher;
 import com.ulr.paytogether.core.exception.ResourceNotFoundException;
 import com.ulr.paytogether.core.modele.DealModele;
@@ -172,6 +173,14 @@ public class DealServiceImpl implements DealService {
             // Pas d'images à traiter
             dealMisAJour.setListeImages(List.of());
         }
+
+        // Publier l'événement de mise à jour
+        var dealUpdatedEvent = DealUpdatedEvent.builder()
+                .dealUuid(dealMisAJour.getUuid())
+                .titreDeal(dealMisAJour.getTitre())
+                .dateModification(LocalDateTime.now())
+                .build();
+        eventPublisher.publishAsync(dealUpdatedEvent);
 
         return dealMisAJour;
     }
