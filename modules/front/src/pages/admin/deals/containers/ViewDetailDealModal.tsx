@@ -776,7 +776,7 @@ export function ViewDetailDealModal({
                   </Badge>
                 </div>
               </TabsTrigger>
-              <TabsTrigger
+              {/* <TabsTrigger
                 value="supplier"
                 className="relative rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm transition-all duration-300"
               >
@@ -786,7 +786,7 @@ export function ViewDetailDealModal({
                     {t("deals.supplier")}
                   </span>
                 </div>
-              </TabsTrigger>
+              </TabsTrigger> */}
               <TabsTrigger
                 value="reviews"
                 className="relative rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800 data-[state=active]:shadow-sm transition-all duration-300"
@@ -952,7 +952,7 @@ export function ViewDetailDealModal({
                   </div>
 
                   {/* Informations du fournisseur */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/30 rounded-xl p-5 border border-blue-200/50 dark:border-blue-800/50 shadow-sm">
                       <div className="flex items-center gap-3 mb-3">
                         <div className="w-10 h-10 rounded-lg bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center">
@@ -1017,7 +1017,7 @@ export function ViewDetailDealModal({
                         )}
                       </p>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </TabsContent>
 
