@@ -76,6 +76,8 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/publicites/actives").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/publicites/*/images/*/url").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        // Endpoints d'administration Elasticsearch (ADMIN uniquement)
+                        .requestMatchers("/api/admin/elasticsearch/**").hasRole("ADMIN")
                         // Tous les autres endpoints nécessitent une authentification
                         .anyRequest().authenticated()
                 )

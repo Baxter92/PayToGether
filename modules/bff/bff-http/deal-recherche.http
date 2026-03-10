@@ -14,6 +14,8 @@
 
 
 ### 1. Recherche de deals par texte - Public (sans authentification)
+
+
 GET {{base_url}}/api/recherche/deals?q=deal
 Content-Type: application/json
 
