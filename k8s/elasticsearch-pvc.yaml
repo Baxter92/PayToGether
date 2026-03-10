@@ -11,5 +11,5 @@ spec:
   resources:
     requests:
       storage: 5Gi  # Ajustable selon vos besoins
-  storageClassName: standard  # ⚠️ À adapter selon votre cluster (standard, nfs-client, etc.)
+  storageClassName: local-path  # Rancher K3s local-path provisioner
 
