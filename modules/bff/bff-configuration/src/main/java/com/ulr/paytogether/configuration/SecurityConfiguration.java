@@ -65,6 +65,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/auth/reset-password").permitAll()
                         .requestMatchers("/api/auth/activate-account").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/recherche/deals").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/deals/statut/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/deals/villes").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/deals/*/images/*/url").permitAll()
@@ -123,6 +124,7 @@ public class SecurityConfiguration {
                path.startsWith("/api/auth/forgot-password") ||
                path.startsWith("/api/auth/reset-password") ||
                path.startsWith("/api/auth/activate-account") ||
+               (path.startsWith("/api/recherche/deals") && "GET".equals(method)) ||
                path.startsWith("/api/deals/statut") ||
                path.startsWith("/api/deals/villes") ||
                path.startsWith("/api/deals/categorie/") ||

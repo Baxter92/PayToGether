@@ -6,11 +6,17 @@ Ordre recommandé pour appliquer les manifests (incluant le registry local) :
 
 ```bash
 kubectl apply -f k8s/namespace-paytogether.yaml
+
 # Registry local (PVC + déploiement + service + ingress)
 kubectl apply -f k8s/registry-pvc.yaml -n paytogether
 kubectl apply -f k8s/registry-deployment.yaml -n paytogether
 kubectl apply -f k8s/registry-service.yaml -n paytogether
 kubectl apply -f k8s/ingress-registry.yaml -n paytogether
+
+# Elasticsearch (recherche globale de deals)
+kubectl apply -f k8s/elasticsearch-pvc.yaml -n paytogether
+kubectl apply -f k8s/deployment-elasticsearch.yaml -n paytogether
+kubectl apply -f k8s/service-elasticsearch.yaml -n paytogether
 
 # Configs & Secrets
 kubectl apply -f k8s/configmap-bff.yaml -n paytogether
@@ -33,6 +39,19 @@ Domaines configurés pour l'Ingress :
 - BFF : `devbff.dealtogether.ca`
 - Registry local : `registry.dealtogether.ca`
 
+**Services internes (ClusterIP)** :
+- Elasticsearch : `elasticsearch-service:9200`
+- Connect : `connect-service:8092`
+
+**Scripts de déploiement** :
+```bash
+# Déploiement complet Elasticsearch
+./k8s/deploy-elasticsearch.sh
+```
+
+**Documentation détaillée** :
+- Elasticsearch : [k8s/README_ELASTICSEARCH.md](./README_ELASTICSEARCH.md)
+
 Commandes utiles pour vérification et debug :
 
 - Vérifier les pods et leur statut :
@@ -43,6 +62,7 @@ kubectl describe pod <pod-name> -n paytogether
 kubectl logs deployment/front-deploiement -n paytogether
 kubectl logs deployment/bff-deploiement -n paytogether
 kubectl logs deployment/registry -n paytogether
+kubectl logs deployment/elasticsearch-deployment -n paytogether
 ```
 
 - Vérifier services et endpoints :
@@ -69,6 +89,7 @@ kubectl describe ingress registry-ingress -n paytogether
 kubectl rollout restart deployment/front-deploiement -n paytogether
 kubectl rollout restart deployment/bff-deploiement -n paytogether
 kubectl rollout restart deployment/registry -n paytogether
+kubectl rollout restart deployment/elasticsearch-deployment -n paytogether
 ```
 
 - Accéder au registry local (exemple) :

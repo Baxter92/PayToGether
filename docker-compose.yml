@@ -33,6 +33,9 @@ services:
       MINIO_BUCKET_NAME: paytogether-images
       MINIO_PRESIGNED_URL_EXPIRATION: 3600
 
+      # Elasticsearch (recherche globale)
+      ELASTICSEARCH_URIS: http://elasticsearch:9200
+
       # Optimisations JVM (peut être overridé)
       JAVA_OPTS: >-
         -XX:+UseContainerSupport
@@ -46,6 +49,8 @@ services:
       postgres:
         condition: service_healthy
       minio:
+        condition: service_healthy
+      elasticsearch:
         condition: service_healthy
 
     healthcheck:
@@ -130,11 +135,45 @@ services:
     networks:
       - paytogether-network
 
+  # ---- Elasticsearch (Recherche globale) ----
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: paytogether-elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      # Mode single-node pour le développement
+      discovery.type: single-node
+      # Désactiver la sécurité pour simplifier le dev
+      xpack.security.enabled: false
+      # Limiter la RAM utilisée
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      # Désactiver le ML (machine learning) pour économiser des ressources
+      xpack.ml.enabled: false
+
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+    networks:
+      - paytogether-network
+
+    restart: unless-stopped
+
 # ---- Volumes persistants ----
 volumes:
   postgres-data:
     driver: local
   minio-data:
+    driver: local
+  elasticsearch-data:
     driver: local
 
 # ---- Réseau Docker ----

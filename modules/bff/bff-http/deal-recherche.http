@@ -1,0 +1,39 @@
+### ====================================================
+### API de Recherche de Deals avec Elasticsearch
+### ====================================================
+
+### 1. Recherche de deals par texte - Public (sans authentification)
+GET http://localhost:8080/api/recherche/deals?q=pizza
+Content-Type: application/json
+
+### 2. Recherche de deals par ville
+GET http://localhost:8080/api/recherche/deals?q=Montreal
+Content-Type: application/json
+
+### 3. Recherche de deals par catégorie
+GET http://localhost:8080/api/recherche/deals?q=restaurant
+Content-Type: application/json
+
+### 4. Recherche de deals avec query vide (retourne une liste vide)
+GET http://localhost:8080/api/recherche/deals?q=
+Content-Type: application/json
+
+### 5. Recherche de deals sans query parameter (retourne une liste vide)
+GET http://localhost:8080/api/recherche/deals
+Content-Type: application/json
+
+### ====================================================
+### ADMIN - Réindexation complète
+### ====================================================
+
+### 6. Réindexer tous les deals dans Elasticsearch (nécessite authentification)
+POST http://localhost:8080/api/recherche/deals/reindex
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### ====================================================
+### Variables d'environnement
+### ====================================================
+# @name token
+# Remplacer par votre JWT token
+

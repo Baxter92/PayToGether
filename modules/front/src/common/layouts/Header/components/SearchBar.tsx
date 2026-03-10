@@ -39,7 +39,7 @@ export interface SearchBarProps {
 }
 
 const SearchBar = ({
-  placeholder = "Rechercher des deals, restaurants, activités...",
+  placeholder = "Rechercher des deals...",
   value,
   defaultValue = "",
   onChange,

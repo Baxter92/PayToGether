@@ -17,7 +17,7 @@ import SidebarMenu from "./components/SidebarMenu";
 import LanguageSelector from "@components/LanguageSelector";
 import { ThemeToggle } from "@components/ThemeToggle";
 import { Dropdown } from "@components/Dropdown";
-import SearchBar from "./components/SearchBar";
+import SearchBarWithResults from "./components/SearchBarWithResults";
 import { PATHS } from "@/common/constants/path";
 import { toast } from "sonner";
 import type { ICategory } from "@/common/containers/CategoryCard/type";
@@ -79,7 +79,6 @@ const Header = ({
   onLocationChange,
   showSearchBar = true,
   searchPlaceholder,
-  onSearch,
   showFavorites = true,
   favoritesCount = 0,
   favoritesLink = PATHS.FAVORITES,
@@ -231,7 +230,7 @@ const Header = ({
           {/* Search Bar - Desktop Only */}
           {showSearchBar && (
             <div className="hidden lg:flex flex-1 max-w-2xl flex-col">
-              <SearchBar placeholder={searchPlaceholder} onSearch={onSearch} />
+              <SearchBarWithResults placeholder={searchPlaceholder} />
             </div>
           )}
 
@@ -357,7 +356,7 @@ const Header = ({
         {/* Search Bar - Mobile Only */}
         {showSearchBar && (
           <div className="lg:hidden">
-            <SearchBar placeholder={searchPlaceholder} onSearch={onSearch} />
+            <SearchBarWithResults placeholder={searchPlaceholder} />
           </div>
         )}
       </div>

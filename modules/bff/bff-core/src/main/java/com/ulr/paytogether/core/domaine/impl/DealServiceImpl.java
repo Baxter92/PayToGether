@@ -1,6 +1,7 @@
 package com.ulr.paytogether.core.domaine.impl;
 
 import com.ulr.paytogether.core.domaine.service.DealService;
+import com.ulr.paytogether.core.domaine.service.DealRechercheService;
 import com.ulr.paytogether.core.domaine.validator.DealValidator;
 import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.event.DealCancelledEvent;
@@ -30,6 +31,7 @@ public class DealServiceImpl implements DealService {
     private final DealProvider dealProvider;
     private final DealValidator dealValidator;
     private final EventPublisher eventPublisher;
+    private final DealRechercheService dealRechercheService;
 
     @Transactional
     @Override
@@ -51,7 +53,20 @@ public class DealServiceImpl implements DealService {
                 .build();
 
         eventPublisher.publishAsync(dealEvent);
-        return dealProvider.sauvegarder(deal);
+
+        DealModele dealCree = dealProvider.sauvegarder(deal);
+
+        // Indexer le deal dans Elasticsearch si publié
+        if (dealCree.getStatut() == StatutDeal.PUBLIE) {
+            try {
+                dealRechercheService.indexerDeal(dealCree);
+                log.info("Deal {} indexé dans Elasticsearch", dealCree.getUuid());
+            } catch (Exception e) {
+                log.error("Erreur lors de l'indexation du deal {} : {}", dealCree.getUuid(), e.getMessage());
+            }
+        }
+
+        return dealCree;
     }
 
     @Override
@@ -173,7 +188,23 @@ public class DealServiceImpl implements DealService {
         dealValidator.validerTransitionStatut(dealExistant.getStatut(), nouveauStatut);
 
         // Mettre à jour le statut
-        return dealProvider.mettreAJourStatut(uuid, nouveauStatut);
+        DealModele dealMisAJour = dealProvider.mettreAJourStatut(uuid, nouveauStatut);
+
+        // Gérer l'indexation Elasticsearch selon le nouveau statut
+        try {
+            if (nouveauStatut == StatutDeal.PUBLIE) {
+                dealRechercheService.mettreAJourIndexDeal(dealMisAJour);
+                log.info("Deal {} réindexé dans Elasticsearch (statut PUBLIE)", uuid);
+            } else {
+                // Supprimer de l'index si non publié
+                dealRechercheService.supprimerIndexDeal(uuid);
+                log.info("Deal {} supprimé de l'index Elasticsearch (statut {})", uuid, nouveauStatut);
+            }
+        } catch (Exception e) {
+            log.error("Erreur lors de la gestion de l'index Elasticsearch pour le deal {} : {}", uuid, e.getMessage());
+        }
+
+        return dealMisAJour;
     }
 
     @Transactional
@@ -198,6 +229,15 @@ public class DealServiceImpl implements DealService {
                         "deal.non.trouve", uuid.toString()));
 
         dealProvider.supprimerParUuid(uuid);
+
+        // Supprimer de l'index Elasticsearch
+        try {
+            dealRechercheService.supprimerIndexDeal(uuid);
+            log.info("Deal {} supprimé de l'index Elasticsearch", uuid);
+        } catch (Exception e) {
+            log.error("Erreur lors de la suppression de l'index Elasticsearch pour le deal {} : {}", uuid, e.getMessage());
+        }
+
         var dealAnnuleEvent = DealCancelledEvent.builder()
                 .dealUuid(uuid)
                 .nomMarchand(dealModele.getCreateur().getNom())

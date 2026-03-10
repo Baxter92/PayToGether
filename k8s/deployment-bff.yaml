@@ -17,10 +17,13 @@ spec:
     spec:
       containers:
         - name: bff
-          image: docker.io/14152021/dealtogether:bff-v1.0.29
+          image: docker.io/14152021/dealtogether:bff-v1.0.30
           ports:
             - containerPort: 8080
           env:
             # Configuration API Auth (service connect)
             - name: API_AUTH_URL
               value: "http://connect-service:8092"
+            # Configuration Elasticsearch (service ClusterIP)
+            - name: ELASTICSEARCH_URIS
+              value: "http://elasticsearch-service:9200"

@@ -24,6 +24,10 @@ spec:
           envFrom:
             - secretRef:
                 name: bff-secret
+          env:
+            # Configuration Elasticsearch (service ClusterIP)
+            - name: ELASTICSEARCH_URIS
+              value: "http://elasticsearch-service:9200"
           # Monter le ConfigMap comme fichier application.yml pour Spring Boot
           volumeMounts:
             - name: config-volume
