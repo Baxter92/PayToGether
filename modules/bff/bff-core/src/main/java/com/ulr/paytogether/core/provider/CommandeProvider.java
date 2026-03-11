@@ -35,4 +35,18 @@ public interface CommandeProvider {
      * @return Map avec les statistiques (totalCommandes, confirmees, enCours, annulees, remboursees)
      */
     Map<String, Long> calculerStatistiquesCommandes();
+
+    /**
+     * Trouve une commande par l'UUID d'un paiement associé
+     * @param paiementUuid UUID du paiement
+     * @return Commande associée au paiement, ou null si aucune commande trouvée
+     */
+    CommandeModele trouverParPaiementUuid(UUID paiementUuid);
+
+    /**
+     * Trouve une commande par son UUID
+     * @param uuid UUID de la commande
+     * @return Commande correspondante, ou null si aucune commande trouvée
+     */
+    CommandeModele lireParUuid(UUID uuid);
 }

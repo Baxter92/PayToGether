@@ -205,3 +205,17 @@ Authorization: Bearer {{access_token}}
 GET {{base_url}}/api/deals/villes
 Content-Type: application/json
 
+### 13. Récupérer mes paiements avec informations complètes (GET) - AUTHENTIFICATION REQUISE
+### Retourne tous les paiements de l'utilisateur connecté avec :
+### - Deal (uuid, titre, description, image présignée, date d'expiration, prix)
+### - Catégorie (uuid, nom, icône)
+### - Montant du paiement
+### - Montant total (prixPart * nbPartsAchetées)
+### - Adresse de facturation (uuid, rue, ville, code postal, téléphone, pays)
+### - Numéro de commande et son UUID
+### - Statut du paiement
+### - Statut de la commande
+### - UUID du paiement
+GET {{base_url}}/api/deals/mes-paiements
+Content-Type: application/json
+Authorization: Bearer {{access_token}}

@@ -1,19 +1,25 @@
 package com.ulr.paytogether.core.domaine.impl;
 
-import com.ulr.paytogether.core.domaine.service.AdresseService;
+import com.ulr.paytogether.core.domaine.service.DealService;
 import com.ulr.paytogether.core.domaine.service.SquarePaymentService;
+import com.ulr.paytogether.core.domaine.service.UtilisateurService;
 import com.ulr.paytogether.core.domaine.validator.AdresseValidator;
 import com.ulr.paytogether.core.domaine.validator.PaiementValidator;
 import com.ulr.paytogether.core.enumeration.StatutPaiement;
 import com.ulr.paytogether.core.event.EventPublisher;
 import com.ulr.paytogether.core.event.PaymentInitiatedEvent;
 import com.ulr.paytogether.core.event.PaymentNotificationEvent;
+import com.ulr.paytogether.core.event.PaymentRefundedEvent;
 import com.ulr.paytogether.core.event.PaymentSuccessfulEvent;
 import com.ulr.paytogether.core.exception.ResourceNotFoundException;
 import com.ulr.paytogether.core.exception.ValidationException;
 import com.ulr.paytogether.core.modele.AdresseModele;
+import com.ulr.paytogether.core.modele.DealModele;
 import com.ulr.paytogether.core.modele.PaiementModele;
+import com.ulr.paytogether.core.modele.UtilisateurModele;
 import com.ulr.paytogether.core.provider.AdresseProvider;
+import com.ulr.paytogether.core.provider.CommandeProvider;
+import com.ulr.paytogether.core.provider.DealParticipantProvider;
 import com.ulr.paytogether.core.provider.PaiementProvider;
 import com.ulr.paytogether.core.provider.SquarePaymentProvider;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +27,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -39,6 +48,10 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
     private final AdresseValidator adresseValidator;
     private final EventPublisher eventPublisher;
     private final AdresseProvider adresseProvider;
+    private final CommandeProvider commandeProvider;
+    private final DealParticipantProvider dealParticipantProvider;
+    private final DealService dealService;
+    private final UtilisateurService utilisateurService;
 
     @Transactional
     @Override
@@ -134,28 +147,9 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
             paiement.setMessageErreur(e.getMessage());
             paiementProvider.mettreAJour(paiement.getUuid(), paiement);
 
-            PaymentNotificationEvent paymentNotificationEvent = PaymentNotificationEvent
-                    .builder()
-                    .paiementUuid(paiement.getUuid())
-                    .utilisateurUuid(paiement.getUtilisateur().getUuid())
-                    .email(paiement.getUtilisateur().getEmail())
-                    .sujetNotification("Échec du paiement du deal " + paiement.getDeal().getTitre())
-                    .statutPaiement(StatutPaiement.ECHOUE.name())
-                    .typeNotification("EMAIL")
-                    .datePaiement(paiement.getDatePaiement())
-                    .methodePaiement(paiement.getMethodePaiement().name())
-                    .titreDeal(paiement.getDeal().getTitre())
-                    .descriptionDeal(paiement.getDeal().getDescription())
-                    .montantPaiement(paiement.getMontant())
-                    .nombreDePart(paiement.getNombreDePart())
-                    .adresseRue(paiement.getAdresse() != null ? paiement.getAdresse().getRue() : null)
-                    .adresseVille(paiement.getAdresse() != null ? paiement.getAdresse().getVille() : null)
-                    .adresseProvince(paiement.getAdresse() != null ? paiement.getAdresse().getProvince() : null)
-                    .adresseCodePostal(paiement.getAdresse() != null ? paiement.getAdresse().getCodePostal() : null)
-                    .adressePays(paiement.getAdresse() != null ? paiement.getAdresse().getPays() : null)
-                    .build();
-
-            eventPublisher.publishAsync(paymentNotificationEvent);
+            // NE PAS envoyer d'email ici - le handler avec @Retryable va réessayer
+            // L'email d'échec sera envoyé UNIQUEMENT après épuisement des max attempts
+            // via PaymentFailedEvent dans le handler @Recover
 
             throw new ValidationException("paiement.traitement.echec", e.getMessage());
         }
@@ -257,6 +251,127 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
                 .build();
 
         eventPublisher.publishAsync(paymentNotificationEvent);
+    }
+
+    @Transactional
+    @Override
+    public int rembourserPaiementsEnMasse(List<UUID> utilisateurUuids, UUID dealUuid, String raisonRemboursement) {
+        log.info("Remboursement en masse de {} utilisateurs pour le deal {}", utilisateurUuids.size(), dealUuid);
+
+        int nombreRemboursements = 0;
+        List<PaymentRefundedEvent> evenements = new ArrayList<>();
+
+        DealModele deal = dealService.lireParUuid(dealUuid)
+                .orElseThrow(() -> ResourceNotFoundException.parUuid("deal", dealUuid));
+
+        for (UUID utilisateurUuid : utilisateurUuids) {
+            try {
+                // Trouver le paiement de l'utilisateur pour ce deal
+                List<PaiementModele> paiements = paiementProvider.trouverParUtilisateur(utilisateurUuid);
+                PaiementModele paiement = paiements.stream()
+                        .filter(p -> p.getDeal() != null && p.getDeal().getUuid().equals(dealUuid))
+                        .filter(p -> p.getStatut() == StatutPaiement.CONFIRME)
+                        .findFirst()
+                        .orElse(null);
+
+                if (paiement == null) {
+                    log.warn("Aucun paiement confirmé trouvé pour l'utilisateur {} sur le deal {}", utilisateurUuid, dealUuid);
+                    continue;
+                }
+
+                // Rembourser via Square
+                String refundId = squarePaymentProvider.refundPayment(paiement.getSquarePaymentId(), paiement.getMontant());
+
+                // Mettre à jour le statut du paiement
+                paiement.setStatut(StatutPaiement.REFUNDED);
+                paiement.setMessageErreur("Remboursé: " + raisonRemboursement);
+                paiementProvider.mettreAJour(paiement.getUuid(), paiement);
+
+                // Récupérer l'utilisateur pour l'email
+                UtilisateurModele utilisateur = utilisateurService.lireParUuid(utilisateurUuid)
+                        .orElseThrow(() -> ResourceNotFoundException.parUuid("utilisateur", utilisateurUuid));
+
+                // Créer l'événement de remboursement
+                PaymentRefundedEvent event = new PaymentRefundedEvent(
+                        paiement.getUuid(),
+                        utilisateurUuid,
+                        paiement.getCommande() != null ? paiement.getCommande().getUuid() : null,
+                        dealUuid,
+                        paiement.getMontant(),
+                        refundId,
+                        paiement.getNombreDePart(),
+                        utilisateur.getEmail(),
+                        utilisateur.getPrenom(),
+                        utilisateur.getNom(),
+                        deal.getTitre(),
+                        deal.getDescription(),
+                        LocalDateTime.now(),
+                        raisonRemboursement
+                );
+
+                evenements.add(event);
+                nombreRemboursements++;
+
+                log.info("✅ Paiement {} remboursé avec succès (refundId: {})", paiement.getUuid(), refundId);
+
+            } catch (Exception e) {
+                log.error("❌ Erreur lors du remboursement pour l'utilisateur {}: {}", utilisateurUuid, e.getMessage(), e);
+            }
+        }
+
+        // Publier tous les événements de remboursement
+        evenements.forEach(eventPublisher::publishAsync);
+
+        log.info("Remboursement en masse terminé: {}/{} succès", nombreRemboursements, utilisateurUuids.size());
+        return nombreRemboursements;
+    }
+
+    @Transactional
+    @Override
+    public void supprimerParticipationApresRemboursement(UUID utilisateurUuid, UUID dealUuid, int nombreDeParts) {
+        log.info("Suppression de la participation de l'utilisateur {} au deal {} ({} parts)",
+                utilisateurUuid, dealUuid, nombreDeParts);
+
+        try {
+            // 1. Supprimer la participation au deal
+            dealParticipantProvider.supprimerParticipation(utilisateurUuid, dealUuid);
+            log.info("✅ Participation supprimée du deal");
+
+            // 2. Trouver le paiement de cet utilisateur pour ce deal
+            List<PaiementModele> paiements = paiementProvider.trouverParUtilisateur(utilisateurUuid);
+            PaiementModele paiement = paiements.stream()
+                    .filter(p -> p.getDeal() != null && p.getDeal().getUuid().equals(dealUuid))
+                    .filter(p -> p.getStatut() == StatutPaiement.REFUNDED)
+                    .findFirst()
+                    .orElse(null);
+
+            if (paiement != null) {
+                UUID commandeUuid = paiement.getCommande() != null ? paiement.getCommande().getUuid() : null;
+
+                // 3. Supprimer le paiement
+                paiementProvider.supprimerParUuid(paiement.getUuid());
+                log.info("✅ Paiement {} supprimé", paiement.getUuid());
+
+                // 4. Vérifier si la commande a encore des paiements
+                if (commandeUuid != null) {
+                    List<PaiementModele> paiementsRestants = paiementProvider.trouverParCommande(commandeUuid);
+
+                    if (paiementsRestants.isEmpty()) {
+                        // Supprimer la commande si elle n'a plus de paiements
+                        commandeProvider.supprimerParUuid(commandeUuid);
+                        log.info("✅ Commande {} supprimée (plus de paiements)", commandeUuid);
+                    } else {
+                        log.info("Commande {} conservée ({} paiements restants)", commandeUuid, paiementsRestants.size());
+                    }
+                }
+            }
+
+            log.info("✅ Suppression de la participation terminée avec succès");
+
+        } catch (Exception e) {
+            log.error("❌ Erreur lors de la suppression de la participation: {}", e.getMessage(), e);
+            throw new ValidationException("participation.suppression.echec", e.getMessage());
+        }
     }
 
 

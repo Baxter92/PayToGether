@@ -1,0 +1,18 @@
+### Variables
+@base_url = http://localhost:8080
+@access_token = {{access_token}}
+
+### 1. Rembourser plusieurs paiements en masse (ADMIN uniquement)
+POST {{base_url}}/api/square-payments/refund-bulk
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "dealUuid": "439981e2-dbd2-4960-b662-895bc1b94dd7",
+  "utilisateurUuids": [
+    "545128a4-0b6c-4694-abdd-6952549381b5",
+    "c198970c-0e04-4ed4-b2b5-54590d53b58c"
+  ],
+  "raisonRemboursement": "Deal annulé par l'administrateur"
+}
+

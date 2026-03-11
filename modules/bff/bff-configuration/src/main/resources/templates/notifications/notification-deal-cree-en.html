@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>New Deal Created</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #1b79e4 0%, #019cca 100%); color: white; padding: 30px; text-align: center; }
+        .content { padding: 40px 30px; }
+        .button { display: inline-block; padding: 15px 40px; background: linear-gradient(135deg, #1b79e4 0%, #019cca 100%); color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 20px 0; }
+        .footer { background: #f8f9fa; padding: 20px 30px; text-align: center; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header"><h1>🎉 New Deal Created</h1></div>
+        <div class="content">
+            <p>Hello <strong th:text="${prenom}">First Name</strong> <strong th:text="${nom}">Last Name</strong>,</p>
+            <p>Your deal has been successfully created!</p>
+            <p><strong>Title:</strong> <span th:text="${titreDeal}">Deal</span></p>
+            <p><strong>Description:</strong> <span th:text="${descriptionDeal}">Deal Description</span></p>
+            <p><strong>Price per share:</strong> <span th:text="${prixDealPart}">0</span> CAD</p>
+            <p><strong>Total price:</strong> <span th:text="${prixDeal}">0</span> CAD</p>
+            <p><strong>Number of participants:</strong> <span th:text="${nbParticipants}">0</span></p>
+            <p><strong>Creation date:</strong> <span th:text="${dateCreation}">date</span></p>
+            <div style="text-align: center;"><a th:href="${lienDeal}" class="button">View My Deal</a></div>
+        </div>
+        <div class="footer"><p>© 2026 DealToGether - All rights reserved</p></div>
+    </div>
+</body>
+</html>
+

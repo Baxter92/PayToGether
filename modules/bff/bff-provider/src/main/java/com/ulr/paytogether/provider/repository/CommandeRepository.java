@@ -44,4 +44,11 @@ public interface CommandeRepository extends JpaRepository<CommandeJpa, UUID> {
      * @return la liste des commandes
      */
     List<CommandeJpa> findByStatut(StatutCommande statut);
+
+    /**
+     * Recherche une commande par l'UUID d'un paiement associé
+     * @param paiementUuid l'UUID du paiement
+     * @return un Optional contenant la commande si elle existe
+     */
+    Optional<CommandeJpa> findByPaiementUuid(UUID paiementUuid);
 }

@@ -73,11 +73,27 @@ public interface DealParticipantProvider {
     long compterParticipants(UUID dealUuid);
 
     /**
+     * Compte le nombre de parts d'un deal
+     * @param dealUuid UUID du deal
+     * @return Nombre de participants
+     */
+    long compterNombreParts(UUID dealUuid);
+
+    /**
      * Supprime un participant d'un deal
      * @param dealUuid UUID du deal
      * @param utilisateurUuid UUID de l'utilisateur
      */
     void supprimerParticipant(UUID dealUuid, UUID utilisateurUuid);
+
+    /**
+     * Supprime une participation (alias de supprimerParticipant)
+     * @param utilisateurUuid UUID de l'utilisateur
+     * @param dealUuid UUID du deal
+     */
+    default void supprimerParticipation(UUID utilisateurUuid, UUID dealUuid) {
+        supprimerParticipant(dealUuid, utilisateurUuid);
+    }
 
     /**
      * Supprime tous les participants d'un deal

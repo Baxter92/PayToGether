@@ -73,6 +73,13 @@ public interface DealParticipantService {
     long compterParticipants(UUID dealUuid);
 
     /**
+     * Compte le nombre de parts d'un deal
+     * @param dealUuid UUID du deal
+     * @return Nombre de participants
+     */
+    long compterNombreParts(UUID dealUuid);
+
+    /**
      * Supprime un participant d'un deal
      * @param dealUuid UUID du deal
      * @param utilisateurUuid UUID de l'utilisateur

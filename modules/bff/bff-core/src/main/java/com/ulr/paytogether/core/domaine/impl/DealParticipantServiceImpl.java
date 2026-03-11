@@ -125,6 +125,15 @@ public class DealParticipantServiceImpl implements DealParticipantService {
     }
 
     @Override
+    public long compterNombreParts(UUID dealUuid) {
+        if (dealUuid == null) {
+            throw new IllegalArgumentException("L'UUID du deal est obligatoire");
+        }
+
+        return dealParticipantProvider.compterNombreParts(dealUuid);
+    }
+
+    @Override
     public void supprimerParticipant(UUID dealUuid, UUID utilisateurUuid) {
         log.info("Suppression du participant : deal={}, utilisateur={}", dealUuid, utilisateurUuid);
 

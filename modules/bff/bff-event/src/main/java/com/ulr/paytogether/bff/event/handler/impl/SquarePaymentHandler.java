@@ -2,16 +2,30 @@ package com.ulr.paytogether.bff.event.handler.impl;
 
 import com.ulr.paytogether.bff.event.annotation.FunctionalHandler;
 import com.ulr.paytogether.bff.event.handler.ConsumerHandler;
+import com.ulr.paytogether.core.domaine.service.*;
 import com.ulr.paytogether.core.enumeration.StatutPaiement;
+import com.ulr.paytogether.core.event.EventPublisher;
 import com.ulr.paytogether.core.event.PaymentInitiatedEvent;
 import com.ulr.paytogether.core.event.PaymentSuccessfulEvent;
 import com.ulr.paytogether.core.event.PaymentFailedEvent;
-import com.ulr.paytogether.core.domaine.service.SquarePaymentService;
-import com.ulr.paytogether.core.domaine.service.PaiementService;
+import com.ulr.paytogether.core.modele.AdresseModele;
+import com.ulr.paytogether.core.modele.CommandeModele;
+import com.ulr.paytogether.core.modele.DealModele;
 import com.ulr.paytogether.core.modele.PaiementModele;
+import com.ulr.paytogether.core.modele.UtilisateurModele;
+import com.ulr.paytogether.core.provider.AdresseProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.retry.annotation.Recover;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import static com.ulr.paytogether.bff.event.utils.EventUtils.CONSTRUIRELIENDEAL;
 
 /**
  * Handler pour traiter les événements de paiement Square.
@@ -34,6 +48,12 @@ public class SquarePaymentHandler implements ConsumerHandler {
 
     private final SquarePaymentService squarePaymentService;
     private final PaiementService paiementService;
+    private final CommandeService commandeService;
+    private final EmailNotificationService emailNotificationService;
+    private final UtilisateurService utilisateurService;
+    private final EventPublisher eventPublisher;
+    private final AdresseProvider adresseProvider;
+    private final DealParticipantService dealParticipantService;
 
     /**
      * Handler pour traiter l'événement PaymentInitiatedEvent.
@@ -70,6 +90,61 @@ public class SquarePaymentHandler implements ConsumerHandler {
     }
 
     /**
+     * Méthode @Recover appelée après épuisement de tous les max attempts (5 tentatives).
+     * Publie un événement PaymentFailedEvent pour déclencher l'envoi d'email d'échec.
+     *
+     * @param e L'exception qui a causé l'échec final
+     * @param event L'événement PaymentInitiatedEvent original
+     */
+    @Recover
+    public void recoverFromPaymentInitiatedFailure(Exception e, PaymentInitiatedEvent event) {
+        log.error("❌ ÉCHEC DÉFINITIF après 5 tentatives pour le paiement UUID={}, commande={}. Publication de PaymentFailedEvent.",
+                event.getPaiementUuid(), event.getCommandeUuid());
+
+        try {
+            // Récupérer les informations complètes du paiement
+            PaiementModele paiement = paiementService.lireParUuid(event.getPaiementUuid())
+                    .orElseThrow(() -> new RuntimeException("Paiement non trouvé: " + event.getPaiementUuid()));
+
+            UtilisateurModele utilisateur = utilisateurService.lireParUuid(event.getUtilisateurUuid())
+                    .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé: " + event.getUtilisateurUuid()));
+
+            AdresseModele adresse = adresseProvider.trouverParPaiement(event.getPaiementUuid());
+
+            // Construire l'événement PaymentFailedEvent avec toutes les infos pour l'email
+            PaymentFailedEvent paymentFailedEvent = new PaymentFailedEvent(
+                    event.getUtilisateurUuid(),
+                    event.getCommandeUuid(),
+                    event.getPaiementUuid(),
+                    event.getMontant(),
+                    event.getMethodePaiement(),
+                    e.getMessage() != null ? e.getMessage() : "Erreur inconnue",
+                    "PAYMENT_PROCESSING_ERROR",
+                    utilisateur.getEmail(),
+                    utilisateur.getPrenom(),
+                    utilisateur.getNom(),
+                    paiement.getDeal().getTitre(),
+                    paiement.getDeal().getDescription(),
+                    event.getNombreDePart(),
+                    5, // Nombre de tentatives
+                    adresse != null ? adresse.getRue() : "",
+                    adresse != null ? adresse.getVille() : "",
+                    adresse != null ? adresse.getProvince() : "",
+                    adresse != null ? adresse.getCodePostal() : "",
+                    adresse != null ? adresse.getPays() : ""
+            );
+
+            // Publier l'événement d'échec définitif
+            eventPublisher.publishAsync(paymentFailedEvent);
+
+            log.info("✅ PaymentFailedEvent publié avec succès pour paiement UUID={}", event.getPaiementUuid());
+
+        } catch (Exception ex) {
+            log.error("❌ Erreur lors de la publication de PaymentFailedEvent: {}", ex.getMessage(), ex);
+        }
+    }
+
+    /**
      * Handler pour traiter l'événement PaymentSuccessfulEvent.
      * Met à jour les statistiques et déclenche les actions post-paiement.
      *
@@ -93,7 +168,33 @@ public class SquarePaymentHandler implements ConsumerHandler {
             // commandeService.marquerCommePayee(event.getCommandeUuid());
             log.info("Order marked as paid: {}", event.getCommandeUuid());
 
-            // 3. Déclencher le processus de livraison ou de préparation
+            // 3. Envoyer email de notification au créateur du deal (nouveau participant)
+            CommandeModele commandeModele = commandeService.lireParUuid(event.getCommandeUuid());
+            UtilisateurModele utilisateurModele = utilisateurService.lireParUuid(event.getUtilisateurUuid()).orElse(null);
+            DealModele dealModele = commandeModele.getDealModele();
+
+            long nombreDePartsActuels = dealParticipantService.compterNombreParts(dealModele.getUuid()) + event.getNombreDePart();
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("prenom", dealModele.getCreateur().getPrenom());
+            variables.put("nom", dealModele.getCreateur().getNom());
+            variables.put("titreDeal", dealModele.getTitre());
+            variables.put("prenomParticipant", Optional.ofNullable(utilisateurModele).map(UtilisateurModele::getPrenom).orElse(""));
+            variables.put("nomParticipant", Optional.ofNullable(utilisateurModele).map(UtilisateurModele::getNom).orElse(""));
+            variables.put("nombrePartsActuels", nombreDePartsActuels);
+            variables.put("nombreParticipantsMax", dealModele.getNbParticipants());
+            variables.put("lienDeal", CONSTRUIRELIENDEAL(dealModele.getUuid().toString()));
+
+            // Appeler le service métier pour envoyer l'email au créateur du deal
+            emailNotificationService.envoyerNotification(
+                    dealModele.getCreateur().getEmail(),
+                    "New participant - " + dealModele.getTitre(),
+                    "notification-nouveau-participant-en",
+                    variables
+            );
+
+            log.info("✅ Email de nouveau participant envoyé au créateur: {}", dealModele.getCreateur().getEmail());
+
+            // 4. Déclencher le processus de livraison ou de préparation
             // livraisonService.demarrerLivraison(event.getCommandeUuid());
             log.info("Delivery process initiated for order: {}", event.getCommandeUuid());
 
@@ -108,13 +209,14 @@ public class SquarePaymentHandler implements ConsumerHandler {
     /**
      * Handler pour traiter l'événement PaymentFailedEvent.
      * Gère les actions en cas d'échec de paiement.
+     * Envoie un email d'échec à l'utilisateur.
      *
      * @param event L'événement d'échec de paiement
      */
     @FunctionalHandler(
         eventType = PaymentFailedEvent.class,
         maxAttempts = 3,
-        description = "Gestion des échecs de paiement Square"
+        description = "Gestion des échecs de paiement Square et envoi d'email"
     )
     public void handlePaymentFailed(PaymentFailedEvent event) {
         log.info("Handling PaymentFailedEvent: paiement={}, montant={}, erreur={}",
@@ -133,6 +235,24 @@ public class SquarePaymentHandler implements ConsumerHandler {
             log.warn("Payment failed for user {} with error: {} (code: {})",
                     event.getUtilisateurUuid(), event.getMessageErreur(), event.getCodeErreur());
 
+            // 4. Envoyer l'email d'échec de paiement
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("prenom", event.getPrenom());
+            variables.put("nom", event.getNom());
+            variables.put("montant", event.getMontant());
+            variables.put("titreDeal", event.getTitreDeal());
+            variables.put("dateTentative", LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+            variables.put("raisonEchec", event.getMessageErreur());
+            variables.put("supportEmail", "support@dealtogether.ca");
+
+            emailNotificationService.envoyerNotification(
+                    event.getEmail(),
+                    "Échec de paiement - " + event.getTitreDeal(),
+                    "notification-paiement-echoue-en",
+                    variables
+            );
+
+            log.info("✅ Email d'échec de paiement envoyé à: {}", event.getEmail());
             log.info("PaymentFailedEvent handled successfully for paiement: {}", event.getPaiementUuid());
 
         } catch (Exception e) {

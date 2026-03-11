@@ -43,6 +43,16 @@ public interface SquarePaymentProvider {
     String rembourserPaiement(String squarePaymentId, BigDecimal montant, String raison);
 
     /**
+     * Rembourse un paiement Square (surcharge sans raison)
+     * @param squarePaymentId l'ID du paiement à rembourser
+     * @param montant le montant à rembourser
+     * @return l'ID du remboursement Square
+     */
+    default String refundPayment(String squarePaymentId, BigDecimal montant) {
+        return rembourserPaiement(squarePaymentId, montant, "Remboursement demandé");
+    }
+
+    /**
      * Récupère les détails d'un paiement Square
      * @param squarePaymentId l'ID du paiement Square
      * @return un objet contenant les détails du paiement

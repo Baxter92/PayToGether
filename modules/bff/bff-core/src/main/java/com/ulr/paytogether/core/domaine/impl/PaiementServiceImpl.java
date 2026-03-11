@@ -128,5 +128,11 @@ public class PaiementServiceImpl implements PaiementService {
         log.info("Calcul des statistiques des paiements");
         return paiementProvider.calculerStatistiquesPaiements();
     }
+
+    @Override
+    public List<PaiementModele> lireParUtilisateurAvecInfosCompletes(String keycloakId) {
+        log.info("Récupération des paiements de l'utilisateur {} avec informations complètes", keycloakId);
+        return paiementProvider.trouverParUtilisateurAvecInfosCompletes(keycloakId);
+    }
 }
 

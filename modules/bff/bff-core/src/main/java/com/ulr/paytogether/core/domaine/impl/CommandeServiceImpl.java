@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Implémentation du service Commande
@@ -30,6 +31,21 @@ public class CommandeServiceImpl implements CommandeService {
     public Map<String, Long> calculerStatistiques() {
         log.info("Calcul des statistiques des commandes");
         return commandeProvider.calculerStatistiquesCommandes();
+    }
+
+    @Override
+    public CommandeModele lireParPaiementUuid(UUID paiementUuid) {
+        log.info("Récupération de la commande par paiement UUID: {}", paiementUuid);
+        if (paiementUuid == null) {
+            log.warn("UUID de paiement est null");
+            return null;
+        }
+        return commandeProvider.trouverParPaiementUuid(paiementUuid);
+    }
+
+    @Override
+    public CommandeModele lireParUuid(UUID uuid) {
+        return commandeProvider.lireParUuid(uuid);
     }
 }
 

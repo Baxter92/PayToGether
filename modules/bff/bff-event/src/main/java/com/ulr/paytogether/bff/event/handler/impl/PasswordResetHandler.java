@@ -81,8 +81,8 @@ public class PasswordResetHandler implements ConsumerHandler {
             // 3. Envoyer l'email via le service métier
             emailNotificationService.envoyerNotification(
                     event.getEmail(),
-                    "Réinitialisation de votre mot de passe PayToGether",
-                    "notification-reinitialisation-mot-de-passe",
+                    "Reset your DealToGether password",
+                    "notification-reinitialisation-mot-de-passe-en",
                     variables
             );
 

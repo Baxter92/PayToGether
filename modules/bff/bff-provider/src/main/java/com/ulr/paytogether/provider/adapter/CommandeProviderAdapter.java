@@ -129,4 +129,18 @@ public class CommandeProviderAdapter implements CommandeProvider {
 
         return stats;
     }
+
+    @Override
+    public CommandeModele trouverParPaiementUuid(UUID paiementUuid) {
+        return jpaRepository.findByPaiementUuid(paiementUuid)
+                .map(mapper::versModele)
+                .orElseThrow(()-> new RuntimeException("Aucune commande trouvée pour le paiement UUID : " + paiementUuid));
+    }
+
+    @Override
+    public CommandeModele lireParUuid(UUID uuid) {
+        return jpaRepository.findById(uuid)
+                .map(mapper::versModele)
+                .orElseThrow(() -> new RuntimeException("Commande non trouvée avec l'UUID : " + uuid));
+    }
 }

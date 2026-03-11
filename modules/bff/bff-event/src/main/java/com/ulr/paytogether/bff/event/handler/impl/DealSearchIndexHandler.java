@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  * ⚠️ TEMPORAIREMENT DÉSACTIVÉ : Ce handler recréait l'index avec la mauvaise structure UUID
  * TODO : Réactiver après avoir corrigé le problème de structure d'index
  */
-// @Component - DÉSACTIVÉ TEMPORAIREMENT
+@Component
 @RequiredArgsConstructor
 @Slf4j
 public class DealSearchIndexHandler implements ConsumerHandler {
