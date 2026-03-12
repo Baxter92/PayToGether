@@ -20,6 +20,7 @@ public class CommandeJpaMapper {
         if (jpaCommande == null) return null;
         return CommandeModele.builder()
                 .uuid(jpaCommande.getUuid())
+                .numeroCommande(jpaCommande.getNumeroCommande())
                 .montantTotal(jpaCommande.getMontantTotal())
                 .statut(jpaCommande.getStatut())
                 .utilisateur(jpaCommande.getMarchandJpa() != null ?
@@ -34,6 +35,7 @@ public class CommandeJpaMapper {
         if (modele == null) return null;
         return CommandeJpa.builder()
                 .uuid(modele.getUuid())
+                .numeroCommande(modele.getNumeroCommande())
                 .montantTotal(modele.getMontantTotal())
                 .statut(modele.getStatut())
                 .marchandJpa(modele.getUtilisateur() != null ?

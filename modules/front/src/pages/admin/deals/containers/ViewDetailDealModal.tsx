@@ -1,11 +1,7 @@
 import { useI18n } from "@/common/hooks/useI18n";
 import { Dialog, DialogContent } from "@/common/components/ui/dialog";
-import Form, { type IFieldGroup } from "@/common/containers/Form";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTitle } from "@radix-ui/react-dialog";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Tabs,
   TabsContent,
@@ -29,6 +25,8 @@ import {
   ImageIcon,
   Loader2,
   Expand,
+  RefreshCcw,
+  AlertCircle,
 } from "lucide-react";
 import { DataTable } from "@/common/components";
 import { formatCurrency } from "@/common/utils/formatCurrency";
@@ -39,11 +37,26 @@ import {
   useDealParticipants,
   StatutPaiement,
   type ParticipantDto,
+  useRefundParticipantsBulk,
 } from "@/common/api";
 import { cn } from "@/common/utils";
 import { ImageLightbox } from "@/common/components/ImageLightbox";
 import { Button } from "@/common/components/ui/button";
+import { Checkbox } from "@/common/components/ui/checkbox";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/common/components/ui/alert-dialog";
+import { toast } from "sonner";
 
+// Types et schémas temporairement commentés - non utilisés pour l'instant
+/*
 // Define CreateDealInput type
 type CreateDealInput = {
   title: string;
@@ -85,6 +98,7 @@ const viewDetailDealFormSchema = z.object({
   supplierName: z.string().optional(),
   packagingMethod: z.string().optional(),
 });
+*/
 
 const supplierMock = {
   name: "Supplier Name",
@@ -105,6 +119,101 @@ type ReviewRow = {
 
 /* ==============================
    ReadOnlyImageGallery Component
+============================== */
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/explicit-function-return-type
+function ReadOnlyImageGallery({
+  images,
+  dealUuid,
+}: {
+  images: any[];
+  dealUuid?: string;
+}) {
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const { t } = useI18n("deals");
+
+  const handleImageClick = (index: number): void => {
+    setCurrentImageIndex(index);
+    setIsLightboxOpen(true);
+  };
+
+  if (!images || images.length === 0) {
+    return (
+      <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl py-16 bg-gradient-to-br from-gray-50 to-blue-50/30 dark:from-gray-900 dark:to-blue-950/30">
+        <div className="flex flex-col items-center text-center">
+          <div className="w-20 h-20 rounded-2xl bg-white dark:bg-gray-800 shadow-md flex items-center justify-center mb-4 border-2 border-gray-100 dark:border-gray-700">
+            <ImageIcon className="w-10 h-10 text-gray-300 dark:text-gray-600" />
+          </div>
+          <p className="text-base text-gray-900 dark:text-gray-100 font-bold mb-1">
+            {t("deals.noImageAvailable")}
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {t("deals.noImageAvailableDescription")}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-xl border-2 border-blue-100/50 dark:border-blue-900/50 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center border border-blue-100 dark:border-blue-900">
+              <ImageIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                {t("deals.imageGallery")}
+              </p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                {t("deals.enlargeImage")}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-full shadow-sm border-2 border-blue-100 dark:border-blue-900">
+            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              {images.length}
+            </span>
+            <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+              {t("deals.images", { count: images.length })}
+            </span>
+          </div>
+        </div>
+
+        {/* Images Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {images.map((img, idx) => (
+            <ReadOnlyImageThumbnailWrapper
+              key={img.imageUuid || img.uuid || idx}
+              image={img}
+              index={idx}
+              dealUuid={dealUuid}
+              onImageClick={() => handleImageClick(idx)}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Lightbox */}
+      {isLightboxOpen && (
+        <ReadOnlyImageLightbox
+          images={images}
+          dealUuid={dealUuid}
+          currentIndex={currentImageIndex}
+          isOpen={isLightboxOpen}
+          onClose={() => setIsLightboxOpen(false)}
+        />
+      )}
+    </>
+  );
+}
+
+/* ==============================
+   ReadOnlyImageThumbnail Component
 ============================== */
 
 function ReadOnlyImageThumbnail({
@@ -256,99 +365,6 @@ function ReadOnlyImageLightbox({
   );
 }
 
-/* ==============================
-   ReadOnlyImageGallery Component
-============================== */
-
-function ReadOnlyImageGallery({
-  images,
-  dealUuid,
-}: {
-  images: any[];
-  dealUuid?: string;
-}) {
-  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const { t } = useI18n("deals");
-
-  const handleImageClick = (index: number): void => {
-    setCurrentImageIndex(index);
-    setIsLightboxOpen(true);
-  };
-
-  if (!images || images.length === 0) {
-    return (
-      <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl py-16 bg-gradient-to-br from-gray-50 to-blue-50/30 dark:from-gray-900 dark:to-blue-950/30">
-        <div className="flex flex-col items-center text-center">
-          <div className="w-20 h-20 rounded-2xl bg-white dark:bg-gray-800 shadow-md flex items-center justify-center mb-4 border-2 border-gray-100 dark:border-gray-700">
-            <ImageIcon className="w-10 h-10 text-gray-300 dark:text-gray-600" />
-          </div>
-          <p className="text-base text-gray-900 dark:text-gray-100 font-bold mb-1">
-            {t("admin:deals.noImageAvailable")}
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {t("admin:deals.noImageAvailableDescription")}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between p-5 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-xl border-2 border-blue-100/50 dark:border-blue-900/50 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center border border-blue-100 dark:border-blue-900">
-              <ImageIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                {t("admin:deals.imageGallery")}
-              </p>
-              <p className="text-xs text-gray-600 dark:text-gray-400">
-                {t("admin:deals.enlargeImage")}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-full shadow-sm border-2 border-blue-100 dark:border-blue-900">
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              {images.length}
-            </span>
-            <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-              {t("admin:deals.images", { count: images.length })}
-            </span>
-          </div>
-        </div>
-
-        {/* Images Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {images.map((img, idx) => (
-            <ReadOnlyImageThumbnailWrapper
-              key={img.imageUuid || img.uuid || idx}
-              image={img}
-              index={idx}
-              dealUuid={dealUuid}
-              onImageClick={() => handleImageClick(idx)}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Lightbox */}
-      {isLightboxOpen && (
-        <ReadOnlyImageLightbox
-          images={images}
-          dealUuid={dealUuid}
-          currentIndex={currentImageIndex}
-          isOpen={isLightboxOpen}
-          onClose={() => setIsLightboxOpen(false)}
-        />
-      )}
-    </>
-  );
-}
 
 /* ==============================
    ViewDetailDealModal Component
@@ -368,13 +384,104 @@ export function ViewDetailDealModal({
   const { data: commentaires = [] } = useCommentairesByDeal(dealUuid);
   const { data: users = [] } = useUsers();
   const { data: participants = [] } = useDealParticipants(dealUuid);
-  const form = useForm<CreateDealInput>({
-    resolver: zodResolver(viewDetailDealFormSchema),
-  });
 
+  // État pour la sélection des participants et remboursement
+  const [selectedParticipants, setSelectedParticipants] = useState<Set<string>>(new Set());
+  const [isRefundDialogOpen, setIsRefundDialogOpen] = useState(false);
+  const [refundType, setRefundType] = useState<"single" | "bulk">("single");
+  const [singleParticipantToRefund, setSingleParticipantToRefund] = useState<ParticipantDto | null>(null);
+
+  const { mutateAsync: refundParticipants, isPending: isRefunding } = useRefundParticipantsBulk();
+
+  // Handlers pour sélection et remboursement
+  const toggleParticipantSelection = (utilisateurUuid: string): void => {
+    const newSelection = new Set(selectedParticipants);
+    if (newSelection.has(utilisateurUuid)) {
+      newSelection.delete(utilisateurUuid);
+    } else {
+      newSelection.add(utilisateurUuid);
+    }
+    setSelectedParticipants(newSelection);
+  };
+
+  const selectAllParticipants = (): void => {
+    if (selectedParticipants.size === participants.length) {
+      setSelectedParticipants(new Set());
+    } else {
+      setSelectedParticipants(new Set(participants.map(p => p.utilisateurUuid)));
+    }
+  };
+
+  const handleSingleRefund = (participant: ParticipantDto): void => {
+    setSingleParticipantToRefund(participant);
+    setRefundType("single");
+    setIsRefundDialogOpen(true);
+  };
+
+  const handleBulkRefund = (): void => {
+    if (selectedParticipants.size === 0) {
+      toast.error("Please select at least one participant to refund");
+      return;
+    }
+    setRefundType("bulk");
+    setIsRefundDialogOpen(true);
+  };
+
+  const confirmRefund = async (): Promise<void> => {
+    try {
+      if (refundType === "single" && singleParticipantToRefund) {
+        await refundParticipants({
+          dealUuid,
+          utilisateurUuids: [singleParticipantToRefund.utilisateurUuid],
+          raisonRemboursement: "Admin refund request",
+        });
+      } else if (refundType === "bulk") {
+        await refundParticipants({
+          dealUuid,
+          utilisateurUuids: Array.from(selectedParticipants),
+          raisonRemboursement: "Bulk admin refund request",
+        });
+        setSelectedParticipants(new Set());
+      }
+      setIsRefundDialogOpen(false);
+      setSingleParticipantToRefund(null);
+    } catch (error) {
+      console.error("Refund error:", error);
+    }
+  };
 
   const participantColumns = useMemo<ColumnDef<ParticipantDto>[]>(
     () => [
+      {
+        id: "select",
+        header: () => (
+          <div className="flex items-center justify-center">
+            <Checkbox
+              checked={
+                participants.length > 0 &&
+                selectedParticipants.size === participants.length
+              }
+              onCheckedChange={selectAllParticipants}
+              aria-label="Select all"
+              className="border-2"
+            />
+          </div>
+        ),
+        cell: ({ row }) => (
+          <div className="flex items-center justify-center">
+            <Checkbox
+              checked={selectedParticipants.has(row.original.utilisateurUuid)}
+              onCheckedChange={() =>
+                toggleParticipantSelection(row.original.utilisateurUuid)
+              }
+              aria-label="Select row"
+              className="border-2"
+            />
+          </div>
+        ),
+        enableSorting: false,
+        enableHiding: false,
+      },
       {
         accessorKey: "name",
         header: t("deals.participantName"),
@@ -485,8 +592,27 @@ export function ViewDetailDealModal({
           </Badge>
         ),
       },
+      {
+        id: "actions",
+        header: () => <div className="text-center">Actions</div>,
+        cell: ({ row }) => (
+          <div className="flex items-center justify-center">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => handleSingleRefund(row.original)}
+              disabled={row.original.statutPaiement !== StatutPaiement.CONFIRME}
+              className="hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/50 dark:hover:text-red-400 gap-2"
+            >
+              <RefreshCcw className="w-4 h-4" />
+              Refund
+            </Button>
+          </div>
+        ),
+        enableSorting: false,
+      },
     ],
-    [],
+    [participants, selectedParticipants],
   );
 
   const reviewColumns = useMemo<ColumnDef<ReviewRow>[]>(
@@ -583,148 +709,7 @@ export function ViewDetailDealModal({
       }));
   }, [commentaires, users]);
 
-  const [partsTotal, setPartsTotal] = useState<number>(0);
-
-  useEffect(() => {
-    if (deal) {
-      form.reset(normalizeDealForModal(deal));
-      setPartsTotal(Number(deal.total));
-    }
-  }, [deal, form]);
-
-  function normalizeDealForModal(raw: any): CreateDealInput {
-    console.log(raw, "raw");
-
-    return {
-      title: raw.title ?? "",
-      shortSubtitle: undefined,
-      description: "",
-      price: Number(raw.groupPrice) * Number(raw.unit),
-      originalPrice: Number(raw.originalPrice),
-      currency: "USD",
-      partsTotal: Number(raw.total),
-      minRequired: 1,
-      expiryDate: undefined,
-      location: raw.city ?? "",
-      categoryId: raw.category ?? "",
-      highlights: raw.discount ? `Remise de ${raw.discount}%` : undefined,
-      whatsIncluded: `• ${raw.unit} ${raw.currency} par part\n• Produit : ${raw.title}`,
-      images: [],
-      status: "published",
-      supplierName: undefined,
-      packagingMethod: undefined,
-    };
-  }
-
-  const viewDetailDealFormGroups: IFieldGroup[] = [
-    {
-      title: t("deals.generalInformation"),
-      description: t("deals.generalInformationDescription"),
-      columns: 2,
-      className:
-        "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
-      fields: [
-        {
-          type: "text",
-          name: "title",
-          label: t("deals.dealTitle"),
-        },
-        {
-          type: "text",
-          name: "shortSubtitle",
-          label: t("deals.subtitle"),
-        },
-        {
-          type: "textarea",
-          name: "description",
-          label: t("deals.descriptionField"),
-          colSpan: 2,
-        },
-        {
-          type: "text",
-          name: "location",
-          label: t("deals.location"),
-        },
-        {
-          type: "radio",
-          name: "status",
-          label: t("deals.status"),
-          items: [
-            { label: t("deals.published"), value: "published" },
-            { label: t("deals.draft"), value: "draft" },
-          ],
-        },
-      ],
-    },
-    {
-      title: t("deals.pricing"),
-      description: t("deals.pricingDescription"),
-      columns: 3,
-      className:
-        "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
-      fields: [
-        {
-          type: "number",
-          name: "price",
-          label: t("deals.partPrice"),
-        },
-        {
-          type: "number",
-          name: "originalPrice",
-          label: t("deals.initialPrice"),
-        },
-        {
-          type: "select",
-          name: "currency",
-          label: t("deals.currency"),
-          items: [{ label: t("deals.dollar"), value: "CAD" }],
-        },
-      ],
-    },
-    {
-      title: t("deals.availability"),
-      description: t("deals.availabilityDescription"),
-      columns: 3,
-      className:
-        "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
-      fields: [
-        {
-          type: "number",
-          name: "partsTotal",
-          label: t("deals.totalParts"),
-        },
-        {
-          type: "number",
-          name: "minRequired",
-          label: t("deals.minParts"),
-        },
-        {
-          type: "date",
-          name: "expiryDate",
-          label: t("deals.expirationDate"),
-        },
-      ],
-    },
-    {
-      title: t("deals.imageGallery"),
-      description: t("deals.imageGalleryDescription"),
-      className:
-        "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
-      fields: [
-        {
-          type: "file" as const,
-          name: "images",
-          label: t("deals.images"),
-          render: () => (
-            <ReadOnlyImageGallery
-              images={deal?.raw?.listeImages || []}
-              dealUuid={dealUuid}
-            />
-          ),
-        },
-      ],
-    },
-  ];
+  const partsTotal = Number(deal?.total) || 0;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -808,11 +793,204 @@ export function ViewDetailDealModal({
             {/* Contenu des tabs */}
             <div className="flex-1 overflow-y-auto">
               <TabsContent value="details" className="px-6 py-6 space-y-6 m-0">
-                <Form<CreateDealInput>
-                  form={form}
-                  groups={viewDetailDealFormGroups}
-                  readOnly
-                />
+                {/* Informations générales */}
+                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
+                    {t("deals.generalInformation")}
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        {t("deals.dealTitle")}
+                      </label>
+                      <p className="mt-1 text-base font-semibold text-gray-900 dark:text-gray-100">
+                        {deal?.title || deal?.raw?.titre || "—"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        {t("deals.status")}
+                      </label>
+                      <p className="mt-1">
+                        <Badge className={
+                          deal?.status === "PUBLIE" 
+                            ? "bg-green-100 text-green-800" 
+                            : "bg-gray-100 text-gray-800"
+                        }>
+                          {deal?.status || deal?.raw?.statut || "—"}
+                        </Badge>
+                      </p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        Description
+                      </label>
+                      <p className="mt-1 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                        {deal?.description || deal?.raw?.description || "—"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        {t("deals.location")}
+                      </label>
+                      <p className="mt-1 text-base text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-blue-600" />
+                        {deal?.location || `${deal?.raw?.ville}, ${deal?.raw?.pays}` || "—"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        Catégorie
+                      </label>
+                      <p className="mt-1 text-base text-gray-900 dark:text-gray-100">
+                        {deal?.category || deal?.raw?.categorieNom || "—"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Prix et disponibilité */}
+                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
+                    {t("deals.pricing")}
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        Prix du deal
+                      </label>
+                      <p className="mt-1 text-2xl font-bold text-green-600">
+                        {formatCurrency(deal?.originalPrice || deal?.raw?.prixDeal || 0)}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        Prix par part
+                      </label>
+                      <p className="mt-1 text-2xl font-bold text-blue-600">
+                        {formatCurrency(deal?.groupPrice || deal?.raw?.prixPart || 0)}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        Monnaie
+                      </label>
+                      <p className="mt-1 text-base font-semibold text-gray-900 dark:text-gray-100">
+                        {deal?.currency || "CAD"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Disponibilité */}
+                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
+                    {t("deals.availability")}
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        Parts totales
+                      </label>
+                      <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">
+                        {deal?.total || deal?.raw?.nbParticipants || 0}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        Parts vendues
+                      </label>
+                      <p className="mt-1 text-2xl font-bold text-blue-600">
+                        {deal?.participants || deal?.raw?.nombreParticipantsReel || 0}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        Date d'expiration
+                      </label>
+                      <p className="mt-1 text-base font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-purple-600" />
+                        {deal?.expiryDate 
+                          ? new Date(deal.expiryDate).toLocaleDateString("fr-FR")
+                          : deal?.raw?.dateFin
+                            ? new Date(deal.raw.dateFin).toLocaleDateString("fr-FR")
+                            : "—"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Points forts */}
+                {(deal?.raw?.listePointsForts && deal.raw.listePointsForts.length > 0) && (
+                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-yellow-600" />
+                      Points forts
+                    </h3>
+                    <ul className="space-y-2">
+                      {deal.raw.listePointsForts.map((point: string, index: number) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <span className="text-green-600 font-bold mt-1">✓</span>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">{point}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Galerie d'images */}
+                {deal?.raw?.listeImages && deal.raw.listeImages.length > 0 && (
+                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
+                      {t("deals.imageGallery")}
+                    </h3>
+                    <ReadOnlyImageGallery
+                      images={deal.raw.listeImages}
+                      dealUuid={dealUuid}
+                    />
+                  </div>
+                )}
+
+                {/* Dates */}
+                <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
+                    Dates
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        Date de création
+                      </label>
+                      <p className="mt-1 text-base text-gray-900 dark:text-gray-100">
+                        {deal?.raw?.dateCreation 
+                          ? new Date(deal.raw.dateCreation).toLocaleDateString("fr-FR", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "—"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        Dernière modification
+                      </label>
+                      <p className="mt-1 text-base text-gray-900 dark:text-gray-100">
+                        {deal?.raw?.dateModification 
+                          ? new Date(deal.raw.dateModification).toLocaleDateString("fr-FR", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "—"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </TabsContent>
 
               <TabsContent value="participants" className="px-6 py-6 m-0">
@@ -897,13 +1075,39 @@ export function ViewDetailDealModal({
 
                   {/* Table des participants */}
                   <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-blue-50/30 dark:from-gray-900 dark:to-blue-950/30">
-                      <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
-                        {t("deals.participantList")}
-                      </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
-                        {t("deals.participantListDescription")}
-                      </p>
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-blue-50/30 dark:from-gray-900 dark:to-blue-950/30 flex items-center justify-between">
+                      <div>
+                        <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
+                          {t("deals.participantList")}
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
+                          {t("deals.participantListDescription")}
+                        </p>
+                      </div>
+
+                      {/* Bouton de remboursement groupé */}
+                      {selectedParticipants.size > 0 && (
+                        <Button
+                          onClick={handleBulkRefund}
+                          disabled={isRefunding}
+                          className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-md gap-2"
+                        >
+                          {isRefunding ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              Processing...
+                            </>
+                          ) : (
+                            <>
+                              <RefreshCcw className="w-4 h-4" />
+                              Refund Selected
+                              <Badge className="ml-1 bg-white/20 text-white">
+                                {selectedParticipants.size}
+                              </Badge>
+                            </>
+                          )}
+                        </Button>
+                      )}
                     </div>
                     <div className="p-4">
                       <DataTable<ParticipantDto, unknown>
@@ -1064,6 +1268,97 @@ export function ViewDetailDealModal({
           </Tabs>
         </div>
       </DialogContent>
+
+      {/* Dialog de confirmation de remboursement */}
+      <AlertDialog open={isRefundDialogOpen} onOpenChange={setIsRefundDialogOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 text-red-600" />
+              Confirm Refund
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              {refundType === "single" && singleParticipantToRefund ? (
+                <>
+                  <p>Are you sure you want to refund this participant?</p>
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-blue-600" />
+                        <span className="font-semibold">{singleParticipantToRefund.utilisateurNom}</span>
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        <div>Email: {singleParticipantToRefund.utilisateurEmail}</div>
+                        <div>Parts: {singleParticipantToRefund.nombreDePart}</div>
+                        <div className="font-semibold text-red-600 mt-2">
+                          Amount to refund: {formatCurrency(singleParticipantToRefund.montantTotal)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p>Are you sure you want to refund {selectedParticipants.size} participants?</p>
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-blue-600">
+                        <Users className="w-4 h-4" />
+                        <span className="font-semibold">{selectedParticipants.size} participants selected</span>
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        <div className="font-semibold text-red-600">
+                          Total amount: {formatCurrency(
+                            participants
+                              .filter(p => selectedParticipants.has(p.utilisateurUuid))
+                              .reduce((sum, p) => sum + p.montantTotal, 0),
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div className="bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+                <div className="flex gap-2">
+                  <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-yellow-800 dark:text-yellow-200">
+                    <strong>Warning:</strong> This action will:
+                    <ul className="list-disc list-inside mt-1 space-y-1">
+                      <li>Refund the payment via Square</li>
+                      <li>Send a confirmation email</li>
+                      <li>Remove participants from the deal</li>
+                      <li>Delete payments and orders</li>
+                    </ul>
+                    <p className="mt-2 font-semibold">This action cannot be undone.</p>
+                  </div>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isRefunding}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmRefund}
+              disabled={isRefunding}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {isRefunding ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <RefreshCcw className="w-4 h-4 mr-2" />
+                  Confirm Refund
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* TODO: Ajouter RefundConfirmationDialog une fois les fonctions handleConfirmRefund, etc. implémentées
       <RefundConfirmationDialog

@@ -80,7 +80,23 @@ POST {{baseUrl}}/api/square-payments/{{paiementUuid}}/refund
 Content-Type: {{contentType}}
 
 ###############################################################################
-# 7. Test avec données invalides (montant négatif)
+# 7. Rembourser plusieurs participants en masse (ADMIN uniquement)
+###############################################################################
+POST {{baseUrl}}/api/square-payments/refund-bulk
+Content-Type: {{contentType}}
+Authorization: Bearer YOUR_ADMIN_TOKEN_HERE
+
+{
+  "dealUuid": "4ea745a4-2187-46c3-b31e-b8bb1b099df5",
+  "utilisateurUuids": [
+    "545128a4-0b6c-4694-abdd-6952549381b5",
+    "550e8400-e29b-41d4-a716-446655440001"
+  ],
+  "raisonRemboursement": "Deal cancelled by admin - full refund"
+}
+
+###############################################################################
+# 8. Test avec données invalides (montant négatif)
 ###############################################################################
 POST {{baseUrl}}/api/square-payments
 Content-Type: {{contentType}}
