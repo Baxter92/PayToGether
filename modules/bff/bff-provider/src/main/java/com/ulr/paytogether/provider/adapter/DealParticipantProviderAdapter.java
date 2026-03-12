@@ -160,6 +160,14 @@ public class DealParticipantProviderAdapter implements DealParticipantProvider {
     }
 
     @Override
+    public long compterNombreParts(UUID dealUuid) {
+        return participantRepository.findByIdDealUuid(dealUuid)
+                .stream()
+                .mapToInt(DealParticipantJpa::getNombreDePart)
+                .sum();
+    }
+
+    @Override
     @Transactional
     public void supprimerParticipant(UUID dealUuid, UUID utilisateurUuid) {
         log.debug("Suppression du participant : deal={}, utilisateur={}", dealUuid, utilisateurUuid);

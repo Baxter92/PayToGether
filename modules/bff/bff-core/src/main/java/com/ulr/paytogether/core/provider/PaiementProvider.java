@@ -46,4 +46,12 @@ public interface PaiementProvider {
      * @return Map avec les statistiques (totalTransactions, transactionsReussies, transactionsEchouees, montantTotal)
      */
     Map<String, Object> calculerStatistiquesPaiements();
+
+    /**
+     * Récupère tous les paiements d'un utilisateur avec les informations complètes
+     * (deal, catégorie, adresse de facturation, commande)
+     * @param keycloakId String de l'utilisateur
+     * @return Liste des paiements avec toutes les informations
+     */
+    List<PaiementModele> trouverParUtilisateurAvecInfosCompletes(String keycloakId);
 }

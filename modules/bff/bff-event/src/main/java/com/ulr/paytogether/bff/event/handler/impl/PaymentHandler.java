@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  * Ces événements de confirmation sont publiés par EventConsumerService,
  * le handler n'a pas besoin de les publier manuellement.
  */
-@Component
+//@Component
 @RequiredArgsConstructor
 @Slf4j
 public class PaymentHandler implements ConsumerHandler {

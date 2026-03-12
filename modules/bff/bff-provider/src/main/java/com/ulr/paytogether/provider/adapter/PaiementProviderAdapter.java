@@ -219,4 +219,15 @@ public class PaiementProviderAdapter implements PaiementProvider {
 
         return stats;
     }
+
+    @Override
+    public List<PaiementModele> trouverParUtilisateurAvecInfosCompletes(String keycloakId) {
+        UtilisateurJpa utilisateurJpa = utilisateurRepository.findByKeycloakId(keycloakId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé pour le Keycloak ID : " + keycloakId));
+
+        return jpaRepository.findByUtilisateurJpa(utilisateurJpa)
+                .stream()
+                .map(mapper::versModeleComplet)
+                .collect(Collectors.toList());
+    }
 }

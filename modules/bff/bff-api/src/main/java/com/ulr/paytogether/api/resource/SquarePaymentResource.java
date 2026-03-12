@@ -3,12 +3,19 @@ package com.ulr.paytogether.api.resource;
 import com.ulr.paytogether.api.apiadapter.SquarePaymentApiAdapter;
 import com.ulr.paytogether.api.dto.CreerPaiementSquareDTO;
 import com.ulr.paytogether.api.dto.PaiementSquareResponseDTO;
+import com.ulr.paytogether.api.dto.RemboursementEnMasseDTO;
+import com.ulr.paytogether.api.dto.RemboursementEnMasseResponseDTO;
+import com.ulr.paytogether.core.domaine.service.SquarePaymentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -22,6 +29,7 @@ import java.util.UUID;
 public class SquarePaymentResource {
 
     private final SquarePaymentApiAdapter apiAdapter;
+    private final SquarePaymentService squarePaymentService;
 
     /**
      * Crée un nouveau paiement Square.
@@ -80,6 +88,54 @@ public class SquarePaymentResource {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Erreur remboursement paiement Square: {}", e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    /**
+     * Rembourse plusieurs paiements en masse (ADMIN uniquement).
+     * Pour chaque utilisateur :
+     * - Rembourse son paiement via Square
+     * - Envoie un email de confirmation
+     * - Supprime sa participation au deal
+     * - Supprime le paiement
+     * - Supprime la commande si elle n'a plus de paiements
+     *
+     * POST /api/square-payments/refund-bulk
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/refund-bulk")
+    public ResponseEntity<RemboursementEnMasseResponseDTO> rembourserPaiementsEnMasse(
+            @Valid @RequestBody RemboursementEnMasseDTO dto) {
+        log.info("POST /api/square-payments/refund-bulk - Remboursement en masse de {} utilisateurs pour le deal {}",
+                dto.getUtilisateurUuids().size(), dto.getDealUuid());
+
+        try {
+            int nombreRemboursements = squarePaymentService.rembourserPaiementsEnMasse(
+                    dto.getUtilisateurUuids(),
+                    dto.getDealUuid(),
+                    dto.getRaisonRemboursement()
+            );
+
+            int nombreEchecs = dto.getUtilisateurUuids().size() - nombreRemboursements;
+
+            RemboursementEnMasseResponseDTO response = RemboursementEnMasseResponseDTO.builder()
+                    .dealUuid(dto.getDealUuid())
+                    .nombreUtilisateurs(dto.getUtilisateurUuids().size())
+                    .nombreRemboursementsReussis(nombreRemboursements)
+                    .nombreEchecs(nombreEchecs)
+                    .message(String.format("%d/%d remboursements effectués avec succès",
+                            nombreRemboursements, dto.getUtilisateurUuids().size()))
+                    .details(new ArrayList<>())
+                    .build();
+
+            log.info("Remboursement en masse terminé: {}/{} succès",
+                    nombreRemboursements, dto.getUtilisateurUuids().size());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("Erreur remboursement en masse: {}", e.getMessage(), e);
             throw e;
         }
     }

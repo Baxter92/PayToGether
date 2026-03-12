@@ -64,5 +64,11 @@ public interface PaiementService {
      * Calculer les statistiques des paiements (pour l'admin)
      */
     Map<String, Object> calculerStatistiques();
+
+    /**
+     * Récupérer tous les paiements d'un utilisateur avec toutes les informations complètes
+     * (deal, catégorie, adresse de facturation, commande)
+     */
+    List<PaiementModele> lireParUtilisateurAvecInfosCompletes(String keycloakId);
 }
 

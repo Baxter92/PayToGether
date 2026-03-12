@@ -372,6 +372,7 @@ export function ViewDetailDealModal({
     resolver: zodResolver(viewDetailDealFormSchema),
   });
 
+
   const participantColumns = useMemo<ColumnDef<ParticipantDto>[]>(
     () => [
       {
@@ -1063,6 +1064,18 @@ export function ViewDetailDealModal({
           </Tabs>
         </div>
       </DialogContent>
+
+      {/* TODO: Ajouter RefundConfirmationDialog une fois les fonctions handleConfirmRefund, etc. implémentées
+      <RefundConfirmationDialog
+        open={refundDialogOpen}
+        onOpenChange={setRefundDialogOpen}
+        onConfirm={handleConfirmRefund}
+        isLoading={isRefunding}
+        participantCount={selectedParticipantDetails.length}
+        participantNames={selectedParticipantDetails.map((p) => p.utilisateurNom)}
+        totalAmount={totalRefundAmount}
+      />
+      */}
     </Dialog>
   );
 }

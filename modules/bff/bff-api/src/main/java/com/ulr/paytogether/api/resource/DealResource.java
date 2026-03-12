@@ -5,12 +5,12 @@ import com.ulr.paytogether.api.apiadapter.DealApiAdapter;
 import com.ulr.paytogether.api.dto.*;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
 import com.ulr.paytogether.core.enumeration.StatutImage;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -223,5 +223,23 @@ public class DealResource {
         log.debug("Récupération des commentaires du deal: {}", dealUuid);
         List<CommentaireDTO> commentaires = commentaireApiAdapter.trouverParDeal(dealUuid);
         return ResponseEntity.ok(commentaires);
+    }
+
+    /**
+     * Récupérer tous les paiements de l'utilisateur connecté avec informations complètes
+     * (Deal, Catégorie, Adresse de facturation, Commande)
+     */
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/mes-paiements")
+    public ResponseEntity<List<PaiementUtilisateurDTO>> mesPaiements(JwtAuthenticationToken token) {
+        var tokenValue = token.getToken().getTokenValue();
+        try {
+            log.debug("Récupération des paiements de l'utilisateur avec token: {}", tokenValue);
+            List<PaiementUtilisateurDTO> paiementsDTO = dealApiAdapter.mesPaiements(tokenValue);
+            return ResponseEntity.ok(paiementsDTO);
+        }catch (RuntimeException e) {
+            log.error("Erreur lors de la récupération des paiements de l'utilisateur: {}", e.getMessage(), e);
+            return ResponseEntity.notFound().build();
+        }
     }
 }

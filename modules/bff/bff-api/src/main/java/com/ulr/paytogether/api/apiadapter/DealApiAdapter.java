@@ -1,13 +1,13 @@
 package com.ulr.paytogether.api.apiadapter;
 
-import com.ulr.paytogether.api.dto.DealDTO;
-import com.ulr.paytogether.api.dto.DealResponseDto;
-import com.ulr.paytogether.api.dto.MiseAJourDealDTO;
-import com.ulr.paytogether.api.dto.MiseAJourImagesDealDTO;
+import com.ulr.paytogether.api.dto.*;
 import com.ulr.paytogether.api.mapper.DealMapper;
+import com.ulr.paytogether.api.mapper.PaiementUtilisateurMapper;
 import com.ulr.paytogether.core.domaine.service.DealService;
+import com.ulr.paytogether.core.domaine.service.PaiementService;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
 import com.ulr.paytogether.core.enumeration.StatutImage;
+import com.ulr.paytogether.core.modele.PaiementModele;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +21,8 @@ import java.util.UUID;
 public class DealApiAdapter {
     private final DealService dealService;
     private final DealMapper dealMapper;
+    private final PaiementService paiementService;
+    private final PaiementUtilisateurMapper paiementUtilisateurMapper;
 
 
     public DealResponseDto creerDeal( DealDTO dto) {
@@ -106,5 +108,10 @@ public class DealApiAdapter {
 
     public String obtenirUrlLectureImage(UUID dealUuid, UUID imageUuid) {
         return dealService.obtenirUrlLectureImage(dealUuid, imageUuid);
+    }
+
+    public List<PaiementUtilisateurDTO> mesPaiements(String keycloakUserUuid) {
+        List<PaiementModele> paiements = paiementService.lireParUtilisateurAvecInfosCompletes(keycloakUserUuid);
+        return paiementUtilisateurMapper.versDTOList(paiements);
     }
 }

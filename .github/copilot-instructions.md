@@ -1,5 +1,49 @@
 # Instructions Copilot - Projet PayToGether
 
+## 🎯 Méthodologie de Travail Préférée
+
+### Approche Étape par Étape
+
+**🚀 Je préfère travailler de cette manière** :
+- ✅ **Progression étape par étape** : Avancer de manière incrémentale, une fonctionnalité à la fois
+- ✅ **Code explicatif** : Le code doit être bien commenté et auto-documenté
+- ✅ **Actions concrètes** : Prendre des actions directes plutôt que demander des confirmations
+- ✅ **PAS de documentation automatique** : NE PAS générer de documentation sauf si explicitement demandé
+- ✅ **Validation par le build** : Toujours tester le build après les modifications importantes
+- ✅ **Corrections immédiates** : Corriger les erreurs TypeScript/Java immédiatement
+- ✅ **Code fonctionnel prioritaire** : Le code doit compiler et fonctionner avant tout
+
+### Quand Générer de la Documentation
+
+**Je demanderai explicitement** quand j'ai besoin de :
+- 📄 Documentation technique détaillée (README, guides, etc.)
+- 📋 Diagrammes d'architecture
+- 📖 Guides d'utilisation
+- 📝 Documentation API
+
+**Tu peux suggérer** de créer de la documentation si :
+- Une fonctionnalité complexe nécessite des explications
+- L'architecture a significativement évolué
+- Il y a des décisions importantes à documenter
+
+### Workflow de Travail
+
+```
+1. Comprendre la demande
+   ↓
+2. Implémenter étape par étape
+   ↓
+3. Corriger les erreurs de compilation
+   ↓
+4. Tester le build (frontend/backend)
+   ↓
+5. Fournir un résumé concis
+   ↓
+6. Suggérer la prochaine étape (si pertinent)
+```
+
+---
+
 ## 🌍 Configuration des domaines
 
 - **Frontend** : `dev.dealtogether.ca`

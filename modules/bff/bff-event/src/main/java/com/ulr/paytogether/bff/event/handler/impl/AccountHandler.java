@@ -86,8 +86,8 @@ public class AccountHandler implements ConsumerHandler {
             // 3. Envoyer l'email via le service métier
             emailNotificationService.envoyerNotification(
                     event.getEmail(),
-                    "Validation de votre compte DealToGether",
-                    "notification-account-validation",
+                    "Validating your DealToGether account",
+                    "notification-account-validation-en",
                     variables
             );
 
@@ -118,8 +118,8 @@ public class AccountHandler implements ConsumerHandler {
             // Envoyer l'email de confirmation d'activation
             emailNotificationService.envoyerNotification(
                     event.getEmail(),
-                    "Votre compte DealToGether est activé",
-                    "notification-account-activation",
+                    "Your DealToGether account is activated",
+                    "notification-account-activation-en",
                     variables
             );
 
@@ -149,8 +149,8 @@ public class AccountHandler implements ConsumerHandler {
             // Envoyer l'email de confirmation d'activation
             emailNotificationService.envoyerNotification(
                     event.getEmail(),
-                    "Votre compte DealToGether est activé",
-                    "notification-account-activation",
+                    "Your DealToGether account is deactivated",
+                    "notification-desactivation-compte-en",
                     variables
             );
 

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.ulr.paytogether.bff.event.utils.EventUtils.CONSTRUIRELIENDEAL;
 import static com.ulr.paytogether.bff.event.utils.EventUtils.DATE_FORMATTER;
 
 @Component
@@ -20,8 +21,6 @@ import static com.ulr.paytogether.bff.event.utils.EventUtils.DATE_FORMATTER;
 @Slf4j
 public class Dealhandler implements ConsumerHandler {
 
-    @Value("${app.frontend.base-url}")
-    private String frontendBaseUrl;
     private final EmailNotificationService emailNotificationService;
 
 
@@ -41,13 +40,13 @@ public class Dealhandler implements ConsumerHandler {
         variables.put("prixDeal", event.getMontant());
         variables.put("dateCreation", event.getDateCreation().format(DATE_FORMATTER));
         variables.put("nbParticipants", event.getNbParticipants());
-        variables.put("lienDeal", construireLienverDeal(event.getDealUuid().toString()));
+        variables.put("lienDeal", CONSTRUIRELIENDEAL(event.getDealUuid().toString()));
 
         // Appeler le service métier pour envoyer l'email
         emailNotificationService.envoyerNotification(
                 event.getEmailMarchand(),
-                "Nouveau deal créé : " + event.getTitreDeal(),
-                "notification-deal-cree",
+                "New deal created : " + event.getTitreDeal(),
+                "notification-deal-cree-en",
                 variables
         );
 
@@ -70,19 +69,14 @@ public class Dealhandler implements ConsumerHandler {
         // Appeler le service métier pour envoyer l'email
         emailNotificationService.envoyerNotification(
                 event.getEmailMarchand(),
-                "Deal annulé : " + event.getTitreDeal(),
-                "notification-deal-annule",
+                "Deal canceled : " + event.getTitreDeal(),
+                "notification-deal-annule-en",
                 variables
         );
 
         log.info("Email sent successfully to: {}", event.getEmailMarchand());
     }
 
-    /**
-     * Construit le lien de validation avec le token
-     */
-    private String construireLienverDeal(String dealUuid) {
-        return frontendBaseUrl + "/deals/%s".formatted(dealUuid);
-    }
+
 
 }
