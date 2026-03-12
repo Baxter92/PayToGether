@@ -1,5 +1,6 @@
 import type { ImageResponse } from "../hooks/useImageUpload";
-import type { StatutPaiementType } from "./payment";
+import type { StatutCommandeType } from "./order";
+import type { MethodePaiementType, StatutPaiementType } from "./payment";
 
 export const StatutDeal = {
   BROUILLON: "BROUILLON",
@@ -88,4 +89,39 @@ export interface ParticipantDto {
   adresseProvince: string;
   adresseAppartement: string;
   adresseNumeroPhone: string;
+}
+
+export interface MyPaymentsDTO {
+  paiementUuid: string;
+  montantPaiement: number;
+  statutPaiement: StatutPaiementType;
+  methodePaiement: MethodePaiementType;
+  transactionId: string;
+  commandeUuid: string;
+  numeroCommande: string;
+  statutCommande: StatutCommandeType;
+  montantTotal: number;
+  nbPartsAchetees: number;
+  deal: {
+    uuid: string;
+    titre: string;
+    description: string;
+    imagePrincipaleUrlPresignee: string;
+    dateExpiration: string;
+    prixDeal: number;
+    prixPart: number;
+  };
+  categorie: {
+    uuid: string;
+    nom: string;
+    icone: string;
+  };
+  adresseFacturation: {
+    rue: string;
+    codePostal: string;
+    ville: string;
+    pays: string;
+    uuid: string;
+    telephone: string;
+  };
 }

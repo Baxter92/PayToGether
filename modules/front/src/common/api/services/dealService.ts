@@ -1,5 +1,10 @@
 import { createResourceService } from "../module/service/resourceFactory";
-import type { CreateDealDTO, DealDTO, StatutDealType } from "../types";
+import type {
+  CreateDealDTO,
+  DealDTO,
+  MyPaymentsDTO,
+  StatutDealType,
+} from "../types";
 import { apiClient } from "./apiClient";
 
 // Service de base avec méthodes CRUD standard
@@ -56,4 +61,6 @@ export const dealService = {
 
   getParticipants: (dealUuid: string) =>
     apiClient.get<any[]>(`/deals/${dealUuid}/participants`),
+
+  myPayments: () => apiClient.get<MyPaymentsDTO[]>("/deals/mes-paiements"),
 };

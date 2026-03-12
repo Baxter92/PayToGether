@@ -1,106 +1,17 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import HeaderProfile, { type PROFILE_TABS } from "./containers/HeaderProfile";
 import AsideStats from "./containers/AsideStats";
 import Overview from "./containers/Overview";
 import MyDeals from "./containers/MyDeals";
 import MyPurchases from "./containers/MyPurchases";
 import Settings from "./containers/Settings";
-import PaymentsList from "./containers/PaymentsList";
-import OrdersReceivedList from "./containers/OrderReceivedList";
-import { mockOrdersReceived } from "@/common/constants/data";
-import ReviewsList, { type Review } from "./containers/ReviewsList";
 import Favorites from "./containers/Favorites";
 import { useAuth } from "@/common/context/AuthContext";
-import {
-  type CommentaireDTO,
-  StatutDeal,
-  useCommentaires,
-  useDealsByCreateur,
-  useDealsByStatut,
-  useUsers,
-} from "@/common/api";
 
 export default function Profile() {
-  const { user, isMerchant, isAdmin } = useAuth();
+  const { isMerchant, isAdmin } = useAuth();
   const [activeTab, setActiveTab] =
     useState<(typeof PROFILE_TABS)[number]["key"]>("overview");
-  const { data: commentaires = [], isLoading: commentairesLoading } =
-    useCommentaires();
-  const { data: deals = [] } = useDealsByStatut(StatutDeal.PUBLIE);
-  const { data: users = [] } = useUsers();
-  const { data: merchantDeals = [] } = useDealsByCreateur(
-    user?.id && (isMerchant || isAdmin) ? user.id : undefined,
-  );
-
-  const dealsByUuid = useMemo(
-    () => new Map(deals.map((deal) => [deal.uuid, deal.titre])),
-    [deals],
-  );
-
-  const usersByUuid = useMemo(
-    () =>
-      new Map(
-        users.map((currentUser) => [
-          currentUser.uuid,
-          {
-            name:
-              `${currentUser.prenom ?? ""} ${currentUser.nom ?? ""}`.trim() ||
-              currentUser.email,
-            email: currentUser.email,
-          },
-        ]),
-      ),
-    [users],
-  );
-
-  const merchantDealUuids = useMemo(
-    () => new Set(merchantDeals.map((deal) => deal.uuid)),
-    [merchantDeals],
-  );
-
-  const commentairesToReviewRows = useMemo(() => {
-    const toReview = (commentaire: CommentaireDTO, index: number): Review => {
-      const buyer = usersByUuid.get(commentaire.utilisateurUuid);
-      return {
-        id: commentaire.uuid ?? `${commentaire.utilisateurUuid}-${index}`,
-        orderNumber: `COM-${(commentaire.uuid ?? "").slice(0, 8) || index + 1}`,
-        dealTitle: dealsByUuid.get(commentaire.dealUuid) ?? "Deal inconnu",
-        buyer: {
-          id: commentaire.utilisateurUuid,
-          name:
-            buyer?.name ??
-            `Utilisateur ${commentaire.utilisateurUuid?.slice(0, 8)}`,
-          email: buyer?.email,
-        },
-        rating: Number(commentaire.note) || 0,
-        comment: commentaire.contenu ?? "",
-        status: "published",
-        createdAt: commentaire.dateCreation ?? new Date().toISOString(),
-      };
-    };
-
-    const racines = commentaires
-      .filter((commentaire) => !commentaire.commentaireParentUuid)
-      .sort(
-        (a, b) =>
-          new Date(b.dateCreation ?? 0).getTime() -
-          new Date(a.dateCreation ?? 0).getTime(),
-      );
-
-    const myReviews = racines
-      .filter((commentaire) => commentaire.utilisateurUuid === user?.id)
-      .map(toReview);
-
-    const clientReviews = racines
-      .filter(
-        (commentaire) =>
-          merchantDealUuids.has(commentaire.dealUuid) &&
-          commentaire.utilisateurUuid !== user?.id,
-      )
-      .map(toReview);
-
-    return { myReviews, clientReviews };
-  }, [commentaires, dealsByUuid, merchantDealUuids, user?.id, usersByUuid]);
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -120,11 +31,11 @@ export default function Profile() {
 
             {activeTab === "deals" && (isMerchant || isAdmin) && <MyDeals />}
 
-            {activeTab === "purchases" && <MyPurchases />}
+            {activeTab === "payouts" && <MyPurchases />}
 
             {activeTab === "favorites" && <Favorites />}
 
-            {activeTab === "reviews" &&
+            {/* {activeTab === "reviews" &&
               (commentairesLoading ? (
                 <div className="text-sm text-muted-foreground">
                   Chargement des avis...
@@ -134,17 +45,17 @@ export default function Profile() {
                   data={commentairesToReviewRows.myReviews}
                   isMyReviews
                 />
-              ))}
+              ))} */}
 
-            {activeTab === "payouts" && (isMerchant || isAdmin) && (
+            {/* {activeTab === "payouts" && (isMerchant || isAdmin) && (
               <PaymentsList />
-            )}
+            )} */}
 
-            {activeTab === "orders-received" && (isMerchant || isAdmin) && (
+            {/* {activeTab === "orders-received" && (isMerchant || isAdmin) && (
               <OrdersReceivedList data={mockOrdersReceived as any} />
-            )}
+            )} */}
 
-            {activeTab === "client-reviews" &&
+            {/* {activeTab === "client-reviews" &&
               (isMerchant || isAdmin) &&
               (commentairesLoading ? (
                 <div className="text-sm text-muted-foreground">
@@ -152,7 +63,7 @@ export default function Profile() {
                 </div>
               ) : (
                 <ReviewsList data={commentairesToReviewRows.clientReviews} />
-              ))}
+              ))} */}
 
             {activeTab === "settings" && <Settings />}
           </div>

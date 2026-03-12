@@ -3,6 +3,7 @@ import { dealService } from "../services/dealService";
 import type {
   CreateDealDTO,
   DealDTO,
+  MyPaymentsDTO,
   ParticipantDto,
   StatutDealType,
   UpdateDealDTO,
@@ -28,6 +29,7 @@ const dealHooks = createResourceHooks<DealDTO, CreateDealDTO, UpdateDealDTO>({
     villes: () => ["deals", "villes"] as const,
     participants: (dealUuid: string) =>
       ["deals", "participants", dealUuid] as const,
+    myPayments: () => ["deals", "my-payments"] as const,
   },
 });
 
@@ -349,5 +351,12 @@ export const useDealParticipants = (dealUuid: string) => {
     queryKey: dealKeys.participants(dealUuid),
     queryFn: () => dealService.getParticipants(dealUuid),
     enabled: !!dealUuid,
+  });
+};
+
+export const useMyPayments = () => {
+  return useQuery<MyPaymentsDTO[], Error>({
+    queryKey: dealKeys.myPayments(),
+    queryFn: () => dealService.myPayments(),
   });
 };
