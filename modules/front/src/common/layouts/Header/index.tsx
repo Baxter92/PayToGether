@@ -81,7 +81,7 @@ const Header = ({
   searchPlaceholder,
   showFavorites = true,
   favoritesCount = 0,
-  favoritesLink = PATHS.FAVORITES,
+  favoritesLink = `${PATHS.PROFILE}#favorites`,
   showCart = true,
   cartCount = 0,
   cartLink = "/profile#payouts",
