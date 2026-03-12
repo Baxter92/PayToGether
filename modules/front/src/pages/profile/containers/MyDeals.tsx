@@ -60,8 +60,8 @@ export default function MyDeals(): JSX.Element {
       <HStack spacing={4} align="center" justify="between" className="py-4">
         <Heading
           level={2}
-          title="Toutes mes offres"
-          description="Parcourez les deals que vous avez créés"
+          title={t("deals")}
+          description={t("dealsDescription")}
           underline
         />
 

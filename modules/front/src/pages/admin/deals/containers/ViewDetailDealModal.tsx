@@ -131,7 +131,7 @@ function ReadOnlyImageGallery({
 }) {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const { t } = useI18n("deals");
+  const { t } = useI18n("admin");
 
   const handleImageClick = (index: number): void => {
     setCurrentImageIndex(index);
@@ -227,6 +227,7 @@ function ReadOnlyImageThumbnail({
   dealUuid?: string;
   onImageClick: () => void;
 }) {
+  const { t } = useI18n("admin");
   const isPrincipal = !!image.isPrincipal;
   const imageUuid = image.imageUuid || image.uuid;
 
@@ -252,7 +253,7 @@ function ReadOnlyImageThumbnail({
         <div className="w-full h-full bg-gray-50 dark:bg-gray-800">
           <img
             src={src}
-            alt={`Image ${index + 1}`}
+            alt={t("deals.imageAlt", { index: index + 1 })}
             className="w-full h-full object-cover"
           />
         </div>
@@ -267,7 +268,7 @@ function ReadOnlyImageThumbnail({
         <div className="absolute top-3 left-3">
           <div className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
             <Star className="w-3.5 h-3.5 fill-current" />
-            PRINCIPALE
+            {t("deals.principal")}
           </div>
         </div>
       )}
@@ -290,7 +291,7 @@ function ReadOnlyImageThumbnail({
               e.stopPropagation();
               onImageClick();
             }}
-            title="Voir en plein écran"
+            title={t("deals.viewFullScreen")}
           >
             <Expand className="w-5 h-5" />
           </Button>
@@ -365,7 +366,6 @@ function ReadOnlyImageLightbox({
   );
 }
 
-
 /* ==============================
    ViewDetailDealModal Component
 ============================== */
@@ -386,12 +386,16 @@ export function ViewDetailDealModal({
   const { data: participants = [] } = useDealParticipants(dealUuid);
 
   // État pour la sélection des participants et remboursement
-  const [selectedParticipants, setSelectedParticipants] = useState<Set<string>>(new Set());
+  const [selectedParticipants, setSelectedParticipants] = useState<Set<string>>(
+    new Set(),
+  );
   const [isRefundDialogOpen, setIsRefundDialogOpen] = useState(false);
   const [refundType, setRefundType] = useState<"single" | "bulk">("single");
-  const [singleParticipantToRefund, setSingleParticipantToRefund] = useState<ParticipantDto | null>(null);
+  const [singleParticipantToRefund, setSingleParticipantToRefund] =
+    useState<ParticipantDto | null>(null);
 
-  const { mutateAsync: refundParticipants, isPending: isRefunding } = useRefundParticipantsBulk();
+  const { mutateAsync: refundParticipants, isPending: isRefunding } =
+    useRefundParticipantsBulk();
 
   // Handlers pour sélection et remboursement
   const toggleParticipantSelection = (utilisateurUuid: string): void => {
@@ -408,7 +412,9 @@ export function ViewDetailDealModal({
     if (selectedParticipants.size === participants.length) {
       setSelectedParticipants(new Set());
     } else {
-      setSelectedParticipants(new Set(participants.map(p => p.utilisateurUuid)));
+      setSelectedParticipants(
+        new Set(participants.map((p) => p.utilisateurUuid)),
+      );
     }
   };
 
@@ -420,7 +426,7 @@ export function ViewDetailDealModal({
 
   const handleBulkRefund = (): void => {
     if (selectedParticipants.size === 0) {
-      toast.error("Please select at least one participant to refund");
+      toast.error(t("deals.refundSelectAtLeastOne"));
       return;
     }
     setRefundType("bulk");
@@ -462,7 +468,7 @@ export function ViewDetailDealModal({
                 selectedParticipants.size === participants.length
               }
               onCheckedChange={selectAllParticipants}
-              aria-label="Select all"
+              aria-label={t("deals.selectAll")}
               className="border-2"
             />
           </div>
@@ -474,7 +480,7 @@ export function ViewDetailDealModal({
               onCheckedChange={() =>
                 toggleParticipantSelection(row.original.utilisateurUuid)
               }
-              aria-label="Select row"
+              aria-label={t("deals.selectRow")}
               className="border-2"
             />
           </div>
@@ -552,8 +558,7 @@ export function ViewDetailDealModal({
         cell: ({ row }) => (
           <div className="flex items-center justify-center">
             <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100 font-bold px-3 py-1">
-              {row.original.nombreDePart} part
-              {row.original.nombreDePart > 1 ? "s" : ""}
+              {t("deals.partsLabel", { count: row.original.nombreDePart })}
             </Badge>
           </div>
         ),
@@ -594,7 +599,7 @@ export function ViewDetailDealModal({
       },
       {
         id: "actions",
-        header: () => <div className="text-center">Actions</div>,
+        header: () => <div className="text-center">{t("deals.actions")}</div>,
         cell: ({ row }) => (
           <div className="flex items-center justify-center">
             <Button
@@ -605,14 +610,14 @@ export function ViewDetailDealModal({
               className="hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/50 dark:hover:text-red-400 gap-2"
             >
               <RefreshCcw className="w-4 h-4" />
-              Refund
+              {t("deals.refund")}
             </Button>
           </div>
         ),
         enableSorting: false,
       },
     ],
-    [participants, selectedParticipants],
+    [participants, selectedParticipants, t],
   );
 
   const reviewColumns = useMemo<ColumnDef<ReviewRow>[]>(
@@ -651,7 +656,10 @@ export function ViewDetailDealModal({
               ))}
             </div>
             <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">
-              {row.original.rating}/5 étoiles
+              {t("deals.ratingOutOf", {
+                rating: row.original.rating,
+                total: 5,
+              })}
             </span>
           </div>
         ),
@@ -678,7 +686,7 @@ export function ViewDetailDealModal({
         ),
       },
     ],
-    [],
+    [t],
   );
 
   const reviews = useMemo<ReviewRow[]>(() => {
@@ -700,14 +708,16 @@ export function ViewDetailDealModal({
         id: commentaire.uuid ?? "",
         user:
           usersByUuid.get(commentaire.utilisateurUuid) ??
-          `Utilisateur ${commentaire.utilisateurUuid.slice(0, 8)}`,
+          t("deals.userFallback", {
+            id: commentaire.utilisateurUuid.slice(0, 8),
+          }),
         rating: Number(commentaire.note) || 0,
         comment: commentaire.contenu,
         date: commentaire.dateCreation
           ? new Date(commentaire.dateCreation).toLocaleDateString("fr-FR")
           : "",
       }));
-  }, [commentaires, users]);
+  }, [commentaires, users, t]);
 
   const partsTotal = Number(deal?.total) || 0;
 
@@ -812,18 +822,20 @@ export function ViewDetailDealModal({
                         {t("deals.status")}
                       </label>
                       <p className="mt-1">
-                        <Badge className={
-                          deal?.status === "PUBLIE" 
-                            ? "bg-green-100 text-green-800" 
-                            : "bg-gray-100 text-gray-800"
-                        }>
+                        <Badge
+                          className={
+                            deal?.status === "PUBLIE"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
+                          }
+                        >
                           {deal?.status || deal?.raw?.statut || "—"}
                         </Badge>
                       </p>
                     </div>
                     <div className="md:col-span-2">
                       <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        Description
+                        {t("deals.descriptionField")}
                       </label>
                       <p className="mt-1 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                         {deal?.description || deal?.raw?.description || "—"}
@@ -835,12 +847,14 @@ export function ViewDetailDealModal({
                       </label>
                       <p className="mt-1 text-base text-gray-900 dark:text-gray-100 flex items-center gap-2">
                         <MapPin className="w-4 h-4 text-blue-600" />
-                        {deal?.location || `${deal?.raw?.ville}, ${deal?.raw?.pays}` || "—"}
+                        {deal?.location ||
+                          `${deal?.raw?.ville}, ${deal?.raw?.pays}` ||
+                          "—"}
                       </p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        Catégorie
+                        {t("deals.category")}
                       </label>
                       <p className="mt-1 text-base text-gray-900 dark:text-gray-100">
                         {deal?.category || deal?.raw?.categorieNom || "—"}
@@ -857,23 +871,27 @@ export function ViewDetailDealModal({
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                       <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        Prix du deal
+                        {t("deals.dealPrice")}
                       </label>
                       <p className="mt-1 text-2xl font-bold text-green-600">
-                        {formatCurrency(deal?.originalPrice || deal?.raw?.prixDeal || 0)}
+                        {formatCurrency(
+                          deal?.originalPrice || deal?.raw?.prixDeal || 0,
+                        )}
                       </p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        Prix par part
+                        {t("deals.pricePerPart")}
                       </label>
                       <p className="mt-1 text-2xl font-bold text-blue-600">
-                        {formatCurrency(deal?.groupPrice || deal?.raw?.prixPart || 0)}
+                        {formatCurrency(
+                          deal?.groupPrice || deal?.raw?.prixPart || 0,
+                        )}
                       </p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        Monnaie
+                        {t("deals.currency")}
                       </label>
                       <p className="mt-1 text-base font-semibold text-gray-900 dark:text-gray-100">
                         {deal?.currency || "CAD"}
@@ -890,7 +908,7 @@ export function ViewDetailDealModal({
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                       <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        Parts totales
+                        {t("deals.totalParts")}
                       </label>
                       <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">
                         {deal?.total || deal?.raw?.nbParticipants || 0}
@@ -898,22 +916,28 @@ export function ViewDetailDealModal({
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        Parts vendues
+                        {t("deals.partsSold")}
                       </label>
                       <p className="mt-1 text-2xl font-bold text-blue-600">
-                        {deal?.participants || deal?.raw?.nombreParticipantsReel || 0}
+                        {deal?.participants ||
+                          deal?.raw?.nombreParticipantsReel ||
+                          0}
                       </p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        Date d'expiration
+                        {t("deals.expirationDate")}
                       </label>
                       <p className="mt-1 text-base font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-purple-600" />
-                        {deal?.expiryDate 
-                          ? new Date(deal.expiryDate).toLocaleDateString("fr-FR")
+                        {deal?.expiryDate
+                          ? new Date(deal.expiryDate).toLocaleDateString(
+                              "fr-FR",
+                            )
                           : deal?.raw?.dateFin
-                            ? new Date(deal.raw.dateFin).toLocaleDateString("fr-FR")
+                            ? new Date(deal.raw.dateFin).toLocaleDateString(
+                                "fr-FR",
+                              )
                             : "—"}
                       </p>
                     </div>
@@ -921,22 +945,29 @@ export function ViewDetailDealModal({
                 </div>
 
                 {/* Points forts */}
-                {(deal?.raw?.listePointsForts && deal.raw.listePointsForts.length > 0) && (
-                  <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                      <Sparkles className="w-5 h-5 text-yellow-600" />
-                      Points forts
-                    </h3>
-                    <ul className="space-y-2">
-                      {deal.raw.listePointsForts.map((point: string, index: number) => (
-                        <li key={index} className="flex items-start gap-2">
-                          <span className="text-green-600 font-bold mt-1">✓</span>
-                          <span className="text-sm text-gray-700 dark:text-gray-300">{point}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                {deal?.raw?.listePointsForts &&
+                  deal.raw.listePointsForts.length > 0 && (
+                    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-yellow-600" />
+                        {t("deals.highlights")}
+                      </h3>
+                      <ul className="space-y-2">
+                        {deal.raw.listePointsForts.map(
+                          (point: string, index: number) => (
+                            <li key={index} className="flex items-start gap-2">
+                              <span className="text-green-600 font-bold mt-1">
+                                ✓
+                              </span>
+                              <span className="text-sm text-gray-700 dark:text-gray-300">
+                                {point}
+                              </span>
+                            </li>
+                          ),
+                        )}
+                      </ul>
+                    </div>
+                  )}
 
                 {/* Galerie d'images */}
                 {deal?.raw?.listeImages && deal.raw.listeImages.length > 0 && (
@@ -954,32 +985,37 @@ export function ViewDetailDealModal({
                 {/* Dates */}
                 <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                   <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
-                    Dates
+                    {t("deals.dates")}
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        Date de création
+                        {t("deals.createdAt")}
                       </label>
                       <p className="mt-1 text-base text-gray-900 dark:text-gray-100">
-                        {deal?.raw?.dateCreation 
-                          ? new Date(deal.raw.dateCreation).toLocaleDateString("fr-FR", {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })
+                        {deal?.raw?.dateCreation
+                          ? new Date(deal.raw.dateCreation).toLocaleDateString(
+                              "fr-FR",
+                              {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )
                           : "—"}
                       </p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        Dernière modification
+                        {t("deals.updatedAt")}
                       </label>
                       <p className="mt-1 text-base text-gray-900 dark:text-gray-100">
-                        {deal?.raw?.dateModification 
-                          ? new Date(deal.raw.dateModification).toLocaleDateString("fr-FR", {
+                        {deal?.raw?.dateModification
+                          ? new Date(
+                              deal.raw.dateModification,
+                            ).toLocaleDateString("fr-FR", {
                               year: "numeric",
                               month: "long",
                               day: "numeric",
@@ -1095,12 +1131,12 @@ export function ViewDetailDealModal({
                           {isRefunding ? (
                             <>
                               <Loader2 className="w-4 h-4 animate-spin" />
-                              Processing...
+                              {t("deals.processing")}
                             </>
                           ) : (
                             <>
                               <RefreshCcw className="w-4 h-4" />
-                              Refund Selected
+                              {t("deals.refundSelected")}
                               <Badge className="ml-1 bg-white/20 text-white">
                                 {selectedParticipants.size}
                               </Badge>
@@ -1270,28 +1306,43 @@ export function ViewDetailDealModal({
       </DialogContent>
 
       {/* Dialog de confirmation de remboursement */}
-      <AlertDialog open={isRefundDialogOpen} onOpenChange={setIsRefundDialogOpen}>
+      <AlertDialog
+        open={isRefundDialogOpen}
+        onOpenChange={setIsRefundDialogOpen}
+      >
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-red-600" />
-              Confirm Refund
+              {t("deals.confirmRefund")}
             </AlertDialogTitle>
             <AlertDialogDescription className="space-y-4">
               {refundType === "single" && singleParticipantToRefund ? (
                 <>
-                  <p>Are you sure you want to refund this participant?</p>
+                  <p>{t("deals.refundConfirmSingle")}</p>
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <Users className="w-4 h-4 text-blue-600" />
-                        <span className="font-semibold">{singleParticipantToRefund.utilisateurNom}</span>
+                        <span className="font-semibold">
+                          {singleParticipantToRefund.utilisateurNom}
+                        </span>
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">
-                        <div>Email: {singleParticipantToRefund.utilisateurEmail}</div>
-                        <div>Parts: {singleParticipantToRefund.nombreDePart}</div>
+                        <div>
+                          {t("deals.emailLabel")}{" "}
+                          {singleParticipantToRefund.utilisateurEmail}
+                        </div>
+                        <div>
+                          {t("deals.partsLabel", {
+                            count: singleParticipantToRefund.nombreDePart,
+                          })}
+                        </div>
                         <div className="font-semibold text-red-600 mt-2">
-                          Amount to refund: {formatCurrency(singleParticipantToRefund.montantTotal)}
+                          {t("deals.amountToRefund")}{" "}
+                          {formatCurrency(
+                            singleParticipantToRefund.montantTotal,
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1299,18 +1350,29 @@ export function ViewDetailDealModal({
                 </>
               ) : (
                 <>
-                  <p>Are you sure you want to refund {selectedParticipants.size} participants?</p>
+                  <p>
+                    {t("deals.refundConfirmBulk", {
+                      count: selectedParticipants.size,
+                    })}
+                  </p>
                   <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-blue-600">
                         <Users className="w-4 h-4" />
-                        <span className="font-semibold">{selectedParticipants.size} participants selected</span>
+                        <span className="font-semibold">
+                          {t("deals.participantsSelected", {
+                            count: selectedParticipants.size,
+                          })}
+                        </span>
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">
                         <div className="font-semibold text-red-600">
-                          Total amount: {formatCurrency(
+                          {t("deals.totalAmount")}{" "}
+                          {formatCurrency(
                             participants
-                              .filter(p => selectedParticipants.has(p.utilisateurUuid))
+                              .filter((p) =>
+                                selectedParticipants.has(p.utilisateurUuid),
+                              )
                               .reduce((sum, p) => sum + p.montantTotal, 0),
                           )}
                         </div>
@@ -1324,35 +1386,43 @@ export function ViewDetailDealModal({
                 <div className="flex gap-2">
                   <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
                   <div className="text-sm text-yellow-800 dark:text-yellow-200">
-                    <strong>Warning:</strong> This action will:
+                    <strong>{t("deals.warning")}</strong>{" "}
+                    {t("deals.refundWarningIntro")}
                     <ul className="list-disc list-inside mt-1 space-y-1">
-                      <li>Refund the payment via Square</li>
-                      <li>Send a confirmation email</li>
-                      <li>Remove participants from the deal</li>
-                      <li>Delete payments and orders</li>
+                      <li>{t("deals.refundWarningSquare")}</li>
+                      <li>{t("deals.refundWarningEmail")}</li>
+                      <li>{t("deals.refundWarningRemoveParticipants")}</li>
+                      <li>{t("deals.refundWarningDeletePayments")}</li>
                     </ul>
-                    <p className="mt-2 font-semibold">This action cannot be undone.</p>
+                    <p className="mt-2 font-semibold">
+                      {t("deals.refundWarningIrreversible")}
+                    </p>
                   </div>
                 </div>
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isRefunding}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel
+              disabled={isRefunding}
+              className="bg-secondary-500 hover:bg-secondary-600 py-1 px-4 rounded-md inline-flex items-center"
+            >
+              {t("deals.cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmRefund}
               disabled={isRefunding}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-4 rounded-md inline-flex items-center"
             >
               {isRefunding ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  Processing...
+                  {t("deals.processing")}
                 </>
               ) : (
                 <>
                   <RefreshCcw className="w-4 h-4 mr-2" />
-                  Confirm Refund
+                  {t("deals.confirmRefund")}
                 </>
               )}
             </AlertDialogAction>
@@ -1374,3 +1444,7 @@ export function ViewDetailDealModal({
     </Dialog>
   );
 }
+
+
+
+
