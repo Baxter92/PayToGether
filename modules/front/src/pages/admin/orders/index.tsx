@@ -16,6 +16,8 @@ import { ViewDetailDealModal } from "../deals/containers/ViewDetailDealModal";
 import { useAdminOrders } from "@/common/api/hooks/useOrders";
 import { useI18n } from "@/common/hooks/useI18n";
 import { StatutCommande } from "@/common/api/types/order";
+import { useDeal } from "@/common/api";
+import { mapDealToView } from "@/common/api/mappers/catalog";
 
 export default function AdminOrders(): ReactElement {
   // const [searchQuery, setSearchQuery] = useState("");
@@ -23,6 +25,8 @@ export default function AdminOrders(): ReactElement {
   const [openViewDetails, setOpenViewDetails] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [openDealDetails, setOpenDealDetails] = useState(false);
+  const { data: dealData } = useDeal(selectedOrder?.dealUuid);
+  const dealForModal = dealData ? mapDealToView(dealData) : null;
 
   const { data, isLoading, error } = useAdminOrders();
   const orders = data?.commandes ?? [];
@@ -34,7 +38,7 @@ export default function AdminOrders(): ReactElement {
   const columns = [
     {
       id: "numeroCommande",
-      header: tAdmin("orders.id"),
+      header: tAdmin("orders.numeroCommande"),
       accessorKey: "numeroCommande",
     },
     {
@@ -283,7 +287,7 @@ export default function AdminOrders(): ReactElement {
               setOpenDealDetails(false);
               setSelectedOrder(null);
             }}
-            deal={selectedOrder.dealUuid}
+            deal={dealForModal}
           />
         </>
       )}

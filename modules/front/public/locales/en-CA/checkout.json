@@ -80,6 +80,54 @@
     "addressTooShort": "Address too short",
     "cityRequired": "City required"
   },
+  "squarePayment": {
+    "title": "Secure payment via Square",
+    "loading": "Loading payment module...",
+    "processingTitle": "Processing payment",
+    "processingDescription": "Please wait while we secure your transaction...",
+    "security": {
+      "encrypted": "Encrypted",
+      "secured": "Secured",
+      "protected": "Protected"
+    },
+    "confirmTitle": "Confirm payment",
+    "confirmAmountLabel": "Total amount:",
+    "confirmDescription": "You are about to make a secure payment via Square.",
+    "confirmSecurityNote": "Your information is protected with bank-level encryption",
+    "cancel": "Cancel",
+    "confirmButton": "Confirm payment",
+    "amountLabel": "Amount to pay",
+    "methodLabel": "Payment method",
+    "methods": {
+      "card": "Card",
+      "googlePay": "Google Pay",
+      "applePay": "Apple Pay",
+      "cashAppPay": "Cash App"
+    },
+    "cardInfo": "Card information",
+    "back": "Back",
+    "processingButton": "Processing...",
+    "payButton": "Pay {{amount}} CAD",
+    "secureBySquare": "Payment secured by Square",
+    "noStorageNotice": "Your payment information is never stored on our servers",
+    "errors": {
+      "notInitialized": "Square payment is not initialized",
+      "init": "Square initialization error",
+      "paymentFailed": "Payment failed",
+      "unexpectedStatus": "Unexpected payment status: {{status}}",
+      "tokenization": "Tokenization error",
+      "generic": "Payment error"
+    }
+  },
+  "paymentSuccess": {
+    "title": "Payment initialized!",
+    "subtitle": "Your transaction has been recorded successfully",
+    "processing": "Your payment is being processed",
+    "emailNotice": "You will receive a confirmation email shortly.",
+    "orderTracking": "You can check your order status in your profile.",
+    "backHome": "Back to home",
+    "thankYou": "Thank you for your trust!"
+  },
   "orderSuccess": {
     "subtotal": "Subtotal",
     "delivery": "Delivery"

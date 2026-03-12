@@ -175,6 +175,7 @@
     "search": "Search for an order...",
     "export": "Export",
     "filterByStatus": "Filter by status",
+    "numeroCommande": "Order Number",
     "filter": {
       "all": "All statuses"
     },

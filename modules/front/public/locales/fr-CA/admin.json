@@ -175,6 +175,7 @@
     "search": "Rechercher une commande...",
     "export": "Exporter",
     "filterByStatus": "Filtrer par statut",
+    "numeroCommande": "Numéro de commande",
     "filter": {
       "all": "Tous les statuts"
     },

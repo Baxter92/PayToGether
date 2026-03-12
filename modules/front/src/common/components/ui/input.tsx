@@ -19,20 +19,8 @@ export type InputProps = Omit<
   wrapperClassName?: string;
   helperClassName?: string;
   errorClassName?: string;
-
-  /** Debounce delay in ms */
   debounce?: number;
-
-  /**
-   * Format function: transforme la valeur brute (raw) en display.
-   * Ex: raw "4242424242424242" => "4242 4242 4242 4242"
-   */
   format?: (raw: string) => string;
-
-  /**
-   * Optional callback that receives both formatted & raw on every change.
-   * Useful if you want the raw value without parsing the event.
-   */
   onValueChange?: (payload: {
     formatted: string;
     raw: string;
@@ -68,27 +56,14 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       ...rest
     } = props;
 
-    // --- refs : merge forwarded + internal DOM ref
     const internalRef = React.useRef<HTMLInputElement | null>(null);
+
     React.useImperativeHandle(
       forwardedRef,
       () => internalRef.current as HTMLInputElement,
-      [internalRef],
+      [],
     );
 
-    // helper pour merger (si forwardedRef est function ou RefObject)
-    React.useEffect(() => {
-      if (!forwardedRef) return;
-      const node = internalRef.current;
-      if (!node) return;
-      if (typeof forwardedRef === "function") forwardedRef(node);
-      else if (typeof forwardedRef === "object" && forwardedRef !== null) {
-        // @ts-ignore
-        forwardedRef.current = node;
-      }
-    }, [forwardedRef]);
-
-    // keep existing computeRaw/format/display logic
     const computeRaw = (display: string) => {
       try {
         return String(display).replace(/[^\p{L}\p{N}]/gu, "");
@@ -101,121 +76,73 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     const displayValue = controlled
       ? (() => {
-        if (!format) return String(value ?? "");
-        const raw = computeRaw(String(value ?? ""));
-        return format(raw);
-      })()
+          if (!format) return String(value ?? "");
+          const raw = computeRaw(String(value ?? ""));
+          return format(raw);
+        })()
       : undefined;
 
-    // centraliser la logique qui notifie le parent (réutilisée par handleChange et par la détection autofill)
-    const notifyChangeFromDom = React.useCallback(
-      (el: HTMLInputElement | null) => {
-        if (!el) return;
-        const userInput = el.value ?? "";
-        const raw = format ? computeRaw(userInput) : userInput;
-        const formatted = format ? format(raw) : userInput;
-
-        // créer un "event" synthétique proche de ton eventCopy
-        const syntheticEvent = {
-          target: {
-            ...el,
-            value: raw,
-            rawValue: formatted,
-          },
-          // inclure quelques props utiles au besoin
-          currentTarget: el,
-        } as unknown as React.ChangeEvent<HTMLInputElement>;
-
-        if (onValueChange) {
-          try {
-            onValueChange({ formatted, raw, event: syntheticEvent });
-          } catch (err) {
-            // ignore
-          }
-        }
-
-        // si debounce est absent, appeler immédiatement onChange
-        if (!debounce) {
-          onChange?.(syntheticEvent);
-        } else {
-          // si debounce présent, respecter la même mécanique qu'avant
-          // (on peut réutiliser ton timer déjà présent ou en créer un ici)
-          // Pour garder simple, on appelle onChange immédiatement ; si tu veux debounce,
-          // reprends ta logique de timer existante.
-          onChange?.(syntheticEvent);
-        }
-      },
-      [format, onValueChange, onChange, debounce],
-    );
-
-    // Détection de l'autofill : input/change + animationstart + check initial
-    React.useEffect(() => {
-      const el = internalRef.current;
-      if (!el || isReadOnly) return;
-
-      const onInput = () => notifyChangeFromDom(el);
-      const onChange = () => notifyChangeFromDom(el);
-      const onAnimationStart = (ev: AnimationEvent) => {
-        // certains navigateurs peuvent utiliser d'autres noms : onAutoFillStart / autofill
-        if (
-          ev.animationName === "onAutoFillStart" ||
-          ev.animationName.toLowerCase().includes("autofill")
-        ) {
-          notifyChangeFromDom(el);
-        }
-      };
-
-      el.addEventListener("input", onInput);
-      el.addEventListener("change", onChange);
-      el.addEventListener("animationstart", onAnimationStart as EventListener);
-
-      // Au mount, vérifier s'il y a déjà une valeur (ex: autofill ou SSR)
-      // utiliser setTimeout 0 pour laisser le navigateur finir l'autofill sync
-      const t = window.setTimeout(() => {
-        if (el.value) notifyChangeFromDom(el);
-      }, 0);
-
-      return () => {
-        el.removeEventListener("input", onInput);
-        el.removeEventListener("change", onChange);
-        el.removeEventListener(
-          "animationstart",
-          onAnimationStart as EventListener,
-        );
-        clearTimeout(t);
-      };
-    }, [notifyChangeFromDom]);
-
-    // ton handleChange original (pour saisie utilisateur via React)
     const debounceTimer = React.useRef<number | null>(null);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const userInput = e.target.value ?? "";
 
       const raw = format ? computeRaw(userInput) : userInput;
       const formatted = format ? format(raw) : userInput;
 
-      const eventCopy = {
-        ...e,
-        target: { ...e.target, value: raw, rawValue: formatted },
-      } as React.ChangeEvent<HTMLInputElement>;
-
-      onValueChange?.({ formatted, raw, event: eventCopy });
+      onValueChange?.({
+        formatted,
+        raw,
+        event: e,
+      });
 
       if (!debounce || !onChange) {
-        onChange?.(eventCopy);
+        onChange?.(e);
         return;
       }
 
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
+
       debounceTimer.current = window.setTimeout(() => {
-        onChange(eventCopy);
+        onChange(e);
       }, debounce);
     };
 
-    // reste du rendu : passer name & autoComplete (très importants pour autofill)
+    /* =============================
+       Autofill detection
+    ============================== */
+
+    React.useEffect(() => {
+      const el = internalRef.current;
+      if (!el) return;
+
+      const triggerChange = () => {
+        if (!el.value) return;
+
+        el.dispatchEvent(new Event("input", { bubbles: true }));
+      };
+
+      const timer = setTimeout(triggerChange, 200);
+
+      const onAnimationStart = (e: AnimationEvent) => {
+        if (e.animationName === "autofill-start") {
+          triggerChange();
+        }
+      };
+
+      el.addEventListener("animationstart", onAnimationStart);
+
+      return () => {
+        clearTimeout(timer);
+        el.removeEventListener("animationstart", onAnimationStart);
+      };
+    }, []);
+
     const inputId = id ?? useId();
+
     const helperId = helperText ? `${inputId}-helper` : undefined;
     const errorId = error ? `${inputId}-error` : undefined;
+
     const describedBy =
       [errorId, helperId].filter(Boolean).join(" ") || undefined;
 
@@ -227,7 +154,6 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           : "h-9 text-sm px-3";
 
     const wouldBeDisabled = !!(disabled || loading);
-    const isReadOnly = !!(rest as any).readOnly;
 
     return (
       <div className={cn("flex flex-col", wrapperClassName)}>
@@ -247,7 +173,6 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               ? "border-destructive/80 focus-within:ring-destructive/30"
               : "border-input focus-within:ring-ring/30",
             wouldBeDisabled ? "opacity-60 pointer-events-none" : "opacity-100",
-            isReadOnly && "bg-muted/30 cursor-pointer",
             size === "sm" ? "rounded-sm" : "rounded-md",
           )}
         >
@@ -320,7 +245,6 @@ function SpinnerSmall() {
       className="animate-spin h-4 w-4 text-current"
       viewBox="0 0 24 24"
       fill="none"
-      aria-hidden="true"
     >
       <circle
         cx="12"

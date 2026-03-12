@@ -80,6 +80,54 @@
     "addressTooShort": "Adresse trop courte",
     "cityRequired": "Ville requise"
   },
+  "squarePayment": {
+    "title": "Paiement sÃ©curisÃ© via Square",
+    "loading": "Chargement du module de paiement...",
+    "processingTitle": "Traitement du paiement",
+    "processingDescription": "Veuillez patienter pendant que nous sÃ©curisons votre transaction...",
+    "security": {
+      "encrypted": "ChiffrÃ©",
+      "secured": "SÃ©curisÃ©",
+      "protected": "ProtÃ©gÃ©"
+    },
+    "confirmTitle": "Confirmer le paiement",
+    "confirmAmountLabel": "Montant total :",
+    "confirmDescription": "Vous Ãªtes sur le point d'effectuer un paiement sÃ©curisÃ© via Square.",
+    "confirmSecurityNote": "Vos informations sont protÃ©gÃ©es par un chiffrement de niveau bancaire",
+    "cancel": "Annuler",
+    "confirmButton": "Confirmer le paiement",
+    "amountLabel": "Montant Ã  payer",
+    "methodLabel": "MÃ©thode de paiement",
+    "methods": {
+      "card": "Carte",
+      "googlePay": "Google Pay",
+      "applePay": "Apple Pay",
+      "cashAppPay": "Cash App"
+    },
+    "cardInfo": "Informations de carte",
+    "back": "Retour",
+    "processingButton": "Traitement en cours...",
+    "payButton": "Payer {{amount}} CAD",
+    "secureBySquare": "Paiement sÃ©curisÃ© par Square",
+    "noStorageNotice": "Vos informations de paiement ne sont jamais stockÃ©es sur nos serveurs",
+    "errors": {
+      "notInitialized": "Le paiement Square n'est pas initialisÃ©",
+      "init": "Erreur d'initialisation Square",
+      "paymentFailed": "Paiement Ã©chouÃ©",
+      "unexpectedStatus": "Statut de paiement inattendu: {{status}}",
+      "tokenization": "Erreur lors de la tokenisation",
+      "generic": "Erreur lors du paiement"
+    }
+  },
+  "paymentSuccess": {
+    "title": "Paiement initialisÃ© !",
+    "subtitle": "Votre transaction a Ã©tÃ© enregistrÃ©e avec succÃ¨s",
+    "processing": "Votre paiement est en cours de traitement",
+    "emailNotice": "Vous recevrez une confirmation par email dans quelques instants.",
+    "orderTracking": "Vous pouvez consulter l'Ã©tat de votre commande dans votre profil.",
+    "backHome": "Retour Ã  l'accueil",
+    "thankYou": "Merci pour votre confiance !"
+  },
   "orderSuccess": {
     "subtotal": "Sous-total",
     "delivery": "Livraison"

@@ -138,7 +138,32 @@ const Form = <T extends FieldValues>({
   const internalForm = useForm<any>({
     resolver: schema ? zodResolver(schema as any) : undefined,
     defaultValues,
+    mode: "onChange",
   });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const formEl = document.querySelector("form");
+      if (!formEl) return;
+
+      const inputs = formEl.querySelectorAll("input, textarea, select");
+
+      inputs.forEach((input) => {
+        const el = input as HTMLInputElement;
+        const name = el.name;
+
+        if (!name) return;
+        if (!el.value) return;
+
+        form.setValue(name, el.value, {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
+      });
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const form = externalForm ?? internalForm;
 
@@ -189,12 +214,24 @@ const Form = <T extends FieldValues>({
       field.type === "number" ||
       field.type === "password"
     ) {
+      const registered = register(field.name, {
+        valueAsNumber: field.type === "number",
+      });
+
       return (
         <Input
-          {...register(field.name, {
-            valueAsNumber: field.type === "number",
-          })}
+          {...registered}
           {...field}
+          onChange={(e) => {
+            console.log("field, ", field.name, e.target.value);
+
+            registered.onChange(e); // notifie RHF
+            field.onChange?.(e); // préserve le handler custom éventuel
+          }}
+          onBlur={(e) => {
+            registered.onBlur(e); // déclenche la validation au blur
+            field.onBlur?.(e);
+          }}
           disabled={isDisabled}
           error={error}
         />

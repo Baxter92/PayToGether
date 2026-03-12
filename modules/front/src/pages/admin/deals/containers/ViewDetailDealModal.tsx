@@ -284,10 +284,10 @@ function ReadOnlyImageGallery({
             <ImageIcon className="w-10 h-10 text-gray-300 dark:text-gray-600" />
           </div>
           <p className="text-base text-gray-900 dark:text-gray-100 font-bold mb-1">
-            {t("deals.noImageAvailable")}
+            {t("admin:deals.noImageAvailable")}
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {t("deals.noImageAvailableDescription")}
+            {t("admin:deals.noImageAvailableDescription")}
           </p>
         </div>
       </div>
@@ -305,10 +305,10 @@ function ReadOnlyImageGallery({
             </div>
             <div>
               <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                {t("deals.imageGallery")}
+                {t("admin:deals.imageGallery")}
               </p>
               <p className="text-xs text-gray-600 dark:text-gray-400">
-                {t("deals.enlargeImage")}
+                {t("admin:deals.enlargeImage")}
               </p>
             </div>
           </div>
@@ -317,7 +317,7 @@ function ReadOnlyImageGallery({
               {images.length}
             </span>
             <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-              {t("deals.images", { count: images.length })}
+              {t("admin:deals.images", { count: images.length })}
             </span>
           </div>
         </div>
@@ -368,7 +368,6 @@ export function ViewDetailDealModal({
   const { data: commentaires = [] } = useCommentairesByDeal(dealUuid);
   const { data: users = [] } = useUsers();
   const { data: participants = [] } = useDealParticipants(dealUuid);
-
   const form = useForm<CreateDealInput>({
     resolver: zodResolver(viewDetailDealFormSchema),
   });
@@ -593,6 +592,8 @@ export function ViewDetailDealModal({
   }, [deal, form]);
 
   function normalizeDealForModal(raw: any): CreateDealInput {
+    console.log(raw, "raw");
+
     return {
       title: raw.title ?? "",
       shortSubtitle: undefined,

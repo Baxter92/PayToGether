@@ -12,7 +12,8 @@
   "billingAddress": "Billing address",
   "trackOrder": "Track order",
   "backToShop": "Back to shop",
-  "emailConfirmation": "A confirmation email has been sent to",
+  "emailConfirmation": "A confirmation email has been sent to {{email}}",
   "checkSpam": "Check your spam folder if you don't receive it within a few minutes",
-  "questions": "Questions? Contact our support at"
+  "questions": "Questions? Contact our support.",
+  "notAvailable": "Not available"
 }

@@ -267,3 +267,10 @@
     letter-spacing: -0.02em;
   }
 }
+
+input:-webkit-autofill {
+  animation-name: autofill-start;
+  animation-duration: 0.01s;
+}
+
+@keyframes autofill-start {}

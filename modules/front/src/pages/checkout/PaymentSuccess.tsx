@@ -1,20 +1,22 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { Card, CardContent } from "@components/ui/card";
 import { Button } from "@components/ui/button";
 import { CheckCircle2, Home } from "lucide-react";
 import VStack from "@components/VStack";
 import HStack from "@components/HStack";
 import { PATHS } from "@/common/constants/path";
-import { useEffect } from "react";
+import { useI18n } from "@/common/hooks/useI18n";
 
 /**
- * Page de confirmation de paiement initialisé avec succès
+ * Payment success page
  */
 export default function PaymentSuccess() {
   const navigate = useNavigate();
+  const { t } = useI18n("checkout");
 
   useEffect(() => {
-    // Empêcher le retour arrière
+    // Prevent back navigation
     window.history.pushState(null, "", window.location.href);
     window.addEventListener("popstate", preventBack);
 
@@ -36,7 +38,7 @@ export default function PaymentSuccess() {
       <Card className="w-full max-w-md shadow-2xl border-2">
         <CardContent className="p-8">
           <VStack spacing={6} align="center">
-            {/* Icône de succès animée */}
+            {/* Success icon */}
             <div className="relative">
               <div className="absolute inset-0 bg-green-500/20 rounded-full blur-2xl animate-pulse" />
               <div className="relative bg-gradient-to-br from-green-400 to-green-600 p-6 rounded-full shadow-lg">
@@ -44,34 +46,34 @@ export default function PaymentSuccess() {
               </div>
             </div>
 
-            {/* Titre */}
+            {/* Title */}
             <div className="text-center">
               <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent mb-2">
-                Paiement initialisé !
+                {t("paymentSuccess.title")}
               </h1>
               <p className="text-muted-foreground text-sm">
-                Votre transaction a été enregistrée avec succès
+                {t("paymentSuccess.subtitle")}
               </p>
             </div>
 
-            {/* Message informatif */}
+            {/* Info message */}
             <Card className="w-full bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
               <CardContent className="p-4">
                 <VStack spacing={2}>
                   <p className="text-sm text-green-800 dark:text-green-200 font-medium">
-                    ✓ Votre paiement est en cours de traitement
+                    {t("paymentSuccess.processing")}
                   </p>
                   <p className="text-xs text-green-700 dark:text-green-300">
-                    Vous recevrez une confirmation par email dans quelques instants.
+                    {t("paymentSuccess.emailNotice")}
                   </p>
                   <p className="text-xs text-green-700 dark:text-green-300">
-                    Vous pouvez consulter l'état de votre commande dans votre profil.
+                    {t("paymentSuccess.orderTracking")}
                   </p>
                 </VStack>
               </CardContent>
             </Card>
 
-            {/* Bouton retour à l'accueil */}
+            {/* Back home button */}
             <Button
               onClick={handleGoHome}
               size="lg"
@@ -79,14 +81,14 @@ export default function PaymentSuccess() {
             >
               <HStack spacing={2} align="center">
                 <Home className="w-5 h-5" />
-                <span>Retour à l'accueil</span>
+                <span>{t("paymentSuccess.backHome")}</span>
               </HStack>
             </Button>
 
             {/* Footer */}
             <div className="text-center pt-4 border-t w-full">
               <p className="text-xs text-muted-foreground">
-                Merci pour votre confiance ! 🎉
+                {t("paymentSuccess.thankYou")}
               </p>
             </div>
           </VStack>
@@ -95,4 +97,3 @@ export default function PaymentSuccess() {
     </div>
   );
 }
-

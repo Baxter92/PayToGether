@@ -12,7 +12,8 @@
   "billingAddress": "Adresse de facturation",
   "trackOrder": "Suivi de commande",
   "backToShop": "Retour à la boutique",
-  "emailConfirmation": "Un email de confirmation a été envoyé à",
+  "emailConfirmation": "Un email de confirmation a été envoyé à {{email}}",
   "checkSpam": "Vérifiez votre dossier de courrier indésirable si vous ne le recevez pas dans quelques minutes",
-  "questions": "Questions ? Contactez notre support à"
+  "questions": "Questions ? Contactez notre support.",
+  "notAvailable": "Non disponible"
 }
