@@ -18,6 +18,8 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.ulr.paytogether.provider.utils.Tools.extractUserIdFromToken;
+
 /**
  * Adaptateur JPA pour le paiement
  * Implémente le port PaiementProvider défini dans bff-core
@@ -222,8 +224,9 @@ public class PaiementProviderAdapter implements PaiementProvider {
 
     @Override
     public List<PaiementModele> trouverParUtilisateurAvecInfosCompletes(String keycloakId) {
-        UtilisateurJpa utilisateurJpa = utilisateurRepository.findByKeycloakId(keycloakId)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé pour le Keycloak ID : " + keycloakId));
+        String userId = extractUserIdFromToken(keycloakId);
+        UtilisateurJpa utilisateurJpa = utilisateurRepository.findByKeycloakId(userId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé pour le Keycloak ID : " + userId));
 
         return jpaRepository.findByUtilisateurJpa(utilisateurJpa)
                 .stream()

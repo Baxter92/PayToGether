@@ -1,6 +1,7 @@
 package com.ulr.paytogether.api.resource;
 
 import com.ulr.paytogether.api.apiadapter.CommandeAdminApiAdapter;
+import com.ulr.paytogether.api.dto.CommandeListDTO;
 import com.ulr.paytogether.api.dto.CommandeListResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 /**
  * Resource REST pour l'administration des commandes
@@ -38,5 +41,22 @@ public class CommandeAdminResource {
         log.info("Admin : {} commandes trouvées", response.getCommandes().size());
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/{uuid}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VENDEUR')")
+    public ResponseEntity<CommandeListDTO> lireParUuid(UUID uuid) {
+        log.info("Admin : Récupération de la commande par UUID: {}", uuid);
+
+        CommandeListDTO response = commandeAdminApiAdapter.lireParUuid(uuid);
+
+        if (response != null) {
+            log.info("Admin : Commande trouvée pour UUID: {}", uuid);
+            return ResponseEntity.ok(response);
+        } else {
+            log.warn("Admin : Aucune commande trouvée pour UUID: {}", uuid);
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }
 

@@ -65,6 +65,11 @@ public class UtilisateurJpa {
     @Builder.Default
     private List<DealParticipantJpa> participations = new ArrayList<>();
 
+    @OneToMany(mappedBy = "utilisateurJpa", cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<CommandeUtilisateurJpa> commandesUtilisateur = new ArrayList<>();
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime dateCreation;

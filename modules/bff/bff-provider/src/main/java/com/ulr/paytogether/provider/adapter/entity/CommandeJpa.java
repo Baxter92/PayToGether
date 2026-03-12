@@ -12,6 +12,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,6 +57,12 @@ public class CommandeJpa {
     @OneToMany(mappedBy = "commandeJpa", cascade = CascadeType.ALL,
             orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PaiementJpa> paiements;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "commandeJpa", cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<CommandeUtilisateurJpa> utilisateursCommande = new ArrayList<>();
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

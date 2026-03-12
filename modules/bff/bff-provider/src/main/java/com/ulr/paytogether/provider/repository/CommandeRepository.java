@@ -5,6 +5,8 @@ import com.ulr.paytogether.core.enumeration.StatutCommande;
 import com.ulr.paytogether.provider.adapter.entity.DealJpa;
 import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -47,8 +49,10 @@ public interface CommandeRepository extends JpaRepository<CommandeJpa, UUID> {
 
     /**
      * Recherche une commande par l'UUID d'un paiement associé
+     * Utilise une requête JPQL en partant de PaiementJpa
      * @param paiementUuid l'UUID du paiement
      * @return un Optional contenant la commande si elle existe
      */
-    Optional<CommandeJpa> findByPaiementUuid(UUID paiementUuid);
+    @Query("SELECT p.commandeJpa FROM PaiementJpa p WHERE p.uuid = :paiementUuid")
+    Optional<CommandeJpa> findByPaiementUuid(@Param("paiementUuid") UUID paiementUuid);
 }

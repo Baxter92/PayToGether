@@ -7,5 +7,8 @@ public enum StatutCommande {
     EN_COURS,
     CONFIRMEE,
     ANNULEE,
-    REMBOURSEE
+    REMBOURSEE,
+    FACTURE_MARCHAND_RECUE,
+    FACTURES_CLIENT_ENVOYEES,
+    TERMINEE
 }

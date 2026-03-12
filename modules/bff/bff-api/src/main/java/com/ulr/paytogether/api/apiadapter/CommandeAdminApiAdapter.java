@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -52,6 +53,10 @@ public class CommandeAdminApiAdapter {
                 .build();
     }
 
+    public CommandeListDTO lireParUuid(UUID uuid) {
+        CommandeModele commande = commandeService.lireParUuid(uuid);
+        return commande != null ? mapperVersCommandeListDTO(commande) : null;
+    }
     /**
      * Mapper un CommandeModele vers CommandeListDTO
      */
