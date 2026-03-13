@@ -1,19 +1,12 @@
 import type { ReactElement } from "react";
-import {
-  Users,
-  ShoppingCart,
-  DollarSign,
-  Tag,
-  ArrowUpRight,
-  ArrowDownRight,
-} from "lucide-react";
+import { Users, ShoppingCart, DollarSign, Tag } from "lucide-react";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/common/components/ui/card";
-import { useFormattedCurrency, useI18n } from "@/common/hooks/useI18n";
+import { useI18n } from "@/common/hooks/useI18n";
 
 interface StatCardProps {
   title: string;
@@ -23,14 +16,8 @@ interface StatCardProps {
   icon: React.ElementType;
 }
 
-function StatCard({
-  title,
-  value,
-  change,
-  changeLabel,
-  icon: Icon,
-}: StatCardProps): ReactElement {
-  const isPositive = change >= 0;
+function StatCard({ title, value, icon: Icon }: StatCardProps): ReactElement {
+  // const isPositive = change >= 0;
 
   return (
     <Card>
@@ -42,7 +29,7 @@ function StatCard({
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
-        <p
+        {/* <p
           className={`text-xs flex items-center gap-1 ${
             isPositive ? "text-green-600" : "text-destructive"
           }`}
@@ -53,7 +40,7 @@ function StatCard({
             <ArrowDownRight className="h-3 w-3" />
           )}
           {Math.abs(change)}% {changeLabel}
-        </p>
+        </p> */}
       </CardContent>
     </Card>
   );
@@ -61,30 +48,29 @@ function StatCard({
 
 export default function AdminDashboard(): ReactElement {
   const { t } = useI18n("admin");
-  const formatCurrency = useFormattedCurrency();
 
   const stats = [
     {
       titleKey: "dashboard.totalCommissions",
-      value: formatCurrency(45231),
+      value: "-",
       change: 20.1,
       icon: DollarSign,
     },
     {
       titleKey: "dashboard.orders",
-      value: "2 350",
+      value: "-",
       change: 15.5,
       icon: ShoppingCart,
     },
     {
       titleKey: "dashboard.users",
-      value: "12 234",
+      value: "-",
       change: 8.2,
       icon: Users,
     },
     {
       titleKey: "dashboard.activeDeals",
-      value: "573",
+      value: "-",
       change: -2.4,
       icon: Tag,
     },

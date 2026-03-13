@@ -22,11 +22,6 @@ export default function Overview(): JSX.Element {
 
       <Grid cols={{ md: 2, base: 1, lg: 2 }} gap="gap-8" className="mt-4">
         <div className="p-3 border rounded-md">
-          <div className="text-xs text-slate-500">{t("lastPurchase")}</div>
-          <div className="font-medium mt-1">Dîner - La Mer</div>
-          <div className="text-sm text-slate-500 mt-1">2 {t("daysAgo")}</div>
-        </div>
-        <div className="p-3 border rounded-md">
           <div className="text-xs text-slate-500">{t("activeDeals")}</div>
           <div className="font-medium mt-1">{dealsData?.length ?? 0} deals</div>
         </div>
