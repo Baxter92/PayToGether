@@ -126,10 +126,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     if (error instanceof HttpError) {
       if (error.status === 401) return "auth:invalidCredentials";
       if (error.status >= 500) return "auth:serverError";
-      return "auth.loginError";
+      return "auth:loginError";
     }
 
-    if (error instanceof Error) return "auth.loginError";
+    if (error instanceof Error) return "auth:loginError";
     return "auth.authError";
   };
 

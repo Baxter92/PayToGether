@@ -9,6 +9,7 @@ import {
   LogOut,
   Settings,
   ShoppingBag,
+  Home,
 } from "lucide-react";
 import { Button } from "@components/ui/button";
 import { Badge } from "@components/ui/badge";
@@ -99,7 +100,7 @@ const Header = ({
 }: HeaderProps): JSX.Element => {
   const { t: tNav } = useI18n("nav");
   const { t: tHeader } = useI18n("header");
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const locationRoute = useLocation();
   const [location, setLocation] = useState(defaultLocation);
@@ -113,6 +114,7 @@ const Header = ({
     myOrders: texts.myOrders || tNav("myOrders"),
     myFavorites: texts.myFavorites || tNav("myFavorites"),
     settings: texts.settings || tNav("settings"),
+    goToAdmin: tNav("goToAdmin"),
     logout: texts.logout || tNav("logout"),
   };
 
@@ -174,6 +176,16 @@ const Header = ({
       label: mergedTexts.settings,
       icon: <Settings className="w-4 h-4 mr-2" />,
       onClick: () => navigate(PATHS.USERSITTINGS),
+    },
+    {
+      ...(isAdmin
+        ? {
+            value: "goToAdmin",
+            label: mergedTexts.goToAdmin,
+            icon: <Home className="w-4 h-4 mr-2" />,
+            onClick: () => navigate("/admin"),
+          }
+        : {}),
     },
     {
       value: "logout",

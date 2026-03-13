@@ -12,5 +12,6 @@
   "myProfile": "My Profile",
   "myOrders": "My Orders",
   "myFavorites": "My Favorites",
-  "settings": "Settings"
+  "settings": "Settings",
+  "goToAdmin": "Go to administration"
 }

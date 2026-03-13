@@ -5,7 +5,7 @@ import { Separator } from "@components/ui/separator";
 import type { Deal } from "../types";
 import Counter from "@/common/components/Counter";
 import { HStack } from "@/common/components";
-import { Heart, Share } from "lucide-react";
+import { Heart, Share, Share2 } from "lucide-react";
 import { formatCurrency } from "@/common/utils/formatCurrency";
 type PurchaseCardProps = {
   deal: Deal;
@@ -119,15 +119,15 @@ export default function PurchaseCard({
 
         <HStack>
           <Button
-            leftIcon={<Share className="w-4 h-4" />}
+            leftIcon={<Share2 className="w-4 h-4" />}
             tooltip={t("share")}
           />
-          <Button
+          {/* <Button
             variant="outline"
             leftIcon={<Heart className="w-4 h-4 fill-current text-red-600" />}
           >
             {t("addToFavorites")}
-          </Button>
+          </Button> */}
         </HStack>
       </CardContent>
     </Card>

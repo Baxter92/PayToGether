@@ -69,6 +69,7 @@ export default function AdminHero(): JSX.Element {
           .filter(Boolean);
 
         return {
+          ...publicite,
           id: index + 1,
           uuid: publicite.uuid,
           title: publicite.titre,
@@ -235,53 +236,81 @@ export default function AdminHero(): JSX.Element {
 
   const handleSave = useCallback(async () => {
     const activeSlides = slides.filter((s) => s.isActive);
-    const slidesToCreate = activeSlides.filter((s) => s.imageFile);
+    const slidesToUpdate = activeSlides.filter((s) => s.uuid);
+    const slidesToCreate = activeSlides.filter((s) => !s.uuid && s.imageFile);
+    const skippedCreates = activeSlides.filter((s) => !s.uuid && !s.imageFile);
 
-    if (slidesToCreate.length === 0) {
+    if (slidesToUpdate.length === 0 && slidesToCreate.length === 0) {
       toast.error(tAdmin("hero.invalidImage"), {
         description:
-          "Ajoute au moins une image locale sur un slide actif avant de sauvegarder.",
+          "Aucun changement enregistrable: ajoute une image locale pour chaque nouveau slide actif.",
       });
       return;
     }
 
-    const skippedCount = activeSlides.length - slidesToCreate.length;
-
     try {
       await Promise.all(
-        slidesToCreate.map(async (slide) => {
-          const now = new Date();
-          const dateDebut = now.toISOString().slice(0, 19);
-          const dateFin = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .slice(0, 19);
-
-          await createPublicite({
-            titre: slide.title,
-            description: [slide.subtitle, slide.description, slide.badge]
-              .filter(Boolean)
-              .join(" • "),
-            lienExterne: slide.buttonLink || null,
-            listeImages: [
-              {
-                urlImage: slide.imageFile?.name || "hero-image.jpg",
-                statut: "PENDING",
-                presignUrl: null,
-                file: slide.imageFile,
-              },
-            ],
-            dateDebut,
-            dateFin,
-            active: true,
-          });
-        }),
+        slidesToUpdate.map((slide) =>
+          updatePublicite({
+            id: slide.uuid!,
+            data: {
+              ...slide,
+              titre: slide.title,
+              description: [slide.subtitle, slide.description, slide.badge]
+                .filter(Boolean)
+                .join(" • "),
+              lienExterne: slide.buttonLink || null,
+              active: true,
+            },
+          }),
+        ),
       );
 
+      if (slidesToCreate.length > 0) {
+        await Promise.all(
+          slidesToCreate.map(async (slide) => {
+            const now = new Date();
+            const dateDebut = now.toISOString().slice(0, 19);
+            const dateFin = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+              .toISOString()
+              .slice(0, 19);
+
+            await createPublicite({
+              titre: slide.title,
+              description: [slide.subtitle, slide.description, slide.badge]
+                .filter(Boolean)
+                .join(" • "),
+              lienExterne: slide.buttonLink || null,
+              listeImages: [
+                {
+                  urlImage: slide.imageFile?.name || "hero-image.jpg",
+                  statut: "PENDING",
+                  presignUrl: null,
+                  file: slide.imageFile,
+                },
+              ],
+              dateDebut,
+              dateFin,
+              active: true,
+            });
+          }),
+        );
+      }
+
+      const updatedCount = slidesToUpdate.length;
+      const createdCount = slidesToCreate.length;
+      const skippedCount = skippedCreates.length;
+
+      const summary = [
+        updatedCount > 0 ? `${updatedCount} mis a jour` : null,
+        createdCount > 0 ? `${createdCount} cree` : null,
+        skippedCount > 0 ? `${skippedCount} ignore (sans image locale)` : null,
+      ]
+        .filter(Boolean)
+        .join(", ");
+
       toast.success(tAdmin("hero.saved"), {
-        description:
-          skippedCount > 0
-            ? `${slidesToCreate.length} slide(s) enregistré(s), ${skippedCount} ignoré(s) (image non uploadée).`
-            : tAdmin("hero.saveDescription"),
+        description: summary || tAdmin("hero.saveDescription"),
       });
     } catch (error) {
       toast.error("Erreur lors de la création des publicités", {
@@ -289,7 +318,7 @@ export default function AdminHero(): JSX.Element {
           error instanceof Error ? error.message : "Une erreur est survenue",
       });
     }
-  }, [slides, createPublicite, tAdmin]);
+  }, [slides, createPublicite, updatePublicite, tAdmin]);
 
   // ✅ Mémoïser les slide IDs pour éviter un recalcul à chaque render
   const slideIds = slides.map((s) => s.id);
@@ -307,7 +336,7 @@ export default function AdminHero(): JSX.Element {
           <Button
             onClick={handleSave}
             leftIcon={<Save className="h-4 w-4" />}
-            disabled={isPending || isUploading}
+            disabled={isPending || isUploading || isUpdatingPublicite}
           >
             {tAdmin("hero.save")}
           </Button>
