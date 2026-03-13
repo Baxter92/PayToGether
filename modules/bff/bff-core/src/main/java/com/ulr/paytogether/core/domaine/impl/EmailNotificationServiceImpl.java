@@ -33,5 +33,31 @@ public class EmailNotificationServiceImpl implements EmailNotificationService {
 
         log.debug("Service - Notification déléguée au provider pour: {}", destinataire);
     }
+    
+    @Override
+    public void envoyerEmailAvecTemplate(String destinataire, String sujet, String templateName, Map<String, Object> templateParams) {
+        log.info("Service - Envoi d'email avec template {} à: {}", templateName, destinataire);
+        
+        var checkFakeEmail = destinataire.contains("example") || destinataire.contains("test");
+        String destinataireFinal = checkFakeEmail ? "ulrsinha@gmail.com" : destinataire;
+        
+        emailProvider.envoyerEmail(destinataireFinal, sujet, "notifications/" + templateName, templateParams);
+        
+        log.debug("Service - Email avec template délégué au provider pour: {}", destinataire);
+    }
+    
+    @Override
+    public void envoyerEmailAvecPieceJointe(String destinataire, String sujet, String templateName, 
+                                             Map<String, Object> templateParams, byte[] attachmentData, String attachmentName) {
+        log.info("Service - Envoi d'email avec pièce jointe {} à: {}", attachmentName, destinataire);
+        
+        var checkFakeEmail = destinataire.contains("example") || destinataire.contains("test");
+        String destinataireFinal = checkFakeEmail ? "ulrsinha@gmail.com" : destinataire;
+        
+        emailProvider.envoyerEmailAvecPieceJointe(destinataireFinal, sujet, "notifications/" + templateName, 
+                                                  templateParams, attachmentData, attachmentName);
+        
+        log.debug("Service - Email avec pièce jointe délégué au provider pour: {}", destinataire);
+    }
 }
 

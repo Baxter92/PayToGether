@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #333;
+            padding: 20px;
+        }
+        .invoice-header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .invoice-header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .invoice-info {
+            display: table;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+        .invoice-info-left, .invoice-info-right {
+            display: table-cell;
+            width: 50%;
+            vertical-align: top;
+        }
+        .invoice-info-right {
+            text-align: right;
+        }
+        .section-title {
+            font-weight: bold;
+            font-size: 14px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
+        .info-line {
+            margin-bottom: 5px;
+        }
+        .info-label {
+            font-weight: bold;
+            display: inline-block;
+            width: 120px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .amount-column {
+            text-align: right;
+        }
+        .totals {
+            margin-top: 20px;
+            float: right;
+            width: 300px;
+        }
+        .total-row {
+            display: table;
+            width: 100%;
+            padding: 8px 0;
+        }
+        .total-label {
+            display: table-cell;
+            text-align: right;
+            padding-right: 20px;
+            font-weight: normal;
+        }
+        .total-amount {
+            display: table-cell;
+            text-align: right;
+            width: 100px;
+        }
+        .final-total {
+            border-top: 2px solid #2c3e50;
+            margin-top: 10px;
+            padding-top: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .footer {
+            margin-top: 100px;
+            text-align: center;
+            font-size: 10px;
+            color: #777;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        .clearfix {
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+    <!-- ✅ Logo DealTogether -->
+    <div th:replace="~{fragments/logo :: logo}"></div>
+
+    <div class="invoice-header">
+        <h1>INVOICE / FACTURE</h1>
+        <p>DealTogether Inc.</p>
+    </div>
+
+    <div class="invoice-info">
+        <div class="invoice-info-left">
+            <div class="section-title">BILL TO / FACTURER À:</div>
+            <div class="info-line">
+                <strong th:text="${clientPrenom + ' ' + clientNom}">Client Name</strong>
+            </div>
+            <div class="info-line" th:text="${clientEmail}">client@email.com</div>
+            <div class="info-line">
+                <span class="info-label">Delivery Address:</span>
+                <span th:text="${adresseLivraison}">Address</span>
+            </div>
+            <div class="info-line">
+                <span class="info-label">Delivery Type:</span>
+                <span th:text="${typeLivraison}">Home Delivery</span>
+            </div>
+        </div>
+
+        <div class="invoice-info-right">
+            <div class="section-title">INVOICE DETAILS:</div>
+            <div class="info-line">
+                <span class="info-label">Invoice #:</span>
+                <strong th:text="${numeroCommande}">ORDER-123</strong>
+            </div>
+            <div class="info-line">
+                <span class="info-label">Date:</span>
+                <span th:text="${datePaiement}">2026-03-12</span>
+            </div>
+            <div class="info-line">
+                <span class="info-label">Transaction ID:</span>
+                <span th:text="${transactionId}">TXN-456</span>
+            </div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th class="amount-column">Amount (CAD $)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <strong th:text="${dealTitre}">Deal Title</strong><br>
+                    <span style="font-size: 10px; color: #777;">Group purchase deal</span>
+                </td>
+                <td class="amount-column" th:text="${#numbers.formatDecimal(sousTotal, 1, 2)}">50.00</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="totals">
+        <div class="total-row">
+            <div class="total-label">Subtotal:</div>
+            <div class="total-amount" th:text="'$' + ${#numbers.formatDecimal(sousTotal, 1, 2)}">$50.00</div>
+        </div>
+
+        <div class="total-row">
+            <div class="total-label">Service Fee (5%):</div>
+            <div class="total-amount" th:text="'$' + ${#numbers.formatDecimal(fraisService, 1, 2)}">$2.50</div>
+        </div>
+
+        <div class="total-row">
+            <div class="total-label">GST/TVA (5%):</div>
+            <div class="total-amount" th:text="'$' + ${#numbers.formatDecimal(tva, 1, 2)}">$2.63</div>
+        </div>
+
+        <div class="total-row" th:if="${fraisLivraison > 0}">
+            <div class="total-label">Delivery Fee:</div>
+            <div class="total-amount" th:text="'$' + ${#numbers.formatDecimal(fraisLivraison, 1, 2)}">$12.00</div>
+        </div>
+
+        <div class="total-row final-total">
+            <div class="total-label">TOTAL:</div>
+            <div class="total-amount" th:text="'$' + ${#numbers.formatDecimal(montantTotal, 1, 2)}">$67.13</div>
+        </div>
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div class="footer">
+        <p><strong>DealTogether Inc.</strong></p>
+        <p>Email: support@dealtogether.ca | Website: www.dealtogether.ca</p>
+        <p>Thank you for your purchase! / Merci pour votre achat!</p>
+        <p style="margin-top: 10px; font-size: 9px;">
+            This invoice is computer-generated and is valid without signature.<br>
+            Cette facture est générée par ordinateur et est valide sans signature.
+        </p>
+    </div>
+</body>
+</html>
+

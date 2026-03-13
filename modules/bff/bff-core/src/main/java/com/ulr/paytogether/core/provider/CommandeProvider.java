@@ -1,7 +1,10 @@
 package com.ulr.paytogether.core.provider;
 
+import com.ulr.paytogether.core.enumeration.StatutCommande;
 import com.ulr.paytogether.core.modele.CommandeModele;
+import com.ulr.paytogether.core.modele.CommandeUtilisateurModele;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -49,4 +52,31 @@ public interface CommandeProvider {
      * @return Commande correspondante, ou null si aucune commande trouvée
      */
     CommandeModele lireParUuid(UUID uuid);
+    
+    /**
+     * Met à jour le statut d'une commande et sa date de dépôt payout
+     */
+    CommandeModele mettreAJourStatutEtDatePayout(UUID commandeUuid, 
+                                                  StatutCommande statut,
+                                                  LocalDateTime dateDepotPayout);
+    
+    /**
+     * Met à jour l'URL de la facture du marchand
+     */
+    CommandeModele mettreAJourFactureMarchand(UUID commandeUuid, String factureUrl);
+    
+    /**
+     * Récupère les utilisateurs d'une commande via la table commande_utilisateur
+     */
+    List<CommandeUtilisateurModele> trouverUtilisateursCommande(UUID commandeUuid);
+    
+    /**
+     * Valide un utilisateur pour une commande
+     */
+    void validerUtilisateurCommande(UUID commandeUuid, UUID utilisateurUuid);
+    
+    /**
+     * Vérifie si tous les utilisateurs d'une commande sont validés
+     */
+    boolean tousUtilisateursValides(UUID commandeUuid);
 }

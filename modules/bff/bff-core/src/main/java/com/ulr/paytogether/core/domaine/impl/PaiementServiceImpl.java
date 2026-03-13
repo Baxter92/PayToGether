@@ -83,6 +83,12 @@ public class PaiementServiceImpl implements PaiementService {
         log.debug("Recherche des paiements de la commande: {}", commandeUuid);
         return paiementProvider.trouverParCommande(commandeUuid);
     }
+    
+    @Override
+    public List<PaiementModele> lireParCommande(UUID commandeUuid) {
+        // Alias de trouverParCommande pour cohérence avec les conventions de nommage
+        return trouverParCommande(commandeUuid);
+    }
 
     @Override
     public DealModele mettreAJour(UUID uuid, PaiementModele paiement) {

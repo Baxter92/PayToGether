@@ -152,16 +152,45 @@ public class DealProviderAdapter implements DealProvider {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public DealModele mettreAJour(UUID uuid, DealModele deal) {
-        DealJpa entite = jpaRepository.findById(uuid)
-                .map(jpa -> {
-                    mapper.mettreAJour(jpa, deal);
-                    return jpaRepository.save(jpa);
-                })
+        log.info("🔄 Début de mise à jour du deal: {}", uuid);
+        
+        // 1. Récupérer le deal existant
+        DealJpa dealExistant = jpaRepository.findById(uuid)
                 .orElseThrow(() -> new IllegalArgumentException("Deal non trouvé pour l'UUID : " + uuid));
-
-        return mapper.versModele(entite);
+        
+        // 2. ✅ Charger les entités JPA existantes depuis la BDD (éviter TransientObjectException)
+        UtilisateurJpa createurJpa = null;
+        if (deal.getCreateur() != null && deal.getCreateur().getUuid() != null) {
+            createurJpa = utilisateurRepository.findById(deal.getCreateur().getUuid())
+                    .orElseThrow(() -> new IllegalArgumentException("Créateur non trouvé pour l'UUID : " + deal.getCreateur().getUuid()));
+        }
+        
+        CategorieJpa categorieJpa = null;
+        if (deal.getCategorie() != null && deal.getCategorie().getUuid() != null) {
+            categorieJpa = categorieRepository.findById(deal.getCategorie().getUuid())
+                    .orElseThrow(() -> new IllegalArgumentException("Catégorie non trouvée pour l'UUID : " + deal.getCategorie().getUuid()));
+        }
+        
+        // 3. Mettre à jour les champs via le mapper
+        mapper.mettreAJour(dealExistant, deal);
+        
+        // 4. ✅ Forcer l'assignation des entités chargées (évite les instances transient)
+        if (createurJpa != null) {
+            dealExistant.setMarchandJpa(createurJpa);
+        }
+        if (categorieJpa != null) {
+            dealExistant.setCategorieJpa(categorieJpa);
+        }
+        
+        // 5. Sauvegarder
+        log.info("💾 Sauvegarde de la mise à jour...");
+        DealJpa sauvegarde = jpaRepository.save(dealExistant);
+        
+        log.info("🎉 Mise à jour terminée - UUID: {}", sauvegarde.getUuid());
+        return mapper.versModele(sauvegarde);
     }
 
     @Transactional(rollbackFor = Exception.class)

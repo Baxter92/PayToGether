@@ -16,12 +16,10 @@ public interface DealSearchRepository extends ElasticsearchRepository<DealDocume
     /**
      * Recherche full-text dans les deals (titre, description, ville, catégorie)
      * @param titre Titre à rechercher
-     * @param description Description à rechercher
-     * @param ville Ville à rechercher
      * @param categorieNom Catégorie à rechercher
+     * @param createurNom Catégorie à rechercher
      * @return Liste de deals correspondants
      */
-    List<DealDocument> findByTitreContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrVilleContainingIgnoreCaseOrCategorieNomContainingIgnoreCase(
-            String titre, String description, String ville, String categorieNom);
+    List<DealDocument> findByTitreContainingIgnoreCaseOrCategorieNomContainingIgnoreCaseOrCreateurNomContainingIgnoreCase(String titre, String categorieNom, String createurNom);
 }
 

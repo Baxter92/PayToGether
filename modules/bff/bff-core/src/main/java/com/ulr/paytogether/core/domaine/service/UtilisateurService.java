@@ -29,6 +29,11 @@ public interface UtilisateurService {
     List<UtilisateurModele> lireTous();
 
     /**
+     * Trouver tous les utilisateurs
+     */
+    List<UtilisateurModele> lireTousMarchands();
+
+    /**
      * Mettre à jour un utilisateur
      */
     UtilisateurModele mettreAJour(UUID uuid, UtilisateurModele utilisateur, String token);

@@ -30,6 +30,10 @@ public class CommandeModele {
     private LocalDateTime dateCommande;
     private LocalDateTime dateCreation;
     private LocalDateTime dateModification;
+    
+    // Champs pour le flux de payout et facturation
+    private LocalDateTime dateDepotPayout;
+    private String factureMarchandUrl; // URL de la facture du marchand dans MinIO
 
     // Champ calculé
     private BigDecimal montantTotalPaiements; // Somme des paiements associés

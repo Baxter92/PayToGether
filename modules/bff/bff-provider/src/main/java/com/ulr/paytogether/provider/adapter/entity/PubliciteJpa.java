@@ -43,10 +43,8 @@ public class PubliciteJpa {
     @Builder.Default
     private List<ImageJpa> listeImages = new ArrayList<>();
 
-    @Column(nullable = false)
     private LocalDateTime dateDebut;
 
-    @Column(nullable = false)
     private LocalDateTime dateFin;
 
     @Column(nullable = false)

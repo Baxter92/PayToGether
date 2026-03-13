@@ -80,6 +80,19 @@ public class UtilisateurResource {
     }
 
     /**
+     * Récupérer tous les utilisateurs
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/sellers")
+    public ResponseEntity<List<UtilisateurDTO>> lireTousMarchands() {
+        log.debug("Récupération de tous les utilisateurs");
+
+        List<UtilisateurDTO> utilisateurs = apiAdapter.trouverTousMarchands();
+
+        return ResponseEntity.ok(utilisateurs);
+    }
+
+    /**
      * Mettre à jour un utilisateur
      */
     @PutMapping("/{uuid}")

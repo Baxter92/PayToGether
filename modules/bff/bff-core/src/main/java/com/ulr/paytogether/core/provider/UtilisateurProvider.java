@@ -35,6 +35,11 @@ public interface UtilisateurProvider {
     List<UtilisateurModele> trouverTous();
 
     /**
+     * Trouver tous les utilisateurs
+     */
+    List<UtilisateurModele> trouverTousMarchands();
+
+    /**
      * Mettre à jour un utilisateur
      */
     UtilisateurModele mettreAJour(UUID uuid, UtilisateurModele utilisateur, String token);

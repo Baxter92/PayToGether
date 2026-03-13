@@ -14,6 +14,9 @@
 </head>
 <body>
     <div class="container">
+        <!-- ✅ Logo DealTogether -->
+        <div th:replace="~{fragments/logo :: logo}"></div>
+
         <div class="header"><h1>⏰ Payment Reminder</h1></div>
         <div class="content">
             <p>Hello <strong th:text="${prenom}">First Name</strong> <strong th:text="${nom}">Last Name</strong>,</p>

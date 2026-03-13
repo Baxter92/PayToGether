@@ -8,7 +8,8 @@ import com.ulr.paytogether.core.event.PaymentNotificationEvent;
 import com.ulr.paytogether.core.domaine.service.EmailNotificationService;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -33,8 +34,9 @@ import static com.ulr.paytogether.bff.event.utils.EventUtils.DATE_FORMATTER;
  */
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class PaymentNotificationHandler implements ConsumerHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(PaymentNotificationHandler.class);
 
     private final EmailNotificationService emailNotificationService;
     private final UtilisateurService utilisateurService;

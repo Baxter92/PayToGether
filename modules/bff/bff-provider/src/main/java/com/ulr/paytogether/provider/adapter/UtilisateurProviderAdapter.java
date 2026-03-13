@@ -86,6 +86,14 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
     }
 
     @Override
+    public List<UtilisateurModele> trouverTousMarchands() {
+        return jpaRepository.findByRole(RoleUtilisateur.VENDEUR)
+                .stream()
+                .map(mapper::versModele)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public UtilisateurModele mettreAJour(UUID uuid, UtilisateurModele utilisateur, String token) {
         return jpaRepository.findById(uuid)
                 .map(utilisateurExistant -> {

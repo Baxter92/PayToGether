@@ -52,6 +52,12 @@ public class CommandeJpa {
     @Column(nullable = false)
     @Builder.Default
     private LocalDateTime dateCommande = LocalDateTime.now();
+    
+    @Column(name = "date_depot_payout")
+    private LocalDateTime dateDepotPayout;
+    
+    @Column(name = "facture_marchand_url", length = 500)
+    private String factureMarchandUrl;
 
     @JsonIgnore
     @OneToMany(mappedBy = "commandeJpa", cascade = CascadeType.ALL,

@@ -16,6 +16,9 @@
 </head>
 <body>
     <div class="container">
+        <!-- ✅ Logo DealTogether -->
+        <div th:replace="~{fragments/logo :: logo}"></div>
+
         <div class="header"><h1>💰 Paiement reçu</h1></div>
         <div class="content">
             <p>Bonjour <strong th:text="${prenom}">Prénom</strong> <strong th:text="${nom}">Nom</strong>,</p>
