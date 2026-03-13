@@ -126,6 +126,7 @@ public class SecurityConfiguration {
                path.startsWith("/api/auth/forgot-password") ||
                path.startsWith("/api/auth/reset-password") ||
                path.startsWith("/api/auth/activate-account") ||
+               (path.startsWith("/images/") && "GET".equals(method)) || // ✅ Logo et ressources statiques
                (path.startsWith("/api/recherche/deals") && "GET".equals(method)) ||
                path.startsWith("/api/deals/statut") ||
                path.startsWith("/api/deals/villes") ||

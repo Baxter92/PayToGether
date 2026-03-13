@@ -51,6 +51,7 @@ public class DealServiceImpl implements DealService {
                 .montant(deal.getPrixDeal())
                 .montantPart(deal.getPrixPart())
                 .nbParticipants(deal.getNbParticipants())
+                .dateCreation(deal.getDateCreation())
                 .build();
 
         eventPublisher.publishAsync(dealEvent);

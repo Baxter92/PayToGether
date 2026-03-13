@@ -44,6 +44,11 @@ public interface PaiementService {
      * Trouver les paiements par commande
      */
     List<PaiementModele> trouverParCommande(UUID commandeUuid);
+    
+    /**
+     * Lire les paiements par commande (alias de trouverParCommande)
+     */
+    List<PaiementModele> lireParCommande(UUID commandeUuid);
 
     /**
      * Mettre à jour un paiement

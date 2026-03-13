@@ -78,6 +78,18 @@ public class UtilisateurApiAdapter {
     }
 
     /**
+     * Trouver tous les utilisateurs
+     */
+    public List<UtilisateurDTO> trouverTousMarchands() {
+        log.debug("ApiAdapter - Recherche de tous les utilisateurs marchands");
+
+        return utilisateurService.lireTousMarchands()
+                .stream()
+                .map(mapper::modeleVersDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Mettre à jour un utilisateur
      */
     public UtilisateurDTO mettreAJour(UUID uuid, MettreUtilisateurDto dto, String token) {

@@ -4,7 +4,8 @@ import com.ulr.paytogether.bff.event.annotation.FunctionalHandler;
 import com.ulr.paytogether.bff.event.handler.ConsumerHandler;
 import com.ulr.paytogether.core.event.PaymentMadeEvent;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,8 +22,9 @@ import org.springframework.stereotype.Component;
  */
 //@Component
 @RequiredArgsConstructor
-@Slf4j
 public class PaymentHandler implements ConsumerHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(PaymentHandler.class);
 
     // Injection des services nécessaires
     // private final NotificationService notificationService;

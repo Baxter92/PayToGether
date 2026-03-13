@@ -36,8 +36,8 @@ public class DealRechercheProviderAdapter implements DealRechercheProvider {
 
         // Recherche dans plusieurs champs : titre, description, ville, catégorie
         List<DealDocument> documents = searchRepository
-                .findByTitreContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrVilleContainingIgnoreCaseOrCategorieNomContainingIgnoreCase(
-                        query, query, query, query);
+                .findByTitreContainingIgnoreCaseOrCategorieNomContainingIgnoreCaseOrCreateurNomContainingIgnoreCase(
+                        query, query, query);
 
         // Filtrer uniquement les deals publiés (statut stocké en String)
         List<DealRechercheModele> resultats = documents.stream()

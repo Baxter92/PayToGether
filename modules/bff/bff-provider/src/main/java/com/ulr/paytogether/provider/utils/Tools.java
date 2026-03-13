@@ -12,6 +12,8 @@ public class Tools {
     public static final String DIRECTORY_DEALS_IMAGES = "deals/";
     public static final String DIRECTORY_PUBLICITES_IMAGES = "publicites/";
     public static final String DIRECTORY_UTILISATEUR_IMAGES = "utilisateurs/";
+    public static final String DIRECTORY_INVOICES_SELLER = "invoice/seller/";
+    public static final String DIRECTORY_INVOICES_USER = "invoice/user/";
 
     /**
      * Extrait l'ID utilisateur du JWT

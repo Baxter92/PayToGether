@@ -2,7 +2,6 @@ package com.ulr.paytogether.bff.event.handler.impl;
 
 import com.ulr.paytogether.bff.event.annotation.FunctionalHandler;
 import com.ulr.paytogether.bff.event.handler.ConsumerHandler;
-import com.ulr.paytogether.bff.event.utils.EventUtils;
 import com.ulr.paytogether.core.event.AccountActivationEvent;
 import com.ulr.paytogether.core.event.AccountDeactivationEvent;
 import com.ulr.paytogether.core.event.AccountValidationEvent;
@@ -10,12 +9,12 @@ import com.ulr.paytogether.core.domaine.service.EmailNotificationService;
 import com.ulr.paytogether.core.domaine.service.ValidationTokenService;
 import com.ulr.paytogether.core.modele.ValidationTokenModele;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.stereotype.Component;
 
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,8 +36,9 @@ import static com.ulr.paytogether.bff.event.utils.EventUtils.DATE_FORMATTER;
  */
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class AccountHandler implements ConsumerHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(AccountHandler.class);
 
     private final EmailNotificationService emailNotificationService;
     private final ValidationTokenService validationTokenService;

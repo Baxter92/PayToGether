@@ -1,19 +1,26 @@
 package com.ulr.paytogether.provider.adapter;
 
 import com.ulr.paytogether.core.enumeration.StatutCommande;
+import com.ulr.paytogether.core.enumeration.StatutCommandeUtilisateur;
 import com.ulr.paytogether.core.modele.CommandeModele;
+import com.ulr.paytogether.core.modele.CommandeUtilisateurModele;
 import com.ulr.paytogether.core.provider.CommandeProvider;
 import com.ulr.paytogether.provider.adapter.entity.CommandeJpa;
+import com.ulr.paytogether.provider.adapter.entity.CommandeUtilisateurJpa;
 import com.ulr.paytogether.provider.adapter.entity.DealJpa;
 import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
 import com.ulr.paytogether.provider.adapter.mapper.CommandeJpaMapper;
+import com.ulr.paytogether.provider.adapter.mapper.CommandeUtilisateurJpaMapper;
 import com.ulr.paytogether.provider.repository.CommandeRepository;
+import com.ulr.paytogether.provider.repository.CommandeUtilisateurRepository;
 import com.ulr.paytogether.provider.repository.DealRepository;
 import com.ulr.paytogether.provider.repository.PaiementRepository;
 import com.ulr.paytogether.provider.repository.UtilisateurRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +41,9 @@ public class CommandeProviderAdapter implements CommandeProvider {
     private final UtilisateurRepository utilisateurRepository;
     private final DealRepository dealRepository;
     private final PaiementRepository paiementRepository;
+    private final CommandeUtilisateurRepository commandeUtilisateurRepository;
     private final CommandeJpaMapper mapper;
+    private final CommandeUtilisateurJpaMapper commandeUtilisateurMapper;
 
     @Override
     public CommandeModele sauvegarder(CommandeModele commande) {
@@ -143,4 +152,76 @@ public class CommandeProviderAdapter implements CommandeProvider {
                 .map(mapper::versModele)
                 .orElseThrow(() -> new RuntimeException("Commande non trouvée avec l'UUID : " + uuid));
     }
+    
+    @Override
+    @Transactional
+    public CommandeModele mettreAJourStatutEtDatePayout(UUID commandeUuid, StatutCommande statut, LocalDateTime dateDepotPayout) {
+        CommandeJpa commande = jpaRepository.findById(commandeUuid)
+            .orElseThrow(() -> new RuntimeException("Commande non trouvée avec l'UUID : " + commandeUuid));
+
+        commande.setStatut(statut);
+        if (dateDepotPayout != null) {
+            commande.setDateDepotPayout(dateDepotPayout);
+        }
+
+        List<CommandeUtilisateurJpa> commandeUtilisateurJpas = commande.getPaiements()
+            .stream()
+                .map(paiement -> CommandeUtilisateurJpa.builder()
+                    .commandeJpa(commande)
+                    .utilisateurJpa(paiement.getUtilisateurJpa())
+                    .statutCommandeUtilisateur(StatutCommandeUtilisateur.EN_ATTENTE)
+                    .build())
+                .toList();
+        
+        CommandeJpa sauvegarde = jpaRepository.save(commande);
+        commandeUtilisateurRepository.saveAll(commandeUtilisateurJpas);
+        return mapper.versModele(sauvegarde);
+    }
+    
+    @Override
+    @Transactional
+    public CommandeModele mettreAJourFactureMarchand(UUID commandeUuid, String factureUrl) {
+        CommandeJpa commande = jpaRepository.findById(commandeUuid)
+            .orElseThrow(() -> new RuntimeException("Commande non trouvée avec l'UUID : " + commandeUuid));
+        
+        commande.setFactureMarchandUrl(factureUrl);
+        commande.setStatut(StatutCommande.INVOICE_SELLER);
+        
+        CommandeJpa sauvegarde = jpaRepository.save(commande);
+        return mapper.versModele(sauvegarde);
+    }
+    
+    @Override
+    public List<CommandeUtilisateurModele> trouverUtilisateursCommande(UUID commandeUuid) {
+        return commandeUtilisateurRepository.findByCommandeJpaUuid(commandeUuid)
+            .stream()
+            .map(commandeUtilisateurMapper::versModele)
+            .collect(Collectors.toList());
+    }
+    
+    @Override
+    @Transactional
+    public void validerUtilisateurCommande(UUID commandeUuid, UUID utilisateurUuid) {
+        CommandeUtilisateurJpa commandeUtilisateur = commandeUtilisateurRepository
+            .findByCommandeJpaUuidAndUtilisateurJpaUuid(commandeUuid, utilisateurUuid)
+            .orElseThrow(() -> new RuntimeException(
+                "Utilisateur " + utilisateurUuid + " non trouvé pour la commande " + commandeUuid));
+        
+        commandeUtilisateur.setStatutCommandeUtilisateur(StatutCommandeUtilisateur.VALIDEE);
+        commandeUtilisateurRepository.save(commandeUtilisateur);
+    }
+    
+    @Override
+    public boolean tousUtilisateursValides(UUID commandeUuid) {
+        List<CommandeUtilisateurJpa> utilisateurs = commandeUtilisateurRepository.findByCommandeJpaUuid(commandeUuid);
+        if (utilisateurs.isEmpty()) {
+            return false;
+        }
+        
+        long nombreValides = commandeUtilisateurRepository
+            .countByCommandeJpaUuidAndStatutCommandeUtilisateur(commandeUuid, StatutCommandeUtilisateur.VALIDEE);
+        
+        return nombreValides == utilisateurs.size();
+    }
+
 }

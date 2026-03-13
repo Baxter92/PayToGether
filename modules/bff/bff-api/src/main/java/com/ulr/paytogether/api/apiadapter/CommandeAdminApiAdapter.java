@@ -3,9 +3,11 @@ package com.ulr.paytogether.api.apiadapter;
 import com.ulr.paytogether.api.dto.*;
 import com.ulr.paytogether.core.domaine.service.CommandeService;
 import com.ulr.paytogether.core.modele.CommandeModele;
+import com.ulr.paytogether.core.modele.CommandeUtilisateurModele;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -57,6 +59,76 @@ public class CommandeAdminApiAdapter {
         CommandeModele commande = commandeService.lireParUuid(uuid);
         return commande != null ? mapperVersCommandeListDTO(commande) : null;
     }
+    
+    /**
+     * Valider un payout par l'admin
+     */
+    public CommandeListDTO validerPayout(UUID commandeUuid, ValiderPayoutDTO dto) {
+        log.info("Validation du payout pour la commande: {}", commandeUuid);
+        
+        CommandeModele commande = commandeService.validerPayout(
+            commandeUuid, 
+            dto.getDateDepotPayout()
+        );
+        
+        return mapperVersCommandeListDTO(commande);
+    }
+    
+    /**
+     * Upload de la facture du vendeur
+     */
+    public CommandeListDTO uploadFactureVendeur(UUID commandeUuid, MultipartFile facture) {
+        log.info("Upload de la facture du vendeur pour la commande: {}", commandeUuid);
+        
+        try {
+            // Valider le fichier
+            if (facture == null || facture.isEmpty()) {
+                throw new IllegalArgumentException("Le fichier de facture est vide ou null");
+            }
+            
+            // Convertir MultipartFile en byte[]
+            byte[] factureData = facture.getBytes();
+            String factureNom = facture.getOriginalFilename();
+            
+            CommandeModele commande = commandeService.uploadFactureVendeur(commandeUuid, factureData, factureNom);
+            
+            return mapperVersCommandeListDTO(commande);
+        } catch (Exception e) {
+            log.error("Erreur lors de l'upload de la facture: {}", e.getMessage(), e);
+            throw new RuntimeException("Erreur lors de l'upload de la facture", e);
+        }
+    }
+    
+    /**
+     * Valider les factures des clients
+     */
+    public ValidationFacturesClientResponseDTO validerFacturesClients(
+            UUID commandeUuid, 
+            ValiderFacturesClientDTO dto) {
+        log.info("Validation des factures clients pour la commande: {}", commandeUuid);
+        
+        Map<String, Object> resultat = commandeService.validerFacturesClients(
+            commandeUuid, 
+            dto.getUtilisateurUuids()
+        );
+        
+        return ValidationFacturesClientResponseDTO.builder()
+            .commandeUuid((UUID) resultat.get("commandeUuid"))
+            .numeroCommande((String) resultat.get("numeroCommande"))
+            .nombreValidations(((Long) resultat.get("nombreValidations")).intValue())
+            .nombreTotal(((Long) resultat.get("nombreTotal")).intValue())
+            .toutesValidees((Boolean) resultat.get("toutesValidees"))
+            .message((String) resultat.get("message"))
+            .build();
+    }
+
+    public List<CommandeUtilisateurDto> listerUtilisateursParCommande(UUID commandeUuid) {
+        List<CommandeUtilisateurModele> cuList = commandeService.listerUtilisateursParCommande(commandeUuid);
+        return cuList.stream()
+                .map(this::mapperVersCommandeUtilisateurDTO)
+                .collect(Collectors.toList());
+    }
+    
     /**
      * Mapper un CommandeModele vers CommandeListDTO
      */
@@ -76,6 +148,18 @@ public class CommandeAdminApiAdapter {
                 .dateCreation(commande.getDateCreation())
                 .montantTotalPaiements(commande.getMontantTotalPaiements())
                 .statut(commande.getStatut())
+                .build();
+    }
+
+    private CommandeUtilisateurDto mapperVersCommandeUtilisateurDTO(CommandeUtilisateurModele cu) {
+        return CommandeUtilisateurDto.builder()
+                .uuid(cu.getUuid())
+                .commandeUuid(cu.getCommandeUuid())
+                .utilisateurUuid(cu.getUtilisateurUuid())
+                .nom(cu.getUtilisateur() != null ? cu.getUtilisateur().getNom() : null)
+                .prenom(cu.getUtilisateur() != null ? cu.getUtilisateur().getPrenom() : null)
+                .email(cu.getUtilisateur() != null ? cu.getUtilisateur().getEmail() : null)
+                .statutCommandeUtilisateur(cu.getStatutCommandeUtilisateur().name())
                 .build();
     }
 }

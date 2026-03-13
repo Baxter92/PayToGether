@@ -1,0 +1,24 @@
+### =========================================================================
+### Test de l'endpoint du logo
+### =========================================================================
+
+### 1. GET - Récupérer le logo (accès public)
+GET {{host}}/images/dealtogetherlogo.png
+Content-Type: application/json
+
+### Résultat attendu : 200 OK avec image PNG
+### Le logo doit être servi depuis les ressources statiques
+
+### 2. GET - Test d'une image inexistante
+GET {{host}}/images/image-inexistante.png
+Content-Type: application/json
+
+### Résultat attendu : 404 NOT FOUND
+
+### 3. GET - Test de tentative d'accès à un fichier avec chemin relatif (sécurité)
+GET {{host}}/images/../application.properties
+Content-Type: application/json
+
+### Résultat attendu : 400 BAD REQUEST
+### Protection contre les attaques de traversée de répertoire
+

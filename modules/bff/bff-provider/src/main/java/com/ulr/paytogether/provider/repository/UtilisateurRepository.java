@@ -1,9 +1,11 @@
 package com.ulr.paytogether.provider.repository;
 
+import com.ulr.paytogether.core.enumeration.RoleUtilisateur;
 import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -40,4 +42,11 @@ public interface UtilisateurRepository extends JpaRepository<UtilisateurJpa, UUI
         * @return un Optional contenant l'utilisateur s'il existe
         */
     Optional<UtilisateurJpa> findByKeycloakId(String keycloakId);
+
+    /**
+     *
+     * @param role
+     * @return
+     */
+    List<UtilisateurJpa> findByRole(RoleUtilisateur role);
 }

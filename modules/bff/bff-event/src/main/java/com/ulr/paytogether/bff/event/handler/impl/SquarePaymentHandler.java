@@ -15,7 +15,9 @@ import com.ulr.paytogether.core.modele.PaiementModele;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
 import com.ulr.paytogether.core.provider.AdresseProvider;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.stereotype.Component;
 
@@ -43,8 +45,9 @@ import static com.ulr.paytogether.bff.event.utils.EventUtils.CONSTRUIRELIENDEAL;
  */
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class SquarePaymentHandler implements ConsumerHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(SquarePaymentHandler.class);
 
     private final SquarePaymentService squarePaymentService;
     private final PaiementService paiementService;
@@ -54,6 +57,9 @@ public class SquarePaymentHandler implements ConsumerHandler {
     private final EventPublisher eventPublisher;
     private final AdresseProvider adresseProvider;
     private final DealParticipantService dealParticipantService;
+    
+    @Value("${app.frontend.base-url}")
+    private String frontendBaseUrl;
 
     /**
      * Handler pour traiter l'événement PaymentInitiatedEvent.
@@ -182,7 +188,7 @@ public class SquarePaymentHandler implements ConsumerHandler {
             variables.put("nomParticipant", Optional.ofNullable(utilisateurModele).map(UtilisateurModele::getNom).orElse(""));
             variables.put("nombrePartsActuels", nombreDePartsActuels);
             variables.put("nombreParticipantsMax", dealModele.getNbParticipants());
-            variables.put("lienDeal", CONSTRUIRELIENDEAL(dealModele.getUuid().toString()));
+            variables.put("lienDeal", CONSTRUIRELIENDEAL(dealModele.getUuid().toString(), frontendBaseUrl));
 
             // Appeler le service métier pour envoyer l'email au créateur du deal
             emailNotificationService.envoyerNotification(

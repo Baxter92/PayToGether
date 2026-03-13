@@ -6,7 +6,8 @@ import com.ulr.paytogether.core.domaine.service.EmailNotificationService;
 import com.ulr.paytogether.core.domaine.service.SquarePaymentService;
 import com.ulr.paytogether.core.event.PaymentRefundedEvent;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.time.format.DateTimeFormatter;
@@ -23,8 +24,9 @@ import java.util.Map;
  */
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class PaymentRefundedHandler implements ConsumerHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(PaymentRefundedHandler.class);
 
     private final EmailNotificationService emailNotificationService;
     private final SquarePaymentService squarePaymentService;

@@ -16,8 +16,8 @@ Authorization: Bearer {{access_token}}
   "dateDebut": "2026-02-09T10:00:00",
   "dateFin": "2026-12-31T23:59:59",
   "dateExpiration": "2026-12-31T23:59:59",
-  "categorieUuid": "393986af-834d-4373-aa8b-a095e8bdb311",
-  "createurUuid": "c198970c-0e04-4ed4-b2b5-54590d53b58c",
+  "categorieUuid": "9b358044-7928-47c0-a79f-9e966517fc41",
+  "createurUuid": "545128a4-0b6c-4694-abdd-6952549381b5",
   "statut": "BROUILLON",
   "ville": "Alberta",
   "pays": "Canada",
@@ -55,12 +55,12 @@ Authorization: Bearer {{access_token}}
 ### 4. Mettre à jour un deal (PUT) - Sans images
 # Si listeImages n'est pas présente, les images du deal ne sont pas modifiées
 
-PUT {{base_url}}/api/deals/200caba0-7b65-4e01-9a9e-7fcc099e7a7d
+PUT {{base_url}}/api/deals/4ea745a4-2187-46c3-b31e-b8bb1b099df5
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 {
-  "titre": "Deal mis à jour4",
+  "titre": "Deal mis à jour41",
   "description": "Description modifiée",
   "prixDeal": 1500.00,
   "prixPart": 15.00,
@@ -73,7 +73,7 @@ Authorization: Bearer {{access_token}}
   "ville": "Alberta",
   "pays": "Canada",
   "listePointsForts": [
-    "Nouveau point fort1",
+    "Nouveau point fort0",
     "Nouveau point fort2"
   ]
 }

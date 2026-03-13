@@ -6,7 +6,8 @@ import com.ulr.paytogether.core.domaine.service.EmailNotificationService;
 import com.ulr.paytogether.core.event.DealCancelledEvent;
 import com.ulr.paytogether.core.event.DealCreatedEvent;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -18,10 +19,14 @@ import static com.ulr.paytogether.bff.event.utils.EventUtils.DATE_FORMATTER;
 
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class Dealhandler implements ConsumerHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(Dealhandler.class);
+
     private final EmailNotificationService emailNotificationService;
+    
+    @Value("${app.frontend.base-url}")
+    private String frontendBaseUrl;
 
 
     @FunctionalHandler(
@@ -40,7 +45,7 @@ public class Dealhandler implements ConsumerHandler {
         variables.put("prixDeal", event.getMontant());
         variables.put("dateCreation", event.getDateCreation().format(DATE_FORMATTER));
         variables.put("nbParticipants", event.getNbParticipants());
-        variables.put("lienDeal", CONSTRUIRELIENDEAL(event.getDealUuid().toString()));
+        variables.put("lienDeal", CONSTRUIRELIENDEAL(event.getDealUuid().toString(), frontendBaseUrl));
 
         // Appeler le service métier pour envoyer l'email
         emailNotificationService.envoyerNotification(

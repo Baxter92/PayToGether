@@ -9,11 +9,19 @@
         <outputRelativeToContentRoot value="true" />
         <module name="bff-provider" />
         <module name="bff-wsclient" />
-        <module name="bff-event" />
         <module name="bff-event-dispatcher" />
         <module name="bff-configuration" />
         <module name="bff-api" />
         <module name="bff-core" />
+      </profile>
+      <profile name="Annotation profile for bff project" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
+        </processorPath>
+        <module name="bff-event" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

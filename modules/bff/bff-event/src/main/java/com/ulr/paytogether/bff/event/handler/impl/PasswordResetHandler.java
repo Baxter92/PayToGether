@@ -7,7 +7,8 @@ import com.ulr.paytogether.core.domaine.service.EmailNotificationService;
 import com.ulr.paytogether.core.domaine.service.ValidationTokenService;
 import com.ulr.paytogether.core.modele.ValidationTokenModele;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -31,8 +32,9 @@ import java.util.Map;
  */
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class PasswordResetHandler implements ConsumerHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(PasswordResetHandler.class);
 
     private final EmailNotificationService emailNotificationService;
     private final ValidationTokenService validationTokenService;
