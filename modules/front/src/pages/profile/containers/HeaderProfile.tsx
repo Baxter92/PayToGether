@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback } from "@/common/components/ui/avatar";
 import { Button } from "@/common/components/ui/button";
 import { useAuth } from "@/common/context/AuthContext";
 import { AvatarImage } from "@radix-ui/react-avatar";
-import { Gift, Heart, Home, Settings, ShoppingBag } from "lucide-react";
+import { Gift, Heart, Home, Settings, ShoppingBag, Store } from "lucide-react";
 import { type JSX } from "react";
 
 export const PROFILE_TABS = [
@@ -29,12 +29,12 @@ export const PROFILE_TABS = [
   },
   // { labelKey: "reviews", key: "reviews", icon: Star, merchant: false },
   { labelKey: "deals", key: "deals", icon: Gift, merchant: true },
-  // {
-  //   labelKey: "ordersReceived",
-  //   key: "orders-received",
-  //   icon: Store,
-  //   merchant: true,
-  // },
+  {
+    labelKey: "ordersReceived",
+    key: "orders-received",
+    icon: Store,
+    merchant: true,
+  },
   // {
   //   labelKey: "clientReviews",
   //   key: "client-reviews",
