@@ -34,6 +34,13 @@ public interface CommandeProvider {
     List<CommandeModele> trouverToutesAvecInfosCompletes();
 
     /**
+     * Récupère toutes les commandes d'un marchand avec informations complètes
+     * @param marchandUuid UUID du marchand
+     * @return Liste des commandes du marchand
+     */
+    List<CommandeModele> trouverParMarchandAvecInfosCompletes(UUID marchandUuid);
+
+    /**
      * Calcule les statistiques globales des commandes par statut
      * @return Map avec les statistiques (totalCommandes, confirmees, enCours, annulees, remboursees)
      */

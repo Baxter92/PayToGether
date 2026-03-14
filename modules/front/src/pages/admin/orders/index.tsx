@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { useState } from "react";
-import { Eye, Download, Loader2 } from "lucide-react";
+import { Eye, Download, Loader2, DollarSign, Upload, CheckCircle2 } from "lucide-react";
 import { Button } from "@/common/components/ui/button";
 import {
   Card,
@@ -12,12 +12,22 @@ import { Badge } from "@/common/components/ui/badge";
 import { formatCurrency } from "@/common/utils/formatCurrency";
 import { DataTable, VStack } from "@/common/components";
 import ViewOrderDetailsModal from "./components/ViewOrderDetailsModal";
+import ValidatePayoutModal from "./components/ValidatePayoutModal";
+import UploadSellerInvoiceModal from "./components/UploadSellerInvoiceModal";
+import ValidateCustomerInvoicesModal from "./components/ValidateCustomerInvoicesModal";
 import { ViewDetailDealModal } from "../deals/containers/ViewDetailDealModal";
-import { useAdminOrders } from "@/common/api/hooks/useOrders";
+import {
+  useAdminOrders,
+  useAdminValidatePayout,
+  useAdminUploadSellerInvoice,
+  useAdminValidateCustomerInvoices,
+  useOrderCustomers,
+} from "@/common/api/hooks/useOrders";
 import { useI18n } from "@/common/hooks/useI18n";
 import { StatutCommande } from "@/common/api/types/order";
 import { useDeal } from "@/common/api";
 import { mapDealToView } from "@/common/api/mappers/catalog";
+import { useAuth } from "@/common/context/AuthContext";
 
 export default function AdminOrders(): ReactElement {
   // const [searchQuery, setSearchQuery] = useState("");
@@ -25,6 +35,10 @@ export default function AdminOrders(): ReactElement {
   const [openViewDetails, setOpenViewDetails] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [openDealDetails, setOpenDealDetails] = useState(false);
+  const [openPayoutModal, setOpenPayoutModal] = useState(false);
+  const [openInvoiceModal, setOpenInvoiceModal] = useState(false);
+  const [openValidationModal, setOpenValidationModal] = useState(false);
+
   const { data: dealData } = useDeal(selectedOrder?.dealUuid);
   const dealForModal = dealData ? mapDealToView(dealData) : null;
 
@@ -34,6 +48,43 @@ export default function AdminOrders(): ReactElement {
 
   const { t: tAdmin } = useI18n("admin");
   const { t: tStatus } = useI18n("status");
+  const { isAdmin } = useAuth();
+
+  // Hooks pour les mutations
+  const validatePayoutMutation = useAdminValidatePayout();
+  const uploadInvoiceMutation = useAdminUploadSellerInvoice();
+  const validateCustomersMutation = useAdminValidateCustomerInvoices();
+
+  // Hook pour récupérer les clients (seulement si le modal est ouvert)
+  const { data: customers = [] } = useOrderCustomers(
+    openValidationModal ? selectedOrder?.uuid : "",
+  );
+
+  const handleValidatePayout = async (dateDepotPayout: string): Promise<void> => {
+    if (!selectedOrder?.uuid) return;
+    await validatePayoutMutation.mutateAsync({
+      uuid: selectedOrder.uuid,
+      dateDepotPayout,
+    });
+  };
+
+  const handleUploadInvoice = async (file: File): Promise<void> => {
+    if (!selectedOrder?.uuid) return;
+    await uploadInvoiceMutation.mutateAsync({
+      uuid: selectedOrder.uuid,
+      file,
+    });
+  };
+
+  const handleValidateCustomers = async (
+    validations: { customerUuid: string; valide: boolean }[],
+  ): Promise<void> => {
+    if (!selectedOrder?.uuid) return;
+    await validateCustomersMutation.mutateAsync({
+      uuid: selectedOrder.uuid,
+      validations,
+    });
+  };
 
   const columns = [
     {
@@ -90,28 +141,72 @@ export default function AdminOrders(): ReactElement {
     {
       id: "actions",
       header: tAdmin("orders.actions"),
-      cell: ({ row }: { row: any }) => (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => {
-            setSelectedOrder({
-              id: row.original.numeroCommande,
-              customer: `${row.original.marchandPrenom} ${row.original.marchandNom}`,
-              deal: row.original.dealTitre,
-              date: row.original.dateCreation
-                ? new Date(row.original.dateCreation).toLocaleDateString()
-                : "-",
-              amount: row.original.montantTotalPaiements,
-              status:
-                row.original.statut === "LIVRÉE" ? "completed" : "pending",
-            });
-            setOpenViewDetails(true);
-          }}
-        >
-          <Eye className="h-4 w-4" />
-        </Button>
-      ),
+      cell: ({ row }: { row: any }) => {
+        const order = row.original;
+        const statut = order.statut;
+
+        return (
+          <div className="flex items-center gap-2">
+            {/* Bouton Voir les détails */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setSelectedOrder(order);
+                setOpenViewDetails(true);
+              }}
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+
+            {/* Bouton Valider Payout (admin seulement, statut COMPLETE) */}
+            {isAdmin && statut === StatutCommande.COMPLETE && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSelectedOrder(order);
+                  setOpenPayoutModal(true);
+                }}
+              >
+                <DollarSign className="h-4 w-4 mr-1" />
+                Payout
+              </Button>
+            )}
+
+            {/* Bouton Upload Facture Vendeur (statut PAYOUT) */}
+            {statut === StatutCommande.PAYOUT && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSelectedOrder(order);
+                  setOpenInvoiceModal(true);
+                }}
+              >
+                <Upload className="h-4 w-4 mr-1" />
+                Invoice
+              </Button>
+            )}
+
+            {/* Bouton Valider Factures Clients (statut INVOICE_CUSTOMER ou TERMINE) */}
+            {(statut === StatutCommande.INVOICE_CUSTOMER ||
+              statut === StatutCommande.TERMINE) && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSelectedOrder(order);
+                  setOpenValidationModal(true);
+                }}
+              >
+                <CheckCircle2 className="h-4 w-4 mr-1" />
+                {statut === StatutCommande.TERMINE ? "Voir" : "Valider"}
+              </Button>
+            )}
+          </div>
+        );
+      },
     },
   ];
 
@@ -131,6 +226,7 @@ export default function AdminOrders(): ReactElement {
 
   const getStatusBadge = (status: string): ReactElement => {
     switch (status) {
+      case StatutCommande.TERMINE:
       case StatutCommande.LIVRÉE:
         return (
           <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
@@ -142,6 +238,30 @@ export default function AdminOrders(): ReactElement {
         return (
           <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
             {tStatus("pending")}
+          </Badge>
+        );
+      case StatutCommande.COMPLETE:
+        return (
+          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+            {tStatus("complete")}
+          </Badge>
+        );
+      case StatutCommande.PAYOUT:
+        return (
+          <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">
+            {tStatus("payout")}
+          </Badge>
+        );
+      case StatutCommande.INVOICE_SELLER:
+        return (
+          <Badge className="bg-indigo-100 text-indigo-800 hover:bg-indigo-100">
+            {tStatus("invoiceSeller")}
+          </Badge>
+        );
+      case StatutCommande.INVOICE_CUSTOMER:
+        return (
+          <Badge className="bg-cyan-100 text-cyan-800 hover:bg-cyan-100">
+            {tStatus("invoiceCustomer")}
           </Badge>
         );
       case StatutCommande.REMBOURSÉE:
@@ -288,6 +408,32 @@ export default function AdminOrders(): ReactElement {
               setSelectedOrder(null);
             }}
             deal={dealForModal}
+          />
+          <ValidatePayoutModal
+            open={openPayoutModal}
+            onClose={() => {
+              setOpenPayoutModal(false);
+            }}
+            order={selectedOrder}
+            onConfirm={handleValidatePayout}
+          />
+          <UploadSellerInvoiceModal
+            open={openInvoiceModal}
+            onClose={() => {
+              setOpenInvoiceModal(false);
+            }}
+            order={selectedOrder}
+            onUpload={handleUploadInvoice}
+          />
+          <ValidateCustomerInvoicesModal
+            open={openValidationModal}
+            onClose={() => {
+              setOpenValidationModal(false);
+            }}
+            order={selectedOrder}
+            customers={customers}
+            onValidate={handleValidateCustomers}
+            isReadOnly={selectedOrder?.statut === StatutCommande.TERMINE && !isAdmin}
           />
         </>
       )}

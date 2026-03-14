@@ -233,7 +233,51 @@
     "refund": "Refund",
     "cancelOrder": "Cancel Order",
     "orderDetails": "Order Details",
-    "updateStatus": "Update"
+    "updateStatus": "Update Status",
+    "payout": {
+      "title": "Validate Payout",
+      "description": "Order {{orderNumber}} - Enter the payout deposit date",
+      "dateLabel": "Payout deposit date",
+      "dateHelp": "Date when money was sent to the seller",
+      "dateRequired": "Date is required",
+      "validated": "Payout validated successfully",
+      "error": "Error validating payout",
+      "validate": "Validate Payout",
+      "cancel": "Cancel",
+      "loading": "Validating..."
+    },
+    "invoice": {
+      "uploadTitle": "Upload Seller Invoice",
+      "uploadDescription": "Order {{orderNumber}} - Upload the seller's invoice",
+      "fileLabel": "Invoice (PDF only)",
+      "fileHelp": "PDF format, maximum 10 MB",
+      "fileRequired": "Please select a file",
+      "invalidFileType": "Only PDF files are accepted",
+      "fileTooLarge": "File must not exceed 10 MB",
+      "uploaded": "Invoice uploaded successfully",
+      "uploadError": "Error uploading invoice",
+      "upload": "Upload",
+      "cancel": "Cancel",
+      "loading": "Validating..."
+    },
+    "validation": {
+      "title": "Validate Customer Invoices",
+      "description": "Order {{orderNumber}} - Validate customer invoices",
+      "viewTitle": "View Validations",
+      "viewDescription": "Order {{orderNumber}} - View customer validations",
+      "progress": "{{validated}}/{{total}} customers validated",
+      "complete": "All validated",
+      "validated": "Validated",
+      "paymentNumber": "Payment #",
+      "amount": "Amount",
+      "cannotUnvalidate": "Cannot unvalidate an already validated customer",
+      "allComplete": "All invoices validated! Order completed.",
+      "saved": "Validations saved",
+      "error": "Error during validation",
+      "saveValidations": "Save Validations",
+      "cancel": "Cancel",
+      "loading": "Validating..."
+    }
   },
   "users": {
     "title": "User Management",

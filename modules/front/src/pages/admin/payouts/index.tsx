@@ -294,6 +294,7 @@ export default function AdminPayouts(): ReactElement {
       <ViewDetailMerchantModal
         open={openMerchantDetails}
         onClose={() => setOpenMerchantDetails(false)}
+        merchant={null}
       />
     </main>
   );

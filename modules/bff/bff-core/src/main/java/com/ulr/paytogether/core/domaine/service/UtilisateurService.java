@@ -1,6 +1,7 @@
 package com.ulr.paytogether.core.domaine.service;
 
 import com.ulr.paytogether.core.enumeration.StatutImage;
+import com.ulr.paytogether.core.modele.MarchandAvecDealsModele;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
 
 import java.util.List;
@@ -92,4 +93,10 @@ public interface UtilisateurService {
      * @param nouveauMotDePasse Nouveau mot de passe
      */
     void reinitialiserMotDePasseAvecToken(String token, String nouveauMotDePasse);
+
+    /**
+     * Récupérer tous les marchands avec leurs deals, moyennes et statuts de commandes
+     * @return Liste des marchands enrichis
+     */
+    List<MarchandAvecDealsModele> lireTousMarchandsAvecDeals();
 }

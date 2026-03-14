@@ -37,6 +37,17 @@ public class CommandeServiceImpl implements CommandeService {
     }
 
     @Override
+    public List<CommandeModele> lireCommandesMarchand(UUID marchandUuid) {
+        log.info("Récupération des commandes du marchand: {}", marchandUuid);
+        
+        if (marchandUuid == null) {
+            throw new IllegalArgumentException("L'UUID du marchand ne peut pas être null");
+        }
+        
+        return commandeProvider.trouverParMarchandAvecInfosCompletes(marchandUuid);
+    }
+
+    @Override
     public Map<String, Long> calculerStatistiques() {
         log.info("Calcul des statistiques des commandes");
         return commandeProvider.calculerStatistiquesCommandes();

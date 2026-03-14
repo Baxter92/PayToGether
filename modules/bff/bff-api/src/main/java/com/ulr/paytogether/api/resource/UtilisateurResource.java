@@ -3,6 +3,7 @@ package com.ulr.paytogether.api.resource;
 import com.ulr.paytogether.api.apiadapter.UtilisateurApiAdapter;
 import com.ulr.paytogether.api.dto.*;
 import com.ulr.paytogether.core.enumeration.StatutImage;
+import com.ulr.paytogether.core.enumeration.StatutUtilisateur;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

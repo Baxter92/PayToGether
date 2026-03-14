@@ -177,16 +177,16 @@ const Header = ({
       icon: <Settings className="w-4 h-4 mr-2" />,
       onClick: () => navigate(PATHS.USERSITTINGS),
     },
-    {
-      ...(isAdmin
-        ? {
-            value: "goToAdmin",
-            label: mergedTexts.goToAdmin,
-            icon: <Home className="w-4 h-4 mr-2" />,
-            onClick: () => navigate("/admin"),
-          }
-        : {}),
-    },
+    ...(isAdmin
+      ? [
+        {
+          value: "goToAdmin",
+          label: mergedTexts.goToAdmin,
+          icon: <Home className="w-4 h-4 mr-2" />,
+          onClick: () => navigate("/admin"),
+        },
+      ]
+      : []),
     {
       value: "logout",
       label: mergedTexts.logout,

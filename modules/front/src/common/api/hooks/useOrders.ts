@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { orderService, orderAdminService } from "../services/orderService";
+import { orderService, orderAdminService, type Customer } from "../services/orderService";
 import type {
   OrderDTO,
   CreateOrderDTO,
@@ -156,6 +156,15 @@ export const useAdminOrders = () => {
   });
 };
 
+// Hook pour lister les commandes d'un marchand
+export const useMerchantOrders = (marchandUuid: string) => {
+  return useQuery<OrderListResponseDTO, Error>({
+    queryKey: ["admin", "commandes", "marchand", marchandUuid],
+    queryFn: () => orderAdminService.listByMerchant(marchandUuid),
+    enabled: !!marchandUuid,
+  });
+};
+
 // Hook pour récupérer les commandes par statut (admin)
 export const useAdminOrdersByStatut = (statut: StatutCommandeType) => {
   return useQuery<OrderDTO[], Error>({
@@ -254,3 +263,75 @@ export const useAdminDeleteOrder = () => {
     },
   });
 };
+
+// Hook pour valider le payout (admin)
+export const useAdminValidatePayout = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    OrderDTO,
+    Error,
+    { uuid: string; dateDepotPayout: string }
+  >({
+    mutationFn: ({ uuid, dateDepotPayout }) =>
+      orderAdminService.validatePayout(uuid, dateDepotPayout),
+    onSuccess: (updatedOrder) => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "commandes"] });
+      queryClient.invalidateQueries({
+        queryKey: orderKeys.detail(updatedOrder.uuid),
+      });
+    },
+  });
+};
+
+// Hook pour uploader la facture du vendeur
+export const useAdminUploadSellerInvoice = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<OrderDTO, Error, { uuid: string; file: File }>({
+    mutationFn: ({ uuid, file }) =>
+      orderAdminService.uploadSellerInvoice(uuid, file),
+    onSuccess: (updatedOrder) => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "commandes"] });
+      queryClient.invalidateQueries({
+        queryKey: orderKeys.detail(updatedOrder.uuid),
+      });
+    },
+  });
+};
+
+// Hook pour récupérer les clients d'une commande
+export const useOrderCustomers = (uuid: string) => {
+  return useQuery<Customer[], Error>({
+    queryKey: ["admin", "commandes", uuid, "customers"],
+    queryFn: () => orderAdminService.getOrderCustomers(uuid),
+    enabled: !!uuid,
+  });
+};
+
+// Hook pour valider les factures clients
+export const useAdminValidateCustomerInvoices = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    OrderDTO,
+    Error,
+    {
+      uuid: string;
+      validations: { customerUuid: string; valide: boolean }[];
+    }
+  >({
+    mutationFn: ({ uuid, validations }) =>
+      orderAdminService.validateCustomerInvoices(uuid, validations),
+    onSuccess: (updatedOrder) => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "commandes"] });
+      queryClient.invalidateQueries({
+        queryKey: orderKeys.detail(updatedOrder.uuid),
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["admin", "commandes", updatedOrder.uuid, "customers"],
+      });
+    },
+  });
+};
+

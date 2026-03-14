@@ -12,5 +12,10 @@
   "processing": "Processing",
   "failed": "Failed",
   "published": "Published",
-  "draft": "Draft"
+  "draft": "Draft",
+  "complete": "Complete",
+  "payout": "Payout",
+  "invoiceSeller": "Seller Invoice",
+  "invoiceCustomer": "Customer Invoice"
 }
+

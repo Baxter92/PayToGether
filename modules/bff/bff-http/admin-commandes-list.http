@@ -7,6 +7,7 @@
 ### Variables
 @baseUrl = http://localhost:8080/api
 @adminToken = Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+@vendeurToken = Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...VENDEUR_TOKEN
 
 ### =========================================================================
 ### 1. Lister toutes les commandes avec statistiques (ADMIN)
@@ -59,6 +60,58 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...VENDEUR_TOKEN
 GET {{baseUrl}}/admin/commandes
 
 ### Expected: 401 Unauthorized
+
+###
+
+### =========================================================================
+### 4. Lister les commandes d'un marchand spécifique (ADMIN ou VENDEUR)
+### =========================================================================
+### Remplacer par l'UUID réel d'un marchand
+@marchandUuid = 123e4567-e89b-12d3-a456-426614174000
+
+GET {{baseUrl}}/admin/commandes/marchand/{{marchandUuid}}
+Authorization: {{adminToken}}
+
+### Expected: 200 OK
+### Response:
+### {
+###   "commandes": [
+###     {
+###       "uuid": "...",
+###       "numeroCommande": "CMD-2026-00001",
+###       "marchandUuid": "123e4567-e89b-12d3-a456-426614174000",
+###       "marchandNom": "Martin",
+###       "marchandPrenom": "Sophie",
+###       "marchandEmail": "sophie.martin@example.com",
+###       "dealUuid": "...",
+###       "dealTitre": "Restaurant 5 étoiles",
+###       "dateCreation": "2026-03-01T09:00:00",
+###       "montantTotalPaiements": 1500.00,
+###       "statut": "CONFIRMEE"
+###     }
+###   ],
+###   "statistiques": {
+###     "totalCommandes": 50,
+###     "commandesConfirmees": 45,
+###     "commandesEnCours": 4,
+###     "commandesAnnulees": 1,
+###     "commandesRemboursees": 0
+###   }
+### }
+
+###
+
+### =========================================================================
+### 5. Lister les commandes de son propre compte (VENDEUR)
+### =========================================================================
+### Le vendeur accède à ses propres commandes via son UUID
+@vendeurUuid = 123e4567-e89b-12d3-a456-426614174000
+
+GET {{baseUrl}}/admin/commandes/marchand/{{vendeurUuid}}
+Authorization: {{vendeurToken}}
+
+### Expected: 200 OK
+### Le vendeur voit uniquement ses propres commandes
 
 ###
 

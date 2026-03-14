@@ -67,5 +67,6 @@
   "deleteAccount": "Supprimer le compte",
   "deleteAccountDescription": "Supprimez votre compte et supprimez toutes vos données.",
   "cancel": "Annuler",
-  "confirm": "Confirmer"
+  "confirm": "Confirmer",
+  "adminDashboard": "Tableau de bord Admin"
 }

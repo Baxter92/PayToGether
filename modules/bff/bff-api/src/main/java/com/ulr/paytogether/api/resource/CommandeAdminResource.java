@@ -41,6 +41,24 @@ public class CommandeAdminResource {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Liste les commandes d'un marchand spécifique
+     * Accessible aux ADMIN et VENDEUR (le vendeur ne peut voir que ses propres commandes)
+     *
+     * @param marchandUuid UUID du marchand
+     * @return Liste des commandes du marchand et statistiques
+     */
+    @GetMapping("/marchand/{marchandUuid}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'VENDEUR')")
+    public ResponseEntity<CommandeListResponseDTO> listerCommandesMarchand(@PathVariable UUID marchandUuid) {
+        log.info("Récupération des commandes du marchand: {}", marchandUuid);
+
+        CommandeListResponseDTO response = commandeAdminApiAdapter.listerCommandesMarchand(marchandUuid);
+
+        log.info("Marchand {} : {} commandes trouvées", marchandUuid, response.getCommandes().size());
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{uuid}")
     @PreAuthorize("hasAnyRole('ADMIN', 'VENDEUR')")
     public ResponseEntity<CommandeListDTO> lireParUuid(@PathVariable UUID uuid) {

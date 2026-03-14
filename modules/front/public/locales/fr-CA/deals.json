@@ -35,5 +35,8 @@
   "unavailableQuantity": "Quantité non disponible",
   "deliveryInfo": "Livraison réfrigérée disponible • Remboursement si l'offre n'est pas activée",
   "share": "Partager",
+  "shared": "Partagé",
+  "linkCopied": "Lien copié dans le presse-papiers",
+  "shareError": "Erreur lors du partage",
   "addToFavorites": "Mettre en favoris"
 }

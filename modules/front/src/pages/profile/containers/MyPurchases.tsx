@@ -44,7 +44,12 @@ const orderStatusConfig: Record<
 > = {
   [StatutCommande.EN_ATTENTE]: { labelKey: "pending", colorScheme: "warning" },
   [StatutCommande.EN_COURS]: { labelKey: "pending", colorScheme: "info" },
-  [StatutCommande.LIVRÉE]: { labelKey: "cancelled", colorScheme: "danger" },
+  [StatutCommande.COMPLETE]: { labelKey: "complete", colorScheme: "info" },
+  [StatutCommande.PAYOUT]: { labelKey: "payout", colorScheme: "info" },
+  [StatutCommande.INVOICE_SELLER]: { labelKey: "invoiceSeller", colorScheme: "info" },
+  [StatutCommande.INVOICE_CUSTOMER]: { labelKey: "invoiceCustomer", colorScheme: "info" },
+  [StatutCommande.TERMINE]: { labelKey: "completed", colorScheme: "success" },
+  [StatutCommande.LIVRÉE]: { labelKey: "completed", colorScheme: "success" },
   [StatutCommande.ANNULÉE]: { labelKey: "cancelled", colorScheme: "danger" },
   [StatutCommande.REMBOURSÉE]: { labelKey: "refunded", colorScheme: "info" },
 };

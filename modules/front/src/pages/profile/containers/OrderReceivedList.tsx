@@ -1,130 +1,146 @@
+import { useState, type JSX } from "react";
 import { DataTable } from "@/common/components";
 import { Badge } from "@/common/components/ui/badge";
+import { Button } from "@/common/components/ui/button";
 import { Heading } from "@/common/containers/Heading";
 import { timeAgo } from "@/common/utils/date";
+import { formatCurrency } from "@/common/utils/formatCurrency";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
-  Check,
-  CircleCheckBig,
-  DownloadIcon,
+  Upload,
+  CheckCircle2,
   EyeIcon,
-  Phone,
-  X,
+  Loader2,
 } from "lucide-react";
+import { useMerchantOrders, useAdminUploadSellerInvoice, useAdminValidateCustomerInvoices, useOrderCustomers } from "@/common/api/hooks/useOrders";
+import { StatutCommande } from "@/common/api/types/order";
+import { useI18n } from "@/common/hooks/useI18n";
+import { useAuth } from "@/common/context/AuthContext";
+import UploadSellerInvoiceModal from "@/pages/admin/orders/components/UploadSellerInvoiceModal";
+import ValidateCustomerInvoicesModal from "@/pages/admin/orders/components/ValidateCustomerInvoicesModal";
 
-type OrderStatus =
-  | "pending" // payée mais pas encore validée
-  | "confirmed" // validée par le marchand
-  | "used" // consommée
-  | "cancelled" // annulée
-  | "refunded"; // remboursée
+export default function OrdersReceivedList(): JSX.Element {
+  const { t: tStatus } = useI18n("status");
+  const { user } = useAuth();
 
-interface Order {
-  id: string;
-  orderNumber: string;
-  dealTitle: string;
-  buyer: {
-    id: string;
-    name: string;
-    email?: string;
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [openInvoiceModal, setOpenInvoiceModal] = useState(false);
+  const [openValidationModal, setOpenValidationModal] = useState(false);
+
+  // Récupérer les commandes du marchand connecté
+  const { data, isLoading, error } = useMerchantOrders(user?.id ?? "");
+  const orders = data?.commandes ?? [];
+
+  // Hooks pour les mutations
+  const uploadInvoiceMutation = useAdminUploadSellerInvoice();
+  const validateCustomersMutation = useAdminValidateCustomerInvoices();
+
+  // Hook pour récupérer les clients
+  const { data: customers = [] } = useOrderCustomers(
+    openValidationModal ? selectedOrder?.uuid : "",
+  );
+
+  const handleUploadInvoice = async (file: File): Promise<void> => {
+    if (!selectedOrder?.uuid) return;
+    await uploadInvoiceMutation.mutateAsync({
+      uuid: selectedOrder.uuid,
+      file,
+    });
   };
-  quantity: number;
-  totalAmount: number;
-  currency: string;
-  status: OrderStatus;
-  createdAt: string;
-  usedAt?: string;
-}
 
-const OrderStatusBadge: React.FC<{ status: OrderStatus }> = ({ status }) => {
-  switch (status) {
-    case "pending":
-      return (
-        <Badge variant="outline" colorScheme="warning" size="sm">
-          À valider
-        </Badge>
-      );
-    case "confirmed":
-      return (
-        <Badge variant="outline" colorScheme="info" size="sm">
-          Confirmée
-        </Badge>
-      );
-    case "used":
-      return (
-        <Badge variant="outline" colorScheme="success" size="sm">
-          Completée
-        </Badge>
-      );
-    case "cancelled":
-      return (
-        <Badge variant="outline" colorScheme="danger" size="sm">
-          Annulée
-        </Badge>
-      );
-    case "refunded":
-      return (
-        <Badge variant="outline" colorScheme="secondary" size="sm">
-          Remboursée
-        </Badge>
-      );
-    default:
-      return null;
-  }
-};
+  const handleValidateCustomers = async (
+    validations: { customerUuid: string; valide: boolean }[],
+  ): Promise<void> => {
+    if (!selectedOrder?.uuid) return;
+    await validateCustomersMutation.mutateAsync({
+      uuid: selectedOrder.uuid,
+      validations,
+    });
+  };
 
-export default function OrdersReceivedList({ data }: { data: Order[] }) {
-  const columns: ColumnDef<Order, any>[] = [
+  const getStatusBadge = (status: string): JSX.Element => {
+    switch (status) {
+      case StatutCommande.TERMINE:
+        return (
+          <Badge variant="outline" className="bg-green-100 text-green-800">
+            {tStatus("completed")}
+          </Badge>
+        );
+      case StatutCommande.COMPLETE:
+        return (
+          <Badge variant="outline" className="bg-blue-100 text-blue-800">
+            {tStatus("complete")}
+          </Badge>
+        );
+      case StatutCommande.PAYOUT:
+        return (
+          <Badge variant="outline" className="bg-purple-100 text-purple-800">
+            {tStatus("payout")}
+          </Badge>
+        );
+      case StatutCommande.INVOICE_SELLER:
+        return (
+          <Badge variant="outline" className="bg-indigo-100 text-indigo-800">
+            {tStatus("invoiceSeller")}
+          </Badge>
+        );
+      case StatutCommande.INVOICE_CUSTOMER:
+        return (
+          <Badge variant="outline" className="bg-cyan-100 text-cyan-800">
+            {tStatus("invoiceCustomer")}
+          </Badge>
+        );
+      case StatutCommande.EN_ATTENTE:
+      case StatutCommande.EN_COURS:
+        return (
+          <Badge variant="outline" className="bg-yellow-100 text-yellow-800">
+            {tStatus("pending")}
+          </Badge>
+        );
+      case StatutCommande.ANNULÉE:
+        return (
+          <Badge variant="outline" className="bg-red-100 text-red-800">
+            {tStatus("cancelled")}
+          </Badge>
+        );
+      case StatutCommande.REMBOURSÉE:
+        return (
+          <Badge variant="outline" className="bg-gray-100 text-gray-800">
+            {tStatus("refunded")}
+          </Badge>
+        );
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const columns: ColumnDef<any, any>[] = [
     {
       header: "Commande",
-      accessorKey: "orderNumber",
+      accessorKey: "numeroCommande",
       cell: ({ getValue }) => (
         <span className="font-medium">{getValue<string>()}</span>
       ),
     },
     {
-      header: "Offre",
-      accessorKey: "dealTitle",
-      cell: ({ getValue }) => (
-        <span className="text-sm">{getValue<string>()}</span>
-      ),
-    },
-    {
-      header: "Client",
-      accessorFn: (row) => row.buyer.name,
-      id: "buyer",
-      cell: ({ row }) => (
-        <div>
-          <div className="font-medium">{row.original.buyer.name}</div>
-          <div className="text-xs text-muted-foreground">
-            {row.original.buyer.email}
-          </div>
-        </div>
-      ),
-    },
-    {
-      header: "Qté",
-      accessorKey: "quantity",
+      header: "Deal",
+      accessorKey: "dealTitre",
     },
     {
       header: "Montant",
-      accessorKey: "totalAmount",
-      cell: ({ row }) => (
-        <span className="font-medium">
-          {row.original.totalAmount.toLocaleString()} {row.original.currency}
-        </span>
-      ),
+      accessorKey: "montantTotalPaiements",
+      cell: ({ getValue }) => formatCurrency(getValue<number>()),
     },
     {
       header: "Date",
-      accessorKey: "createdAt",
+      accessorKey: "dateCreation",
       cell: ({ getValue }) => {
         const v = getValue<string>();
         return (
           <div className="flex flex-col">
             <span className="text-sm">{new Date(v).toLocaleDateString()}</span>
             <span className="text-xs text-muted-foreground">
-              il y a {timeAgo(v)}
+              {timeAgo(v)}
             </span>
           </div>
         );
@@ -132,95 +148,125 @@ export default function OrdersReceivedList({ data }: { data: Order[] }) {
     },
     {
       header: "Statut",
-      accessorKey: "status",
-      cell: ({ getValue }) => (
-        <OrderStatusBadge status={getValue<OrderStatus>()} />
-      ),
+      accessorKey: "statut",
+      cell: ({ getValue }) => getStatusBadge(getValue<string>()),
+    },
+    {
+      header: "Actions",
+      cell: ({ row }) => {
+        const order = row.original;
+        const statut = order.statut;
+
+        return (
+          <div className="flex items-center gap-2">
+            {/* Bouton Upload Facture (statut PAYOUT) */}
+            {statut === StatutCommande.PAYOUT && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSelectedOrder(order);
+                  setOpenInvoiceModal(true);
+                }}
+              >
+                <Upload className="h-4 w-4 mr-1" />
+                Facture
+              </Button>
+            )}
+
+            {/* Bouton Valider Factures Clients (statut INVOICE_CUSTOMER) */}
+            {statut === StatutCommande.INVOICE_CUSTOMER && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSelectedOrder(order);
+                  setOpenValidationModal(true);
+                }}
+              >
+                <CheckCircle2 className="h-4 w-4 mr-1" />
+                Valider
+              </Button>
+            )}
+
+            {/* Bouton Voir validations (statut TERMINE) */}
+            {statut === StatutCommande.TERMINE && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSelectedOrder(order);
+                  setOpenValidationModal(true);
+                }}
+              >
+                <EyeIcon className="h-4 w-4 mr-1" />
+                Voir
+              </Button>
+            )}
+          </div>
+        );
+      },
     },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[400px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-[400px] items-center justify-center text-destructive">
+        Erreur lors du chargement des commandes
+      </div>
+    );
+  }
 
   return (
     <section>
       <Heading
         level={2}
-        title="Mes commandes"
-        description="Parcourez les commandes que vous avez faites"
+        title="Commandes reçues"
+        description="Gérez les commandes de vos deals"
         underline
       />
 
       <DataTable
         columns={columns}
-        data={data}
-        searchKey={["orderNumber", "buyer.name", "dealTitle"]}
-        searchPlaceholder="Commande, client, offre..."
+        data={orders}
+        searchKey={["numeroCommande", "dealTitre"]}
+        searchPlaceholder="Rechercher une commande..."
         pageSizeOptions={[10, 25, 50]}
         enableSelection={false}
-        showSelectionCount
         enableRowNumber
-        actionsRow={({ row }) => {
-          const order = row.original;
-
-          const canConfirm = order.status === "pending";
-          const canUse = order.status === "confirmed";
-          const canCancel = ["pending", "confirmed"].includes(order.status);
-
-          return [
-            {
-              tooltip: "Voir",
-              leftIcon: <EyeIcon className="w-4 h-4" />,
-              onClick: () => alert(`Voir ${row.original.id}`),
-            },
-            ...(canConfirm
-              ? [
-                {
-                  tooltip: "Confirmer",
-                  leftIcon: <Check className="w-4 h-4" />,
-                  colorScheme: "success" as const,
-                  onClick: () =>
-                    alert(`Confirmer ${row.original.id} (simulation)`),
-                },
-              ]
-              : []),
-            ...(canUse
-              ? [
-                {
-                  tooltip: "Marquer utilisée",
-                  leftIcon: <CircleCheckBig className="w-4 h-4" />,
-                  colorScheme: "warning" as const,
-                  onClick: () =>
-                    alert(
-                      `Marquer ${row.original.id} comme utilisée (simulation)`,
-                    ),
-                },
-              ]
-              : []),
-            ...(canCancel
-              ? [
-                {
-                  tooltip: "Annuler",
-                  leftIcon: <X className="w-4 h-4" />,
-                  colorScheme: "danger" as const,
-                  onClick: () =>
-                    alert(`Annuler ${row.original.id} (simulation)`),
-                },
-              ]
-              : []),
-
-            {
-              tooltip: "Contacter l'acheteur",
-              leftIcon: <Phone className="w-4 h-4" />,
-              colorScheme: "danger" as const,
-              onClick: () => alert(`Contacter l'acheteur ${row.original.id}`),
-            },
-            {
-              tooltip: "Télécharger ticket",
-              leftIcon: <DownloadIcon className="w-4 h-4" />,
-              colorScheme: "secondary" as const,
-              onClick: () => alert(`Télécharger ticket ${row.original.id}`),
-            },
-          ];
-        }}
       />
+
+      {/* Modals */}
+      {selectedOrder && (
+        <>
+          <UploadSellerInvoiceModal
+            open={openInvoiceModal}
+            onClose={() => {
+              setOpenInvoiceModal(false);
+            }}
+            order={selectedOrder}
+            onUpload={handleUploadInvoice}
+          />
+          <ValidateCustomerInvoicesModal
+            open={openValidationModal}
+            onClose={() => {
+              setOpenValidationModal(false);
+            }}
+            order={selectedOrder}
+            customers={customers}
+            onValidate={handleValidateCustomers}
+            isReadOnly={selectedOrder?.statut === StatutCommande.TERMINE}
+          />
+        </>
+      )}
     </section>
   );
 }

@@ -232,7 +232,47 @@
     "refund": "Rembourser",
     "cancelOrder": "Annuler la commande",
     "orderDetails": "Détails de la commande",
-    "updateStatus": "Mettre à jour"
+    "updateStatus": "Mettre à jour",
+    "payout": {
+      "title": "Valider le payout",
+      "description": "Commande {{orderNumber}} - Entrez la date de dépôt du payout",
+      "dateLabel": "Date de dépôt du payout",
+      "dateHelp": "Date à laquelle l'argent a été envoyé au vendeur",
+      "dateRequired": "La date est obligatoire",
+      "validated": "Payout validé avec succès",
+      "error": "Erreur lors de la validation du payout",
+      "validate": "Valider le payout",
+      "cancel": "Annuler",
+      "loading": "Validation en cours..."
+    },
+    "invoice": {
+      "uploadTitle": "Uploader la facture du vendeur",
+      "uploadDescription": "Commande {{orderNumber}} - Téléchargez la facture du vendeur",
+      "fileLabel": "Facture (PDF uniquement)",
+      "fileHelp": "Format PDF, maximum 10 MB",
+      "fileRequired": "Veuillez sélectionner un fichier",
+      "invalidFileType": "Seuls les fichiers PDF sont acceptés",
+      "fileTooLarge": "Le fichier ne doit pas dépasser 10 MB",
+      "uploaded": "Facture uploadée avec succès",
+      "uploadError": "Erreur lors de l'upload de la facture",
+      "upload": "Uploader"
+    },
+    "validation": {
+      "title": "Valider les factures clients",
+      "description": "Commande {{orderNumber}} - Validez les factures des clients",
+      "viewTitle": "Consulter les validations",
+      "viewDescription": "Commande {{orderNumber}} - Vue des validations clients",
+      "progress": "{{validated}}/{{total}} clients validés",
+      "complete": "Toutes validées",
+      "validated": "Validé",
+      "paymentNumber": "N° de paiement",
+      "amount": "Montant",
+      "cannotUnvalidate": "Impossible de dévalider un client déjà validé",
+      "allComplete": "Toutes les factures sont validées ! Commande terminée.",
+      "saved": "Validations enregistrées",
+      "error": "Erreur lors de la validation",
+      "saveValidations": "Enregistrer les validations"
+    }
   },
   "users": {
     "title": "Gestion des utilisateurs",

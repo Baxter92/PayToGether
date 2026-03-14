@@ -8,6 +8,7 @@ import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.event.AccountValidationEvent;
 import com.ulr.paytogether.core.event.EventPublisher;
 import com.ulr.paytogether.core.event.PasswordResetEvent;
+import com.ulr.paytogether.core.modele.MarchandAvecDealsModele;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
 import com.ulr.paytogether.core.modele.ValidationTokenModele;
 import com.ulr.paytogether.core.provider.UtilisateurProvider;
@@ -189,6 +190,12 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         }
 
         utilisateurProvider.assignerRole(utilisateurUuid, nomRole, token);
+    }
+
+    @Override
+    public List<MarchandAvecDealsModele> lireTousMarchandsAvecDeals() {
+        log.info("Récupération de tous les marchands avec leurs deals enrichis");
+        return utilisateurProvider.trouverTousMarchandsAvecDeals();
     }
 
     @Override

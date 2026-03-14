@@ -17,6 +17,7 @@ import com.ulr.paytogether.provider.repository.DealRepository;
 import com.ulr.paytogether.provider.repository.PaiementRepository;
 import com.ulr.paytogether.provider.repository.UtilisateurRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class CommandeProviderAdapter implements CommandeProvider {
 
     private final CommandeRepository jpaRepository;
@@ -95,6 +97,34 @@ public class CommandeProviderAdapter implements CommandeProvider {
     @Override
     public List<CommandeModele> trouverToutesAvecInfosCompletes() {
         return jpaRepository.findAll().stream()
+                .map(commandeJpa -> {
+                    CommandeModele commande = mapper.versModele(commandeJpa);
+
+                    // Calculer le montant total des paiements pour cette commande
+                    var montantTotal = paiementRepository.findByCommandeJpaUuid(commandeJpa.getUuid())
+                            .stream()
+                            .map(p -> p.getMontant())
+                            .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+                    commande.setMontantTotalPaiements(montantTotal);
+
+                    return commande;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CommandeModele> trouverParMarchandAvecInfosCompletes(UUID marchandUuid) {
+        log.info("Récupération des commandes du marchand: {}", marchandUuid);
+        
+        if (marchandUuid == null) {
+            throw new IllegalArgumentException("L'UUID du marchand ne peut pas être null");
+        }
+        
+        UtilisateurJpa marchandJpa = utilisateurRepository.findById(marchandUuid)
+                .orElseThrow(() -> new IllegalArgumentException("Marchand non trouvé avec l'UUID: " + marchandUuid));
+        
+        return jpaRepository.findByMarchandJpa(marchandJpa).stream()
                 .map(commandeJpa -> {
                     CommandeModele commande = mapper.versModele(commandeJpa);
 

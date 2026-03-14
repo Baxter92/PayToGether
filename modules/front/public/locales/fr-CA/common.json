@@ -46,5 +46,6 @@
     "changeTheme": "Changer le thème",
     "lightTheme": "Clair",
     "darkTheme": "Sombre",
-    "systemTheme": "Système"
+    "systemTheme": "Système",
+    "uploading": "Téléchargement en cours..."
 }

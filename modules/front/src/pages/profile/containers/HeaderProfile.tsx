@@ -5,8 +5,9 @@ import { Avatar, AvatarFallback } from "@/common/components/ui/avatar";
 import { Button } from "@/common/components/ui/button";
 import { useAuth } from "@/common/context/AuthContext";
 import { AvatarImage } from "@radix-ui/react-avatar";
-import { Gift, Heart, Home, Settings, ShoppingBag, Store } from "lucide-react";
+import { Gift, Heart, Home, Settings, ShoppingBag, Store, Shield } from "lucide-react";
 import { type JSX } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const PROFILE_TABS = [
   {
@@ -64,6 +65,7 @@ export default function HeaderProfile({
 }): JSX.Element {
   const { t } = useI18n("profile");
   const { isAdmin, isMerchant, user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // 1. Lire le hash au chargement
@@ -104,10 +106,23 @@ export default function HeaderProfile({
           <AvatarFallback>{user?.name[0]?.toUpperCase?.()}</AvatarFallback>
         </Avatar>
 
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-            {user?.name?.capitalizeWords?.()}
-          </h1>
+        <div className="flex-1">
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+              {user?.name?.capitalizeWords?.()}
+            </h1>
+            {isAdmin && (
+              <Button
+                variant="outline"
+                size="sm"
+                leftIcon={<Shield className="w-4 h-4" />}
+                onClick={() => navigate("/admin")}
+                className="ml-auto"
+              >
+                {t("adminDashboard")}
+              </Button>
+            )}
+          </div>
           <p className="text-sm text-slate-500 dark:text-slate-300">
             {isMerchant || isAdmin ? t("merchant") : t("client")} •{" "}
             {user?.location}

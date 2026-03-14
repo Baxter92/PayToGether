@@ -20,6 +20,13 @@ public interface CommandeService {
     List<CommandeModele> lireToutesAvecInfosCompletes();
 
     /**
+     * Lire toutes les commandes d'un marchand avec informations complètes
+     * @param marchandUuid UUID du marchand
+     * @return Liste des commandes du marchand
+     */
+    List<CommandeModele> lireCommandesMarchand(UUID marchandUuid);
+
+    /**
      * Calculer les statistiques des commandes (pour l'admin)
      */
     Map<String, Long> calculerStatistiques();

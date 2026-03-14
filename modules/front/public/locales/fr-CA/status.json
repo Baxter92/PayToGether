@@ -12,5 +12,10 @@
   "processing": "En cours",
   "failed": "Échoué",
   "published": "Publié",
-  "draft": "Brouillon"
+  "draft": "Brouillon",
+  "complete": "Complète",
+  "payout": "Payout",
+  "invoiceSeller": "Facture vendeur",
+  "invoiceCustomer": "Facture client"
 }
+

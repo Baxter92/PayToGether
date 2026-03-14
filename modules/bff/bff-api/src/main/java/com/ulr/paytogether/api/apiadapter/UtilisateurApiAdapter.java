@@ -1,9 +1,11 @@
 package com.ulr.paytogether.api.apiadapter;
 
 import com.ulr.paytogether.api.dto.CreerUtilisateurDTO;
+import com.ulr.paytogether.api.dto.MarchandAvecDealsDTO;
 import com.ulr.paytogether.api.dto.MettreUtilisateurDto;
 import com.ulr.paytogether.api.dto.ReinitialiserMotDePasseDTO;
 import com.ulr.paytogether.api.dto.UtilisateurDTO;
+import com.ulr.paytogether.api.mapper.MarchandAvecDealsMapper;
 import com.ulr.paytogether.api.mapper.UtilisateurMapper;
 import com.ulr.paytogether.core.domaine.service.UtilisateurService;
 import com.ulr.paytogether.core.enumeration.StatutImage;

@@ -1,6 +1,7 @@
 package com.ulr.paytogether.core.provider;
 
 import com.ulr.paytogether.core.enumeration.StatutImage;
+import com.ulr.paytogether.core.modele.MarchandAvecDealsModele;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
 
 import java.util.List;
@@ -88,4 +89,10 @@ public interface UtilisateurProvider {
      * Assigner un rôle à un utilisateur
      */
     void assignerRole(UUID utilisateurUuid, String nomRole, String token);
+
+    /**
+     * Trouver tous les marchands avec leurs deals, moyennes et statuts de commandes
+     * @return Liste des marchands enrichis
+     */
+    List<MarchandAvecDealsModele> trouverTousMarchandsAvecDeals();
 }

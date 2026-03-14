@@ -35,5 +35,8 @@
   "unavailableQuantity": "Quantity not available",
   "deliveryInfo": "Refrigerated delivery available • Refund if the offer is not activated",
   "share": "Share",
+  "shared": "Shared",
+  "linkCopied": "Link copied to clipboard",
+  "shareError": "Error sharing",
   "addToFavorites": "Add to favorites"
 }

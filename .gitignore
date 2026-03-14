@@ -24,25 +24,82 @@ rad.json
 *.g.xlf
 #License-file
 *.flf
-#idea folder
+
+### IntelliJ IDEA ###
 .idea/
-#Test results file
+*.iml
+*.iws
+*.ipr
+out/
+
+### Logs ###
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+### Test results ###
 TestResults.xml
-#Node modules
+coverage/
+.nyc_output/
+
+### Node ###
 node_modules/
 dist/
+build/
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.vuepress/dist/
+
+### Maven ###
 target/
 bin/
-#Target folder
-modules/bff-provider/target/
-modules/bff-wsclient/target/
-modules/bff-wsclient/bin/
-modules/bff-core/target/
-modules/bff-configuration/target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+### Specific project folders ###
+modules/bff/bff-provider/target/
+modules/bff/bff-wsclient/target/
+modules/bff/bff-wsclient/bin/
+modules/bff/bff-core/target/
+modules/bff/bff-configuration/target/
+modules/bff/bff-event/target/
+modules/bff/bff-event-dispatcher/target/
+modules/bff/bff-api/target/
+modules/bff/bff-api/bin/
 modules/front/node_modules/
 modules/front/node/
-modules/bff-api/target/
-modules/bff-api/bin/
-#Compiled JavaScript map files
+modules/front/dist/
+modules/front/build/
+
+### Compiled files ###
+*.class
 *.js.map
-mvnw
+
+### OS files ###
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.AppleDouble
+.LSOverride
+
+### Environment ###
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+

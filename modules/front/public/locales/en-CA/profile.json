@@ -67,5 +67,6 @@
   "deleteAccount": "Delete account",
   "deleteAccountDescription": "Delete your account and remove all your data.",
   "cancel": "Cancel",
-  "confirm": "Confirm"
+  "confirm": "Confirm",
+  "adminDashboard": "Admin Dashboard"
 }

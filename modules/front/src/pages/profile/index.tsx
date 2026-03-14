@@ -8,7 +8,6 @@ import Settings from "./containers/Settings";
 import Favorites from "./containers/Favorites";
 import { useAuth } from "@/common/context/AuthContext";
 import OrdersReceivedList from "./containers/OrderReceivedList";
-import { mockOrdersReceived } from "@/common/constants/data";
 
 export default function Profile() {
   const { isMerchant, isAdmin } = useAuth();
@@ -54,7 +53,7 @@ export default function Profile() {
             )} */}
 
             {activeTab === "orders-received" && (isMerchant || isAdmin) && (
-              <OrdersReceivedList data={mockOrdersReceived as any} />
+              <OrdersReceivedList />
             )}
 
             {/* {activeTab === "client-reviews" &&

@@ -5,8 +5,10 @@ import { Separator } from "@components/ui/separator";
 import type { Deal } from "../types";
 import Counter from "@/common/components/Counter";
 import { HStack } from "@/common/components";
-import { Heart, Share, Share2 } from "lucide-react";
+import { Share2, Check } from "lucide-react";
 import { formatCurrency } from "@/common/utils/formatCurrency";
+import { useState } from "react";
+import { toast } from "sonner";
 type PurchaseCardProps = {
   deal: Deal;
   showAction?: boolean;
@@ -33,6 +35,39 @@ export default function PurchaseCard({
   totalPrice,
 }: PurchaseCardProps) {
   const { t } = useI18n("deals");
+  const [isShared, setIsShared] = useState(false);
+
+  const handleShare = async (): Promise<void> => {
+    const dealUrl = `${window.location.origin}/deals/${deal.id}`;
+    const shareData = {
+      title: deal.title,
+      text: `Découvrez cette offre: ${deal.title}`,
+      url: dealUrl,
+    };
+
+    try {
+      // Utiliser l'API Web Share si disponible (mobile)
+      if (navigator.share) {
+        await navigator.share(shareData);
+        toast.success(t("shared"));
+      } else {
+        // Sinon, copier le lien dans le presse-papiers
+        await navigator.clipboard.writeText(dealUrl);
+        setIsShared(true);
+        toast.success(t("linkCopied"));
+
+        // Réinitialiser l'icône après 2 secondes
+        setTimeout(() => setIsShared(false), 2000);
+      }
+    } catch (error) {
+      // Ignorer les erreurs (l'utilisateur a annulé le partage)
+      if (error instanceof Error && error.name !== "AbortError") {
+        console.error("Erreur lors du partage:", error);
+        toast.error(t("shareError"));
+      }
+    }
+  };
+
   return (
     <Card>
       <CardContent>
@@ -119,12 +154,18 @@ export default function PurchaseCard({
 
         <HStack>
           <Button
-            leftIcon={<Share2 className="w-4 h-4" />}
+            variant="outline"
+            leftIcon={isShared ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
             tooltip={t("share")}
-          />
+            onClick={handleShare}
+          >
+            {isShared ? t("shared") : t("share")}
+          </Button>
+          {/* Bouton like - fonctionnalité non implémentée pour le moment */}
           {/* <Button
             variant="outline"
             leftIcon={<Heart className="w-4 h-4 fill-current text-red-600" />}
+            tooltip={t("addToFavorites")}
           >
             {t("addToFavorites")}
           </Button> */}
