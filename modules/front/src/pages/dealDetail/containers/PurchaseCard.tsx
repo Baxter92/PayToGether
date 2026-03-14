@@ -7,6 +7,7 @@ import Counter from "@/common/components/Counter";
 import { HStack } from "@/common/components";
 import { Heart, Share, Share2 } from "lucide-react";
 import { formatCurrency } from "@/common/utils/formatCurrency";
+import { toast } from "sonner";
 type PurchaseCardProps = {
   deal: Deal;
   showAction?: boolean;
@@ -33,6 +34,14 @@ export default function PurchaseCard({
   totalPrice,
 }: PurchaseCardProps) {
   const { t } = useI18n("deals");
+  const handleShare = async () => {
+    const shareData = {
+      title: `${deal.title} - ${t("app:name")}`,
+      text: deal.description,
+      url: window.location.href,
+    };
+    await navigator.share(shareData);
+  };
   return (
     <Card>
       <CardContent>
@@ -121,6 +130,7 @@ export default function PurchaseCard({
           <Button
             leftIcon={<Share2 className="w-4 h-4" />}
             tooltip={t("share")}
+            onClick={handleShare}
           />
           {/* <Button
             variant="outline"
