@@ -3,6 +3,7 @@ import { useI18n } from "@/common/hooks/useI18n";
 import { Badge } from "@components/ui/badge";
 import { Separator } from "@components/ui/separator";
 import type { Deal } from "../types";
+import { User } from "lucide-react";
 
 export default function ProductDetails({ deal }: { deal: Deal }) {
   const { t } = useI18n("deals");
@@ -25,6 +26,10 @@ export default function ProductDetails({ deal }: { deal: Deal }) {
       <h2 className="text-2xl font-semibold text-foreground">{deal.title}</h2>
 
       <div className="flex items-center gap-4 mt-4">
+        <Badge variant="outline">
+          <User />
+          {deal?.supplier?.name ?? ""}
+        </Badge>
         <Badge>{deal.rating} ★</Badge>
         <div className="text-sm text-gray-600 dark:text-gray-400">
           {deal.reviewsCount} {t("reviews")}
