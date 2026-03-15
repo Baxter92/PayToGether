@@ -3,6 +3,7 @@ package com.ulr.paytogether.api.resource;
 import com.ulr.paytogether.provider.adapter.entity.elasticsearch.DealDocument;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import java.util.*;
 @RequestMapping("/api/admin/elasticsearch")
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(name = "spring.data.elasticsearch.repositories.enabled", havingValue = "true", matchIfMissing = true)
 public class ElasticsearchAdminResource {
 
     private final ElasticsearchOperations elasticsearchOperations;

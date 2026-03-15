@@ -3,8 +3,10 @@ package com.ulr.paytogether.provider.repository;
 import com.ulr.paytogether.provider.adapter.entity.AdresseJpa;
 import com.ulr.paytogether.provider.adapter.entity.PaiementJpa;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,4 +29,7 @@ public interface AdresseRepository extends JpaRepository<AdresseJpa, UUID> {
      * @return l'adresse trouvée
      */
     Optional<AdresseJpa> findByPaiementUuid(UUID paiementUuid);
+
+    @Query(value = "DELETE FROM AdresseJpa a WHERE a.paiement IN :paiements")
+    void deleteAllByPaiement(List<PaiementJpa> paiements);
 }

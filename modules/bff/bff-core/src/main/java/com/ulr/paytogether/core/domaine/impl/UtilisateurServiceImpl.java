@@ -5,6 +5,7 @@ import com.ulr.paytogether.core.domaine.validator.ActivationCompteValidator;
 import com.ulr.paytogether.core.domaine.validator.ReinitialiserMotDePasseValidator;
 import com.ulr.paytogether.core.domaine.validator.UtilisateurValidator;
 import com.ulr.paytogether.core.enumeration.StatutImage;
+import com.ulr.paytogether.core.event.AccountDeactivationEvent;
 import com.ulr.paytogether.core.event.AccountValidationEvent;
 import com.ulr.paytogether.core.event.EventPublisher;
 import com.ulr.paytogether.core.event.PasswordResetEvent;
@@ -36,6 +37,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     private final ValidationTokenProvider validationTokenProvider;
     private final ActivationCompteValidator activationCompteValidator;
     private final ReinitialiserMotDePasseValidator reinitialiserMotDePasseValidator;
+    private final EventPublisher eventPublisher;
 
     @Override
     public UtilisateurModele creer(UtilisateurModele utilisateur) {
@@ -178,6 +180,21 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     @Override
     public void activerUtilisateur(UUID utilisateurUuid, boolean actif, String token) {
         log.info("Activation/Désactivation de l'utilisateur: {} - actif: {}", utilisateurUuid, actif);
+        if (!actif){
+            UtilisateurModele utilisateurModele = lireParUuid(utilisateurUuid)
+                    .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé pour UUID: " + utilisateurUuid));
+
+            AccountDeactivationEvent deactivationEvent = AccountDeactivationEvent.builder()
+                    .utilisateurUuid(utilisateurUuid)
+                    .nom(utilisateurModele.getNom())
+                    .prenom(utilisateurModele.getPrenom())
+                    .email(utilisateurModele.getEmail())
+                    .dateDesactivation(LocalDateTime.now())
+                    .build();
+
+
+            eventPublisher.publishAsync(deactivationEvent);
+        }
         utilisateurProvider.activerUtilisateur(utilisateurUuid, actif, token);
     }
 

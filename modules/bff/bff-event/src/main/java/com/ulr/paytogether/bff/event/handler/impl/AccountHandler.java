@@ -57,6 +57,7 @@ public class AccountHandler implements ConsumerHandler {
      */
     @FunctionalHandler(
         eventType = AccountValidationEvent.class,
+        maxAttempts = 2,
         description = "Envoie un email de validation de compte avec token 24h"
     )
     public void handleAccountValidation(AccountValidationEvent event) {
@@ -101,6 +102,7 @@ public class AccountHandler implements ConsumerHandler {
 
     @FunctionalHandler(
             eventType = AccountActivationEvent.class,
+            maxAttempts = 2,
             description = "Envoie un email de confirmation d'activation de compte"
     )
     public void handleAccountActivation(AccountActivationEvent event) {
@@ -133,6 +135,7 @@ public class AccountHandler implements ConsumerHandler {
 
     @FunctionalHandler(
             eventType = AccountDeactivationEvent.class,
+            maxAttempts = 2,
             description = "Envoie un email de confirmation de désactivation de compte"
     )
     public void handleAccountDesActivation(AccountDeactivationEvent event) {
@@ -144,6 +147,7 @@ public class AccountHandler implements ConsumerHandler {
             Map<String, Object> variables = new HashMap<>();
             variables.put("prenom", event.getPrenom());
             variables.put("nom", event.getNom());
+            variables.put("dateDesactivation", event.getDateDesactivation().format(DATE_FORMATTER));
             variables.put("raisonDesactivation", "Nous sommes désolés de vous voir partir. Si vous avez des questions ou des préoccupations, n'hésitez pas à nous contacter.");
 
             // Envoyer l'email de confirmation d'activation

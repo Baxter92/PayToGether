@@ -1,0 +1,21 @@
+{
+  "payment": {
+    "id": "test_payment_error",
+    "created_at": "2026-03-14T10:00:00.000Z",
+    "updated_at": "2026-03-14T10:00:00.000Z",
+    "amount_money": {
+      "amount": 10000,
+      "currency": "CAD"
+    },
+    "status": "FAILED",
+    "source_type": "CARD"
+  },
+  "errors": [
+    {
+      "category": "PAYMENT_METHOD_ERROR",
+      "code": "CARD_DECLINED",
+      "detail": "Card was declined"
+    }
+  ]
+}
+

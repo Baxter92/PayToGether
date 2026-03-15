@@ -11,6 +11,8 @@ import com.ulr.paytogether.provider.repository.DealRepository;
 import com.ulr.paytogether.provider.repository.elasticsearch.DealSearchRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(name = "spring.data.elasticsearch.repositories.enabled", havingValue = "true", matchIfMissing = true)
 public class DealRechercheProviderAdapter implements DealRechercheProvider {
 
     private final DealSearchRepository searchRepository;

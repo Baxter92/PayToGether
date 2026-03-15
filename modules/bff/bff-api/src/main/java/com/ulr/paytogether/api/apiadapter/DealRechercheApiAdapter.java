@@ -6,6 +6,7 @@ import com.ulr.paytogether.core.domaine.service.DealRechercheService;
 import com.ulr.paytogether.core.modele.DealRechercheModele;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(name = "spring.data.elasticsearch.repositories.enabled", havingValue = "true", matchIfMissing = true)
 public class DealRechercheApiAdapter {
 
     private final DealRechercheService dealRechercheService;

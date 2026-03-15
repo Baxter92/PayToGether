@@ -16,6 +16,7 @@ import com.ulr.paytogether.core.provider.DealProvider;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,13 +27,22 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class DealServiceImpl implements DealService {
 
     private final DealProvider dealProvider;
     private final DealValidator dealValidator;
     private final EventPublisher eventPublisher;
-    private final DealRechercheService dealRechercheService;
+    
+    @Autowired(required = false)
+    private DealRechercheService dealRechercheService;
+
+    public DealServiceImpl(DealProvider dealProvider, 
+                          DealValidator dealValidator, 
+                          EventPublisher eventPublisher) {
+        this.dealProvider = dealProvider;
+        this.dealValidator = dealValidator;
+        this.eventPublisher = eventPublisher;
+    }
 
     @Transactional
     @Override

@@ -233,4 +233,14 @@ public class PaiementProviderAdapter implements PaiementProvider {
                 .map(mapper::versModeleComplet)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void supprimerParUtilisateur(UUID uuid) {
+        UtilisateurJpa utilisateurJpa = utilisateurRepository.findById(uuid)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé pour l'UUID : " + uuid));
+
+        List<PaiementJpa> paiements = jpaRepository.findByUtilisateurJpa(utilisateurJpa);
+        adresseRepository.deleteAllByPaiement(paiements);
+        jpaRepository.deleteAll(paiements);
+    }
 }

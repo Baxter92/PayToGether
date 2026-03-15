@@ -54,4 +54,10 @@ public interface PaiementProvider {
      * @return Liste des paiements avec toutes les informations
      */
     List<PaiementModele> trouverParUtilisateurAvecInfosCompletes(String keycloakId);
+
+    /**
+     *
+     * @param uuid
+     */
+    void supprimerParUtilisateur(UUID uuid);
 }

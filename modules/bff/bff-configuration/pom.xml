@@ -101,6 +101,41 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- WireMock pour les tests d'intégration -->
+    <dependency>
+      <groupId>org.wiremock</groupId>
+      <artifactId>wiremock-standalone</artifactId>
+      <version>3.3.1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- REST Assured pour tests d'API REST -->
+    <dependency>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>rest-assured</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Testcontainers pour PostgreSQL et MinIO -->
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>testcontainers</artifactId>
+      <version>1.19.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>1.19.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>1.19.3</version>
+      <scope>test</scope>
+    </dependency>
+
     <!-- Spring Security pour BCryptPasswordEncoder -->
     <dependency>
       <groupId>org.springframework.security</groupId>

@@ -4,6 +4,7 @@ import com.ulr.paytogether.api.apiadapter.DealRechercheApiAdapter;
 import com.ulr.paytogether.api.dto.DealRechercheDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +18,7 @@ import java.util.List;
 @RequestMapping("/api/recherche")
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty(name = "spring.data.elasticsearch.repositories.enabled", havingValue = "true", matchIfMissing = true)
 public class DealRechercheResource {
 
     private final DealRechercheApiAdapter apiAdapter;

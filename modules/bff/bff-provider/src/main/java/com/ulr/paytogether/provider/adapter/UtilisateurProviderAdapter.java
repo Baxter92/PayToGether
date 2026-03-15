@@ -7,6 +7,7 @@ import com.ulr.paytogether.core.enumeration.StatutUtilisateur;
 import com.ulr.paytogether.core.modele.DealAvecStatutModele;
 import com.ulr.paytogether.core.modele.MarchandAvecDealsModele;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
+import com.ulr.paytogether.core.provider.PaiementProvider;
 import com.ulr.paytogether.core.provider.UtilisateurProvider;
 import com.ulr.paytogether.provider.adapter.entity.CommandeJpa;
 import com.ulr.paytogether.provider.adapter.entity.CommentaireJpa;
@@ -56,6 +57,7 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
     private final DealRepository dealRepository;
     private final CommandeRepository commandeRepository;
     private final CommentaireRepository commentaireRepository;
+    private final PaiementProvider paiementProvider;
 
     @Transactional
     @Override
@@ -139,8 +141,10 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
 
     @Override
     public void supprimerParUuid(UUID uuid, String token) {
+
         UtilisateurJpa utilisateurJpa = jpaRepository.findById(uuid)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'UUID: " + uuid));
+        paiementProvider.supprimerParUtilisateur(uuid);
         jpaRepository.deleteById(uuid);
         userApiClient.deleteUser(token, utilisateurJpa.getKeycloakId());
     }
