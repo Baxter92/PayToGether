@@ -23,7 +23,6 @@ export default function ShippingForm({
     // fullName: z.string().min(2, t("nameRequired")),
     phone: z.string().refine((val) => {
       const cleaned = val.replace(/\D/g, "");
-      if (cleaned.length <= 0) return true;
       return cleaned.length >= 10;
     }, t("phoneInvalid")),
     address: z.string().min(5, t("addressTooShort")),
