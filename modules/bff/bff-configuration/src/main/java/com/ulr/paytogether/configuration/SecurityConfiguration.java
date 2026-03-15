@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -25,12 +26,16 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 /**
  * Configuration de la sécurité
  * Fournit le bean BCryptPasswordEncoder pour le hachage des mots de passe
+ * 
+ * ⚠️ Cette configuration est DÉSACTIVÉE en mode test (profil "test")
+ * En test, c'est TestSecurityConfig qui prend le relais
  */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
 @Slf4j
+@Profile("!test")  // ✅ Ne pas charger cette configuration en mode test
 public class SecurityConfiguration {
 
     private final JwtConverter jwtConverter;

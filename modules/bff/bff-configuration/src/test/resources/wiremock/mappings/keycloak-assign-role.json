@@ -1,0 +1,10 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPathPattern": "/api/users/.*/roles/.*"
+  },
+  "response": {
+    "status": 204
+  }
+}
+

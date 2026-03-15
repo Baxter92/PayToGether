@@ -190,7 +190,7 @@ class ParcoursCommandeCompletIT extends AbstractIT {
         assertEquals(StatutCommande.INVOICE_SELLER, commandeReload.getStatut());
 
         // When : Génération et envoi des factures clients
-        simulerEnvoiFacturesClients(commandeTest);
+        simulerTraitementFactureVendeur(commandeTest);
 
         // Then : Vérifier que la commande passe à INVOICE_CUSTOMER
         CommandeJpa commandeReload2 = commandeRepository.findById(commandeTest.getUuid()).orElseThrow();
@@ -209,7 +209,7 @@ class ParcoursCommandeCompletIT extends AbstractIT {
         simulerPaiementsComplets(commandeTest, List.of(acheteur1, acheteur2, acheteur3));
         simulerDepotPayout(commandeTest);
         simulerUploadFactureMarchand(commandeTest);
-        simulerEnvoiFacturesClients(commandeTest);
+        simulerTraitementFactureVendeur(commandeTest);
 
         CommandeJpa commandeReload = commandeRepository.findById(commandeTest.getUuid()).orElseThrow();
         assertEquals(StatutCommande.INVOICE_CUSTOMER, commandeReload.getStatut());
@@ -297,7 +297,7 @@ class ParcoursCommandeCompletIT extends AbstractIT {
 
         // ========== ÉTAPE 6 : Génération factures clients → INVOICE_CUSTOMER ==========
         System.out.println("\n📧 ÉTAPE 6 : Génération et envoi des factures clients");
-        simulerEnvoiFacturesClients(commandeTest);
+        simulerTraitementFactureVendeur(commandeTest);
         
         verifierStatutCommande(commandeTest.getUuid(), StatutCommande.INVOICE_CUSTOMER);
         System.out.println("   ✅ Statut : INVOICE_CUSTOMER");
@@ -372,7 +372,7 @@ class ParcoursCommandeCompletIT extends AbstractIT {
         simulerPaiementsComplets(commandeTest, List.of(acheteur1, acheteur2, acheteur3));
         simulerDepotPayout(commandeTest);
         simulerUploadFactureMarchand(commandeTest);
-        simulerEnvoiFacturesClients(commandeTest);
+        simulerTraitementFactureVendeur(commandeTest);
 
         CommandeJpa commandeReload = commandeRepository.findById(commandeTest.getUuid()).orElseThrow();
         assertEquals(StatutCommande.INVOICE_CUSTOMER, commandeReload.getStatut());

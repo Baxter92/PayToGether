@@ -4,12 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.ulr.paytogether.bff.event.annotation.FunctionalHandler;
 import com.ulr.paytogether.bff.event.handler.ConsumerHandler;
-import com.ulr.paytogether.core.event.EventPublisher;
-import com.ulr.paytogether.core.event.HandlerConsumedEvent;
-import com.ulr.paytogether.core.event.HandlerFailedEvent;
 import com.ulr.paytogether.bff.eventdispatcher.entity.EventRecordJpa;
 import com.ulr.paytogether.bff.eventdispatcher.repository.EventRecordRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -32,17 +28,14 @@ public class EventConsumerService {
 
     private final EventRecordRepository eventRecordRepository;
     private final ApplicationContext applicationContext;
-    private final EventPublisher eventPublisher;
     private final ObjectMapper objectMapper;
     private final List<HandlerInfo> registeredHandlers = new ArrayList<>();
 
     @Autowired
     public EventConsumerService(EventRecordRepository eventRecordRepository,
-                               ApplicationContext applicationContext,
-                               EventPublisher eventPublisher) {
+                               ApplicationContext applicationContext) {
         this.eventRecordRepository = eventRecordRepository;
         this.applicationContext = applicationContext;
-        this.eventPublisher = eventPublisher;
         this.objectMapper = new ObjectMapper();
         this.objectMapper.registerModule(new JavaTimeModule());
         discoverHandlers();
@@ -105,50 +98,69 @@ public class EventConsumerService {
     }
 
     /**
-     * Traite les événements en attente toutes les 30 secondes
-     * Délai augmenté pour éviter les doublons lors de l'envoi d'emails
+     * Traite les événements en attente toutes les 60 secondes.
+     * Délai augmenté à 60 secondes pour :
+     * - Éviter les doublons d'emails
+     * - Donner le temps aux événements en PROCESSING de se terminer
+     * - Réduire la charge sur le système
      */
-    @Scheduled(fixedDelay = 30000, initialDelay = 10000)
+    @Scheduled(fixedDelay = 60000, initialDelay = 15000)
     @Transactional
     public void processePendingEvents() {
         List<EventRecordJpa> pendingEvents = eventRecordRepository.findByStatus(EventRecordJpa.EventStatus.PENDING);
 
         if (!pendingEvents.isEmpty()) {
-            log.info("Processing {} pending events", pendingEvents.size());
+            log.info("⚙️ Processing {} pending events", pendingEvents.size());
 
             for (EventRecordJpa eventRecord : pendingEvents) {
                 processEvent(eventRecord);
             }
         }
 
-        // Réinitialiser les événements bloqués (en traitement depuis plus de 5 minutes)
+        // Réinitialiser les événements bloqués (en traitement depuis plus de 10 minutes)
+        // Augmenté de 5 à 10 minutes pour éviter les réinitialisations prématurées
         resetStuckEvents();
     }
 
     /**
-     * Traite un événement spécifique
+     * Traite un événement spécifique.
+     * Vérifie que l'événement n'est pas déjà en traitement avant de continuer.
      */
     @Transactional
     public void processEvent(EventRecordJpa eventRecord) {
         log.debug("Processing event: {} of type: {}", eventRecord.getEventId(), eventRecord.getEventType());
 
+        // ✅ PROTECTION CONTRE LES DOUBLONS : Vérifier que l'événement est toujours PENDING
+        // Il pourrait avoir été pris par un autre thread entre-temps
+        EventRecordJpa freshEventRecord = eventRecordRepository.findById(eventRecord.getEventId()).orElse(null);
+        if (freshEventRecord == null) {
+            log.warn("⚠️ Event {} not found in database, skipping", eventRecord.getEventId());
+            return;
+        }
+
+        if (freshEventRecord.getStatus() != EventRecordJpa.EventStatus.PENDING) {
+            log.warn("⚠️ Event {} is already {} (not PENDING), skipping to avoid duplicate processing",
+                    freshEventRecord.getEventId(), freshEventRecord.getStatus());
+            return;
+        }
+
         // Marquer comme en traitement
-        eventRecord.setStatus(EventRecordJpa.EventStatus.PROCESSING);
-        eventRecord.setLastAttemptAt(LocalDateTime.now());
-        eventRecordRepository.save(eventRecord);
+        freshEventRecord.setStatus(EventRecordJpa.EventStatus.PROCESSING);
+        freshEventRecord.setLastAttemptAt(LocalDateTime.now());
+        eventRecordRepository.saveAndFlush(freshEventRecord); // Force flush pour garantir le commit immédiat
 
         try {
             // Trouver les handlers compatibles
-            List<HandlerInfo> compatibleHandlers = findCompatibleHandlers(eventRecord);
+            List<HandlerInfo> compatibleHandlers = findCompatibleHandlers(freshEventRecord);
 
             if (compatibleHandlers.isEmpty()) {
-                log.warn("No handler found for event type: {}", eventRecord.getEventType());
-                markAsFailed(eventRecord, "No compatible handler found");
+                log.warn("No handler found for event type: {}", freshEventRecord.getEventType());
+                markAsFailed(freshEventRecord, "No compatible handler found");
                 return;
             }
 
             // Désérialiser l'événement
-            Object event = deserializeEvent(eventRecord);
+            Object event = deserializeEvent(freshEventRecord);
 
             // Exécuter tous les handlers compatibles
             boolean allSuccess = true;
@@ -156,9 +168,9 @@ public class EventConsumerService {
 
             for (HandlerInfo handlerInfo : compatibleHandlers) {
                 try {
-                    executeHandler(handlerInfo, event, eventRecord);
+                    executeHandler(handlerInfo, event, freshEventRecord);
                     log.info("Handler {} executed successfully for event {}",
-                            handlerInfo.getHandlerName(), eventRecord.getEventId());
+                            handlerInfo.getHandlerName(), freshEventRecord.getEventId());
                 } catch (Exception e) {
                     allSuccess = false;
                     errors.append(handlerInfo.getHandlerName())
@@ -166,19 +178,19 @@ public class EventConsumerService {
                           .append(e.getMessage())
                           .append("; ");
                     log.error("Error executing handler {} for event {}: {}",
-                            handlerInfo.getHandlerName(), eventRecord.getEventId(), e.getMessage(), e);
+                            handlerInfo.getHandlerName(), freshEventRecord.getEventId(), e.getMessage(), e);
                 }
             }
 
             if (allSuccess) {
-                markAsConsumed(eventRecord, compatibleHandlers.get(0).getHandlerName());
+                markAsConsumed(freshEventRecord, compatibleHandlers.get(0).getHandlerName());
             } else {
-                handleFailure(eventRecord, errors.toString());
+                handleFailure(freshEventRecord, errors.toString());
             }
 
         } catch (Exception e) {
-            log.error("Error processing event {}: {}", eventRecord.getEventId(), e.getMessage(), e);
-            handleFailure(eventRecord, e.getMessage());
+            log.error("Error processing event {}: {}", freshEventRecord.getEventId(), e.getMessage(), e);
+            handleFailure(freshEventRecord, e.getMessage());
         }
     }
 
@@ -241,32 +253,12 @@ public class EventConsumerService {
 
         eventRecord.setConsumerHandler(handlerInfo.getHandlerName());
 
-        // ✅ RÈGLE IMPORTANTE : Publier événement de confirmation après consommation réussie
-        publishHandlerConsumedEvent(eventRecord, handlerInfo.getHandlerName());
+        // ❌ NE PLUS PUBLIER HandlerConsumedEvent pour éviter la boucle infinie et les doublons
+        // Les logs suffisent pour tracer la consommation réussie
+        log.info("✅ Handler {} successfully consumed event {} of type {}",
+                handlerInfo.getHandlerName(), eventRecord.getEventId(), eventRecord.getEventType());
     }
 
-    /**
-     * Publie un événement HandlerConsumedEvent pour tracer la consommation réussie
-     */
-    private void publishHandlerConsumedEvent(EventRecordJpa eventRecord, String handlerName) {
-        try {
-            HandlerConsumedEvent consumedEvent = HandlerConsumedEvent.builder()
-                .eventId(eventRecord.getEventId().toString())
-                .eventType(eventRecord.getEventType())
-                .handlerName(handlerName)
-                .message("Handler executed successfully")
-                .build();
-
-            eventPublisher.publishAsync(consumedEvent);
-            log.info("Published HandlerConsumedEvent for event {} by handler {}",
-                    eventRecord.getEventId(), handlerName);
-
-        } catch (Exception e) {
-            log.error("Failed to publish HandlerConsumedEvent for event {}: {}",
-                    eventRecord.getEventId(), e.getMessage(), e);
-            // Ne pas relancer l'exception pour ne pas affecter le traitement principal
-        }
-    }
 
     /**
      * Marque un événement comme consommé
@@ -301,8 +293,12 @@ public class EventConsumerService {
 
         boolean isFinalFailure = eventRecord.getAttempts() >= eventRecord.getMaxAttempts();
 
-        // ✅ RÈGLE IMPORTANTE : Publier événement d'échec
-        publishHandlerFailedEvent(eventRecord, errorMessage, isFinalFailure);
+        // ❌ NE PLUS PUBLIER HandlerFailedEvent pour éviter la boucle infinie et les doublons
+        // Les logs suffisent pour tracer les échecs
+        log.error("❌ Handler failed for event {} of type {} (attempt {}/{}, final={}): {}",
+                eventRecord.getEventId(), eventRecord.getEventType(),
+                eventRecord.getAttempts(), eventRecord.getMaxAttempts(),
+                isFinalFailure, errorMessage);
 
         if (isFinalFailure) {
             markAsFailed(eventRecord, "Max attempts reached: " + errorMessage);
@@ -314,62 +310,17 @@ public class EventConsumerService {
         }
     }
 
-    /**
-     * Publie un événement HandlerFailedEvent pour tracer l'échec
-     */
-    private void publishHandlerFailedEvent(EventRecordJpa eventRecord, String errorMessage, boolean isFinalFailure) {
-        try {
-            // Extraire la classe d'exception du message d'erreur si possible
-            String exceptionClass = extractExceptionClass(errorMessage);
-
-            HandlerFailedEvent failedEvent = HandlerFailedEvent.builder()
-                .eventId(eventRecord.getEventId().toString())
-                .eventType(eventRecord.getEventType())
-                .handlerName(eventRecord.getConsumerHandler() != null ? eventRecord.getConsumerHandler() : "Unknown")
-                .errorMessage(errorMessage)
-                .exceptionClass(exceptionClass)
-                .attemptNumber(eventRecord.getAttempts() + 1)
-                .isFinalFailure(isFinalFailure)
-                .build();
-
-            eventPublisher.publishAsync(failedEvent);
-            log.info("Published HandlerFailedEvent for event {} (attempt {}, final={})",
-                    eventRecord.getEventId(), eventRecord.getAttempts() + 1, isFinalFailure);
-
-        } catch (Exception e) {
-            log.error("Failed to publish HandlerFailedEvent for event {}: {}",
-                    eventRecord.getEventId(), e.getMessage(), e);
-            // Ne pas relancer l'exception
-        }
-    }
 
     /**
-     * Extrait le nom de la classe d'exception du message d'erreur
-     */
-    private String extractExceptionClass(String errorMessage) {
-        if (errorMessage == null) return "UnknownException";
-
-        // Pattern pour trouver le nom de classe Java (ex: "java.lang.NullPointerException: message")
-        int colonIndex = errorMessage.indexOf(':');
-        if (colonIndex > 0) {
-            String potentialClass = errorMessage.substring(0, colonIndex).trim();
-            if (potentialClass.contains(".")) {
-                return potentialClass;
-            }
-        }
-
-        return "UnknownException";
-    }
-
-    /**
-     * Réinitialise les événements bloqués en traitement
+     * Réinitialise les événements bloqués en traitement.
+     * Réinitialise les événements en PROCESSING depuis plus de 10 minutes.
      */
     private void resetStuckEvents() {
-        LocalDateTime threshold = LocalDateTime.now().minusMinutes(5);
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(10);
         List<EventRecordJpa> stuckEvents = eventRecordRepository.findStuckEvents(threshold);
 
         if (!stuckEvents.isEmpty()) {
-            log.warn("Found {} stuck events, resetting to PENDING", stuckEvents.size());
+            log.warn("⚠️ Found {} stuck events, resetting to PENDING", stuckEvents.size());
 
             for (EventRecordJpa event : stuckEvents) {
                 event.setStatus(EventRecordJpa.EventStatus.PENDING);

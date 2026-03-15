@@ -7,17 +7,12 @@ import com.ulr.paytogether.core.enumeration.StatutUtilisateur;
 import com.ulr.paytogether.core.modele.DealAvecStatutModele;
 import com.ulr.paytogether.core.modele.MarchandAvecDealsModele;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
+import com.ulr.paytogether.core.provider.DealParticipantProvider;
 import com.ulr.paytogether.core.provider.PaiementProvider;
 import com.ulr.paytogether.core.provider.UtilisateurProvider;
-import com.ulr.paytogether.provider.adapter.entity.CommandeJpa;
-import com.ulr.paytogether.provider.adapter.entity.CommentaireJpa;
-import com.ulr.paytogether.provider.adapter.entity.DealJpa;
-import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
+import com.ulr.paytogether.provider.adapter.entity.*;
 import com.ulr.paytogether.provider.adapter.mapper.UtilisateurJpaMapper;
-import com.ulr.paytogether.provider.repository.CommandeRepository;
-import com.ulr.paytogether.provider.repository.CommentaireRepository;
-import com.ulr.paytogether.provider.repository.DealRepository;
-import com.ulr.paytogether.provider.repository.UtilisateurRepository;
+import com.ulr.paytogether.provider.repository.*;
 import com.ulr.paytogether.provider.utils.FileManager;
 import com.ulr.paytogether.provider.utils.Tools;
 import com.ulr.paytogether.wsclient.client.apiclient.AuthApiCLient;
@@ -56,8 +51,10 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
     private final AuthApiCLient authApiCLient;
     private final DealRepository dealRepository;
     private final CommandeRepository commandeRepository;
+    private final CommandeUtilisateurRepository commandeUtilisateurRepository;
     private final CommentaireRepository commentaireRepository;
     private final PaiementProvider paiementProvider;
+    private final DealParticipantProvider dealParticipantProvider;
 
     @Transactional
     @Override
@@ -141,9 +138,16 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
 
     @Override
     public void supprimerParUuid(UUID uuid, String token) {
-
         UtilisateurJpa utilisateurJpa = jpaRepository.findById(uuid)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'UUID: " + uuid));
+
+        List<CommandeUtilisateurJpa> commandes = commandeUtilisateurRepository.findByUtilisateurJpaUuid(uuid);
+        if (commandes != null && !commandes.isEmpty()) {
+            commandes.forEach(cmd -> {
+                dealParticipantProvider.trouverParticipation(cmd.getCommandeJpa().getDealJpa().getUuid(), uuid)
+                        .ifPresent(participation -> dealParticipantProvider.supprimerParticipant(cmd.getCommandeJpa().getDealJpa().getUuid(), uuid));
+            });
+        }
         paiementProvider.supprimerParUtilisateur(uuid);
         jpaRepository.deleteById(uuid);
         userApiClient.deleteUser(token, utilisateurJpa.getKeycloakId());

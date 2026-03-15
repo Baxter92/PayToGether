@@ -182,7 +182,7 @@ public class CommandeAdminApiAdapter {
             .commandeUuid((UUID) resultat.get("commandeUuid"))
             .numeroCommande((String) resultat.get("numeroCommande"))
             .nombreValidations(((Long) resultat.get("nombreValidations")).intValue())
-            .nombreTotal(((Long) resultat.get("nombreTotal")).intValue())
+            .nombreTotal(((Integer) resultat.get("nombreTotal")))
             .toutesValidees((Boolean) resultat.get("toutesValidees"))
             .message((String) resultat.get("message"))
             .build();

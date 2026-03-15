@@ -1,0 +1,10 @@
+{
+  "request": {
+    "method": "DELETE",
+    "urlPathPattern": "/admin/realms/.*/users/.*/role-mappings/realm"
+  },
+  "response": {
+    "status": 204
+  }
+}
+

@@ -86,4 +86,12 @@ public interface CommandeProvider {
      * Vérifie si tous les utilisateurs d'une commande sont validés
      */
     boolean tousUtilisateursValides(UUID commandeUuid);
+
+    /**
+     * Mettre à jour uniquement statut
+     * @param uuid
+     * @param statut
+     * @return
+     */
+    CommandeModele mettreAJour(UUID uuid,  StatutCommande statut);
 }

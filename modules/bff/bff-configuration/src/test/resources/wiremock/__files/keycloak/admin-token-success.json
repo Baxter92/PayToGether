@@ -1,0 +1,11 @@
+{
+  "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJtb2NrLWtleS1pZCJ9.eyJleHAiOjE3MTA1MTQ4MDAsImlhdCI6MTcxMDUxMTIwMCwianRpIjoibW9jay1qd3QtaWQiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvcmVhbG1zL21hc3RlciIsImF1ZCI6ImFjY291bnQiLCJzdWIiOiJtb2NrLWFkbWluLXVzZXItaWQiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJhZG1pbi1jbGkiLCJzZXNzaW9uX3N0YXRlIjoibW9jay1zZXNzaW9uLWlkIiwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbImFkbWluIl19fQ.mock-signature",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJtb2NrLXJlZnJlc2gta2V5In0.eyJleHAiOjE3MTA1MTg0MDAsImlhdCI6MTcxMDUxMTIwMCwianRpIjoibW9jay1yZWZyZXNoLWp3dC1pZCJ9.mock-refresh-signature",
+  "refresh_expires_in": 7200,
+  "not-before-policy": 0,
+  "session_state": "mock-session-state-id",
+  "scope": "profile email"
+}
+

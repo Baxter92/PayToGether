@@ -1,0 +1,14 @@
+{
+  "request": {
+    "method": "PUT",
+    "urlPathPattern": "/api/users/.*"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "bodyFileName": "keycloak/user-updated-response.json"
+  }
+}
+

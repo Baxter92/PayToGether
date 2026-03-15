@@ -254,4 +254,13 @@ public class CommandeProviderAdapter implements CommandeProvider {
         return nombreValides == utilisateurs.size();
     }
 
+    @Override
+    public CommandeModele mettreAJour(UUID commandeUuid, StatutCommande statut) {
+        CommandeJpa commande = jpaRepository.findById(commandeUuid)
+                .orElseThrow(() -> new RuntimeException("Commande non trouvée avec l'UUID : " + commandeUuid));
+        commande.setStatut(statut);
+        CommandeJpa sauvegarde = jpaRepository.save(commande);
+        return mapper.versModele(sauvegarde);
+    }
+
 }

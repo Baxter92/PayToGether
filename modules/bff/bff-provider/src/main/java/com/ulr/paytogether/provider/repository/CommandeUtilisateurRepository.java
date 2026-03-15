@@ -19,6 +19,13 @@ public interface CommandeUtilisateurRepository extends JpaRepository<CommandeUti
      * Trouve tous les utilisateurs d'une commande
      */
     List<CommandeUtilisateurJpa> findByCommandeJpaUuid(UUID commandeUuid);
+
+    /**
+     *
+     * @param utilisateurJpaUuid
+     * @return
+     */
+    List<CommandeUtilisateurJpa> findByUtilisateurJpaUuid(UUID utilisateurJpaUuid);
     
     /**
      * Trouve un utilisateur spécifique d'une commande

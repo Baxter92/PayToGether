@@ -39,7 +39,7 @@ class EventConsumerServiceTest {
         when(mockContext.getBean("testHandler")).thenReturn(testHandler);
 
         // Act
-        EventConsumerService service = new EventConsumerService(mockRepository, mockContext, mockPublisher);
+        EventConsumerService service = new EventConsumerService(mockRepository, mockContext);
 
         // Assert
         // Le test devrait découvrir 1 handler

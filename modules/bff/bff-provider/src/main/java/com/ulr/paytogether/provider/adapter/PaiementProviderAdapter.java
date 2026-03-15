@@ -41,6 +41,7 @@ public class PaiementProviderAdapter implements PaiementProvider {
     private final DealParticipantRepository dealParticipantRepository;
     private final AdresseRepository adresseRepository;
     private final AdresseJpaMapper adresseJpaMapper;
+    private final CommandeUtilisateurRepository  commandeUtilisateurRepository;
 
     @Override
     public PaiementModele sauvegarder(PaiementModele paiement) {
@@ -240,7 +241,24 @@ public class PaiementProviderAdapter implements PaiementProvider {
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé pour l'UUID : " + uuid));
 
         List<PaiementJpa> paiements = jpaRepository.findByUtilisateurJpa(utilisateurJpa);
+        List<CommandeJpa> commandeJpas = new ArrayList<>();
+        List<CommandeUtilisateurJpa> commandeUtilisateurJpas = new ArrayList<>();
+        paiements.forEach(p -> {;
+            commandeJpas.add(p.getCommandeJpa());
+            commandeUtilisateurJpas.addAll(commandeUtilisateurRepository.findByCommandeJpaUuid(p.getCommandeJpa().getUuid()));
+        });
         adresseRepository.deleteAllByPaiement(paiements);
         jpaRepository.deleteAll(paiements);
+        if (!commandeUtilisateurJpas.isEmpty()) {
+            commandeUtilisateurRepository.deleteAll(commandeUtilisateurJpas);
+        }
+        if (!commandeJpas.isEmpty()) {
+            commandeJpas.forEach(commande -> {
+                CommandeJpa cJpa = commandeRepository.getReferenceById(commande.getUuid());
+                if (cJpa.getPaiements().isEmpty()) {
+                    commandeRepository.delete(cJpa);
+                }
+            });
+        }
     }
 }

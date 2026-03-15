@@ -68,9 +68,8 @@ public class DealServiceImpl implements DealService {
 
         DealModele dealCree = dealProvider.sauvegarder(deal);
 
-        // TODO : Réactiver l'indexation automatique après avoir corrigé la structure d'index
         // Indexer le deal dans Elasticsearch si publié
-        /*
+
         if (dealCree.getStatut() == StatutDeal.PUBLIE) {
             try {
                 dealRechercheService.indexerDeal(dealCree);
@@ -79,7 +78,6 @@ public class DealServiceImpl implements DealService {
                 log.error("Erreur lors de l'indexation du deal {} : {}", dealCree.getUuid(), e.getMessage());
             }
         }
-        */
 
         return dealCree;
     }

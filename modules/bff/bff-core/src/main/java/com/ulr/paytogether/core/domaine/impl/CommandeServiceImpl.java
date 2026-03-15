@@ -172,7 +172,7 @@ public class CommandeServiceImpl implements CommandeService {
         
         // Si tous validés, passer la commande en TERMINEE
         if (tousValides) {
-            commandeProvider.mettreAJourStatutEtDatePayout(commandeUuid, StatutCommande.TERMINEE, null);
+            commandeProvider.mettreAJour(commandeUuid, StatutCommande.TERMINEE);
             log.info("Toutes les validations sont complètes, commande {} passée en TERMINEE", commandeUuid);
         }
         
@@ -206,10 +206,9 @@ public class CommandeServiceImpl implements CommandeService {
         }
         
         // Mettre à jour le statut
-        CommandeModele commandeMiseAJour = commandeProvider.mettreAJourStatutEtDatePayout(
+        CommandeModele commandeMiseAJour = commandeProvider.mettreAJour(
             commandeUuid, 
-            nouveauStatut, 
-            null
+            nouveauStatut
         );
         
         log.info("Statut de la commande {} mis à jour de {} vers {}", 

@@ -1,0 +1,12 @@
+{
+  "data": {
+    "id": "mock-keycloak-user-id-123456",
+    "username": "test.user",
+    "email": "test@paytogether.com",
+    "enabled": true,
+    "emailVerified": false,
+    "firstName": "Test",
+    "lastName": "User"
+  }
+}
+

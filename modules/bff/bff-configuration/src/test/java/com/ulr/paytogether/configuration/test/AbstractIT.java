@@ -3,7 +3,9 @@ package com.ulr.paytogether.configuration.test;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import com.ulr.paytogether.bff.event.handler.impl.SquarePaymentHandler;
 import com.ulr.paytogether.configuration.test.config.TestConfig;
+import com.ulr.paytogether.configuration.test.config.TestSecurityConfig;
 import com.ulr.paytogether.core.enumeration.*;
 import com.ulr.paytogether.provider.adapter.entity.*;
 import com.ulr.paytogether.provider.repository.*;
@@ -12,6 +14,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -20,14 +24,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -36,9 +38,11 @@ import java.util.UUID;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Import(TestConfig.class)
+@Import({TestConfig.class, TestSecurityConfig.class})
 //@Testcontainers  // Commenté car on utilise H2 pour les tests
 public abstract class AbstractIT {
+
+    private static final Logger log = LoggerFactory.getLogger(AbstractIT.class);
 
     @LocalServerPort
     protected int port;
@@ -66,6 +70,15 @@ public abstract class AbstractIT {
 
     @Autowired
     protected AdresseRepository adresseRepository;
+
+    @Autowired
+    protected ValidationTokenRepository validationTokenRepository;
+
+    @Autowired
+    protected PubliciteRepository publiciteRepository;
+
+    @Autowired
+    protected CommentaireRepository commentaireRepository;
 
     // Fixtures JPA (accessibles aux tests)
     protected CategorieJpa categorieElectronique;
@@ -175,44 +188,67 @@ public abstract class AbstractIT {
      */
     protected void creerUtilisateurs() {
         // Vendeur
-        vendeur = new UtilisateurJpa();
-        vendeur.setNom("Vendeur");
-        vendeur.setPrenom("Test");
-        vendeur.setEmail("vendeur@test.com");
-        vendeur.setMotDePasse("$2a$10$abcdefghijklmnopqrstuvwxyz");
-        vendeur.setRole(RoleUtilisateur.VENDEUR);
-        vendeur.setStatut(StatutUtilisateur.ACTIF);
-        vendeur = utilisateurRepository.save(vendeur);
+        Optional<UtilisateurJpa> vendeur1 = utilisateurRepository.findByEmail(Optional.ofNullable(vendeur).map(UtilisateurJpa::getEmail).orElse(null));
+        if (vendeur1.isPresent()) {
+            vendeur = vendeur1.get();
+        } else {
+            vendeur = new UtilisateurJpa();
+            vendeur.setNom("Vendeur");
+            vendeur.setPrenom("Test");
+            vendeur.setEmail("vendeur@test.com");
+            vendeur.setMotDePasse("$2a$10$abcdefghijklmnopqrstuvwxyz");
+            vendeur.setRole(RoleUtilisateur.VENDEUR);
+            vendeur.setStatut(StatutUtilisateur.ACTIF);
+            vendeur = utilisateurRepository.save(vendeur);
+        }
 
         // Acheteur 1
-        acheteur1 = new UtilisateurJpa();
-        acheteur1.setNom("Acheteur");
-        acheteur1.setPrenom("Un");
-        acheteur1.setEmail("acheteur1@test.com");
-        acheteur1.setMotDePasse("$2a$10$abcdefghijklmnopqrstuvwxyz");
-        acheteur1.setRole(RoleUtilisateur.UTILISATEUR);
-        acheteur1.setStatut(StatutUtilisateur.ACTIF);
-        acheteur1 = utilisateurRepository.save(acheteur1);
+        Optional<UtilisateurJpa> acheteur10 = utilisateurRepository.findByEmail(Optional.ofNullable(acheteur1).map(UtilisateurJpa::getEmail).orElse(null));
+        if (acheteur10.isPresent()) {
+            acheteur1 = acheteur10.get();
+        } else {
+            acheteur1 = new UtilisateurJpa();
+            acheteur1.setNom("Acheteur");
+            acheteur1.setPrenom("Un");
+            acheteur1.setEmail("acheteur1@test.com");
+            acheteur1.setMotDePasse("$2a$10$abcdefghijklmnopqrstuvwxyz");
+            acheteur1.setRole(RoleUtilisateur.UTILISATEUR);
+            acheteur1.setStatut(StatutUtilisateur.ACTIF);
+            acheteur1 = utilisateurRepository.save(acheteur1);
+        }
+
+
 
         // Acheteur 2
-        acheteur2 = new UtilisateurJpa();
-        acheteur2.setNom("Acheteur");
-        acheteur2.setPrenom("Deux");
-        acheteur2.setEmail("acheteur2@test.com");
-        acheteur2.setMotDePasse("$2a$10$abcdefghijklmnopqrstuvwxyz");
-        acheteur2.setRole(RoleUtilisateur.UTILISATEUR);
-        acheteur2.setStatut(StatutUtilisateur.ACTIF);
-        acheteur2 = utilisateurRepository.save(acheteur2);
+        Optional<UtilisateurJpa> acheteur20 = utilisateurRepository.findByEmail(Optional.ofNullable(acheteur2).map(UtilisateurJpa::getEmail).orElse(null));
+        if (acheteur20.isPresent()) {
+            acheteur2 = acheteur20.get();
+        } else {
+            acheteur2 = new UtilisateurJpa();
+            acheteur2.setNom("Acheteur");
+            acheteur2.setPrenom("Deux");
+            acheteur2.setEmail("acheteur2@test.com");
+            acheteur2.setMotDePasse("$2a$10$abcdefghijklmnopqrstuvwxyz");
+            acheteur2.setRole(RoleUtilisateur.UTILISATEUR);
+            acheteur2.setStatut(StatutUtilisateur.ACTIF);
+            acheteur2 = utilisateurRepository.save(acheteur2);
+        }
 
         // Acheteur 3
-        acheteur3 = new UtilisateurJpa();
-        acheteur3.setNom("Acheteur");
-        acheteur3.setPrenom("Trois");
-        acheteur3.setEmail("acheteur3@test.com");
-        acheteur3.setMotDePasse("$2a$10$abcdefghijklmnopqrstuvwxyz");
-        acheteur3.setRole(RoleUtilisateur.UTILISATEUR);
-        acheteur3.setStatut(StatutUtilisateur.ACTIF);
-        acheteur3 = utilisateurRepository.save(acheteur3);
+        Optional<UtilisateurJpa> acheteur30 = utilisateurRepository.findByEmail(Optional.ofNullable(acheteur3).map(UtilisateurJpa::getEmail).orElse(null));
+        if (acheteur30.isPresent()) {
+            acheteur3 = acheteur30.get();
+        } else {
+            acheteur3 = new UtilisateurJpa();
+            acheteur3.setNom("Acheteur");
+            acheteur3.setPrenom("Trois");
+            acheteur3.setEmail("acheteur3@test.com");
+            acheteur3.setMotDePasse("$2a$10$abcdefghijklmnopqrstuvwxyz");
+            acheteur3.setRole(RoleUtilisateur.UTILISATEUR);
+            acheteur3.setStatut(StatutUtilisateur.ACTIF);
+            acheteur3 = utilisateurRepository.save(acheteur3);
+        }
+
     }
 
     /**
@@ -359,6 +395,39 @@ public abstract class AbstractIT {
     }
 
     /**
+     * Mock creation compte
+     * @param statut
+     * @return
+     */
+    protected UtilisateurJpa creerUtilisateur(StatutUtilisateur  statut) {
+        UtilisateurJpa utilisateur = new UtilisateurJpa();
+        utilisateur.setEmail("test_email");
+        utilisateur.setNom("test_nom");
+        utilisateur.setPrenom("test_prenom");
+        utilisateur.setMotDePasse("test_mot_de_passe");
+        utilisateur.setRole(RoleUtilisateur.UTILISATEUR);
+        utilisateur.setStatut(statut);
+        return utilisateurRepository.save(utilisateur);
+    }
+
+    /**
+     * Mock validation token
+     * @param uuid
+     * @param token
+     * @return
+     */
+    protected ValidationTokenJpa setValidationToken(UUID uuid, String token) {
+        UtilisateurJpa utilisateurJpa = utilisateurRepository.findById(uuid).orElseThrow();
+        ValidationTokenJpa validationTokenJpa1 = new ValidationTokenJpa();
+        validationTokenJpa1.setToken(token);
+        validationTokenJpa1.setTypeToken("VALIDATION_COMPTE");
+        validationTokenJpa1.setUtilisateurUuid(utilisateurJpa.getUuid());
+        validationTokenJpa1.setDateExpiration(LocalDateTime.now().plusHours(1));
+        validationTokenJpa1.setUtilise(false);
+        return validationTokenRepository.save(validationTokenJpa1);
+    }
+
+    /**
      * Mock WireMock pour Square Payment Success
      */
     protected void mockSquarePaymentSuccess() {
@@ -400,9 +469,34 @@ public abstract class AbstractIT {
                         .withStatus(200)));
     }
 
+    // =========================================================================
+    // MOCKS KEYCLOAK
+    // =========================================================================
+    
     /**
-     * Simule le paiement de toutes les parts du deal
-     * Crée les paiements et CommandeUtilisateurs nécessaires
+     * Les mocks Keycloak sont gérés automatiquement par WireMock via les fichiers JSON :
+     * - mappings/keycloak-admin-auth.json : Authentification admin
+     * - mappings/keycloak-create-user.json : Création utilisateur
+     * - mappings/keycloak-get-user.json : Récupération utilisateur
+     * - mappings/keycloak-update-user.json : Mise à jour utilisateur
+     * - mappings/keycloak-delete-user.json : Suppression utilisateur
+     * - mappings/keycloak-get-roles.json : Liste des rôles
+     * - mappings/keycloak-assign-role.json : Assigner un rôle
+     * - mappings/keycloak-remove-role.json : Retirer un rôle
+     * 
+     * Les fichiers de réponses sont dans : wiremock/keycloak/*.json
+     * 
+     * ✅ Aucune méthode mock n'est nécessaire - WireMock charge automatiquement
+     * les mappings au démarrage depuis le classpath "wiremock"
+     */
+
+    /**
+     * Simule le paiement de toutes les parts du deal.
+     * Crée les paiements et CommandeUtilisateurs nécessaires.
+     * 
+     * Note : Dans un environnement réel, c'est le handler PaymentSuccessfulHandler
+     * qui mettrait à jour le statut de la commande. Ici, on simule directement
+     * le résultat final pour les tests d'intégration.
      */
     protected void simulerPaiementsComplets(CommandeJpa commande, List<UtilisateurJpa> acheteurs) {
         DealJpa deal = commande.getDealJpa();
@@ -414,10 +508,33 @@ public abstract class AbstractIT {
             
             // Créer CommandeUtilisateur
             creerCommandeUtilisateur(commande, acheteur, StatutCommandeUtilisateur.EN_ATTENTE);
+            
+            log.info("✅ Paiement simulé pour l'acheteur {}", acheteur.getEmail());
         }
         
-        // Mettre à jour le statut de la commande
+        // Mettre à jour le statut de la commande à COMPLETEE
+        // (équivalent au résultat du handler PaymentSuccessfulHandler)
         setStatut(commande, StatutCommande.COMPLETEE);
+        log.info("✅ Commande {} marquée comme COMPLETEE", commande.getNumeroCommande());
+    }
+
+    /**
+     * Simule le traitement de l'upload de facture vendeur.
+     * 
+     * Note : Dans un environnement réel, c'est le handler SellerInvoiceUploadedHandler
+     * qui générerait les factures clients et mettrait à jour le statut. Ici, on simule
+     * directement le résultat final pour les tests d'intégration.
+     */
+    protected void simulerTraitementFactureVendeur(CommandeJpa commande) {
+        CommandeJpa commandeJpa = commandeRepository.findById(commande.getUuid()).orElseThrow();
+        
+        // Simuler le résultat du handler : statut INVOICE_CUSTOMER
+        // (équivalent au résultat du handler SellerInvoiceUploadedHandler)
+        commandeJpa.setStatut(StatutCommande.INVOICE_CUSTOMER);
+        commandeRepository.save(commandeJpa);
+        
+        log.info("✅ Factures clients simulées et statut mis à jour à INVOICE_CUSTOMER pour la commande {}", 
+            commande.getNumeroCommande());
     }
 
     /**
@@ -438,15 +555,6 @@ public abstract class AbstractIT {
         String factureMarchandUrl = "invoice/seller/facture_" + commande.getNumeroCommande() + ".pdf";
         commandeJpa.setFactureMarchandUrl(factureMarchandUrl);
         commandeJpa.setStatut(StatutCommande.INVOICE_SELLER);
-        commandeRepository.save(commandeJpa);
-    }
-
-    /**
-     * Simule la génération et l'envoi des factures clients
-     */
-    protected void simulerEnvoiFacturesClients(CommandeJpa commande) {
-        CommandeJpa commandeJpa = commandeRepository.findById(commande.getUuid()).orElseThrow();
-        commandeJpa.setStatut(StatutCommande.INVOICE_CUSTOMER);
         commandeRepository.save(commandeJpa);
     }
 

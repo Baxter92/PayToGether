@@ -11,12 +11,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class CommandeUtilisateurJpaMapper {
     
-    private final UtilisateurJpaMapper utilisateurMapper;
-    
-    public CommandeUtilisateurJpaMapper(UtilisateurJpaMapper utilisateurMapper) {
-        this.utilisateurMapper = utilisateurMapper;
-    }
-    
     /**
      * Convertit une entité JPA vers un modèle métier
      */
@@ -24,17 +18,10 @@ public class CommandeUtilisateurJpaMapper {
         if (jpa == null) {
             return null;
         }
-        
-        UtilisateurModele utilisateur = null;
-        if (jpa.getUtilisateurJpa() != null) {
-            utilisateur = utilisateurMapper.versModele(jpa.getUtilisateurJpa());
-        }
-        
         return CommandeUtilisateurModele.builder()
             .uuid(jpa.getUuid())
             .commandeUuid(jpa.getCommandeJpa() != null ? jpa.getCommandeJpa().getUuid() : null)
             .utilisateurUuid(jpa.getUtilisateurJpa() != null ? jpa.getUtilisateurJpa().getUuid() : null)
-            .utilisateur(utilisateur)
             .statutCommandeUtilisateur(jpa.getStatutCommandeUtilisateur())
             .dateCreation(jpa.getDateCreation())
             .dateModification(jpa.getDateModification())

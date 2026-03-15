@@ -1,0 +1,27 @@
+[
+  {
+    "id": "role-admin-id-789",
+    "name": "ADMIN",
+    "description": "Administrator role with full access",
+    "composite": false,
+    "clientRole": false,
+    "containerId": "paytogether"
+  },
+  {
+    "id": "role-utilisateur-id-456",
+    "name": "UTILISATEUR",
+    "description": "Standard user role",
+    "composite": false,
+    "clientRole": false,
+    "containerId": "paytogether"
+  },
+  {
+    "id": "role-vendeur-id-123",
+    "name": "VENDEUR",
+    "description": "Seller role with deal creation permissions",
+    "composite": false,
+    "clientRole": false,
+    "containerId": "paytogether"
+  }
+]
+
