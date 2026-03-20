@@ -615,7 +615,9 @@ function HighlightsField({ field, form }: { field: any; form: any }) {
       {highlights.length > 0 ? (
         <div className="space-y-3">
           <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
-            {t("createDealModal.highlights.count", { count: highlights.length })}
+            {t("createDealModal.highlights.count", {
+              count: highlights.length,
+            })}
           </p>
           <div className="flex flex-wrap gap-2">
             {highlights.map((highlight: string, idx: number) => (
@@ -768,6 +770,7 @@ export function CreateDealModal({
             categorieUuid: basePayload.categorieUuid,
             listePointsForts: basePayload.listePointsForts,
             ville: basePayload.ville,
+            prixPartNonReel: basePayload.prixPartNonReel,
             pays: basePayload.pays,
             createurUuid: basePayload.createurUuid,
           };
@@ -813,11 +816,14 @@ export function CreateDealModal({
           await updateDeal({ id: initialData.uuid, data: payload });
 
           if (updateHasErrors) {
-            toast.warning(t("createDealModal.toasts.updateUploadWarningTitle"), {
-              description: t(
-                "createDealModal.toasts.updateUploadWarningDescription",
-              ),
-            });
+            toast.warning(
+              t("createDealModal.toasts.updateUploadWarningTitle"),
+              {
+                description: t(
+                  "createDealModal.toasts.updateUploadWarningDescription",
+                ),
+              },
+            );
           } else {
             toast.success(t("createDealModal.toasts.updateSuccess"));
           }
@@ -826,11 +832,14 @@ export function CreateDealModal({
           await createDeal(buildPayload(data, now, connectedMerchantUuid));
 
           if (hasErrors) {
-            toast.warning(t("createDealModal.toasts.createUploadWarningTitle"), {
-              description: t(
-                "createDealModal.toasts.createUploadWarningDescription",
-              ),
-            });
+            toast.warning(
+              t("createDealModal.toasts.createUploadWarningTitle"),
+              {
+                description: t(
+                  "createDealModal.toasts.createUploadWarningDescription",
+                ),
+              },
+            );
           } else {
             toast.success(t("createDealModal.toasts.createSuccess"), {
               description: t("createDealModal.toasts.createSuccessDescription"),
