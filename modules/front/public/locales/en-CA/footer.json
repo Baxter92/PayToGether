@@ -1,12 +1,41 @@
 {
-  "description": "The #1 collaborative deals platform in Cameroon. Save together on the best local offers.",
-  "links": "Quick Links",
-  "privacy": "Privacy",
-  "terms": "Terms of Service",
-  "contact": "Contact Us",
+  "description": "Save together on the best local offers.",
   "rights": "All rights reserved.",
-  "categories": "Categories",
-  "contactTitle": "Contact",
-  "privacyPolicy": "Privacy Policy",
-  "legalNotice": "Legal Notice"
+  "contact": {
+    "location": "Calgary, Alberta",
+    "phone": "+1 587 582 4298",
+    "email": "contact@dealtogether.ca"
+  },
+  "sections": {
+    "company": {
+      "title": "DealTogether",
+      "about": "About",
+      "mission": "Our mission",
+      "contact": "Contact"
+    },
+    "buyers": {
+      "title": "Buyers",
+      "howItWorks": "How it works",
+      "faq": "FAQ",
+      "refunds": "Refunds"
+    },
+    "sellers": {
+      "title": "Sellers",
+      "becomeSeller": "Become a seller",
+      "sellerTerms": "Seller terms",
+      "supplierCharter": "Supplier charter"
+    },
+    "legal": {
+      "title": "Legal",
+      "terms": "Terms of use",
+      "privacy": "Privacy policy",
+      "cookies": "Cookies",
+      "legalNotice": "Legal notice"
+    },
+    "support": {
+      "title": "Support",
+      "helpCenter": "Help center",
+      "reportIssue": "Report an issue"
+    }
+  }
 }

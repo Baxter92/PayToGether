@@ -79,6 +79,11 @@ export default function PurchaseCard({
             <div className="text-2xl font-bold text-foreground">
               {formatCurrency(deal.priceDeal ?? 0)}
             </div>
+            {deal.priceOriginalStrike && deal.priceOriginalStrike > 0 && (
+              <div className="text-sm line-through text-gray-500 dark:text-gray-400">
+                {formatCurrency(deal.priceOriginalStrike)}
+              </div>
+            )}
             <div className="text-sm text-gray-500 dark:text-gray-400">
               ({formatCurrency(deal.priceOriginal)})
             </div>
@@ -155,7 +160,13 @@ export default function PurchaseCard({
         <HStack>
           <Button
             variant="outline"
-            leftIcon={isShared ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+            leftIcon={
+              isShared ? (
+                <Check className="w-4 h-4" />
+              ) : (
+                <Share2 className="w-4 h-4" />
+              )
+            }
             tooltip={t("share")}
             onClick={handleShare}
           >

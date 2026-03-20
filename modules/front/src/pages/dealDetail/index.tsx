@@ -70,6 +70,10 @@ export default function DealDetail(): JSX.Element {
       title: dealData.titre,
       shortSubtitle: dealData.description,
       priceOriginal: Number(dealData.prixDeal) || 0,
+      priceOriginalStrike:
+        dealData.prixPartNonReel && dealData.prixPartNonReel > 0
+          ? Number(dealData.prixPartNonReel)
+          : undefined,
       priceDeal: Number(dealData.prixPart) || 0,
       pricePerPart: Number(dealData.prixPart) || 0,
       rating: dealData.moyenneCommentaires,

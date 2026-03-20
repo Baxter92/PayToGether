@@ -1,150 +1,127 @@
-import { useCategories } from "@/common/api";
-import { mapCategoryToView } from "@/common/api/mappers/catalog";
-import { useI18n } from "@hooks/useI18n";
-import {
-  Facebook,
-  Twitter,
-  Instagram,
-  Mail,
-  MapPin,
-  Phone,
-} from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useI18n } from "@hooks/useI18n";
 
 const Footer = () => {
   const { t: tFooter } = useI18n("footer");
   const { t: tApp } = useI18n("app");
-  const { data: categoriesData } = useCategories();
-  const categories = (categoriesData ?? []).map(mapCategoryToView);
   const currentYear = new Date().getFullYear();
 
-  return (
-    <footer className="bg-gradient-to-b from-secondary-800 to-secondary-900 text-white relative overflow-hidden">
-      {/* Decorative top border */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary" />
+  const sections = [
+    {
+      title: tFooter("sections.company.title"),
+      links: [
+        { label: tFooter("sections.company.about"), href: "#" },
+        { label: tFooter("sections.company.mission"), href: "#" },
+        { label: tFooter("sections.company.contact"), href: "#" },
+      ],
+    },
+    {
+      title: tFooter("sections.buyers.title"),
+      links: [
+        { label: tFooter("sections.buyers.howItWorks"), href: "#" },
+        { label: tFooter("sections.buyers.faq"), href: "#" },
+        { label: tFooter("sections.buyers.refunds"), href: "#" },
+      ],
+    },
+    {
+      title: tFooter("sections.sellers.title"),
+      links: [
+        { label: tFooter("sections.sellers.becomeSeller"), href: "#" },
+        { label: tFooter("sections.sellers.sellerTerms"), href: "#" },
+        { label: tFooter("sections.sellers.supplierCharter"), href: "#" },
+      ],
+    },
+    {
+      title: tFooter("sections.legal.title"),
+      links: [
+        { label: tFooter("sections.legal.terms"), href: "#" },
+        { label: tFooter("sections.legal.privacy"), href: "#" },
+        { label: tFooter("sections.legal.cookies"), href: "#" },
+        { label: tFooter("sections.legal.legalNotice"), href: "#" },
+      ],
+    },
+    {
+      title: tFooter("sections.support.title"),
+      links: [
+        { label: tFooter("sections.support.helpCenter"), href: "#" },
+        { label: tFooter("sections.support.reportIssue"), href: "#" },
+      ],
+    },
+  ];
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {/* Brand Section */}
-          <div className="lg:col-span-1">
-            <Link to="/" className="inline-block mb-6">
-              <span className="text-2xl font-extrabold font-[family-name:var(--font-heading)] bg-gradient-to-r from-primary-300 to-accent-400 bg-clip-text text-transparent">
-                DealToGether
+  return (
+    <footer className="relative overflow-hidden bg-gradient-to-b from-secondary-800 to-secondary-900 text-white">
+      <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-primary via-accent to-primary" />
+
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[1.2fr_4fr]">
+          <div className="max-w-sm">
+            <Link to="/" className="mb-4 inline-block">
+              <span className="bg-gradient-to-r from-primary-300 to-accent-400 bg-clip-text font-[family-name:var(--font-heading)] text-2xl font-extrabold text-transparent">
+                {tApp("name")}
               </span>
             </Link>
-            <p className="text-secondary-300 text-sm leading-relaxed mb-6">
+            <p className="mb-6 text-sm leading-relaxed text-secondary-300">
               {tFooter("description")}
             </p>
-            <div className="flex gap-3">
-              <a
-                href="#"
-                className="p-2.5 bg-white/10 rounded-xl hover:bg-primary hover:scale-110 transition-all duration-300"
-                aria-label="Facebook"
-              >
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a
-                href="#"
-                className="p-2.5 bg-white/10 rounded-xl hover:bg-primary hover:scale-110 transition-all duration-300"
-                aria-label="Twitter"
-              >
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a
-                href="#"
-                className="p-2.5 bg-white/10 rounded-xl hover:bg-primary hover:scale-110 transition-all duration-300"
-                aria-label="Instagram"
-              >
-                <Instagram className="w-5 h-5" />
-              </a>
-            </div>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h3 className="text-lg font-bold font-[family-name:var(--font-heading)] mb-6 text-white">
-              {tFooter("links")}
-            </h3>
-            <ul className="space-y-3">
-              {[
-                { label: tFooter("privacy"), href: "#" },
-                { label: tFooter("terms"), href: "#" },
-                { label: tFooter("contact"), href: "#" },
-                { label: "FAQ", href: "#" },
-              ].map((link, i) => (
-                <li key={i}>
-                  <a
-                    href={link.href}
-                    className="text-secondary-300 hover:text-primary-300 transition-colors duration-300 text-sm inline-flex items-center gap-2 group"
-                  >
-                    <span className="w-1.5 h-1.5 bg-primary/50 rounded-full group-hover:bg-primary transition-colors duration-300" />
-                    {link.label}
-                  </a>
-                </li>
-              ))}
+            <ul className="space-y-3 text-sm text-secondary-300">
+              <li className="flex items-start gap-3">
+                <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary-400" />
+                <span>{tFooter("contact.location")}</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Phone className="h-5 w-5 shrink-0 text-primary-400" />
+                <span>{tFooter("contact.phone")}</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Mail className="h-5 w-5 shrink-0 text-primary-400" />
+                <span>{tFooter("contact.email")}</span>
+              </li>
             </ul>
           </div>
 
-          {/* Categories */}
-          <div>
-            <h3 className="text-lg font-bold font-[family-name:var(--font-heading)] mb-6 text-white">
-              {tFooter("categories")}
-            </h3>
-            <ul className="space-y-3">
-              {categories.map((cat, i) => (
-                <li key={i}>
-                  <a
-                    href="#"
-                    className="text-secondary-300 hover:text-primary-300 transition-colors duration-300 text-sm inline-flex items-center gap-2 group"
-                  >
-                    <span className="w-1.5 h-1.5 bg-primary/50 rounded-full group-hover:bg-primary transition-colors duration-300" />
-                    {cat.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h3 className="text-lg font-bold font-[family-name:var(--font-heading)] mb-6 text-white">
-              {tFooter("contactTitle")}
-            </h3>
-            <ul className="space-y-4">
-              <li className="flex items-start gap-3 text-secondary-300 text-sm">
-                <MapPin className="w-5 h-5 text-primary-400 shrink-0 mt-0.5" />
-                <span>Calgary, Alberta</span>
-              </li>
-              <li className="flex items-center gap-3 text-secondary-300 text-sm">
-                <Phone className="w-5 h-5 text-primary-400 shrink-0" />
-                <span>+1 587 582 4298</span>
-              </li>
-              <li className="flex items-center gap-3 text-secondary-300 text-sm">
-                <Mail className="w-5 h-5 text-primary-400 shrink-0" />
-                <span>contact@dealtogether.ca</span>
-              </li>
-            </ul>
+          <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 xl:grid-cols-5">
+            {sections.map((section) => (
+              <div key={section.title}>
+                <h3 className="mb-4 font-[family-name:var(--font-heading)] text-lg font-bold text-white">
+                  {section.title}
+                </h3>
+                <ul className="space-y-3">
+                  {section.links.map((link) => (
+                    <li key={link.label}>
+                      <a
+                        href={link.href}
+                        className="inline-flex items-center gap-2 text-sm text-secondary-300 transition-colors duration-300 hover:text-primary-300"
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full bg-primary/50" />
+                        {link.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="border-t border-white/10 mt-12 pt-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-secondary-400 text-sm">
+        <div className="mt-12 border-t border-white/10 pt-8">
+          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+            <p className="text-sm text-secondary-400">
               &copy; {currentYear} {tApp("name")}. {tFooter("rights")}
             </p>
             <div className="flex items-center gap-6">
               <a
                 href="#"
-                className="text-secondary-400 hover:text-primary-300 text-sm transition-colors duration-300"
+                className="text-sm text-secondary-400 transition-colors duration-300 hover:text-primary-300"
               >
-                {tFooter("privacyPolicy")}
+                {tFooter("sections.legal.privacy")}
               </a>
               <a
                 href="#"
-                className="text-secondary-400 hover:text-primary-300 text-sm transition-colors duration-300"
+                className="text-sm text-secondary-400 transition-colors duration-300 hover:text-primary-300"
               >
-                {tFooter("legalNotice")}
+                {tFooter("sections.legal.legalNotice")}
               </a>
             </div>
           </div>

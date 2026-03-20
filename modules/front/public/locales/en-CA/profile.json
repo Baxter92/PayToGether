@@ -68,5 +68,264 @@
   "deleteAccountDescription": "Delete your account and remove all your data.",
   "cancel": "Cancel",
   "confirm": "Confirm",
-  "adminDashboard": "Admin Dashboard"
+  "adminDashboard": "Admin Dashboard",
+  "myDeals": {
+    "addOffer": "Add an offer",
+    "filters": {
+      "category": "Category",
+      "city": "City",
+      "maxPrice": "Max price"
+    }
+  },
+  "favoritesSection": {
+    "title": "Favorites",
+    "count_zero": "{{count}} saved offer",
+    "count_one": "{{count}} saved offer",
+    "count_other": "{{count}} saved offers",
+    "clearAll": "Clear all",
+    "loading": "Loading...",
+    "remove": "Remove from favorites",
+    "emptyTitle": "No favorites yet",
+    "emptyDescription": "Browse our offers and click the heart to save your favorite deals.",
+    "discover": "Discover offers",
+    "tipTitle": "Tip",
+    "tipDescription": "Offers are available for a limited time. Don't wait too long to enjoy your favorites."
+  },
+  "reviewsSection": {
+    "title": "Customer reviews",
+    "description": "Review history",
+    "searchPlaceholder": "Order, customer, deal, comment...",
+    "timeAgo": "{{value}} ago",
+    "status": {
+      "published": "Published",
+      "pending": "Pending",
+      "hidden": "Hidden"
+    },
+    "table": {
+      "order": "Order",
+      "deal": "Deal",
+      "customer": "Customer",
+      "rating": "Rating",
+      "comment": "Comment",
+      "date": "Date",
+      "status": "Status"
+    },
+    "actions": {
+      "view": "View",
+      "delete": "Delete",
+      "reply": "Reply",
+      "contactCustomer": "Contact customer"
+    }
+  },
+  "paymentsSection": {
+    "title": "Received payments",
+    "description": "History of payments made to your account.",
+    "searchPlaceholder": "Search by order, buyer...",
+    "timeAgo": "{{value}} ago",
+    "methods": {
+      "stripe": "Stripe",
+      "paypal": "PayPal"
+    },
+    "status": {
+      "succeeded": "Paid",
+      "pending": "Pending",
+      "failed": "Failed",
+      "refunded": "Refunded"
+    },
+    "table": {
+      "order": "Order",
+      "buyer": "Buyer",
+      "amount": "Amount",
+      "method": "Method",
+      "date": "Date",
+      "status": "Status"
+    },
+    "actions": {
+      "view": "View",
+      "markPaid": "Mark paid",
+      "refund": "Refund",
+      "contactBuyer": "Contact buyer",
+      "downloadReceipt": "Download receipt"
+    }
+  },
+  "ordersReceivedSection": {
+    "title": "Received orders",
+    "description": "Manage orders for your deals",
+    "searchPlaceholder": "Search an order...",
+    "loadError": "Error while loading orders",
+    "table": {
+      "order": "Order",
+      "deal": "Deal",
+      "amount": "Amount",
+      "date": "Date",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "actions": {
+      "invoice": "Invoice",
+      "validate": "Validate",
+      "view": "View"
+    }
+  },
+  "createDealModal": {
+    "header": {
+      "createTitle": "Create a new deal",
+      "createDescription": "Fill in the information to publish your exceptional offer",
+      "editTitle": "Edit deal",
+      "editDescription": "Update the offer information"
+    },
+    "crop": {
+      "title": "Crop image",
+      "description": "Adjust the crop and zoom of your image",
+      "zoom": "Zoom: {{value}}%",
+      "apply": "Apply crop"
+    },
+    "status": {
+      "draft": "Draft",
+      "published": "Published"
+    },
+    "sections": {
+      "general": {
+        "title": "General information",
+        "description": "Bring your offer to life with a compelling title"
+      },
+      "categoryStatus": {
+        "title": "Category & status",
+        "description": "Classify your offer and define its visibility"
+      },
+      "pricing": {
+        "title": "Pricing",
+        "description": "Set the price and value of your offer"
+      },
+      "availability": {
+        "title": "Availability",
+        "description": "Configure the start, end and expiration dates"
+      },
+      "location": {
+        "title": "Location",
+        "description": "Where does your offer take place?"
+      },
+      "highlights": {
+        "title": "Deal highlights",
+        "description": "Show what makes your offer unique"
+      },
+      "supplier": {
+        "title": "Supplier",
+        "description": "Who provides this offer?"
+      },
+      "images": {
+        "title": "Image gallery",
+        "description": "Add up to 5 attractive images for your offer"
+      }
+    },
+    "fields": {
+      "title": {
+        "label": "Deal title",
+        "placeholder": "Example: Romantic dinner for 2 at a starred restaurant"
+      },
+      "description": {
+        "label": "Full description",
+        "placeholder": "Describe your offer in a detailed and attractive way..."
+      },
+      "category": {
+        "label": "Category",
+        "placeholder": "Choose a category"
+      },
+      "status": {
+        "label": "Publication status",
+        "placeholder": "Choose a status"
+      },
+      "price": {
+        "label": "Price per share"
+      },
+      "nonPromoPrice": {
+        "label": "Non-promotional price"
+      },
+      "originalPrice": {
+        "label": "Original price"
+      },
+      "partsTotal": {
+        "label": "Number of shares"
+      },
+      "startDate": {
+        "label": "Start date"
+      },
+      "endDate": {
+        "label": "End date"
+      },
+      "expirationDate": {
+        "label": "Expiration date"
+      },
+      "location": {
+        "label": "Location",
+        "placeholder": "City, district (Example: Montreal - Côte-des-Neiges)"
+      },
+      "highlights": {
+        "label": "Highlights"
+      },
+      "merchant": {
+        "label": "Supplier name",
+        "placeholder": "Select a supplier"
+      },
+      "images": {
+        "label": "Images"
+      }
+    },
+    "highlights": {
+      "placeholder": "Example: 3-course gourmet menu...",
+      "add": "Add",
+      "count_zero": "{{count}} highlight added",
+      "count_one": "{{count}} highlight added",
+      "count_other": "{{count}} highlights added",
+      "remove": "Remove this highlight",
+      "emptyTitle": "No highlights added",
+      "emptyDescription": "Add the advantages of your offer"
+    },
+    "images": {
+      "title": "Image gallery",
+      "formats": "JPG, PNG, WEBP • Max 5 MB per image",
+      "maxAdditional": "You can only add {{count}} more image(s)",
+      "primaryUpdated": "Primary image updated",
+      "dropzoneTitle": "Click or drag your images here",
+      "dropzoneDescription": "Up to {{count}} high-quality images",
+      "selected_zero": "{{count}} image selected",
+      "selected_one": "{{count}} image selected",
+      "selected_other": "{{count}} images selected",
+      "choosePrimary": "Choose a primary image",
+      "emptyTitle": "No image added",
+      "emptyDescription": "Click the area above to get started",
+      "setPrimary": "Set as primary image",
+      "crop": "Crop",
+      "remove": "Delete",
+      "primaryBadge": "PRIMARY"
+    },
+    "progress": {
+      "uploading": "Uploading images...",
+      "completed_zero": "{{count}} succeeded",
+      "completed_one": "{{count}} succeeded",
+      "completed_other": "{{count}} succeeded",
+      "failed_zero": "{{count}} failed",
+      "failed_one": "{{count}} failed",
+      "failed_other": "{{count}} failed"
+    },
+    "submit": {
+      "uploading": "Uploading images...",
+      "updating": "Updating...",
+      "creating": "Creating...",
+      "update": "Update",
+      "create": "Create deal"
+    },
+    "toasts": {
+      "updateUploadWarningTitle": "Deal updated with upload errors",
+      "updateUploadWarningDescription": "Some new images could not be uploaded",
+      "updateSuccess": "Deal updated successfully",
+      "createUploadWarningTitle": "Deal created with upload errors",
+      "createUploadWarningDescription": "Some images could not be uploaded",
+      "createSuccess": "Deal created successfully!",
+      "createSuccessDescription": "All images were uploaded",
+      "updateError": "Error while updating the deal",
+      "createError": "Error while creating the deal",
+      "validationError": "Please fix the errors in the form"
+    }
+  }
 }

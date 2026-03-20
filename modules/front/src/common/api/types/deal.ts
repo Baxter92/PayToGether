@@ -17,6 +17,7 @@ export interface DealDTO {
   description: string;
   prixDeal: number;
   prixPart: number;
+  prixPartNonReel: number;
   nbParticipants: number;
   dateDebut: string;
   dateFin: string;
@@ -42,6 +43,7 @@ export interface CreateDealDTO {
   description: string;
   prixDeal: number;
   prixPart: number;
+  prixPartNonReel?: number;
   nbParticipants: number;
   dateDebut: string;
   dateFin: string;
@@ -59,6 +61,7 @@ export interface UpdateDealDTO {
   description?: string;
   prixDeal?: number;
   prixPart?: number;
+  prixPartNonReel?: number;
   nbParticipants?: number;
   dateDebut?: string;
   dateFin?: string;

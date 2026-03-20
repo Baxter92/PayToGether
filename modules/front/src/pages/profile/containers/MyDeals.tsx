@@ -32,7 +32,7 @@ export default function MyDeals(): JSX.Element {
   const columnFiltersConfig: IColumnFilter[] = [
     {
       id: "category",
-      label: "Catégorie",
+      label: t("myDeals.filters.category"),
       type: "select",
       options: (categoriesData ?? []).map((category) => ({
         label: category.nom,
@@ -41,7 +41,7 @@ export default function MyDeals(): JSX.Element {
     },
     {
       id: "city",
-      label: "Ville",
+      label: t("myDeals.filters.city"),
       type: "select",
       options: (villesData ?? []).map((ville) => ({
         label: ville,
@@ -50,7 +50,7 @@ export default function MyDeals(): JSX.Element {
     },
     {
       id: "groupPrice",
-      label: "Prix max",
+      label: t("myDeals.filters.maxPrice"),
       type: "number",
     },
   ];
@@ -69,7 +69,7 @@ export default function MyDeals(): JSX.Element {
           leftIcon={<Plus className="w-4 h-4" />}
           onClick={() => setAddDealModalOpen(true)}
         >
-          Ajouter une offre
+          {t("myDeals.addOffer")}
         </Button>
       </HStack>
 

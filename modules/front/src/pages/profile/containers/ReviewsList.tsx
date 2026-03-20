@@ -1,6 +1,7 @@
 import { DataTable, StarRating } from "@/common/components";
 import { Badge } from "@/common/components/ui/badge";
 import { Heading } from "@/common/containers/Heading";
+import { useI18n } from "@/common/hooks/useI18n";
 import { timeAgo } from "@/common/utils/date";
 import type { ColumnDef } from "@tanstack/react-table";
 import { EyeIcon, Phone, ReplyIcon, Trash2Icon } from "lucide-react";
@@ -23,23 +24,25 @@ export interface Review {
 }
 
 const ReviewStatusBadge: React.FC<{ status: ReviewStatus }> = ({ status }) => {
+  const { t } = useI18n("profile");
+
   switch (status) {
     case "published":
       return (
         <Badge variant="outline" colorScheme="success" size="sm">
-          Publié
+          {t("reviewsSection.status.published")}
         </Badge>
       );
     case "pending":
       return (
         <Badge variant="outline" colorScheme="warning" size="sm">
-          En attente
+          {t("reviewsSection.status.pending")}
         </Badge>
       );
     case "hidden":
       return (
         <Badge variant="outline" colorScheme="secondary" size="sm">
-          Masqué
+          {t("reviewsSection.status.hidden")}
         </Badge>
       );
     default:
@@ -56,23 +59,25 @@ export default function ReviewsList({
   data,
   isMyReviews = false,
 }: IReviewsListProps) {
+  const { t } = useI18n("profile");
+
   const columns: ColumnDef<Review, any>[] = [
     {
-      header: "Commande",
+      header: t("reviewsSection.table.order"),
       accessorKey: "orderNumber",
       cell: ({ getValue }) => (
         <span className="font-medium">{getValue<string>()}</span>
       ),
     },
     {
-      header: "Offre",
+      header: t("reviewsSection.table.deal"),
       accessorKey: "dealTitle",
       cell: ({ getValue }) => (
         <span className="text-sm">{getValue<string>()}</span>
       ),
     },
     {
-      header: "Client",
+      header: t("reviewsSection.table.customer"),
       accessorFn: (row) => row.buyer.name,
       id: "buyer",
       cell: ({ row }) => (
@@ -85,21 +90,21 @@ export default function ReviewsList({
       ),
     },
     {
-      header: "Note",
+      header: t("reviewsSection.table.rating"),
       accessorKey: "rating",
       cell: ({ getValue }) => (
         <StarRating value={getValue<number>()} size="sm" />
       ),
     },
     {
-      header: "Commentaire",
+      header: t("reviewsSection.table.comment"),
       accessorKey: "comment",
       cell: ({ getValue }) => (
         <p className="max-w-md truncate text-sm">{getValue<string>()}</p>
       ),
     },
     {
-      header: "Date",
+      header: t("reviewsSection.table.date"),
       accessorKey: "createdAt",
       cell: ({ getValue }) => {
         const v = getValue<string>();
@@ -107,7 +112,7 @@ export default function ReviewsList({
           <div className="flex flex-col">
             <span className="text-sm">{new Date(v).toLocaleDateString()}</span>
             <span className="text-xs text-muted-foreground">
-              il y a {timeAgo(v)}
+              {t("reviewsSection.timeAgo", { value: timeAgo(v) })}
             </span>
           </div>
         );
@@ -116,7 +121,7 @@ export default function ReviewsList({
     ...(isMyReviews
       ? [
         {
-          header: "Statut",
+          header: t("reviewsSection.table.status"),
           accessorKey: "status",
           cell: ({ getValue }: { getValue: () => ReviewStatus }) => (
             <ReviewStatusBadge status={getValue()} />
@@ -129,8 +134,8 @@ export default function ReviewsList({
     <section>
       <Heading
         level={2}
-        title="Avis des clients"
-        description="Historique des avis"
+        title={t("reviewsSection.title")}
+        description={t("reviewsSection.description")}
         underline
       />
 
@@ -138,32 +143,32 @@ export default function ReviewsList({
         columns={columns}
         data={data}
         searchKey={["orderNumber", "buyer.name", "dealTitle", "comment"]}
-        searchPlaceholder="Commande, client, offre, commentaire..."
+        searchPlaceholder={t("reviewsSection.searchPlaceholder")}
         pageSizeOptions={[10, 25, 50]}
         enableSelection={false}
         showSelectionCount
         enableRowNumber
         actionsRow={() => [
           {
-            tooltip: "Voir",
+            tooltip: t("reviewsSection.actions.view"),
             leftIcon: <EyeIcon className="w-4 h-4" />,
           },
           ...(isMyReviews
             ? [
               {
-                tooltip: "Supprimer",
+                tooltip: t("reviewsSection.actions.delete"),
                 leftIcon: <Trash2Icon className="w-4 h-4" />,
                 colorScheme: "danger" as const,
               },
             ]
             : []),
           {
-            tooltip: "Répondre",
+            tooltip: t("reviewsSection.actions.reply"),
             colorScheme: "secondary" as const,
             leftIcon: <ReplyIcon className="w-4 h-4" />,
           },
           {
-            tooltip: "Contacter le client",
+            tooltip: t("reviewsSection.actions.contactCustomer"),
             colorScheme: "danger" as const,
             leftIcon: <Phone className="w-4 h-4" />,
           },

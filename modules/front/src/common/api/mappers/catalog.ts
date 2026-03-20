@@ -35,6 +35,7 @@ export const mapDealToView = (deal: DealDTO) => {
     image,
     originalPrice: Number(deal.prixDeal) || 0,
     groupPrice: Number(deal.prixPart) || 0,
+    strikePrice: Number(deal.prixPartNonReel) || 0,
     unit: 1,
     sold: deal.nombrePartsAchetees,
     participants: deal.nombreParticipantsReel,

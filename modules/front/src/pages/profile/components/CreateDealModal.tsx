@@ -33,6 +33,7 @@ import { toast } from "sonner";
 import { dealSchema } from "@/common/schemas/deal.schema";
 import { cn } from "@/common/utils";
 import { useAuth } from "@/common/context/AuthContext";
+import { useI18n } from "@/common/hooks/useI18n";
 
 /* ==============================
    Constants
@@ -76,7 +77,9 @@ const buildPayload = (
       Number(formData.originalPrice) ||
       Number(formData.price) * Number(formData.partsTotal || 1),
     prixPart: Number(formData.price),
-    nbParticipants: Number(formData.partsTotal),
+    prixPartNonReel: formData.prixPartNonReel
+      ? Number(formData.prixPartNonReel)
+      : undefined,
     dateDebut,
     dateFin,
     dateExpiration,
@@ -89,6 +92,7 @@ const buildPayload = (
       .filter(Boolean),
     ville,
     pays,
+    nbParticipants: Number(formData.partsTotal),
     listeImages: images.map((img): Partial<ImageResponse> => {
       return {
         ...img,
@@ -111,6 +115,7 @@ function CropModal({
   onClose: () => void;
   onApply: (area: any) => void;
 }) {
+  const { t } = useI18n("profile");
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedArea, setCroppedArea] = useState<any>(null);
@@ -124,9 +129,11 @@ function CropModal({
       <DialogContent className="max-w-3xl">
         <div className="space-y-4">
           <div>
-            <h3 className="text-lg font-semibold">Recadrer l'image</h3>
+            <h3 className="text-lg font-semibold">
+              {t("createDealModal.crop.title")}
+            </h3>
             <p className="text-sm text-muted-foreground">
-              Ajustez le cadrage et le zoom de votre image
+              {t("createDealModal.crop.description")}
             </p>
           </div>
 
@@ -144,7 +151,9 @@ function CropModal({
 
           <div>
             <label className="text-sm font-medium mb-2 block">
-              Zoom: {Math.round(zoom * 100)}%
+              {t("createDealModal.crop.zoom", {
+                value: Math.round(zoom * 100),
+              })}
             </label>
             <input
               type="range"
@@ -159,14 +168,14 @@ function CropModal({
 
           <div className="flex justify-end gap-3 pt-4 border-t">
             <Button type="button" variant="outline" onClick={onClose}>
-              Annuler
+              {t("cancel")}
             </Button>
             <Button
               type="button"
               onClick={() => onApply(croppedArea)}
               disabled={!croppedArea}
             >
-              Appliquer le recadrage
+              {t("createDealModal.crop.apply")}
             </Button>
           </div>
         </div>
@@ -188,6 +197,7 @@ function ImagesField({
   form: any;
   dealUuid?: string;
 }) {
+  const { t } = useI18n("profile");
   const [cropState, setCropState] = useState<{
     src: string;
     index: number;
@@ -218,7 +228,7 @@ function ImagesField({
 
       if (files.length > remaining) {
         toast.warning(
-          `Vous ne pouvez ajouter que ${remaining} image(s) supplémentaire(s)`,
+          t("createDealModal.images.maxAdditional", { count: remaining }),
         );
       }
 
@@ -255,9 +265,9 @@ function ImagesField({
         }
       });
       setImages(newImages);
-      toast.success("Image principale mise à jour");
+      toast.success(t("createDealModal.images.primaryUpdated"));
     },
-    [images, setImages],
+    [images, setImages, t],
   );
 
   const openCrop = useCallback(
@@ -303,9 +313,11 @@ function ImagesField({
             <ImageIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Galerie d'images</p>
+            <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
+              {t("createDealModal.images.title")}
+            </p>
             <p className="text-xs text-gray-600 dark:text-gray-400">
-              JPG, PNG, WEBP • Max 5 MB par image
+              {t("createDealModal.images.formats")}
             </p>
           </div>
         </div>
@@ -335,10 +347,12 @@ function ImagesField({
                 <Upload className="w-8 h-8 text-white" />
               </div>
               <p className="text-base font-bold text-gray-900 dark:text-gray-100 mb-2">
-                Cliquez ou glissez vos images ici
+                {t("createDealModal.images.dropzoneTitle")}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-                Jusqu'à {maxFiles} images haute qualité
+                {t("createDealModal.images.dropzoneDescription", {
+                  count: maxFiles,
+                })}
               </p>
             </div>
           </div>
@@ -350,11 +364,10 @@ function ImagesField({
         <div className="space-y-4">
           <div className="flex items-center justify-between px-1">
             <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
-              {images.length} image{images.length > 1 ? "s" : ""} sélectionnée
-              {images.length > 1 ? "s" : ""}
+              {t("createDealModal.images.selected", { count: images.length })}
             </p>
             <p className="text-xs text-blue-600 dark:text-blue-400 font-medium bg-blue-50 dark:bg-blue-950/30 px-3 py-1 rounded-full">
-              ⭐ Choisissez une image principale
+              {t("createDealModal.images.choosePrimary")}
             </p>
           </div>
 
@@ -381,10 +394,10 @@ function ImagesField({
               <ImageIcon className="w-10 h-10 text-gray-300 dark:text-gray-600" />
             </div>
             <p className="text-base text-gray-900 dark:text-gray-100 font-bold mb-1">
-              Aucune image ajoutée
+              {t("createDealModal.images.emptyTitle")}
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Cliquez sur la zone ci-dessus pour commencer
+              {t("createDealModal.images.emptyDescription")}
             </p>
           </div>
         </div>
@@ -416,6 +429,7 @@ function ImageThumbnail({
   onSetPrincipal: () => void;
   onCrop: () => void;
 }) {
+  const { t } = useI18n("profile");
   const isPrincipal = !!image.isPrincipal;
   const isNewFile = !!image.file;
 
@@ -468,7 +482,7 @@ function ImageThumbnail({
                 variant="secondary"
                 className="h-8 w-8 p-0 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 shadow-md"
                 onClick={onSetPrincipal}
-                title="Définir comme image principale"
+                title={t("createDealModal.images.setPrimary")}
               >
                 <Star className="w-4 h-4 text-yellow-500 dark:text-yellow-400" />
               </Button>
@@ -480,7 +494,7 @@ function ImageThumbnail({
                 variant="secondary"
                 className="h-8 w-8 p-0 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 shadow-md"
                 onClick={onCrop}
-                title="Recadrer"
+                title={t("createDealModal.images.crop")}
               >
                 <Crop className="w-4 h-4 text-gray-700 dark:text-gray-300" />
               </Button>
@@ -491,7 +505,7 @@ function ImageThumbnail({
               colorScheme="danger"
               className="h-8 w-8 p-0 shadow-md"
               onClick={onRemove}
-              title="Supprimer"
+              title={t("createDealModal.images.remove")}
             >
               <X className="w-4 h-4" />
             </Button>
@@ -503,7 +517,7 @@ function ImageThumbnail({
           <div className="absolute top-3 left-3">
             <div className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
               <Star className="w-3.5 h-3.5 fill-current" />
-              PRINCIPALE
+              {t("createDealModal.images.primaryBadge")}
             </div>
           </div>
         )}
@@ -521,7 +535,7 @@ function ImageThumbnail({
         <div className="absolute top-3 left-3 group-hover:hidden">
           <div className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
             <Star className="w-3.5 h-3.5 fill-current" />
-            PRINCIPALE
+            {t("createDealModal.images.primaryBadge")}
           </div>
         </div>
       )}
@@ -534,6 +548,7 @@ function ImageThumbnail({
 ============================== */
 
 function HighlightsField({ field, form }: { field: any; form: any }) {
+  const { t } = useI18n("profile");
   const [inputValue, setInputValue] = useState("");
 
   const highlightsString = form.watch(field.name) as string | undefined;
@@ -582,7 +597,7 @@ function HighlightsField({ field, form }: { field: any; form: any }) {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Ex: Menu gastronomique 3 plats..."
+          placeholder={t("createDealModal.highlights.placeholder")}
           wrapperClassName="flex-1"
         />
         <Button
@@ -593,16 +608,14 @@ function HighlightsField({ field, form }: { field: any; form: any }) {
           className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
         >
           <Plus className="w-4 h-4 mr-1.5" />
-          Ajouter
+          {t("createDealModal.highlights.add")}
         </Button>
       </HStack>
 
       {highlights.length > 0 ? (
         <div className="space-y-3">
           <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
-            {highlights.length} point{highlights.length > 1 ? "s" : ""} fort
-            {highlights.length > 1 ? "s" : ""} ajouté
-            {highlights.length > 1 ? "s" : ""}
+            {t("createDealModal.highlights.count", { count: highlights.length })}
           </p>
           <div className="flex flex-wrap gap-2">
             {highlights.map((highlight: string, idx: number) => (
@@ -616,7 +629,7 @@ function HighlightsField({ field, form }: { field: any; form: any }) {
                   type="button"
                   onClick={() => removeHighlight(idx)}
                   className="ml-1 hover:bg-blue-200/60 dark:hover:bg-blue-800/60 rounded-md p-1 transition-colors"
-                  title="Supprimer ce point fort"
+                  title={t("createDealModal.highlights.remove")}
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -631,10 +644,10 @@ function HighlightsField({ field, form }: { field: any; form: any }) {
               <Sparkles className="w-7 h-7 text-gray-400 dark:text-gray-600" />
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400 font-semibold mb-1">
-              Aucun point fort ajouté
+              {t("createDealModal.highlights.emptyTitle")}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-500">
-              Ajoutez les avantages de votre offre
+              {t("createDealModal.highlights.emptyDescription")}
             </p>
           </div>
         </div>
@@ -661,6 +674,7 @@ export function CreateDealModal({
   connectedMerchantUuid?: string;
 }) {
   const { isAdmin } = useAuth();
+  const { t } = useI18n("profile");
   const { data: categoriesData } = useCategories();
   const { data: usersData } = useUsers(undefined, {
     enabled: isAdmin,
@@ -700,10 +714,10 @@ export function CreateDealModal({
 
   const statusItems = useMemo(
     () => [
-      { label: "📝 Brouillon", value: "BROUILLON" },
-      { label: "✅ Publié", value: "PUBLIE" },
+      { label: t("createDealModal.status.draft"), value: "BROUILLON" },
+      { label: t("createDealModal.status.published"), value: "PUBLIE" },
     ],
-    [],
+    [t],
   );
   const hideMerchantField = Boolean(connectedMerchantUuid);
 
@@ -799,24 +813,27 @@ export function CreateDealModal({
           await updateDeal({ id: initialData.uuid, data: payload });
 
           if (updateHasErrors) {
-            toast.warning("Deal mis à jour avec des erreurs d'upload", {
-              description:
-                "Certaines nouvelles images n'ont pas pu être téléchargées",
+            toast.warning(t("createDealModal.toasts.updateUploadWarningTitle"), {
+              description: t(
+                "createDealModal.toasts.updateUploadWarningDescription",
+              ),
             });
           } else {
-            toast.success("✅ Deal mis à jour avec succès");
+            toast.success(t("createDealModal.toasts.updateSuccess"));
           }
         } else {
           // Create new deal
           await createDeal(buildPayload(data, now, connectedMerchantUuid));
 
           if (hasErrors) {
-            toast.warning("Deal créé avec des erreurs d'upload", {
-              description: "Certaines images n'ont pas pu être téléchargées",
+            toast.warning(t("createDealModal.toasts.createUploadWarningTitle"), {
+              description: t(
+                "createDealModal.toasts.createUploadWarningDescription",
+              ),
             });
           } else {
-            toast.success("✨ Deal créé avec succès!", {
-              description: "Toutes les images ont été téléchargées",
+            toast.success(t("createDealModal.toasts.createSuccess"), {
+              description: t("createDealModal.toasts.createSuccessDescription"),
             });
           }
         }
@@ -826,8 +843,8 @@ export function CreateDealModal({
       } catch (error: any) {
         toast.error(
           initialData
-            ? "❌ Erreur lors de la mise à jour du deal"
-            : "❌ Erreur lors de la création du deal",
+            ? t("createDealModal.toasts.updateError")
+            : t("createDealModal.toasts.createError"),
           {
             description: error?.response?.data?.message || error?.message,
           },
@@ -843,133 +860,145 @@ export function CreateDealModal({
       updateHasErrors,
       initialData,
       connectedMerchantUuid,
+      t,
     ],
   );
 
   const formGroups: IFieldGroup[] = useMemo(
     () => [
       {
-        title: "📋 Informations générales",
-        description: "Donnez vie à votre offre avec un titre accrocheur",
+        title: t("createDealModal.sections.general.title"),
+        description: t("createDealModal.sections.general.description"),
         columns: 1,
-        className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
+        className:
+          "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
         fields: [
           {
             type: "text",
             name: "title",
-            label: "Titre du deal",
-            placeholder:
-              "Ex : Dîner romantique pour 2 personnes au restaurant étoilé",
+            label: t("createDealModal.fields.title.label"),
+            placeholder: t("createDealModal.fields.title.placeholder"),
             colSpan: 1,
           },
           {
             type: "textarea",
             name: "description",
-            label: "Description complète",
+            label: t("createDealModal.fields.description.label"),
             colSpan: 1,
-            placeholder:
-              "Décrivez votre offre de manière détaillée et attractive...",
+            placeholder: t("createDealModal.fields.description.placeholder"),
             rows: 4,
           },
         ],
       },
       {
-        title: "🏷️ Catégorie & Statut",
-        description: "Classez votre offre et définissez sa visibilité",
+        title: t("createDealModal.sections.categoryStatus.title"),
+        description: t("createDealModal.sections.categoryStatus.description"),
         columns: 2,
-        className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
+        className:
+          "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
         fields: [
           {
             type: "select",
             name: "categoryId",
-            label: "Catégorie",
-            placeholder: "Choisir une catégorie",
+            label: t("createDealModal.fields.category.label"),
+            placeholder: t("createDealModal.fields.category.placeholder"),
             items: categoryItems,
           },
           {
             type: "select",
             name: "status",
-            label: "Statut de publication",
-            placeholder: "Choisir le statut",
+            label: t("createDealModal.fields.status.label"),
+            placeholder: t("createDealModal.fields.status.placeholder"),
             items: statusItems,
           },
         ],
       },
       {
-        title: "💰 Tarification",
-        description: "Définissez le prix et la valeur de votre offre",
-        columns: 3,
-        className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
+        title: t("createDealModal.sections.pricing.title"),
+        description: t("createDealModal.sections.pricing.description"),
+        columns: 4,
+        className:
+          "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
         fields: [
           {
             type: "number",
             name: "price",
-            label: "Prix par part",
+            label: t("createDealModal.fields.price.label"),
+            placeholder: "0.00",
+            prefix: "$",
+          },
+          {
+            type: "number",
+            name: "prixPartNonReel",
+            label: t("createDealModal.fields.nonPromoPrice.label"),
             placeholder: "0.00",
             prefix: "$",
           },
           {
             type: "number",
             name: "originalPrice",
-            label: "Prix initial",
+            label: t("createDealModal.fields.originalPrice.label"),
             placeholder: "0.00",
             prefix: "$",
           },
           {
             type: "number",
             name: "partsTotal",
-            label: "Nombre de parts",
+            label: t("createDealModal.fields.partsTotal.label"),
             placeholder: "0",
           },
         ],
       },
       {
-        title: "📅 Disponibilité",
-        description: "Configurez les dates de début, de fin et d'expiration",
+        title: t("createDealModal.sections.availability.title"),
+        description: t("createDealModal.sections.availability.description"),
         columns: 3,
-        className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
+        className:
+          "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
         fields: [
           {
             type: "date",
             name: "dateDebut",
-            label: "Date de début",
+            label: t("createDealModal.fields.startDate.label"),
           },
           {
             type: "date",
             name: "dateFin",
-            label: "Date de fin",
+            label: t("createDealModal.fields.endDate.label"),
           },
           {
             type: "date",
             name: "dateExpiration",
-            label: "Date d'expiration",
+            label: t("createDealModal.fields.expirationDate.label"),
           },
         ],
       },
       {
-        title: "📍 Localisation",
-        description: "Où se déroule votre offre ?",
+        title: t("createDealModal.sections.location.title"),
+        description: t("createDealModal.sections.location.description"),
         columns: 1,
-        className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
+        className:
+          "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
         fields: [
           {
             type: "text",
             name: "location",
-            label: "Lieu",
-            placeholder: "Ville, Quartier (Ex: Montréal – Côte-des-Neiges)",
+            label: t("createDealModal.fields.location.label"),
+            placeholder: t("createDealModal.fields.location.placeholder"),
           },
         ],
       },
       {
-        title: "✨ Points forts de l'offre",
-        description: "Mettez en avant ce qui rend votre offre unique",
+        title: t("createDealModal.sections.highlights.title"),
+        description: t("createDealModal.sections.highlights.description"),
         columns: 1,
-        className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
+        className:
+          "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
         fields: [
           {
             type: "textarea",
             name: "highlights",
-            label: "Points forts",
+            label: t("createDealModal.fields.highlights.label"),
             render: (field, form) => (
               <HighlightsField field={field} form={form} />
             ),
@@ -977,30 +1006,32 @@ export function CreateDealModal({
         ],
       },
       {
-        title: "👤 Fournisseur",
-        description: "Qui propose cette offre ?",
+        title: t("createDealModal.sections.supplier.title"),
+        description: t("createDealModal.sections.supplier.description"),
         columns: 1,
-        className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
+        className:
+          "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
         hidden: hideMerchantField,
         fields: [
           {
             type: "select" as const,
             name: "merchantId",
-            label: "Nom du fournisseur",
-            placeholder: "Sélectionner un fournisseur",
+            label: t("createDealModal.fields.merchant.label"),
+            placeholder: t("createDealModal.fields.merchant.placeholder"),
             items: userItems,
           },
         ],
       },
       {
-        title: "📸 Galerie d'images",
-        description: "Ajoutez jusqu'à 5 images attractives pour votre offre",
-        className: "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
+        title: t("createDealModal.sections.images.title"),
+        description: t("createDealModal.sections.images.description"),
+        className:
+          "bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6",
         fields: [
           {
             type: "file" as const,
             name: "images",
-            label: "Images",
+            label: t("createDealModal.fields.images.label"),
             maxFiles: MAX_IMAGES,
             render: (field, form) => (
               <ImagesField
@@ -1013,7 +1044,7 @@ export function CreateDealModal({
         ],
       },
     ],
-    [categoryItems, statusItems, userItems, hideMerchantField, initialData],
+    [categoryItems, statusItems, userItems, hideMerchantField, initialData, t],
   );
 
   const defaultValues = useMemo(() => {
@@ -1040,7 +1071,7 @@ export function CreateDealModal({
         categoryId: initialData.categorieUuid,
         status: initialData.statut,
         price: initialData.prixPart,
-        originalPrice: initialData.prixDeal,
+        originalPrice: initialData.prixPartNonReel || initialData.prixDeal,
         partsTotal: initialData.nbParticipants,
         dateDebut: parseDate(initialData.dateDebut),
         dateFin: parseDate(initialData.dateFin),
@@ -1076,12 +1107,14 @@ export function CreateDealModal({
             </div>
             <div className="flex-1">
               <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                {initialData ? "Modifier le deal" : "Créer un nouveau deal"}
+                {initialData
+                  ? t("createDealModal.header.editTitle")
+                  : t("createDealModal.header.createTitle")}
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 font-normal mt-0.5">
                 {initialData
-                  ? "Mettre à jour les informations de l'offre"
-                  : "Remplissez les informations pour publier votre offre exceptionnelle"}
+                  ? t("createDealModal.header.editDescription")
+                  : t("createDealModal.header.createDescription")}
               </p>
             </div>
           </div>
@@ -1095,7 +1128,7 @@ export function CreateDealModal({
                 <div className="flex items-center gap-2">
                   <Loader2 className="w-5 h-5 text-blue-600 dark:text-blue-400 animate-spin" />
                   <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                    Upload des images en cours...
+                    {t("createDealModal.progress.uploading")}
                   </span>
                 </div>
                 <span className="text-base font-bold text-blue-600 dark:text-blue-400">
@@ -1114,12 +1147,16 @@ export function CreateDealModal({
                 <div className="flex items-center gap-4">
                   <span className="flex items-center gap-1.5 text-green-700 dark:text-green-400 font-semibold bg-green-50 dark:bg-green-950/30 px-2.5 py-1 rounded-full">
                     <Check className="w-3.5 h-3.5" />
-                    {uploadProgress.completed} réussie(s)
+                    {t("createDealModal.progress.completed", {
+                      count: uploadProgress.completed,
+                    })}
                   </span>
                   {uploadProgress.failed > 0 && (
                     <span className="flex items-center gap-1.5 text-red-700 dark:text-red-400 font-semibold bg-red-50 dark:bg-red-950/30 px-2.5 py-1 rounded-full">
                       <X className="w-3.5 h-3.5" />
-                      {uploadProgress.failed} échouée(s)
+                      {t("createDealModal.progress.failed", {
+                        count: uploadProgress.failed,
+                      })}
                     </span>
                   )}
                 </div>
@@ -1143,18 +1180,18 @@ export function CreateDealModal({
               isUpdatingEnhanced ||
               isUploadingUpdate
                 ? isUploading || isUploadingUpdate
-                  ? "⏳ Upload des images..."
+                  ? t("createDealModal.submit.uploading")
                   : isUpdatingEnhanced
-                    ? "⏳ Mise à jour en cours..."
-                    : "⏳ Création en cours..."
+                    ? t("createDealModal.submit.updating")
+                    : t("createDealModal.submit.creating")
                 : initialData
-                  ? "🔁 Mettre à jour"
-                  : "✨ Créer le deal"
+                  ? t("createDealModal.submit.update")
+                  : t("createDealModal.submit.create")
             }
             onSubmit={handleSubmit}
             onError={(errors) => {
               console.error("Form validation errors:", errors);
-              toast.error("Veuillez corriger les erreurs dans le formulaire");
+              toast.error(t("createDealModal.toasts.validationError"));
             }}
             isLoading={
               isCreating ||

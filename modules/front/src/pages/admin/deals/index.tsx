@@ -39,6 +39,7 @@ export default function AdminDeals(): ReactElement {
       image: firstImage || "/placeholder.svg",
       originalPrice: deal.prixDeal,
       groupPrice: deal.prixPart,
+      strikePrice: deal.prixPartNonReel || 0,
       unit: 1,
       sold: deal.nombrePartsAchetees,
       participants: deal.nombreParticipantsReel,

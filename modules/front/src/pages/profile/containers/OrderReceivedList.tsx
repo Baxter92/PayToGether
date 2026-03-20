@@ -20,6 +20,7 @@ import UploadSellerInvoiceModal from "@/pages/admin/orders/components/UploadSell
 import ValidateCustomerInvoicesModal from "@/pages/admin/orders/components/ValidateCustomerInvoicesModal";
 
 export default function OrdersReceivedList(): JSX.Element {
+  const { t } = useI18n("profile");
   const { t: tStatus } = useI18n("status");
   const { user } = useAuth();
 
@@ -116,23 +117,23 @@ export default function OrdersReceivedList(): JSX.Element {
 
   const columns: ColumnDef<any, any>[] = [
     {
-      header: "Commande",
+      header: t("ordersReceivedSection.table.order"),
       accessorKey: "numeroCommande",
       cell: ({ getValue }) => (
         <span className="font-medium">{getValue<string>()}</span>
       ),
     },
     {
-      header: "Deal",
+      header: t("ordersReceivedSection.table.deal"),
       accessorKey: "dealTitre",
     },
     {
-      header: "Montant",
+      header: t("ordersReceivedSection.table.amount"),
       accessorKey: "montantTotalPaiements",
       cell: ({ getValue }) => formatCurrency(getValue<number>()),
     },
     {
-      header: "Date",
+      header: t("ordersReceivedSection.table.date"),
       accessorKey: "dateCreation",
       cell: ({ getValue }) => {
         const v = getValue<string>();
@@ -147,12 +148,12 @@ export default function OrdersReceivedList(): JSX.Element {
       },
     },
     {
-      header: "Statut",
+      header: t("ordersReceivedSection.table.status"),
       accessorKey: "statut",
       cell: ({ getValue }) => getStatusBadge(getValue<string>()),
     },
     {
-      header: "Actions",
+      header: t("ordersReceivedSection.table.actions"),
       cell: ({ row }) => {
         const order = row.original;
         const statut = order.statut;
@@ -170,7 +171,7 @@ export default function OrdersReceivedList(): JSX.Element {
                 }}
               >
                 <Upload className="h-4 w-4 mr-1" />
-                Facture
+                {t("ordersReceivedSection.actions.invoice")}
               </Button>
             )}
 
@@ -185,7 +186,7 @@ export default function OrdersReceivedList(): JSX.Element {
                 }}
               >
                 <CheckCircle2 className="h-4 w-4 mr-1" />
-                Valider
+                {t("ordersReceivedSection.actions.validate")}
               </Button>
             )}
 
@@ -200,7 +201,7 @@ export default function OrdersReceivedList(): JSX.Element {
                 }}
               >
                 <EyeIcon className="h-4 w-4 mr-1" />
-                Voir
+                {t("ordersReceivedSection.actions.view")}
               </Button>
             )}
           </div>
@@ -220,7 +221,7 @@ export default function OrdersReceivedList(): JSX.Element {
   if (error) {
     return (
       <div className="flex h-[400px] items-center justify-center text-destructive">
-        Erreur lors du chargement des commandes
+        {t("ordersReceivedSection.loadError")}
       </div>
     );
   }
@@ -229,8 +230,8 @@ export default function OrdersReceivedList(): JSX.Element {
     <section>
       <Heading
         level={2}
-        title="Commandes reçues"
-        description="Gérez les commandes de vos deals"
+        title={t("ordersReceivedSection.title")}
+        description={t("ordersReceivedSection.description")}
         underline
       />
 
@@ -238,7 +239,7 @@ export default function OrdersReceivedList(): JSX.Element {
         columns={columns}
         data={orders}
         searchKey={["numeroCommande", "dealTitre"]}
-        searchPlaceholder="Rechercher une commande..."
+        searchPlaceholder={t("ordersReceivedSection.searchPlaceholder")}
         pageSizeOptions={[10, 25, 50]}
         enableSelection={false}
         enableRowNumber

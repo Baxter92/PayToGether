@@ -3,6 +3,7 @@ export type Deal = {
   title: string;
   shortSubtitle?: string;
   priceOriginal: number;
+  priceOriginalStrike?: number;
   priceDeal?: number;
   pricePerPart: number;
   savingsText?: string;

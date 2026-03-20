@@ -159,6 +159,11 @@ export default function DealCard({
               <span className="text-3xl font-extrabold bg-gradient-to-r from-primary to-primary-600 bg-clip-text text-transparent">
                 {formatCurrency(deal.groupPrice)}
               </span>
+              {deal.strikePrice && deal.strikePrice > 0 ? (
+                <span className="text-sm line-through text-muted-foreground">
+                  {formatCurrency(deal.strikePrice)}
+                </span>
+              ) : null}
             </div>
           </div>
 

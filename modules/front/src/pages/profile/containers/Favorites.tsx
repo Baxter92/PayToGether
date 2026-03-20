@@ -9,8 +9,10 @@ import { Link } from "react-router-dom";
 import { PATHS } from "@/common/constants/path";
 import Grid from "@/common/components/Grid";
 import { Heading } from "@/common/containers/Heading";
+import { useI18n } from "@/common/hooks/useI18n";
 
 export default function Favorites() {
+  const { t } = useI18n("profile");
   const { data: dealsData, isLoading } = useDealsByStatut(StatutDeal.PUBLIE);
   const deals = (dealsData ?? []).map(mapDealToView);
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
@@ -39,10 +41,10 @@ export default function Favorites() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <Heading
-            title="Favoris"
-            description={`${favoriteDeals.length} offre${
-              favoriteDeals.length !== 1 ? "s" : ""
-            } sauvegardée${favoriteDeals.length !== 1 ? "s" : ""}`}
+            title={t("favoritesSection.title")}
+            description={t("favoritesSection.count", {
+              count: favoriteDeals.length,
+            })}
             underline
           />
         </div>
@@ -54,7 +56,7 @@ export default function Favorites() {
             className="flex items-center gap-2"
           >
             <Trash2 className="w-4 h-4" />
-            Tout supprimer
+            {t("favoritesSection.clearAll")}
           </Button>
         )}
       </div>
@@ -62,7 +64,7 @@ export default function Favorites() {
       {/* Favorites Grid */}
       {isLoading ? (
         <div className="text-center py-8 text-muted-foreground">
-          Chargement...
+          {t("favoritesSection.loading")}
         </div>
       ) : favoriteDeals.length > 0 ? (
         <Grid cols={{ md: 3 }} gap={10}>
@@ -72,7 +74,7 @@ export default function Favorites() {
               <button
                 onClick={() => removeFavorite(String(deal.id))}
                 className="absolute top-3 right-3 p-2 bg-white/90 hover:bg-red-50 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100"
-                title="Retirer des favoris"
+                title={t("favoritesSection.remove")}
               >
                 <Trash2 className="w-4 h-4 text-red-500" />
               </button>
@@ -83,16 +85,15 @@ export default function Favorites() {
         <div className="text-center py-16 bg-card border border-border rounded-lg">
           <Heart className="w-20 h-20 text-muted-foreground mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-foreground mb-2">
-            Aucun favori pour le moment
+            {t("favoritesSection.emptyTitle")}
           </h2>
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            Parcourez nos offres et cliquez sur le cœur pour sauvegarder vos
-            deals préférés.
+            {t("favoritesSection.emptyDescription")}
           </p>
           <Link to={PATHS.HOME}>
             <Button className="flex items-center gap-2">
               <ShoppingBag className="w-5 h-5" />
-              Découvrir les offres
+              {t("favoritesSection.discover")}
             </Button>
           </Link>
         </div>
@@ -101,10 +102,11 @@ export default function Favorites() {
       {/* Tips Section */}
       {favoriteDeals.length > 0 && (
         <div className="mt-12 bg-primary-50 dark:bg-primary/10 rounded-lg p-6">
-          <h3 className="font-semibold text-foreground mb-2">💡 Astuce</h3>
+          <h3 className="font-semibold text-foreground mb-2">
+            {t("favoritesSection.tipTitle")}
+          </h3>
           <p className="text-muted-foreground text-sm">
-            Les offres sont à durée limitée ! N'attendez pas trop longtemps pour
-            profiter de vos favoris.
+            {t("favoritesSection.tipDescription")}
           </p>
         </div>
       )}

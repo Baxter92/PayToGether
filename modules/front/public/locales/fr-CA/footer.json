@@ -1,12 +1,41 @@
 {
-  "description": "La plateforme de deals collaboratifs #1 au Cameroun. Économisez en groupe sur les meilleures offres locales.",
-  "links": "Liens rapides",
-  "privacy": "Confidentialité",
-  "terms": "Conditions d'utilisation",
-  "contact": "Contactez-nous",
+  "description": "Économisez en groupe sur les meilleures offres locales.",
   "rights": "Tous droits réservés.",
-  "categories": "Catégories",
-  "contactTitle": "Contact",
-  "privacyPolicy": "Politique de confidentialité",
-  "legalNotice": "Mentions légales"
+  "contact": {
+    "location": "Calgary, Alberta",
+    "phone": "+1 587 582 4298",
+    "email": "contact@dealtogether.ca"
+  },
+  "sections": {
+    "company": {
+      "title": "DealTogether",
+      "about": "À propos",
+      "mission": "Notre mission",
+      "contact": "Contact"
+    },
+    "buyers": {
+      "title": "Acheteurs",
+      "howItWorks": "Comment ça marche",
+      "faq": "FAQ",
+      "refunds": "Remboursement"
+    },
+    "sellers": {
+      "title": "Vendeurs",
+      "becomeSeller": "Devenir vendeur",
+      "sellerTerms": "Conditions vendeurs",
+      "supplierCharter": "Charte fournisseur"
+    },
+    "legal": {
+      "title": "Légal",
+      "terms": "Conditions d'utilisation",
+      "privacy": "Politique de confidentialité",
+      "cookies": "Cookies",
+      "legalNotice": "Mentions légales"
+    },
+    "support": {
+      "title": "Support",
+      "helpCenter": "Centre d'aide",
+      "reportIssue": "Signaler un problème"
+    }
+  }
 }

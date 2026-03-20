@@ -68,5 +68,264 @@
   "deleteAccountDescription": "Supprimez votre compte et supprimez toutes vos données.",
   "cancel": "Annuler",
   "confirm": "Confirmer",
-  "adminDashboard": "Tableau de bord Admin"
+  "adminDashboard": "Tableau de bord Admin",
+  "myDeals": {
+    "addOffer": "Ajouter une offre",
+    "filters": {
+      "category": "Catégorie",
+      "city": "Ville",
+      "maxPrice": "Prix max"
+    }
+  },
+  "favoritesSection": {
+    "title": "Favoris",
+    "count_zero": "{{count}} offre sauvegardée",
+    "count_one": "{{count}} offre sauvegardée",
+    "count_other": "{{count}} offres sauvegardées",
+    "clearAll": "Tout supprimer",
+    "loading": "Chargement...",
+    "remove": "Retirer des favoris",
+    "emptyTitle": "Aucun favori pour le moment",
+    "emptyDescription": "Parcourez nos offres et cliquez sur le cœur pour sauvegarder vos deals préférés.",
+    "discover": "Découvrir les offres",
+    "tipTitle": "Astuce",
+    "tipDescription": "Les offres sont à durée limitée. N'attendez pas trop longtemps pour profiter de vos favoris."
+  },
+  "reviewsSection": {
+    "title": "Avis des clients",
+    "description": "Historique des avis",
+    "searchPlaceholder": "Commande, client, offre, commentaire...",
+    "timeAgo": "il y a {{value}}",
+    "status": {
+      "published": "Publié",
+      "pending": "En attente",
+      "hidden": "Masqué"
+    },
+    "table": {
+      "order": "Commande",
+      "deal": "Offre",
+      "customer": "Client",
+      "rating": "Note",
+      "comment": "Commentaire",
+      "date": "Date",
+      "status": "Statut"
+    },
+    "actions": {
+      "view": "Voir",
+      "delete": "Supprimer",
+      "reply": "Répondre",
+      "contactCustomer": "Contacter le client"
+    }
+  },
+  "paymentsSection": {
+    "title": "Paiements reçus",
+    "description": "Historique des paiements effectués sur votre compte.",
+    "searchPlaceholder": "Rechercher par commande, acheteur...",
+    "timeAgo": "il y a {{value}}",
+    "methods": {
+      "stripe": "Stripe",
+      "paypal": "PayPal"
+    },
+    "status": {
+      "succeeded": "Payé",
+      "pending": "En attente",
+      "failed": "Échoué",
+      "refunded": "Remboursé"
+    },
+    "table": {
+      "order": "Commande",
+      "buyer": "Acheteur",
+      "amount": "Montant",
+      "method": "Méthode",
+      "date": "Date",
+      "status": "Statut"
+    },
+    "actions": {
+      "view": "Voir",
+      "markPaid": "Marquer payé",
+      "refund": "Rembourser",
+      "contactBuyer": "Contacter l'acheteur",
+      "downloadReceipt": "Télécharger reçu"
+    }
+  },
+  "ordersReceivedSection": {
+    "title": "Commandes reçues",
+    "description": "Gérez les commandes de vos deals",
+    "searchPlaceholder": "Rechercher une commande...",
+    "loadError": "Erreur lors du chargement des commandes",
+    "table": {
+      "order": "Commande",
+      "deal": "Deal",
+      "amount": "Montant",
+      "date": "Date",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "actions": {
+      "invoice": "Facture",
+      "validate": "Valider",
+      "view": "Voir"
+    }
+  },
+  "createDealModal": {
+    "header": {
+      "createTitle": "Créer un nouveau deal",
+      "createDescription": "Remplissez les informations pour publier votre offre exceptionnelle",
+      "editTitle": "Modifier le deal",
+      "editDescription": "Mettre à jour les informations de l'offre"
+    },
+    "crop": {
+      "title": "Recadrer l'image",
+      "description": "Ajustez le cadrage et le zoom de votre image",
+      "zoom": "Zoom : {{value}}%",
+      "apply": "Appliquer le recadrage"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "published": "Publié"
+    },
+    "sections": {
+      "general": {
+        "title": "Informations générales",
+        "description": "Donnez vie à votre offre avec un titre accrocheur"
+      },
+      "categoryStatus": {
+        "title": "Catégorie & Statut",
+        "description": "Classez votre offre et définissez sa visibilité"
+      },
+      "pricing": {
+        "title": "Tarification",
+        "description": "Définissez le prix et la valeur de votre offre"
+      },
+      "availability": {
+        "title": "Disponibilité",
+        "description": "Configurez les dates de début, de fin et d'expiration"
+      },
+      "location": {
+        "title": "Localisation",
+        "description": "Où se déroule votre offre ?"
+      },
+      "highlights": {
+        "title": "Points forts de l'offre",
+        "description": "Mettez en avant ce qui rend votre offre unique"
+      },
+      "supplier": {
+        "title": "Fournisseur",
+        "description": "Qui propose cette offre ?"
+      },
+      "images": {
+        "title": "Galerie d'images",
+        "description": "Ajoutez jusqu'à 5 images attractives pour votre offre"
+      }
+    },
+    "fields": {
+      "title": {
+        "label": "Titre du deal",
+        "placeholder": "Ex : Dîner romantique pour 2 personnes au restaurant étoilé"
+      },
+      "description": {
+        "label": "Description complète",
+        "placeholder": "Décrivez votre offre de manière détaillée et attractive..."
+      },
+      "category": {
+        "label": "Catégorie",
+        "placeholder": "Choisir une catégorie"
+      },
+      "status": {
+        "label": "Statut de publication",
+        "placeholder": "Choisir le statut"
+      },
+      "price": {
+        "label": "Prix par part"
+      },
+      "nonPromoPrice": {
+        "label": "Prix non promotionnel"
+      },
+      "originalPrice": {
+        "label": "Prix initial"
+      },
+      "partsTotal": {
+        "label": "Nombre de parts"
+      },
+      "startDate": {
+        "label": "Date de début"
+      },
+      "endDate": {
+        "label": "Date de fin"
+      },
+      "expirationDate": {
+        "label": "Date d'expiration"
+      },
+      "location": {
+        "label": "Lieu",
+        "placeholder": "Ville, Quartier (Ex : Montréal – Côte-des-Neiges)"
+      },
+      "highlights": {
+        "label": "Points forts"
+      },
+      "merchant": {
+        "label": "Nom du fournisseur",
+        "placeholder": "Sélectionner un fournisseur"
+      },
+      "images": {
+        "label": "Images"
+      }
+    },
+    "highlights": {
+      "placeholder": "Ex : Menu gastronomique 3 plats...",
+      "add": "Ajouter",
+      "count_zero": "{{count}} point fort ajouté",
+      "count_one": "{{count}} point fort ajouté",
+      "count_other": "{{count}} points forts ajoutés",
+      "remove": "Supprimer ce point fort",
+      "emptyTitle": "Aucun point fort ajouté",
+      "emptyDescription": "Ajoutez les avantages de votre offre"
+    },
+    "images": {
+      "title": "Galerie d'images",
+      "formats": "JPG, PNG, WEBP • Max 5 MB par image",
+      "maxAdditional": "Vous ne pouvez ajouter que {{count}} image(s) supplémentaire(s)",
+      "primaryUpdated": "Image principale mise à jour",
+      "dropzoneTitle": "Cliquez ou glissez vos images ici",
+      "dropzoneDescription": "Jusqu'à {{count}} images haute qualité",
+      "selected_zero": "{{count}} image sélectionnée",
+      "selected_one": "{{count}} image sélectionnée",
+      "selected_other": "{{count}} images sélectionnées",
+      "choosePrimary": "Choisissez une image principale",
+      "emptyTitle": "Aucune image ajoutée",
+      "emptyDescription": "Cliquez sur la zone ci-dessus pour commencer",
+      "setPrimary": "Définir comme image principale",
+      "crop": "Recadrer",
+      "remove": "Supprimer",
+      "primaryBadge": "PRINCIPALE"
+    },
+    "progress": {
+      "uploading": "Upload des images en cours...",
+      "completed_zero": "{{count}} réussie",
+      "completed_one": "{{count}} réussie",
+      "completed_other": "{{count}} réussies",
+      "failed_zero": "{{count}} échouée",
+      "failed_one": "{{count}} échouée",
+      "failed_other": "{{count}} échouées"
+    },
+    "submit": {
+      "uploading": "Upload des images...",
+      "updating": "Mise à jour en cours...",
+      "creating": "Création en cours...",
+      "update": "Mettre à jour",
+      "create": "Créer le deal"
+    },
+    "toasts": {
+      "updateUploadWarningTitle": "Deal mis à jour avec des erreurs d'upload",
+      "updateUploadWarningDescription": "Certaines nouvelles images n'ont pas pu être téléchargées",
+      "updateSuccess": "Deal mis à jour avec succès",
+      "createUploadWarningTitle": "Deal créé avec des erreurs d'upload",
+      "createUploadWarningDescription": "Certaines images n'ont pas pu être téléchargées",
+      "createSuccess": "Deal créé avec succès !",
+      "createSuccessDescription": "Toutes les images ont été téléchargées",
+      "updateError": "Erreur lors de la mise à jour du deal",
+      "createError": "Erreur lors de la création du deal",
+      "validationError": "Veuillez corriger les erreurs dans le formulaire"
+    }
+  }
 }
