@@ -26,6 +26,7 @@ public class DealModele {
     private String description;
     private BigDecimal prixDeal;
     private BigDecimal prixPart;
+    private BigDecimal prixPartNonReel; // Prix réel de la part (peut être différent du prix affiché)
     private Integer nbParticipants;
     private LocalDateTime dateDebut;
     private LocalDateTime dateFin;

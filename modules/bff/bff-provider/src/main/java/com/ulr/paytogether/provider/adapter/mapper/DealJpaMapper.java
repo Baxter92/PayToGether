@@ -27,6 +27,7 @@ public class DealJpaMapper {
                 .description(jpaDeal.getDescription())
                 .prixDeal(jpaDeal.getPrixDeal())
                 .prixPart(jpaDeal.getPrixPart())
+                .prixPartNonReel(jpaDeal.getPrixPartNonReel())
                 .nbParticipants(jpaDeal.getNbParticipants())
                 .dateDebut(jpaDeal.getDateDebut())
                 .dateFin(jpaDeal.getDateFin())
@@ -54,6 +55,7 @@ public class DealJpaMapper {
                 .description(modele.getDescription())
                 .prixDeal(modele.getPrixDeal())
                 .prixPart(modele.getPrixPart())
+                .prixPartNonReel(modele.getPrixPartNonReel())
                 .nbParticipants(modele.getNbParticipants())
                 .dateDebut(modele.getDateDebut())
                 .dateFin(modele.getDateFin())
@@ -79,6 +81,7 @@ public class DealJpaMapper {
         entite.setDescription(modele.getDescription());
         entite.setPrixDeal(modele.getPrixDeal());
         entite.setPrixPart(modele.getPrixPart());
+        entite.setPrixPartNonReel(modele.getPrixPartNonReel());
         entite.setNbParticipants(modele.getNbParticipants());
         entite.setDateDebut(modele.getDateDebut());
         entite.setDateFin(modele.getDateFin());
