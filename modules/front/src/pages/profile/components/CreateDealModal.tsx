@@ -1080,6 +1080,7 @@ export function CreateDealModal({
         categoryId: initialData.categorieUuid,
         status: initialData.statut,
         price: initialData.prixPart,
+        prixPartNonReel: initialData.prixPartNonReel,
         originalPrice: initialData.prixPartNonReel || initialData.prixDeal,
         partsTotal: initialData.nbParticipants,
         dateDebut: parseDate(initialData.dateDebut),

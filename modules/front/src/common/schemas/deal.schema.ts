@@ -7,6 +7,7 @@ export const dealSchema = z.object({
   description: z.string().min(10, "Description trop courte"),
 
   price: z.number().min(0, "Le prix doit etre positif"),
+  prixPartNonReel: z.number().optional(),
   originalPrice: z.number().optional(),
 
   partsTotal: z.number().min(1, "Le nombre de parts est requis"),
