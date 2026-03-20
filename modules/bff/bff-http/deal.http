@@ -48,9 +48,9 @@ Content-Type: application/json
 Authorization: Bearer {{access_token}}
 
 ### 3. Récupérer un deal par UUID (GET)
-GET {{base_url}}/api/deals/123e4567-e89b-12d3-a456-426614174000
+GET {{base_url}}/api/deals/822a95f2-e149-4876-827f-670f5484ebd2
 Content-Type: application/json
-Authorization: Bearer {{access_token}}
+#Authorization: Bearer {{access_token}}
 
 ### 4. Mettre à jour un deal (PUT) - Sans images
 # Si listeImages n'est pas présente, les images du deal ne sont pas modifiées
