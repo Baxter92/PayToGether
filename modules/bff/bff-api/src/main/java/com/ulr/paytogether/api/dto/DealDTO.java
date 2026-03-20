@@ -39,6 +39,9 @@ public class DealDTO {
     @Positive(message = "Le prix par part doit être positif")
     private BigDecimal prixPart;
 
+    @Positive(message = "Le prix par part non réel doit être positif")
+    private BigDecimal prixPartNonReel; // Prix réel de la part (optionnel, peut différer du prix affiché)
+
     @NotNull(message = "Le nombre de participants est obligatoire")
     @Positive(message = "Le nombre de participants doit être positif")
     private Integer nbParticipants;

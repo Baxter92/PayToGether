@@ -41,6 +41,9 @@ public class DealJpa {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal prixPart;
 
+    @Column(nullable = true, precision = 10, scale = 2)
+    private BigDecimal prixPartNonReel;
+
     @Column(nullable = false)
     private Integer nbParticipants;
 

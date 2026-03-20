@@ -22,6 +22,8 @@ private BigDecimal prixDeal;
 
 private BigDecimal prixPart;
 
+private BigDecimal prixPartNonReel; // Prix réel de la part (optionnel)
+
 private Integer nbParticipants;
 
 private LocalDateTime dateDebut;

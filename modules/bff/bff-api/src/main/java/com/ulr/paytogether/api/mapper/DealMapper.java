@@ -33,6 +33,7 @@ public class DealMapper {
                 .description(deal.getDescription())
                 .prixDeal(deal.getPrixDeal())
                 .prixPart(deal.getPrixPart())
+                .prixPartNonReel(deal.getPrixPartNonReel())
                 .nbParticipants(deal.getNbParticipants())
                 .dateDebut(deal.getDateDebut())
                 .dateFin(deal.getDateFin())
@@ -70,6 +71,7 @@ public class DealMapper {
                 .description(dto.getDescription())
                 .prixDeal(dto.getPrixDeal())
                 .prixPart(dto.getPrixPart())
+                .prixPartNonReel(dto.getPrixPartNonReel())
                 .nbParticipants(dto.getNbParticipants())
                 .dateDebut(dto.getDateDebut())
                 .dateFin(dto.getDateFin())
@@ -104,6 +106,7 @@ public class DealMapper {
                 .description(dto.getDescription())
                 .prixDeal(dto.getPrixDeal())
                 .prixPart(dto.getPrixPart())
+                .prixPartNonReel(dto.getPrixPartNonReel())
                 .nbParticipants(dto.getNbParticipants())
                 .dateDebut(dto.getDateDebut())
                 .dateFin(dto.getDateFin())
@@ -144,6 +147,7 @@ public class DealMapper {
         deal.setDescription(dto.getDescription());
         deal.setPrixDeal(dto.getPrixDeal());
         deal.setPrixPart(dto.getPrixPart());
+        deal.setPrixPartNonReel(dto.getPrixPartNonReel());
         deal.setNbParticipants(dto.getNbParticipants());
         deal.setDateDebut(dto.getDateDebut());
         deal.setDateFin(dto.getDateFin());

@@ -29,6 +29,7 @@ public class DealRechercheMapper {
                 .description(modele.getDescription())
                 .prixDeal(modele.getPrixDeal())
                 .prixPart(modele.getPrixPart())
+                .prixPartNonReel(modele.getPrixPartNonReel())
                 .nbParticipants(modele.getNbParticipants())
                 .dateDebut(modele.getDateDebut())
                 .dateFin(modele.getDateFin())

@@ -40,6 +40,9 @@ public class DealDocument {
     @Field(type = FieldType.Double)
     private BigDecimal prixPart;
 
+    @Field(type = FieldType.Double)
+    private BigDecimal prixPartNonReel; // Prix réel de la part (optionnel)
+
     @Field(type = FieldType.Integer)
     private Integer nbParticipants;
 
