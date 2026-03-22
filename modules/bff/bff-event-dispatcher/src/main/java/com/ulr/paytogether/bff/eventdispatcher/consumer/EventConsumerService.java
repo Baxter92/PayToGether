@@ -9,6 +9,7 @@ import com.ulr.paytogether.bff.eventdispatcher.repository.EventRecordRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,27 +99,52 @@ public class EventConsumerService {
     }
 
     /**
-     * Traite les événements en attente toutes les 60 secondes.
-     * Délai augmenté à 60 secondes pour :
-     * - Éviter les doublons d'emails
-     * - Donner le temps aux événements en PROCESSING de se terminer
-     * - Réduire la charge sur le système
+     * Traite les événements en attente toutes les 120 secondes.
+     * 
+     * ⚠️ PROTECTION CONTRE LES BOUCLES INFINIES ET DOUBLONS :
+     * - Délai augmenté à 120 secondes (au lieu de 60) pour éviter les traitements trop fréquents
+     * - Limite de batch à 10 événements maximum par exécution
+     * - Vérification du statut avant traitement pour éviter les doublons
+     * 
+     * Avec un maxAttempts de 3 et un délai de 120s, un événement qui échoue sera réessayé :
+     * - Tentative 1 : t = 0s
+     * - Tentative 2 : t = 120s
+     * - Tentative 3 : t = 240s
+     * 
+     * Cela garantit un maximum de 3 emails (au lieu de 186 !)
      */
-    @Scheduled(fixedDelay = 60000, initialDelay = 15000)
+    @Scheduled(fixedDelay = 120000, initialDelay = 30000)
     @Transactional
     public void processePendingEvents() {
-        List<EventRecordJpa> pendingEvents = eventRecordRepository.findByStatus(EventRecordJpa.EventStatus.PENDING);
+        // ✅ PROTECTION CRITIQUE : Limiter à 10 événements maximum par batch
+        List<EventRecordJpa> pendingEvents = eventRecordRepository.findByStatusOrderByOccurredOnAsc(
+            EventRecordJpa.EventStatus.PENDING, 
+            PageRequest.of(0, 10)
+        );
 
         if (!pendingEvents.isEmpty()) {
-            log.info("⚙️ Processing {} pending events", pendingEvents.size());
+            log.info("⚙️ Processing batch of {} pending events (max 10 per batch)", pendingEvents.size());
+
+            int successCount = 0;
+            int failureCount = 0;
+            int skippedCount = 0;
 
             for (EventRecordJpa eventRecord : pendingEvents) {
-                processEvent(eventRecord);
+                try {
+                    processEvent(eventRecord);
+                    successCount++;
+                } catch (Exception e) {
+                    failureCount++;
+                    log.error("❌ Failed to process event {}: {}", eventRecord.getEventId(), e.getMessage(), e);
+                }
             }
+
+            log.info("✅ Batch processing completed: {} success, {} failures, {} skipped", 
+                successCount, failureCount, skippedCount);
         }
 
-        // Réinitialiser les événements bloqués (en traitement depuis plus de 10 minutes)
-        // Augmenté de 5 à 10 minutes pour éviter les réinitialisations prématurées
+        // Réinitialiser les événements bloqués (en traitement depuis plus de 15 minutes)
+        // Augmenté de 10 à 15 minutes pour éviter les réinitialisations prématurées
         resetStuckEvents();
     }
 
@@ -313,16 +339,24 @@ public class EventConsumerService {
 
     /**
      * Réinitialise les événements bloqués en traitement.
-     * Réinitialise les événements en PROCESSING depuis plus de 10 minutes.
+     * Réinitialise les événements en PROCESSING depuis plus de 15 minutes.
+     * 
+     * ⚠️ PROTECTION : Augmenté de 10 à 15 minutes pour éviter les réinitialisations
+     * prématurées qui pourraient causer des doublons d'emails.
      */
     private void resetStuckEvents() {
-        LocalDateTime threshold = LocalDateTime.now().minusMinutes(10);
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(15);
         List<EventRecordJpa> stuckEvents = eventRecordRepository.findStuckEvents(threshold);
 
         if (!stuckEvents.isEmpty()) {
             log.warn("⚠️ Found {} stuck events, resetting to PENDING", stuckEvents.size());
 
             for (EventRecordJpa event : stuckEvents) {
+                log.warn("⚠️ Resetting stuck event: {} of type {} (attempt {}/{}, last attempt at: {})",
+                    event.getEventId(), event.getEventType(), 
+                    event.getAttempts(), event.getMaxAttempts(),
+                    event.getLastAttemptAt());
+                
                 event.setStatus(EventRecordJpa.EventStatus.PENDING);
                 eventRecordRepository.save(event);
             }

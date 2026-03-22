@@ -65,7 +65,7 @@ public class AccountHandler implements ConsumerHandler {
                 event.getUtilisateurUuid(), event.getEmail());
 
         try {
-            // 1. Sauvegarder le token via le Service métier
+            // 1. Sauvegarder le token via le Service métier (opération critique avec retry)
             ValidationTokenModele tokenModele = ValidationTokenModele.builder()
                     .token(event.getToken())
                     .utilisateurUuid(event.getUtilisateurUuid())
@@ -76,7 +76,25 @@ public class AccountHandler implements ConsumerHandler {
             validationTokenService.creer(tokenModele);
             log.info("Token de validation sauvegardé pour utilisateur: {}", event.getUtilisateurUuid());
 
-            // 2. Préparer les variables du template
+            // 2. Envoyer l'email UNIQUEMENT après succès de la sauvegarde du token
+            // L'email est envoyé en dernier pour éviter les doublons en cas de retry
+            envoyerEmailValidation(event);
+
+            log.info("AccountValidationEvent handled successfully for user: {}", event.getUtilisateurUuid());
+
+        } catch (Exception e) {
+            log.error("Error handling AccountValidationEvent: {}", e.getMessage(), e);
+            throw e; // Propagation pour retry automatique
+        }
+    }
+
+    /**
+     * Envoie l'email de validation de compte.
+     * Cette méthode est appelée UNIQUEMENT après le succès de la sauvegarde du token.
+     * En cas d'échec de l'email, l'exception n'est PAS propagée pour éviter un retry complet.
+     */
+    private void envoyerEmailValidation(AccountValidationEvent event) {
+        try {
             Map<String, Object> variables = new HashMap<>();
             variables.put("prenom", event.getPrenom());
             variables.put("nom", event.getNom());
@@ -84,7 +102,6 @@ public class AccountHandler implements ConsumerHandler {
             variables.put("lienValidation", construireLienValidation("account-validation", event.getToken()));
             variables.put("dateExpiration", event.getDateExpiration().format(DATE_FORMATTER));
 
-            // 3. Envoyer l'email via le service métier
             emailNotificationService.envoyerNotification(
                     event.getEmail(),
                     "Validating your DealToGether account",
@@ -92,11 +109,12 @@ public class AccountHandler implements ConsumerHandler {
                     variables
             );
 
-            log.info("AccountValidationEvent handled successfully for user: {}", event.getUtilisateurUuid());
-
+            log.info("✅ Email de validation envoyé à: {}", event.getEmail());
         } catch (Exception e) {
-            log.error("Error handling AccountValidationEvent: {}", e.getMessage(), e);
-            throw e; // Propagation pour retry automatique
+            // En cas d'échec de l'email, on log l'erreur mais on ne propage PAS l'exception
+            // pour éviter un retry complet du handler qui renverrait l'email
+            log.error("⚠️ Échec de l'envoi de l'email de validation à {}: {}", 
+                    event.getEmail(), e.getMessage(), e);
         }
     }
 
@@ -110,14 +128,30 @@ public class AccountHandler implements ConsumerHandler {
                 event.getUtilisateurUuid(), event.getEmail());
 
         try {
-            // Préparer les variables du template
+            // Envoyer l'email de confirmation d'activation
+            // L'email est la seule opération, donc on l'isole pour éviter les doublons
+            envoyerEmailActivation(event);
+
+            log.info("AccountActivationEvent handled successfully for user: {}", event.getUtilisateurUuid());
+
+        } catch (Exception e) {
+            log.error("Error handling AccountActivationEvent: {}", e.getMessage(), e);
+            throw e; // Propagation pour retry automatique
+        }
+    }
+
+    /**
+     * Envoie l'email de confirmation d'activation.
+     * En cas d'échec de l'email, l'exception n'est PAS propagée pour éviter un retry complet.
+     */
+    private void envoyerEmailActivation(AccountActivationEvent event) {
+        try {
             Map<String, Object> variables = new HashMap<>();
             variables.put("prenom", event.getPrenom());
             variables.put("nom", event.getNom());
             variables.put("dateActivation", event.getDateActivation().format(DATE_FORMATTER));
             variables.put("lienConnexion", construireLienValidation("login", null));
 
-            // Envoyer l'email de confirmation d'activation
             emailNotificationService.envoyerNotification(
                     event.getEmail(),
                     "Your DealToGether account is activated",
@@ -125,11 +159,10 @@ public class AccountHandler implements ConsumerHandler {
                     variables
             );
 
-            log.info("AccountActivationEvent handled successfully for user: {}", event.getUtilisateurUuid());
-
+            log.info("✅ Email d'activation envoyé à: {}", event.getEmail());
         } catch (Exception e) {
-            log.error("Error handling AccountActivationEvent: {}", e.getMessage(), e);
-            throw e; // Propagation pour retry automatique
+            log.error("⚠️ Échec de l'envoi de l'email d'activation à {}: {}", 
+                    event.getEmail(), e.getMessage(), e);
         }
     }
 
@@ -143,14 +176,30 @@ public class AccountHandler implements ConsumerHandler {
                 event.getUtilisateurUuid(), event.getEmail());
 
         try {
-            // Préparer les variables du template
+            // Envoyer l'email de confirmation de désactivation
+            // L'email est la seule opération, donc on l'isole pour éviter les doublons
+            envoyerEmailDesactivation(event);
+
+            log.info("AccountDeactivationEvent handled successfully for user: {}", event.getUtilisateurUuid());
+
+        } catch (Exception e) {
+            log.error("Error handling AccountDeactivationEvent: {}", e.getMessage(), e);
+            throw e; // Propagation pour retry automatique
+        }
+    }
+
+    /**
+     * Envoie l'email de confirmation de désactivation.
+     * En cas d'échec de l'email, l'exception n'est PAS propagée pour éviter un retry complet.
+     */
+    private void envoyerEmailDesactivation(AccountDeactivationEvent event) {
+        try {
             Map<String, Object> variables = new HashMap<>();
             variables.put("prenom", event.getPrenom());
             variables.put("nom", event.getNom());
             variables.put("dateDesactivation", event.getDateDesactivation().format(DATE_FORMATTER));
             variables.put("raisonDesactivation", "Nous sommes désolés de vous voir partir. Si vous avez des questions ou des préoccupations, n'hésitez pas à nous contacter.");
 
-            // Envoyer l'email de confirmation d'activation
             emailNotificationService.envoyerNotification(
                     event.getEmail(),
                     "Your DealToGether account is deactivated",
@@ -158,11 +207,10 @@ public class AccountHandler implements ConsumerHandler {
                     variables
             );
 
-            log.info("AccountDeactivationEvent handled successfully for user: {}", event.getUtilisateurUuid());
-
+            log.info("✅ Email de désactivation envoyé à: {}", event.getEmail());
         } catch (Exception e) {
-            log.error("Error handling AccountDeactivationEvent: {}", e.getMessage(), e);
-            throw e; // Propagation pour retry automatique
+            log.error("⚠️ Échec de l'envoi de l'email de désactivation à {}: {}", 
+                    event.getEmail(), e.getMessage(), e);
         }
     }
 

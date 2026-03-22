@@ -47,7 +47,34 @@ public class PaymentRefundedHandler implements ConsumerHandler {
                 event.getPaiementUuid(), event.getUtilisateurUuid(), event.getMontantRembourse());
 
         try {
-            // 1. Envoyer l'email de confirmation de remboursement
+            // 1. Supprimer la participation de l'utilisateur au deal (opération critique avec retry)
+            squarePaymentService.supprimerParticipationApresRemboursement(
+                    event.getUtilisateurUuid(),
+                    event.getDealUuid(),
+                    event.getNombreDeParts()
+            );
+
+            log.info("✅ Participation supprimée pour l'utilisateur: {}", event.getUtilisateurUuid());
+
+            // 2. Envoyer l'email de confirmation UNIQUEMENT après succès de l'opération critique
+            // L'email est envoyé en dernier pour éviter les doublons en cas de retry
+            envoyerEmailRemboursement(event);
+
+            log.info("✅ PaymentRefundedEvent handled successfully for paiement: {}", event.getPaiementUuid());
+
+        } catch (Exception e) {
+            log.error("❌ Error handling PaymentRefundedEvent: {}", e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    /**
+     * Envoie l'email de confirmation de remboursement.
+     * Cette méthode est appelée UNIQUEMENT après le succès de l'opération critique.
+     * En cas d'échec de l'email, l'exception n'est PAS propagée pour éviter un retry complet.
+     */
+    private void envoyerEmailRemboursement(PaymentRefundedEvent event) {
+        try {
             Map<String, Object> variables = new HashMap<>();
             variables.put("prenom", event.getPrenom());
             variables.put("nom", event.getNom());
@@ -70,19 +97,11 @@ public class PaymentRefundedHandler implements ConsumerHandler {
             );
 
             log.info("✅ Email de remboursement envoyé à: {}", event.getEmail());
-
-            // 2. Supprimer la participation de l'utilisateur au deal
-            squarePaymentService.supprimerParticipationApresRemboursement(
-                    event.getUtilisateurUuid(),
-                    event.getDealUuid(),
-                    event.getNombreDeParts()
-            );
-
-            log.info("✅ PaymentRefundedEvent handled successfully for paiement: {}", event.getPaiementUuid());
-
         } catch (Exception e) {
-            log.error("❌ Error handling PaymentRefundedEvent: {}", e.getMessage(), e);
-            throw e;
+            // En cas d'échec de l'email, on log l'erreur mais on ne propage PAS l'exception
+            // pour éviter un retry complet du handler qui renverrait l'email
+            log.error("⚠️ Échec de l'envoi de l'email de remboursement à {}: {}", 
+                    event.getEmail(), e.getMessage(), e);
         }
     }
 }

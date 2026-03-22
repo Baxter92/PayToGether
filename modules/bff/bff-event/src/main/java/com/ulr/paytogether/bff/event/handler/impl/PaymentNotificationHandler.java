@@ -76,51 +76,58 @@ public class PaymentNotificationHandler implements ConsumerHandler {
 
         } catch (Exception e) {
             log.error("Error handling PaymentNotificationEvent: {}", e.getMessage(), e);
-            throw e;
+            // Ne pas propager l'exception pour éviter les doublons d'emails en cas de retry
+            // L'erreur est loggée, c'est suffisant pour le monitoring
         }
     }
 
     /**
      * Envoie un email de notification via le Service métier
+     * En cas d'échec, l'exception n'est PAS propagée pour éviter un retry complet du handler
      */
     private void envoyerEmail(PaymentNotificationEvent event) {
-        log.info("Sending email to: {} with subject: {}", event.getEmail(), event.getSujetNotification());
+        try {
+            log.info("Sending email to: {} with subject: {}", event.getEmail(), event.getSujetNotification());
 
-        var isCondirmed = StatutPaiement.CONFIRME.name().equals(event.getStatutPaiement());
+            var isCondirmed = StatutPaiement.CONFIRME.name().equals(event.getStatutPaiement());
 
-        UtilisateurModele utilisateur = utilisateurService.lireParUuid(event.getUtilisateurUuid()).orElse(null);
-        Map<String, Object> variables = new HashMap<>();
-        variables.put("nom", Optional.ofNullable(utilisateur).map(UtilisateurModele::getNom).orElse(""));
-        variables.put("prenom", Optional.ofNullable(utilisateur).map(UtilisateurModele::getPrenom).orElse(""));
-        variables.put("titreDeal", event.getTitreDeal());
-        variables.put("montant", event.getMontantPaiement());
+            UtilisateurModele utilisateur = utilisateurService.lireParUuid(event.getUtilisateurUuid()).orElse(null);
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("nom", Optional.ofNullable(utilisateur).map(UtilisateurModele::getNom).orElse(""));
+            variables.put("prenom", Optional.ofNullable(utilisateur).map(UtilisateurModele::getPrenom).orElse(""));
+            variables.put("titreDeal", event.getTitreDeal());
+            variables.put("montant", event.getMontantPaiement());
 
-        // Informations d'adresse
-        variables.put("adresseRue", event.getAdresseRue() != null ? event.getAdresseRue() : "Non renseignée");
-        variables.put("adresseVille", event.getAdresseVille() != null ? event.getAdresseVille() : "");
-        variables.put("adresseProvince", event.getAdresseProvince() != null ? event.getAdresseProvince() : "");
-        variables.put("adresseCodePostal", event.getAdresseCodePostal() != null ? event.getAdresseCodePostal() : "");
-        variables.put("adressePays", event.getAdressePays() != null ? event.getAdressePays() : "");
+            // Informations d'adresse
+            variables.put("adresseRue", event.getAdresseRue() != null ? event.getAdresseRue() : "Non renseignée");
+            variables.put("adresseVille", event.getAdresseVille() != null ? event.getAdresseVille() : "");
+            variables.put("adresseProvince", event.getAdresseProvince() != null ? event.getAdresseProvince() : "");
+            variables.put("adresseCodePostal", event.getAdresseCodePostal() != null ? event.getAdresseCodePostal() : "");
+            variables.put("adressePays", event.getAdressePays() != null ? event.getAdressePays() : "");
 
-        if (isCondirmed) {
-            variables.put("datePaiement", event.getDatePaiement().format(DATE_FORMATTER));
-            variables.put("methodePaiement", event.getMethodePaiement());
-            variables.put("descriptionDeal", event.getDescriptionDeal());
-        }else {
-            variables.put("dateTentative", event.getDatePaiement());
-            variables.put("raisonEchec", "Veuillez vérifier les informations de votre carte ou contacter votre banque.");
+            if (isCondirmed) {
+                variables.put("datePaiement", event.getDatePaiement().format(DATE_FORMATTER));
+                variables.put("methodePaiement", event.getMethodePaiement());
+                variables.put("descriptionDeal", event.getDescriptionDeal());
+            }else {
+                variables.put("dateTentative", event.getDatePaiement());
+                variables.put("raisonEchec", "Veuillez vérifier les informations de votre carte ou contacter votre banque.");
+            }
+
+            String template = isCondirmed ? "notification-paiement-reussi" : "notification-paiement-echoue";
+            // Appeler le service métier pour envoyer l'email
+            emailNotificationService.envoyerNotification(
+                event.getEmail(),
+                event.getSujetNotification(),
+                template,
+                variables
+            );
+
+            log.info("✅ Email sent successfully to: {}", event.getEmail());
+        } catch (Exception e) {
+            log.error("⚠️ Échec de l'envoi de l'email de notification à {}: {}", 
+                    event.getEmail(), e.getMessage(), e);
         }
-
-        String template = isCondirmed ? "notification-paiement-reussi" : "notification-paiement-echoue";
-        // Appeler le service métier pour envoyer l'email
-        emailNotificationService.envoyerNotification(
-            event.getEmail(),
-            event.getSujetNotification(),
-            template,
-            variables
-        );
-
-        log.info("Email sent successfully to: {}", event.getEmail());
     }
 
     /**

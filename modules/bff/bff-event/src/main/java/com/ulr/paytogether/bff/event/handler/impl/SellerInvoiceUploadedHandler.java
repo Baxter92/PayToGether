@@ -59,13 +59,13 @@ public class SellerInvoiceUploadedHandler implements ConsumerHandler {
         log.info("Traitement de l'événement SellerInvoiceUploadedEvent pour la commande: {}", event.getCommandeUuid());
         
         try {
-            // Récupérer la commande
+            // Récupérer la commande (opération critique avec retry)
             CommandeModele commande = commandeService.lireParUuid(event.getCommandeUuid());
             if (commande == null) {
                 throw new IllegalArgumentException("Commande non trouvée: " + event.getCommandeUuid());
             }
             
-            // Récupérer tous les paiements de la commande
+            // Récupérer tous les paiements de la commande (opération critique avec retry)
             List<PaiementModele> paiements = paiementService.lireParCommande(event.getCommandeUuid());
             if (paiements == null || paiements.isEmpty()) {
                 log.warn("Aucun paiement trouvé pour la commande: {}", event.getCommandeUuid());
@@ -74,94 +74,102 @@ public class SellerInvoiceUploadedHandler implements ConsumerHandler {
             
             log.info("Génération de {} factures pour la commande {}", paiements.size(), event.getNumeroCommande());
             
-            // Pour chaque paiement, générer une facture et l'envoyer par email
-            int facturesGenerees = 0;
-            int facturesEnvoyees = 0;
-            
-            for (PaiementModele paiement : paiements) {
-                try {
-                    // Déterminer si c'est une livraison à domicile ou pickup
-                    // TODO: Ajouter cette information dans le paiement ou la commande
-                    boolean isHomeDelivery = determinerTypeLivraison(paiement);
-                    String adresseLivraison = obtenirAdresseLivraison(paiement, isHomeDelivery);
-                    
-                    // Générer la facture PDF
-                    byte[] facturePdf = invoiceGeneratorService.genererFactureClient(
-                        paiement,
-                        commande.getNumeroCommande(),
-                        commande.getDealModele().getTitre(),
-                        isHomeDelivery,
-                        adresseLivraison
-                    );
-                    
-                    facturesGenerees++;
-                    
-                    // Uploader la facture dans MinIO
-                    String nomFichierFacture = "invoice_" + commande.getNumeroCommande() + "_" 
-                        + paiement.getUtilisateur().getUuid() + "_" 
-                        + System.currentTimeMillis() + ".pdf";
-                    
-                    fileStorageService.uploadFile(
-                        new ByteArrayInputStream(facturePdf),
-                        nomFichierFacture,
-                        DIRECTORY_INVOICES_USER,
-                        facturePdf.length
-                    );
-                    
-                    log.info("Facture uploadée dans MinIO: {}", nomFichierFacture);
-                    
-                    // Générer l'URL présignée pour lecture
-                    String invoiceUrl = fileStorageService.generateReadUrl(
-                        DIRECTORY_INVOICES_USER + nomFichierFacture
-                    );
-                    
-                    // Préparer les paramètres du template email
-                    Map<String, Object> templateParams = new HashMap<>();
-                    templateParams.put("clientNom", paiement.getUtilisateur().getPrenom() + " " + paiement.getUtilisateur().getNom());
-                    templateParams.put("numeroCommande", commande.getNumeroCommande());
-                    templateParams.put("dealTitre", commande.getDealModele().getTitre());
-                    templateParams.put("montantTotal", paiement.getMontant());
-                    templateParams.put("invoiceUrl", invoiceUrl);
-                    
-                    // Envoyer l'email avec la facture en pièce jointe
-                    emailNotificationService.envoyerEmailAvecPieceJointe(
-                        paiement.getUtilisateur().getEmail(),
-                        "Your Invoice - Order " + commande.getNumeroCommande(),
-                        "invoice-client-email", // Template Thymeleaf
-                        templateParams,
-                        facturePdf,
-                        nomFichierFacture
-                    );
-                    
-                    facturesEnvoyees++;
-                    log.info("Facture envoyée au client {} pour le paiement {}", 
-                        paiement.getUtilisateur().getEmail(), paiement.getUuid());
-                    
-                } catch (Exception e) {
-                    log.error("Erreur lors de la génération/envoi de la facture pour le paiement {}: {}", 
-                        paiement.getUuid(), e.getMessage(), e);
-                    // Continue avec les autres factures même en cas d'erreur
-                }
-            }
-            
-            log.info("Factures générées: {}, Factures envoyées: {} sur {} paiements pour la commande {}", 
-                facturesGenerees, facturesEnvoyees, paiements.size(), event.getNumeroCommande());
-            
-            if (facturesEnvoyees == 0) {
-                throw new RuntimeException("Aucune facture n'a pu être envoyée pour la commande " + event.getNumeroCommande());
-            }
+            // Générer et envoyer les factures (isolé pour éviter retry des emails)
+            genererEtEnvoyerFactures(commande, paiements, event);
             
             // Mettre à jour le statut de la commande à INVOICE_CUSTOMER
-            // Cela indique que toutes les factures clients ont été générées et envoyées
             commandeService.mettreAJourStatutCommande(event.getCommandeUuid(), 
-            StatutCommande.INVOICE_CUSTOMER);
+                StatutCommande.INVOICE_CUSTOMER);
             
-            log.info("Statut de la commande {} mis à jour à INVOICE_CUSTOMER", event.getNumeroCommande());
+            log.info("✅ Statut de la commande {} mis à jour à INVOICE_CUSTOMER", event.getNumeroCommande());
             
         } catch (Exception e) {
-            log.error("Erreur lors du traitement de l'événement SellerInvoiceUploadedEvent pour la commande {}: {}", 
+            log.error("❌ Erreur lors du traitement de SellerInvoiceUploadedEvent pour la commande {}: {}", 
                 event.getCommandeUuid(), e.getMessage(), e);
-            throw new RuntimeException("Échec de la génération et envoi des factures clients", e);
+            throw e; // Propagation pour retry automatique
+        }
+    }
+
+    /**
+     * Génère et envoie les factures à tous les clients.
+     * Cette méthode ne propage PAS les exceptions pour éviter un retry complet qui renverrait tous les emails.
+     */
+    private void genererEtEnvoyerFactures(CommandeModele commande, List<PaiementModele> paiements, SellerInvoiceUploadedEvent event) {
+        int facturesGenerees = 0;
+        int facturesEnvoyees = 0;
+        
+        for (PaiementModele paiement : paiements) {
+            try {
+                // Déterminer si c'est une livraison à domicile ou pickup
+                boolean isHomeDelivery = determinerTypeLivraison(paiement);
+                String adresseLivraison = obtenirAdresseLivraison(paiement, isHomeDelivery);
+                
+                // Générer la facture PDF
+                byte[] facturePdf = invoiceGeneratorService.genererFactureClient(
+                    paiement,
+                    commande.getNumeroCommande(),
+                    commande.getDealModele().getTitre(),
+                    isHomeDelivery,
+                    adresseLivraison
+                );
+                
+                facturesGenerees++;
+                
+                // Uploader la facture dans MinIO
+                String nomFichierFacture = "invoice_" + commande.getNumeroCommande() + "_" 
+                    + paiement.getUtilisateur().getUuid() + "_" 
+                    + System.currentTimeMillis() + ".pdf";
+                
+                fileStorageService.uploadFile(
+                    new ByteArrayInputStream(facturePdf),
+                    nomFichierFacture,
+                    DIRECTORY_INVOICES_USER,
+                    facturePdf.length
+                );
+                
+                log.info("Facture uploadée dans MinIO: {}", nomFichierFacture);
+                
+                // Générer l'URL présignée pour lecture
+                String invoiceUrl = fileStorageService.generateReadUrl(
+                    DIRECTORY_INVOICES_USER + nomFichierFacture
+                );
+                
+                // Préparer les paramètres du template email
+                Map<String, Object> templateParams = new HashMap<>();
+                templateParams.put("clientNom", paiement.getUtilisateur().getPrenom() + " " + paiement.getUtilisateur().getNom());
+                templateParams.put("numeroCommande", commande.getNumeroCommande());
+                templateParams.put("dealTitre", commande.getDealModele().getTitre());
+                templateParams.put("montantTotal", paiement.getMontant());
+                templateParams.put("invoiceUrl", invoiceUrl);
+                
+                // Envoyer l'email avec la facture en pièce jointe
+                emailNotificationService.envoyerEmailAvecPieceJointe(
+                    paiement.getUtilisateur().getEmail(),
+                    "Your Invoice - Order " + commande.getNumeroCommande(),
+                    "invoice-client-email", // Template Thymeleaf
+                    templateParams,
+                    facturePdf,
+                    nomFichierFacture
+                );
+                
+                facturesEnvoyees++;
+                log.info("✅ Facture envoyée au client {} pour le paiement {}", 
+                    paiement.getUtilisateur().getEmail(), paiement.getUuid());
+                
+            } catch (Exception e) {
+                // En cas d'erreur sur une facture, on log et on continue avec les autres
+                // On ne propage PAS l'exception pour éviter un retry complet
+                log.error("⚠️ Erreur lors de la génération/envoi de la facture pour le paiement {}: {}", 
+                    paiement.getUuid(), e.getMessage(), e);
+            }
+        }
+        
+        log.info("Factures générées: {}, Factures envoyées: {} sur {} paiements pour la commande {}", 
+            facturesGenerees, facturesEnvoyees, paiements.size(), event.getNumeroCommande());
+        
+        if (facturesEnvoyees == 0) {
+            log.error("⚠️ Aucune facture n'a pu être envoyée pour la commande {}", event.getNumeroCommande());
+            // On ne lance PAS d'exception pour éviter un retry qui renverrait tous les emails
         }
     }
     

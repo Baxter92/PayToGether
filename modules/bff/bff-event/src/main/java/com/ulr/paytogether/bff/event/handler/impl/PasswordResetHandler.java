@@ -61,7 +61,7 @@ public class PasswordResetHandler implements ConsumerHandler {
                 event.getUtilisateurUuid(), event.getEmail());
 
         try {
-            // 1. Sauvegarder le token via le Service métier
+            // 1. Sauvegarder le token via le Service métier (opération critique avec retry)
             ValidationTokenModele tokenModele = ValidationTokenModele.builder()
                     .token(event.getToken())
                     .utilisateurUuid(event.getUtilisateurUuid())
@@ -72,7 +72,25 @@ public class PasswordResetHandler implements ConsumerHandler {
             validationTokenService.creer(tokenModele);
             log.info("Token de réinitialisation sauvegardé pour utilisateur: {}", event.getUtilisateurUuid());
 
-            // 2. Préparer les variables du template
+            // 2. Envoyer l'email UNIQUEMENT après succès de la sauvegarde du token
+            // L'email est envoyé en dernier pour éviter les doublons en cas de retry
+            envoyerEmailReinitialisation(event);
+
+            log.info("PasswordResetEvent handled successfully for user: {}", event.getUtilisateurUuid());
+
+        } catch (Exception e) {
+            log.error("Error handling PasswordResetEvent: {}", e.getMessage(), e);
+            throw e; // Propagation pour retry automatique
+        }
+    }
+
+    /**
+     * Envoie l'email de réinitialisation de mot de passe.
+     * Cette méthode est appelée UNIQUEMENT après le succès de la sauvegarde du token.
+     * En cas d'échec de l'email, l'exception n'est PAS propagée pour éviter un retry complet.
+     */
+    private void envoyerEmailReinitialisation(PasswordResetEvent event) {
+        try {
             Map<String, Object> variables = new HashMap<>();
             variables.put("prenom", event.getPrenom());
             variables.put("nom", event.getNom());
@@ -80,7 +98,6 @@ public class PasswordResetHandler implements ConsumerHandler {
             variables.put("lienReinitialisation", construireLienReinitialisation(event.getToken()));
             variables.put("dateExpiration", event.getDateExpiration().format(DATE_FORMATTER));
 
-            // 3. Envoyer l'email via le service métier
             emailNotificationService.envoyerNotification(
                     event.getEmail(),
                     "Reset your DealToGether password",
@@ -88,11 +105,10 @@ public class PasswordResetHandler implements ConsumerHandler {
                     variables
             );
 
-            log.info("PasswordResetEvent handled successfully for user: {}", event.getUtilisateurUuid());
-
+            log.info("✅ Email de réinitialisation envoyé à: {}", event.getEmail());
         } catch (Exception e) {
-            log.error("Error handling PasswordResetEvent: {}", e.getMessage(), e);
-            throw e; // Propagation pour retry automatique
+            log.error("⚠️ Échec de l'envoi de l'email de réinitialisation à {}: {}", 
+                    event.getEmail(), e.getMessage(), e);
         }
     }
 

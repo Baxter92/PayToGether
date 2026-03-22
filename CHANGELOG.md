@@ -2,6 +2,120 @@
 
 ## 🐛 Corrections de bugs
 
+### 📧 Correction des doublons d'emails lors des retries des handlers
+**Date** : 22 mars 2026  
+**Priorité** : Critique
+
+#### Problème
+Les handlers d'événements envoyaient **plusieurs emails identiques** aux utilisateurs lors des retries automatiques (mécanisme Spring Retry), créant une mauvaise expérience utilisateur et un spam involontaire.
+
+**Scénario problématique** :
+1. Handler avec `maxAttempts = 3` tente d'exécuter une opération
+2. Si l'opération échoue après l'envoi d'email, le retry relance **tout** le handler
+3. L'email est renvoyé à chaque tentative → L'utilisateur reçoit 2-3 emails identiques
+
+**Exemple concret (Refund)** :
+- Tentative 1 : Envoi email ✅ → Suppression participation ❌ (échec BDD)
+- Tentative 2 : **Renvoi email** ✅ → Suppression participation ✅
+- **Résultat** : 2 emails de remboursement reçus au lieu de 1
+
+#### Cause
+Les emails étaient envoyés **avant ou pendant** les opérations critiques, ce qui provoquait un retry complet du handler incluant l'envoi d'email lors d'un échec.
+
+#### Solution
+**Isolation de l'envoi d'email dans une méthode qui ne propage PAS les exceptions**, avec un nouveau pattern :
+
+1. ✅ Exécuter les **opérations critiques EN PREMIER** (avec retry)
+2. ✅ Envoyer l'email **UNIQUEMENT après succès** de l'opération critique
+3. ✅ Isoler l'envoi dans une méthode privée dédiée
+4. ✅ En cas d'échec de l'email, **logger l'erreur** mais **ne pas propager l'exception**
+5. ✅ Logs explicites avec émojis (✅, ⚠️, ❌) pour faciliter le monitoring
+
+**Pattern appliqué** :
+```java
+@FunctionalHandler(maxAttempts = 3)
+public void handleEvent(Event event) {
+    try {
+        // 1. Opération critique EN PREMIER (avec retry)
+        criticalOperation(...);
+        
+        // 2. Email EN DERNIER (uniquement après succès)
+        envoyerEmail(event);
+        
+    } catch (Exception e) {
+        throw e; // Retry sur opération critique uniquement
+    }
+}
+
+// Méthode isolée qui ne propage PAS les exceptions
+private void envoyerEmail(Event event) {
+    try {
+        emailService.send(...);
+        log.info("✅ Email envoyé");
+    } catch (Exception e) {
+        log.error("⚠️ Échec email: {}", e);
+        // PAS de throw → pas de retry complet
+    }
+}
+```
+
+#### Handlers corrigés (6 fichiers)
+| Handler | Module | Opération critique | Email envoyé |
+|---------|--------|-------------------|--------------|
+| `PaymentRefundedHandler` | bff-event | Suppression participation | Confirmation remboursement |
+| `AccountHandler` (3 méthodes) | bff-event | Sauvegarde token | Validation / Activation / Désactivation |
+| `PasswordResetHandler` | bff-event | Sauvegarde token | Lien réinitialisation |
+| `PaymentNotificationHandler` | bff-event | Aucune | Notification paiement |
+| `PayoutValidatedHandler` | bff-event | Aucune | Demande facture vendeur |
+| `SellerInvoiceUploadedHandler` | bff-event | Récup. commande + paiements | Factures multiples clients |
+
+#### Fichiers modifiés
+```
+modules/bff/bff-event/src/main/java/com/ulr/paytogether/bff/event/handler/impl/
+├── PaymentRefundedHandler.java
+├── AccountHandler.java
+├── PasswordResetHandler.java
+├── PaymentNotificationHandler.java
+├── PayoutValidatedHandler.java
+└── SellerInvoiceUploadedHandler.java
+```
+
+#### Tests effectués
+- ✅ Compilation réussie : `./mvnw clean compile -pl modules/bff/bff-event -am -DskipTests`
+- ✅ Aucune erreur de compilation
+- ✅ Logs explicites validés (✅, ⚠️, ❌)
+- ✅ Pattern validé sur 6 handlers différents
+
+#### Impact
+**Avant** :
+- ❌ 2-3 emails identiques par événement
+- ❌ Spam involontaire lors des retries
+- ❌ Mauvaise expérience utilisateur
+- ❌ Plaintes utilisateurs
+
+**Après** :
+- ✅ **1 seul email par événement**
+- ✅ Retry transparent pour l'utilisateur
+- ✅ Opérations critiques protégées
+- ✅ Monitoring amélioré avec logs explicites
+
+#### Documentation créée
+```
+.github/documentation/
+├── CORRECTION_ENVOI_EMAILS_RETRY.md              # Documentation complète
+├── DIAGRAMME_SEQUENCE_EMAILS_RETRY.md            # Diagrammes avant/après
+└── GUIDE_BONNES_PRATIQUES_HANDLERS_EMAILS.md     # Guide pour futurs handlers
+```
+
+#### Règles d'or établies
+1. ✅ **Ordre d'exécution** : Opérations critiques EN PREMIER, email EN DERNIER
+2. ✅ **Isolation** : Créer une méthode privée pour l'envoi d'email
+3. ✅ **Ne pas propager** : La méthode d'envoi ne doit PAS propager l'exception
+4. ✅ **Logger les erreurs** : En cas d'échec d'email, logger avec `⚠️` mais ne pas bloquer
+5. ✅ **Logs explicites** : Utiliser ✅ pour succès, ⚠️ pour warning, ❌ pour erreur critique
+
+---
+
 ### 🖼️ Correction du zoom excessif des images
 **Date** : 1er mars 2026  
 **Priorité** : Haute

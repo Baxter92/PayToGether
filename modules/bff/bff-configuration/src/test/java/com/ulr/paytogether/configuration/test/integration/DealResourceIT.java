@@ -1,10 +1,12 @@
 package com.ulr.paytogether.configuration.test.integration;
 
 import com.ulr.paytogether.configuration.test.AbstractIT;
-import com.ulr.paytogether.core.enumeration.StatutDeal;
-import com.ulr.paytogether.provider.adapter.entity.DealJpa;
+import com.ulr.paytogether.core.enumeration.StatutCommandeUtilisateur;
+import com.ulr.paytogether.provider.adapter.entity.*;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
@@ -27,6 +29,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayName("Tests d'intégration REST : DealResource")
 class DealResourceIT extends AbstractIT {
+
+    private static final Logger log = LoggerFactory.getLogger(DealResourceIT.class);
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
     private static final BigDecimal PRIX_PART = BigDecimal.valueOf(100.00);
@@ -221,7 +225,10 @@ class DealResourceIT extends AbstractIT {
         mockMinioUpload();
         
         DealJpa deal = creerDealAvecImages(vendeur, categorieElectronique, NB_PARTICIPANTS, PRIX_PART);
+        int nombreImagesInitiales = deal.getImageDealJpas().size();
+        log.info("Nombre d'images initiales: {}", nombreImagesInitiales);
 
+        // Payload avec UNIQUEMENT les nouvelles images (les anciennes seront supprimées)
         Map<String, Object> imagesPayload = Map.of(
             "listeImages", List.of(
                 Map.of("urlImage", "nouvelle_image_1.jpg", "isPrincipal", true),
@@ -238,7 +245,17 @@ class DealResourceIT extends AbstractIT {
             .patch("/deals/" + deal.getUuid() + "/images")
             .then()
             .statusCode(200)
-            .body("listeImages", hasSize(3));
+            .body("listeImages", hasSize(3))
+            .body("listeImages[0].presignUrl", notNullValue())
+            .body("listeImages[1].presignUrl", notNullValue())
+            .body("listeImages[2].presignUrl", notNullValue())
+            .body("listeImages[0].statut", equalTo("PENDING"))
+            .body("listeImages[0].isPrincipal", equalTo(true));
+
+        // Vérifier en base que les anciennes images ont été supprimées
+        DealJpa dealMisAJour = dealRepository.findById(deal.getUuid()).orElseThrow();
+        assertEquals(3, dealMisAJour.getImageDealJpas().size(), 
+            "Le deal devrait avoir 3 nouvelles images");
     }
 
     @Test
@@ -291,6 +308,92 @@ class DealResourceIT extends AbstractIT {
 
         // Vérifier que le deal n'existe plus
         assertFalse(dealRepository.findById(deal.getUuid()).isPresent());
+    }
+
+    @Test
+    @Order(13)
+    @DisplayName("DELETE /api/deals/{uuid} - Devrait supprimer un deal avec paiement, adresse et commande en cascade")
+    void supprimer_DevraitSupprimerDealAvecConstraintes() {
+        // Given - Créer un deal complet avec commande, paiements et adresses
+        DealJpa deal = creerDealAvecImages(vendeur, categorieElectronique, NB_PARTICIPANTS, PRIX_PART);
+        log.info("✅ Deal créé: {}", deal.getUuid());
+
+        // Créer une commande pour ce deal
+        CommandeJpa commande = creerCommande(deal, vendeur);
+        log.info("✅ Commande créée: {}", commande.getNumeroCommande());
+
+        // Créer des paiements avec adresses pour plusieurs acheteurs
+        AdresseJpa adresse1 = new AdresseJpa();
+        adresse1.setRue("123 Test Street");
+        adresse1.setVille("Montreal");
+        adresse1.setProvince("QC");
+        adresse1.setCodePostal("H1A 1A1");
+        adresse1.setPays("Canada");
+        adresse1.setHomeDelivery(true);
+
+        AdresseJpa adresse2 = new AdresseJpa();
+        adresse2.setRue("456 Avenue Test");
+        adresse2.setVille("Quebec");
+        adresse2.setProvince("QC");
+        adresse2.setCodePostal("G1R 2B2");
+        adresse2.setPays("Canada");
+        adresse2.setHomeDelivery(false);
+
+        PaiementJpa paiement1 = creerPaiement(commande, acheteur1, adresse1, 1, PRIX_PART);
+        PaiementJpa paiement2 = creerPaiement(commande, acheteur2, adresse2, 1, PRIX_PART);
+        log.info("✅ Paiements créés: {} et {}", paiement1.getUuid(), paiement2.getUuid());
+
+        // Créer les relations CommandeUtilisateur
+        CommandeUtilisateurJpa cu1 = creerCommandeUtilisateur(commande, acheteur1, StatutCommandeUtilisateur.EN_ATTENTE);
+        CommandeUtilisateurJpa cu2 = creerCommandeUtilisateur(commande, acheteur2, StatutCommandeUtilisateur.EN_ATTENTE);
+        log.info("✅ CommandeUtilisateurs créés: {} et {}", cu1.getUuid(), cu2.getUuid());
+
+        // Vérifier que tout existe avant suppression
+        assertTrue(dealRepository.findById(deal.getUuid()).isPresent(), "Le deal devrait exister");
+        assertTrue(commandeRepository.findById(commande.getUuid()).isPresent(), "La commande devrait exister");
+        assertEquals(2, paiementRepository.findByCommandeJpa(commande).size(), "2 paiements devraient exister");
+        assertEquals(2, commandeUtilisateurRepository.findByCommandeJpaUuid(commande.getUuid()).size(), "2 CommandeUtilisateurs devraient exister");
+
+        // Récupérer les UUIDs des entités pour vérifier leur suppression
+        UUID dealUuid = deal.getUuid();
+        UUID commandeUuid = commande.getUuid();
+        UUID paiement1Uuid = paiement1.getUuid();
+        UUID paiement2Uuid = paiement2.getUuid();
+
+        // When - Supprimer le deal
+        given()
+            .when()
+            .delete("/deals/" + dealUuid)
+            .then()
+            .statusCode(anyOf(is(200), is(204)));
+
+        // Then - Vérifier que tout a été supprimé en cascade
+        assertFalse(dealRepository.findById(dealUuid).isPresent(), 
+            "Le deal devrait être supprimé");
+        
+        assertFalse(commandeRepository.findById(commandeUuid).isPresent(), 
+            "La commande devrait être supprimée en cascade");
+        
+        assertFalse(paiementRepository.findById(paiement1Uuid).isPresent(), 
+            "Le paiement 1 devrait être supprimé en cascade");
+        
+        assertFalse(paiementRepository.findById(paiement2Uuid).isPresent(), 
+            "Le paiement 2 devrait être supprimé en cascade");
+        
+        assertEquals(0, commandeUtilisateurRepository.findByCommandeJpaUuid(commandeUuid).size(), 
+            "Les CommandeUtilisateurs devraient être supprimés en cascade");
+        
+        // Vérifier que les adresses sont également supprimées (cascade via paiement)
+        List<AdresseJpa> adresses = adresseRepository.findAll();
+        boolean adresse1Supprimee = adresses.stream()
+            .noneMatch(a -> "123 Test Street".equals(a.getRue()) && "Montreal".equals(a.getVille()));
+        boolean adresse2Supprimee = adresses.stream()
+            .noneMatch(a -> "456 Avenue Test".equals(a.getRue()) && "Quebec".equals(a.getVille()));
+        
+        assertTrue(adresse1Supprimee, "L'adresse 1 devrait être supprimée en cascade");
+        assertTrue(adresse2Supprimee, "L'adresse 2 devrait être supprimée en cascade");
+
+        log.info("✅ Suppression en cascade validée : Deal + Commande + Paiements + Adresses + CommandeUtilisateurs");
     }
 }
 

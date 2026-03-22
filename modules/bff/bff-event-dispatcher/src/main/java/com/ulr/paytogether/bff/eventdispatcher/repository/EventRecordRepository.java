@@ -2,6 +2,7 @@ package com.ulr.paytogether.bff.eventdispatcher.repository;
 
 import com.ulr.paytogether.bff.eventdispatcher.entity.EventRecordJpa;
 import com.ulr.paytogether.bff.eventdispatcher.entity.EventRecordJpa.EventStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -22,6 +23,20 @@ public interface EventRecordRepository extends JpaRepository<EventRecordJpa, UUI
      * Trouve tous les événements en attente de traitement
      */
     List<EventRecordJpa> findByStatus(EventStatus status);
+
+    /**
+     * Trouve un nombre limité d'événements PENDING, triés par date d'occurrence (les plus anciens en premier)
+     * 
+     * ⚠️ PROTECTION CRITIQUE : Limite le nombre d'événements traités par batch
+     * pour éviter les boucles infinies et les 186 emails identiques !
+     * 
+     * Utilisation : findByStatusOrderByOccurredOnAsc(EventStatus.PENDING, PageRequest.of(0, 10))
+     * 
+     * @param status Le statut des événements à récupérer
+     * @param pageable Pagination avec limite (ex: PageRequest.of(0, 10) pour 10 premiers)
+     * @return Liste limitée d'événements triés par date
+     */
+    List<EventRecordJpa> findByStatusOrderByOccurredOnAsc(EventStatus status, Pageable pageable);
 
     /**
      * Trouve les événements en attente pour un type spécifique
