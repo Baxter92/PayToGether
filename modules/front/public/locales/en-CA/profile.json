@@ -239,10 +239,10 @@
         "label": "Price per share"
       },
       "nonPromoPrice": {
-        "label": "Non-promotional price"
+        "label": "Market price"
       },
       "originalPrice": {
-        "label": "Original price"
+        "label": "Global deal price"
       },
       "partsTotal": {
         "label": "Number of shares"

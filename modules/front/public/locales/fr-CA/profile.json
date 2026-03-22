@@ -239,10 +239,10 @@
         "label": "Prix par part"
       },
       "nonPromoPrice": {
-        "label": "Prix non promotionnel"
+        "label": "Prix du marché"
       },
       "originalPrice": {
-        "label": "Prix initial"
+        "label": "Prix global"
       },
       "partsTotal": {
         "label": "Nombre de parts"
