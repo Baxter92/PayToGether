@@ -172,13 +172,11 @@ public class DealParticipantProviderAdapter implements DealParticipantProvider {
     public void supprimerParticipant(UUID dealUuid, UUID utilisateurUuid) {
         log.debug("Suppression du participant : deal={}, utilisateur={}", dealUuid, utilisateurUuid);
 
-        DealParticipantJpa.DealParticipantId id = new DealParticipantJpa.DealParticipantId(dealUuid, utilisateurUuid);
-        if (!participantRepository.existsById(id)) {
-            throw new IllegalArgumentException(
-                    "Participation non trouvée pour le deal " + dealUuid + " et l'utilisateur " + utilisateurUuid);
-        }
+        DealParticipantJpa dealParticipantJpa = participantRepository.findByIdDealUuidAndIdUtilisateurUuid(dealUuid, utilisateurUuid)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Participation non trouvée pour le deal " + dealUuid + " et l'utilisateur " + utilisateurUuid));
 
-        participantRepository.deleteById(id);
+        participantRepository.delete(dealParticipantJpa);
         log.info("Participant supprimé avec succès : deal={}, utilisateur={}", dealUuid, utilisateurUuid);
     }
 

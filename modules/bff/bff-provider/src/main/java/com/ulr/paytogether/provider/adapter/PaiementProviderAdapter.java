@@ -154,6 +154,7 @@ public class PaiementProviderAdapter implements PaiementProvider {
 
     @Override
     public void supprimerParUuid(UUID uuid) {
+        adresseRepository.findByPaiementUuid(uuid).ifPresent(adresseRepository::delete);
         jpaRepository.deleteById(uuid);
     }
 
@@ -259,6 +260,23 @@ public class PaiementProviderAdapter implements PaiementProvider {
                     commandeRepository.delete(cJpa);
                 }
             });
+        }
+    }
+
+    @Override
+    public void dettacherCommande(UUID uuid) {
+        PaiementJpa paiementJpa = jpaRepository.findById(uuid)
+                .orElseThrow(() -> new RuntimeException("Paiement non trouvé pour l'UUID : " + uuid));
+
+        CommandeJpa commandeJpa = paiementJpa.getCommandeJpa();
+        if (commandeJpa != null) {
+            paiementJpa.setCommandeJpa(null);
+            jpaRepository.save(paiementJpa);
+
+            // Vérifier si la commande n'a plus de paiements associés
+            if (commandeJpa.getPaiements().isEmpty()) {
+                commandeRepository.delete(commandeJpa);
+            }
         }
     }
 }

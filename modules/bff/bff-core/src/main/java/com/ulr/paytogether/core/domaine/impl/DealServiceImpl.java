@@ -254,8 +254,7 @@ public class DealServiceImpl implements DealService {
 
         dealProvider.supprimerParUuid(uuid);
 
-        // TODO : Réactiver l'indexation automatique après avoir corrigé la structure d'index
-        /*
+
         // Supprimer de l'index Elasticsearch
         try {
             dealRechercheService.supprimerIndexDeal(uuid);
@@ -263,7 +262,7 @@ public class DealServiceImpl implements DealService {
         } catch (Exception e) {
             log.error("Erreur lors de la suppression de l'index Elasticsearch pour le deal {} : {}", uuid, e.getMessage());
         }
-        */
+
 
         var dealAnnuleEvent = DealCancelledEvent.builder()
                 .dealUuid(uuid)

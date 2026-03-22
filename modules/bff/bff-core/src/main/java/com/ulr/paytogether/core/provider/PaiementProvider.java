@@ -60,4 +60,10 @@ public interface PaiementProvider {
      * @param uuid
      */
     void supprimerParUtilisateur(UUID uuid);
+
+    /**
+     * Detacher le paiement de sa commande
+     * @param uuid
+     */
+    void dettacherCommande(UUID uuid);
 }

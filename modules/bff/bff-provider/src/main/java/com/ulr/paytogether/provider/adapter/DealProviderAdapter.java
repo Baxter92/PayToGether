@@ -1,5 +1,6 @@
 package com.ulr.paytogether.provider.adapter;
 
+import com.ulr.paytogether.core.enumeration.StatutCommande;
 import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.modele.DealModele;
 import com.ulr.paytogether.core.modele.ImageDealModele;
@@ -7,12 +8,7 @@ import com.ulr.paytogether.core.provider.DealProvider;
 import com.ulr.paytogether.provider.adapter.entity.*;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
 import com.ulr.paytogether.provider.adapter.mapper.DealJpaMapper;
-import com.ulr.paytogether.provider.repository.CategorieRepository;
-import com.ulr.paytogether.provider.repository.CommandeRepository;
-import com.ulr.paytogether.provider.repository.CommentaireRepository;
-import com.ulr.paytogether.provider.repository.DealRepository;
-import com.ulr.paytogether.provider.repository.ImageDealRepository;
-import com.ulr.paytogether.provider.repository.UtilisateurRepository;
+import com.ulr.paytogether.provider.repository.*;
 import com.ulr.paytogether.provider.utils.FileManager;
 import com.ulr.paytogether.provider.utils.Tools;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +38,8 @@ public class DealProviderAdapter implements DealProvider {
     private final DealJpaMapper mapper;
     private final FileManager fileManager;
     private final CommentaireRepository commentaireRepository;
+    private final AdresseRepository adresseRepository;
+    private final PaiementRepository paiementRepository;
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -214,11 +212,31 @@ public class DealProviderAdapter implements DealProvider {
         // 1. Supprimer les commandes liées AVANT tout (relation OneToOne sans cascade inverse)
         if (commandes.isPresent()) {
             CommandeJpa commandeJpa = commandes.get();
+            if (commandeJpa.getStatut() != StatutCommande.TERMINEE) {
+                log.warn("⚠️ Commande {} est payée, suppression du deal interdite", commandeJpa.getUuid());
+                throw new IllegalStateException("Impossible de supprimer le deal car une commande associée est déjà payée");
+            }
+            log.info("✅ Commandes supprimées et flush effectué");
+            List<PaiementJpa> paiementJpas = commandeJpa.getPaiements();
+            for (PaiementJpa paiement : paiementJpas) {
+                // supprimer addresse
+                adresseRepository.findByPaiementUuid(paiement.getUuid()).ifPresent(adresse -> {
+                    log.info("🔄 Suppression de l'adresse {} liée au paiement {}", adresse.getUuid(), paiement.getUuid());
+                    adresseRepository.delete(adresse);
+                    adresseRepository.flush();
+                    log.info("✅ Adresse supprimée et flush effectué");
+                });
+                log.info("🔄 Suppression du paiement {}", paiement.getUuid());
+                // supprimer le paiement associé
+                paiementRepository.delete(paiement);
+                paiementRepository.flush();
+                log.info("✅ Paiement supprimé et flush effectué");
+            }
             log.info("🔄 Suppression de {} commandes", commandeJpa.getUuid());
             commandeRepository.delete(commandeJpa);
             commandeRepository.flush();
-            log.info("✅ Commandes supprimées et flush effectué");
         }
+
 
         // 2. Vider la relation ManyToMany avec les participants
         if (deal.getParticipants() != null && !deal.getParticipants().isEmpty()) {

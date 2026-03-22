@@ -346,24 +346,9 @@ public class SquarePaymentServiceImpl implements SquarePaymentService {
                     .orElse(null);
 
             if (paiement != null) {
-                UUID commandeUuid = paiement.getCommande() != null ? paiement.getCommande().getUuid() : null;
-
-                // 3. Supprimer le paiement
-                paiementProvider.supprimerParUuid(paiement.getUuid());
+                // 3. Déttacher le paiement
+                paiementProvider.dettacherCommande(paiement.getUuid());
                 log.info("✅ Paiement {} supprimé", paiement.getUuid());
-
-                // 4. Vérifier si la commande a encore des paiements
-                if (commandeUuid != null) {
-                    List<PaiementModele> paiementsRestants = paiementProvider.trouverParCommande(commandeUuid);
-
-                    if (paiementsRestants.isEmpty()) {
-                        // Supprimer la commande si elle n'a plus de paiements
-                        commandeProvider.supprimerParUuid(commandeUuid);
-                        log.info("✅ Commande {} supprimée (plus de paiements)", commandeUuid);
-                    } else {
-                        log.info("Commande {} conservée ({} paiements restants)", commandeUuid, paiementsRestants.size());
-                    }
-                }
             }
 
             log.info("✅ Suppression de la participation terminée avec succès");
