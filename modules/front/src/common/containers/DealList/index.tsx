@@ -103,13 +103,17 @@ function MobileFilterSheet({
   open,
   onClose,
   children,
-  title = "Filtres",
+  title,
 }: {
   open: boolean;
   onClose: () => void;
   children: React.ReactNode;
   title?: string;
 }) {
+  const { t: tCommon } = useI18n("common");
+  const { t: tFilters } = useI18n("filters");
+  const resolvedTitle = title ?? tFilters("title");
+
   return (
     <>
       <div
@@ -130,8 +134,12 @@ function MobileFilterSheet({
         style={{ minHeight: "40vh", maxHeight: "90vh", overflow: "auto" }}
       >
         <HStack className="items-center justify-between p-4 border-b">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          <button onClick={onClose} aria-label="Fermer" className="p-2">
+          <h3 className="text-lg font-semibold">{resolvedTitle}</h3>
+          <button
+            onClick={onClose}
+            aria-label={tCommon("close")}
+            className="p-2"
+          >
             <X className="w-5 h-5" />
           </button>
         </HStack>
@@ -148,7 +156,7 @@ function DealTableProductCell({ deal }: { deal: any }) {
   );
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex min-w-[20rem] items-start gap-3">
       <Avatar className="h-12 w-12 rounded-lg border border-border/50 shadow-sm bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <AvatarImage
           src={imageUrl?.url || "/placeholder.svg"}
@@ -156,10 +164,14 @@ function DealTableProductCell({ deal }: { deal: any }) {
           className="object-contain"
         />
       </Avatar>
-      <div className="flex flex-col">
-        <span className="font-semibold text-foreground">{deal?.title}</span>
+      <div className="min-w-0 flex-1">
+        <span className="block font-semibold leading-snug text-foreground break-words">
+          {deal?.title}
+        </span>
         {deal?.subtitle && (
-          <span className="text-xs text-muted-foreground">{deal.subtitle}</span>
+          <span className="mt-1 block text-xs leading-snug text-muted-foreground break-words">
+            {deal.subtitle}
+          </span>
         )}
       </div>
     </div>
@@ -183,7 +195,7 @@ export default function DealsList({
   className,
   showTitle = false,
   titleClassName,
-  title = "Offres",
+  title,
   description,
   tableProps,
   isAdmin = false,
@@ -191,6 +203,9 @@ export default function DealsList({
 }: IDealsListProps) {
   const { t: tFilters } = useI18n("filters");
   const { t: tTable } = useI18n("table");
+  const { t: tDeals } = useI18n("deals");
+  const { t: tCommon } = useI18n("common");
+  const { t: tStatus } = useI18n("status");
   const { user } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<DealFilters>({
@@ -228,6 +243,7 @@ export default function DealsList({
 
   // Mobile sheet state
   const [mobileOpen, setMobileOpen] = useState(false);
+  const resolvedTitle = title ?? tDeals("listTitle");
 
   // Debounce search & notify parent when filters change
   const debouncedFilters = useDebounced(filters, 300);
@@ -263,19 +279,19 @@ export default function DealsList({
     if (availableFilters.includes("search")) {
       fields.push({
         name: "searchQuery",
-        label: "Rechercher",
+        label: tFilters("search"),
         type: "text",
-        placeholder: "Chercher un produit...",
+        placeholder: tFilters("searchPlaceholder"),
       });
     }
 
     if (availableFilters.includes("category")) {
       fields.push({
         name: "category",
-        label: "Catégorie",
+        label: tFilters("category"),
         type: "select",
         items: [
-          { value: "all", label: "Toutes les catégories" },
+          { value: "all", label: tFilters("allCategories") },
           ...uniqueCategories,
         ],
       });
@@ -284,21 +300,21 @@ export default function DealsList({
     if (availableFilters.includes("city")) {
       fields.push({
         name: "city",
-        label: "Ville",
+        label: tFilters("city"),
         type: "select",
-        items: [{ value: "all", label: "Toutes les villes" }, ...uniqueCities],
+        items: [{ value: "all", label: tFilters("allCities") }, ...uniqueCities],
       });
     }
 
     if (availableFilters.includes("status")) {
       fields.push({
         name: "status",
-        label: "État",
+        label: tFilters("state"),
         type: "select",
         items: [
-          { value: "all", label: "Tous" },
-          { value: "active", label: "Actif" },
-          { value: "soldout", label: "Épuisé" },
+          { value: "all", label: tFilters("all") },
+          { value: "active", label: tFilters("active") },
+          { value: "soldout", label: tFilters("soldout") },
         ],
       });
     }
@@ -307,13 +323,13 @@ export default function DealsList({
       fields.push(
         {
           name: "priceMin",
-          label: "Prix minimum",
+          label: tFilters("priceMin"),
           type: "number",
           placeholder: "0",
         },
         {
           name: "priceMax",
-          label: "Prix maximum",
+          label: tFilters("priceMax"),
           type: "number",
           placeholder: "200000",
         },
@@ -321,7 +337,7 @@ export default function DealsList({
     }
 
     return fields;
-  }, [availableFilters, uniqueCategories, uniqueCities]);
+  }, [availableFilters, tFilters, uniqueCategories, uniqueCities]);
 
   // Schéma de validation pour les filtres
   const filterSchema = z.object({
@@ -417,10 +433,33 @@ export default function DealsList({
 
   // Columns for DataTable (LIST view)
   const tableColumns = useMemo<ColumnDef<any, any>[]>(() => {
+    const getLocalizedStatusLabel = (value: unknown) => {
+      const normalized = String(value ?? "").trim().toLowerCase();
+
+      if (["publie", "published"].includes(normalized)) {
+        return tStatus("published");
+      }
+
+      if (["brouillon", "draft"].includes(normalized)) {
+        return tStatus("draft");
+      }
+
+      if (["active", "actif"].includes(normalized)) {
+        return tStatus("active");
+      }
+
+      if (["soldout", "epuise", "épuisé"].includes(normalized)) {
+        return tFilters("soldout");
+      }
+
+      return String(value ?? "");
+    };
+
     return [
       {
         accessorKey: "image",
         header: tTable("product"),
+        size: 360,
         cell: ({ row }) => {
           return <DealTableProductCell deal={row.original} />;
         },
@@ -428,6 +467,7 @@ export default function DealsList({
       {
         accessorKey: "category",
         header: tFilters("category"),
+        size: 120,
         cell: ({ getValue }) => (
           <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-secondary/50 text-secondary-foreground capitalize">
             {String(getValue() ?? "")}
@@ -437,6 +477,7 @@ export default function DealsList({
       {
         accessorKey: "groupPrice",
         header: tTable("price"),
+        size: 130,
         cell: ({ row }) => {
           const d = row.original;
           return (
@@ -456,6 +497,7 @@ export default function DealsList({
       {
         accessorKey: "sold",
         header: tTable("partsSold"),
+        size: 140,
         cell: ({ row }) => {
           const d = row.original;
           const sold = d.sold ?? 0;
@@ -499,6 +541,7 @@ export default function DealsList({
       {
         accessorKey: "participants",
         header: tTable("participants"),
+        size: 110,
         cell: ({ row }) => (
           <span className="text-sm text-muted-foreground">
             {row.original.participants}
@@ -508,6 +551,7 @@ export default function DealsList({
       {
         accessorKey: "deadline",
         header: tTable("deadline"),
+        size: 110,
         cell: ({ row }) => {
           const deadline = row.original.deadline ?? 0;
           return (
@@ -520,6 +564,7 @@ export default function DealsList({
       {
         accessorKey: "city",
         header: tFilters("city"),
+        size: 120,
         cell: ({ getValue }) => (
           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-muted text-muted-foreground">
             {String(getValue() ?? "")}
@@ -529,17 +574,27 @@ export default function DealsList({
       {
         accessorKey: "status",
         header: tTable("status"),
-        cell: ({ getValue }) => (
-          <Badge
-            size="sm"
-            colorScheme={getValue() === "published" ? "success" : "secondary"}
-          >
-            {String(getValue() ?? "")}
-          </Badge>
-        ),
+        size: 120,
+        cell: ({ getValue }) => {
+          const status = String(getValue() ?? "");
+          const normalizedStatus = status.trim().toLowerCase();
+
+          return (
+            <Badge
+              size="sm"
+              colorScheme={
+                ["publie", "published"].includes(normalizedStatus)
+                  ? "success"
+                  : "secondary"
+              }
+            >
+              {getLocalizedStatusLabel(status)}
+            </Badge>
+          );
+        },
       },
     ];
-  }, []);
+  }, [tFilters, tStatus, tTable]);
 
   return (
     <section className={cn("", className)}>
@@ -554,14 +609,14 @@ export default function DealsList({
             >
               <Heading
                 level={2}
-                title={title}
+                title={resolvedTitle}
                 underline
                 className="flex-1"
                 descriptionSize="lg"
                 description={description}
               />
               <span className="text-sm text-muted-foreground">
-                {filteredDeals.length} résultats
+                {tDeals("results", { count: filteredDeals.length })}
               </span>
             </HStack>
           )}
@@ -615,7 +670,7 @@ export default function DealsList({
             <aside className="hidden md:block md:col-span-3 lg:col-span-3">
               <div className="sticky top-20 bg-transparent p-4 border rounded">
                 <HStack className="items-center justify-between mb-4">
-                  <h3 className="font-medium">Filtres</h3>
+                  <h3 className="font-medium">{tFilters("title")}</h3>
                 </HStack>
                 {renderFiltersForm()}
               </div>
@@ -684,7 +739,7 @@ export default function DealsList({
                     columns={tableColumns}
                     data={filteredDeals}
                     searchKey={["title", "category", "city", "status"]}
-                    searchPlaceholder="Rechercher dans la liste..."
+                    searchPlaceholder={tDeals("searchInList")}
                     showSelectionCount={true}
                     enableRowNumber={true}
                     pageSizeOptions={[itemsPerPage, 24, 50, 100]}
@@ -708,8 +763,8 @@ export default function DealsList({
                                   props.row.original.status ?? "",
                                 ).toUpperCase(),
                               )
-                                ? "Remettre en brouillon"
-                                : "Publier",
+                                ? tDeals("moveToDraft")
+                                : tDeals("publish"),
                               onClick: () => {
                                 const row = props.row.original;
                                 const currentStatus = String(
@@ -722,7 +777,7 @@ export default function DealsList({
 
                                 setStatusTarget({
                                   id: row.id || row.uuid,
-                                  title: row.title || "ce deal",
+                                  title: row.title || tDeals("genericDeal"),
                                   nextStatus: isPublished
                                     ? "BROUILLON"
                                     : "PUBLIE",
@@ -732,6 +787,7 @@ export default function DealsList({
                             },
                             {
                               leftIcon: <Edit2 className="w-4 h-4" />,
+                              tooltip: tCommon("edit"),
                               onClick: () => {
                                 const uuid =
                                   props.row.original.id ||
@@ -743,12 +799,15 @@ export default function DealsList({
                             {
                               leftIcon: <Trash2 className="w-4 h-4" />,
                               colorScheme: "danger",
-                              tooltip: "Supprimer",
+                              tooltip: tCommon("delete"),
                               onClick: () => {
                                 const row = props.row.original;
                                 setDeleteTarget({
                                   id: row.id || row.uuid,
-                                  title: row.title || row.titre || "ce deal",
+                                  title:
+                                    row.title ||
+                                    row.titre ||
+                                    tDeals("genericDeal"),
                                 });
                                 setDeleteModalOpen(true);
                               },
@@ -777,13 +836,17 @@ export default function DealsList({
           <DialogContent size="default" className="max-w-md">
             <DialogTitle>
               {statusTarget?.nextStatus === "PUBLIE"
-                ? "Publier le deal"
-                : "Remettre le deal en brouillon"}
+                ? tDeals("publishDealTitle")
+                : tDeals("draftDealTitle")}
             </DialogTitle>
             <p className="text-sm text-muted-foreground">
               {statusTarget?.nextStatus === "PUBLIE"
-                ? `Voulez-vous publier "${statusTarget?.title ?? "ce deal"}" ?`
-                : `Voulez-vous remettre "${statusTarget?.title ?? "ce deal"}" en brouillon ?`}
+                ? tDeals("publishDealDescription", {
+                    title: statusTarget?.title ?? tDeals("genericDeal"),
+                  })
+                : tDeals("draftDealDescription", {
+                    title: statusTarget?.title ?? tDeals("genericDeal"),
+                  })}
             </p>
             <div className="flex justify-end gap-2 pt-2">
               <Button
@@ -792,7 +855,7 @@ export default function DealsList({
                 onClick={() => setStatusModalOpen(false)}
                 disabled={isUpdatingStatus}
               >
-                Annuler
+                {tCommon("cancel")}
               </Button>
               <Button
                 type="button"
@@ -806,21 +869,21 @@ export default function DealsList({
                     });
                     toast.success(
                       statusTarget.nextStatus === "PUBLIE"
-                        ? "Deal publié avec succès"
-                        : "Deal remis en brouillon",
+                        ? tDeals("dealPublishedSuccess")
+                        : tDeals("dealMovedToDraftSuccess"),
                     );
                     setStatusModalOpen(false);
                     setStatusTarget(null);
                     onDealUpdated?.();
                   } catch (error: any) {
-                    toast.error("Erreur lors de la mise à jour du statut", {
+                    toast.error(tDeals("updateStatusError"), {
                       description:
                         error?.response?.data?.message || error?.message,
                     });
                   }
                 }}
               >
-                Confirmer
+                {tCommon("confirm")}
               </Button>
             </div>
           </DialogContent>
@@ -830,11 +893,12 @@ export default function DealsList({
           <AlertDialogContent size="default">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-destructive">
-                Supprimer le deal
+                {tDeals("deleteDealTitle")}
               </AlertDialogTitle>
               <AlertDialogDescription>
-                Êtes-vous sûr de vouloir supprimer "{deleteTarget?.title}" ?
-                Cette action est irréversible.
+                {tDeals("deleteDealDescription", {
+                  title: deleteTarget?.title ?? tDeals("genericDeal"),
+                })}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -842,7 +906,7 @@ export default function DealsList({
                 onClick={() => setDeleteModalOpen(false)}
                 disabled={isDeleting}
               >
-                Annuler
+                {tCommon("cancel")}
               </AlertDialogCancel>
               <AlertDialogAction
                 variant="destructive"
@@ -851,19 +915,19 @@ export default function DealsList({
                   if (!deleteTarget?.id) return;
                   try {
                     await deleteDeal(deleteTarget.id);
-                    toast.success("Deal supprimé avec succès");
+                    toast.success(tDeals("dealDeletedSuccess"));
                     setDeleteModalOpen(false);
                     setDeleteTarget(null);
                     onDealUpdated?.();
                   } catch (error: any) {
-                    toast.error("Erreur lors de la suppression du deal", {
+                    toast.error(tDeals("deleteDealError"), {
                       description:
                         error?.response?.data?.message || error?.message,
                     });
                   }
                 }}
               >
-                Supprimer
+                {tCommon("delete")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -878,13 +942,13 @@ export default function DealsList({
             onClick={() => setMobileOpen(false)}
             className="flex-1 px-4 py-2 rounded border"
           >
-            Annuler
+            {tCommon("cancel")}
           </button>
           <button
             onClick={() => setMobileOpen(false)}
             className="flex-1 px-4 py-2 rounded bg-primary-500 text-white"
           >
-            Fermer
+            {tCommon("close")}
           </button>
         </HStack>
       </MobileFilterSheet>

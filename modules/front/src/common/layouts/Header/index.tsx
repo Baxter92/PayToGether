@@ -179,13 +179,13 @@ const Header = ({
     },
     ...(isAdmin
       ? [
-        {
-          value: "goToAdmin",
-          label: mergedTexts.goToAdmin,
-          icon: <Home className="w-4 h-4 mr-2" />,
-          onClick: () => navigate("/admin"),
-        },
-      ]
+          {
+            value: "goToAdmin",
+            label: mergedTexts.goToAdmin,
+            icon: <Home className="w-4 h-4 mr-2" />,
+            onClick: () => navigate("/admin"),
+          },
+        ]
       : []),
     {
       value: "logout",
@@ -349,6 +349,7 @@ const Header = ({
               location={location}
               onLocationChange={handleLocationChange}
               favoritesCount={favoritesCount}
+              texts={mergedTexts}
             />
           </div>
 

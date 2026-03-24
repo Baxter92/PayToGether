@@ -40,6 +40,8 @@
   "complementAddress": "Complément d'adresse",
   "complementAddressPlaceholder": "Complément d'adresse (optionnel)",
   "postalCodeRequired": "Code postal requis",
+  "fees": "Frais de service",
+  "taxName": "GST",
   "checkout": {
     "title": "Finaliser votre commande",
     "subtitle": "Complétez les informations ci-dessous pour confirmer votre achat",

@@ -18,4 +18,5 @@ export const PATHS = {
   ALL_CATEGORIES: "/categories",
   NOT_FOUND: "/404",
   DEALS: "/deals",
+  ADMIN: "/admin",
 };

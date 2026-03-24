@@ -3,6 +3,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@components/ui/sheet";
 import { Button } from "@components/ui/button";
 import {
   Heart,
+  Home,
   LogOut,
   MapPin,
   Menu,
@@ -74,6 +75,7 @@ export interface SidebarMenuProps {
     register?: string;
     yourCity?: string;
     categories?: string;
+    goToAdmin?: string;
   };
 }
 
@@ -110,9 +112,10 @@ const SidebarMenu = ({
     register: "S'inscrire",
     yourCity: "Votre ville",
     categories: "Catégories",
+    goToAdmin: "Admin",
   },
 }: SidebarMenuProps) => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -300,6 +303,15 @@ const SidebarMenu = ({
                 title={texts.settings}
                 leftIcon={<Settings className="w-4 h-4" />}
               />
+              {isAdmin ? (
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  onClick={() => handleNavigationClick(PATHS.ADMIN)}
+                  title={texts.goToAdmin}
+                  leftIcon={<Home className="w-4 h-4" />}
+                />
+              ) : null}
               <Button
                 variant="ghost"
                 className="w-full justify-start"

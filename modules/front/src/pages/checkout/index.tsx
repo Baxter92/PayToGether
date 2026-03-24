@@ -27,6 +27,8 @@ export default function CheckoutPage(): JSX.Element {
   const pricePerPart = deal?.pricePerPart ?? 0;
 
   const subtotal = useMemo(() => qty * pricePerPart, [qty, pricePerPart]);
+  const fees = 0;
+  const tax = useMemo(() => (subtotal + fees) * 0.05, [subtotal, fees]);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,10 +38,13 @@ export default function CheckoutPage(): JSX.Element {
   const [deliveryData, setDeliveryData] = useState<DeliveryData | null>(null);
 
   const deliveryFee = useMemo(
-    () => (deliveryData?.deliveryMethod === "home" ? 3.5 : 0),
+    () => (deliveryData?.deliveryMethod === "home" ? 12 : 0),
     [deliveryData],
   );
-  const total = useMemo(() => subtotal + deliveryFee, [subtotal, deliveryFee]);
+  const total = useMemo(
+    () => subtotal + deliveryFee + tax,
+    [subtotal, deliveryFee, tax],
+  );
 
   React.useEffect(() => {
     if (!checkoutState.deal && !checkoutState.dealId) {
@@ -194,6 +199,8 @@ export default function CheckoutPage(): JSX.Element {
                   qty={qty}
                   subtotal={subtotal}
                   deliveryFee={deliveryFee}
+                  tax={tax}
+                  fees={fees}
                   total={total}
                 />
                 <TrustIndicators />
