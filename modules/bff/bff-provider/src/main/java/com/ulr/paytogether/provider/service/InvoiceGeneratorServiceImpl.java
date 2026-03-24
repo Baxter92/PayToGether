@@ -103,10 +103,8 @@ public class InvoiceGeneratorServiceImpl implements InvoiceGeneratorService {
         breakdown.sousTotal = montantSansFraisLivraison
             .divide(BigDecimal.valueOf(1.1025), 2, RoundingMode.HALF_UP);
         
-        // Frais de service = sousTotal * 5%
-        breakdown.fraisService = breakdown.sousTotal
-            .multiply(BigDecimal.valueOf(SERVICE_FEE_RATE))
-            .setScale(2, RoundingMode.HALF_UP);
+        // Frais de service = 0, version nécéssaire du lancement de l'application
+        breakdown.fraisService = BigDecimal.ZERO;
         
         // TVA = (sousTotal + fraisService) * 5%
         BigDecimal baseAvantTva = breakdown.sousTotal.add(breakdown.fraisService);
