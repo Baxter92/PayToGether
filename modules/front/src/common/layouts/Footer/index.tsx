@@ -1,51 +1,63 @@
 import { Mail, MapPin, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useI18n } from "@hooks/useI18n";
+import { PATHS } from "@/common/constants/path";
+
+type FooterLink = {
+  label: string;
+  to?: string;
+  href?: string;
+};
 
 const Footer = () => {
   const { t: tFooter } = useI18n("footer");
   const { t: tApp } = useI18n("app");
   const currentYear = new Date().getFullYear();
 
-  const sections = [
+  const sections: { title: string; links: FooterLink[] }[] = [
     {
       title: tFooter("sections.company.title"),
       links: [
-        { label: tFooter("sections.company.about"), href: "#" },
-        { label: tFooter("sections.company.mission"), href: "#" },
-        { label: tFooter("sections.company.contact"), href: "#" },
+        { label: tFooter("sections.company.about"), to: PATHS.ABOUT },
+        { label: tFooter("sections.company.mission"), to: PATHS.MISSION },
+        {
+          label: tFooter("sections.company.contact"),
+          href: "mailto:contact@dealtogether.ca",
+        },
       ],
     },
     {
       title: tFooter("sections.buyers.title"),
       links: [
-        { label: tFooter("sections.buyers.howItWorks"), href: "#" },
-        { label: tFooter("sections.buyers.faq"), href: "#" },
-        { label: tFooter("sections.buyers.refunds"), href: "#" },
+        { label: tFooter("sections.buyers.howItWorks"), to: PATHS.HOW_IT_WORKS },
+        { label: tFooter("sections.buyers.faq"), to: PATHS.FAQ },
+        { label: tFooter("sections.buyers.refunds"), to: PATHS.REFUNDS },
       ],
     },
     {
       title: tFooter("sections.sellers.title"),
       links: [
-        { label: tFooter("sections.sellers.becomeSeller"), href: "#" },
-        { label: tFooter("sections.sellers.sellerTerms"), href: "#" },
-        { label: tFooter("sections.sellers.supplierCharter"), href: "#" },
+        {
+          label: tFooter("sections.sellers.becomeSeller"),
+          to: PATHS.BECOME_SELLER,
+        },
+        { label: tFooter("sections.sellers.sellerTerms"), to: PATHS.SELLER_TERMS },
+        {
+          label: tFooter("sections.sellers.supplierCharter"),
+          to: PATHS.SUPPLIER_CHARTER,
+        },
       ],
     },
     {
       title: tFooter("sections.legal.title"),
       links: [
-        { label: tFooter("sections.legal.terms"), href: "#" },
-        { label: tFooter("sections.legal.privacy"), href: "#" },
-        { label: tFooter("sections.legal.cookies"), href: "#" },
-        { label: tFooter("sections.legal.legalNotice"), href: "#" },
-      ],
-    },
-    {
-      title: tFooter("sections.support.title"),
-      links: [
-        { label: tFooter("sections.support.helpCenter"), href: "#" },
-        { label: tFooter("sections.support.reportIssue"), href: "#" },
+        { label: tFooter("sections.legal.terms"), to: PATHS.TERMS },
+        { label: tFooter("sections.legal.privacy"), to: PATHS.PRIVACY },
+        { label: tFooter("sections.legal.cookies"), to: PATHS.COOKIES },
+        {
+          label: tFooter("sections.legal.legalNotice"),
+          to: PATHS.LEGAL_NOTICE,
+        },
       ],
     },
   ];
@@ -90,13 +102,28 @@ const Footer = () => {
                 <ul className="space-y-3">
                   {section.links.map((link) => (
                     <li key={link.label}>
-                      <a
-                        href={link.href}
-                        className="inline-flex items-center gap-2 text-sm text-secondary-300 transition-colors duration-300 hover:text-primary-300"
-                      >
-                        <span className="h-1.5 w-1.5 rounded-full bg-primary/50" />
-                        {link.label}
-                      </a>
+                      {link.to ? (
+                        <Link
+                          to={link.to}
+                          className="inline-flex items-center gap-2 text-sm text-secondary-300 transition-colors duration-300 hover:text-primary-300"
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-primary/50" />
+                          {link.label}
+                        </Link>
+                      ) : link.href ? (
+                        <a
+                          href={link.href}
+                          className="inline-flex items-center gap-2 text-sm text-secondary-300 transition-colors duration-300 hover:text-primary-300"
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-primary/50" />
+                          {link.label}
+                        </a>
+                      ) : (
+                        <span className="inline-flex items-center gap-2 text-sm text-secondary-500">
+                          <span className="h-1.5 w-1.5 rounded-full bg-white/20" />
+                          {link.label}
+                        </span>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -111,18 +138,18 @@ const Footer = () => {
               &copy; {currentYear} {tApp("name")}. {tFooter("rights")}
             </p>
             <div className="flex items-center gap-6">
-              <a
-                href="#"
+              <Link
+                to={PATHS.PRIVACY}
                 className="text-sm text-secondary-400 transition-colors duration-300 hover:text-primary-300"
               >
                 {tFooter("sections.legal.privacy")}
-              </a>
-              <a
-                href="#"
+              </Link>
+              <Link
+                to={PATHS.LEGAL_NOTICE}
                 className="text-sm text-secondary-400 transition-colors duration-300 hover:text-primary-300"
               >
                 {tFooter("sections.legal.legalNotice")}
-              </a>
+              </Link>
             </div>
           </div>
         </div>

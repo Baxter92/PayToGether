@@ -28,6 +28,7 @@ export default function CheckoutPage(): JSX.Element {
 
   const subtotal = useMemo(() => qty * pricePerPart, [qty, pricePerPart]);
   const fees = 0;
+  const defaultDeliveryFee = 12;
   const tax = useMemo(() => (subtotal + fees) * 0.05, [subtotal, fees]);
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -38,8 +39,8 @@ export default function CheckoutPage(): JSX.Element {
   const [deliveryData, setDeliveryData] = useState<DeliveryData | null>(null);
 
   const deliveryFee = useMemo(
-    () => (deliveryData?.deliveryMethod === "home" ? 12 : 0),
-    [deliveryData],
+    () => (deliveryData?.deliveryMethod === "home" ? defaultDeliveryFee : 0),
+    [deliveryData, defaultDeliveryFee],
   );
   const total = useMemo(
     () => subtotal + deliveryFee + tax,
@@ -150,6 +151,7 @@ export default function CheckoutPage(): JSX.Element {
                       onSubmit={handleDeliverySubmit}
                       onBack={() => setCurrentStep(currentStep - 1)}
                       isSubmitting={isSubmitting}
+                      deliveryFee={defaultDeliveryFee}
                     />
                   </CheckoutStep>
 

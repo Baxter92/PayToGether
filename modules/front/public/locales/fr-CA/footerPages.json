@@ -1,0 +1,797 @@
+{
+  "common": {
+    "lastUpdatedLabel": "Dernière mise à jour",
+    "contactTitle": "Contact",
+    "contactDescription": "Pour toute question, vous pouvez contacter directement notre équipe."
+  },
+  "about": {
+    "eyebrow": "À propos de DealTogether",
+    "title": "À propos de DealTogether",
+    "intro": "DealTogether est une plateforme d'achat groupé conçue pour rendre les produits du quotidien plus accessibles grâce à la puissance de l'action collective.",
+    "sections": [
+      {
+        "title": "À propos de DealTogether",
+        "paragraphs": [
+          "DealTogether est une plateforme d'achat groupé conçue pour rendre les produits du quotidien plus accessibles grâce à la puissance de l'action collective.",
+          "Nous partons d'un constat simple : les prix sont souvent élevés non pas à cause du coût réel des produits, mais à cause des intermédiaires, de volumes insuffisants et d'un manque de coordination entre les acheteurs. DealTogether change cette dynamique.",
+          "Notre plateforme permet aux particuliers de se regrouper pour acheter ensemble, et ainsi :"
+        ],
+        "bullets": [
+          "bénéficier de prix négociés à la baisse",
+          "accéder à des produits de qualité à meilleur prix",
+          "créer une communauté d'acheteurs solidaires"
+        ]
+      },
+      {
+        "title": "Comment ça marche",
+        "paragraphs": [
+          "DealTogether met en relation trois acteurs :"
+        ],
+        "bullets": [
+          "Acheteurs : rejoignent ou lancent des achats groupés",
+          "Les vendeurs proposent des remises sur volume.",
+          "La plateforme : facilite, sécurise et structure les transactions",
+          "Lorsqu'un nombre minimum d'acheteurs est atteint, le prix est débloqué pour tout le monde."
+        ]
+      },
+      {
+        "title": "Notre vision",
+        "paragraphs": [
+          "Nous croyons en un modèle de consommation plus intelligent et plus juste :"
+        ],
+        "bullets": [
+          "moins de gaspillage",
+          "plus de pouvoir d'achat",
+          "une relation directe avec les fournisseurs",
+          "DealTogether ne se limite pas à vendre : nous construisons un écosystème collaboratif où tout le monde est gagnant."
+        ]
+      },
+      {
+        "title": "Pour qui ?",
+        "bullets": [
+          "Les nouveaux arrivants sans historique d'achat",
+          "Les familles qui cherchent à réduire leurs dépenses",
+          "Les communautés organisées (associations, groupes locaux)",
+          "Les consommateurs responsables"
+        ]
+      },
+      {
+        "title": "Notre engagement",
+        "paragraphs": [
+          "Nous nous engageons à :"
+        ],
+        "bullets": [
+          "proposer des offres transparentes",
+          "travailler avec des fournisseurs fiables",
+          "garantir une expérience simple et sécurisée",
+          "DealTogether est plus qu'une plateforme : c'est une nouvelle façon d'acheter, ensemble."
+        ]
+      }
+    ]
+  },
+  "mission": {
+    "eyebrow": "Notre mission",
+    "title": "Notre mission",
+    "intro": "Notre mission est de démocratiser l'accès à des produits de qualité à prix réduits en exploitant la puissance de l'achat collectif.",
+    "sections": [
+      {
+        "title": "Notre mission",
+        "paragraphs": [
+          "Notre mission est de démocratiser l'accès à des produits de qualité à prix réduits en exploitant la puissance de l'achat collectif."
+        ]
+      },
+      {
+        "title": "Ce que nous voulons changer",
+        "paragraphs": [
+          "Le commerce traditionnel favorise :"
+        ],
+        "bullets": [
+          "les gros acheteurs",
+          "les circuits complexes",
+          "les marges élevées",
+          "Pendant ce temps, les consommateurs paient plus cher, souvent sans réelle alternative.",
+          "DealTogether inverse cette logique."
+        ]
+      },
+      {
+        "title": "Comment nous y parvenons",
+        "paragraphs": [
+          "Nous permettons à plusieurs personnes de se réunir pour :"
+        ],
+        "bullets": [
+          "augmenter leur pouvoir de négociation",
+          "accéder à des prix habituellement réservés au gros",
+          "réduire les coûts de distribution"
+        ]
+      },
+      {
+        "title": "Impact social",
+        "paragraphs": [
+          "Notre mission a aussi une forte dimension sociale :"
+        ],
+        "bullets": [
+          "faciliter l'accès au logement et aux biens essentiels",
+          "aider les nouveaux arrivants à mieux s'intégrer économiquement",
+          "soutenir les communautés souvent exclues des meilleures offres"
+        ]
+      },
+      {
+        "title": "Impact économique",
+        "bullets": [
+          "plus de volume pour les fournisseurs",
+          "moins de pertes",
+          "une meilleure prévisibilité des ventes"
+        ]
+      },
+      {
+        "title": "Nos valeurs",
+        "bullets": [
+          "Transparence : des prix clairs et justifiés",
+          "Confiance : des partenaires vérifiés",
+          "Accessibilité : des offres ouvertes à tous",
+          "Communauté : acheter ensemble, c'est gagner ensemble"
+        ]
+      },
+      {
+        "title": "Notre ambition",
+        "paragraphs": [
+          "Devenir la référence de l'achat groupé au Canada, puis à l'international, en construisant une plateforme simple, fiable et inclusive.",
+          "DealTogether, c'est transformer chaque achat en opportunité collective."
+        ]
+      }
+    ]
+  },
+  "howItWorks": {
+    "eyebrow": "Comment ça marche",
+    "title": "Comment ça marche",
+    "intro": "DealTogether vous permet d'acheter mieux et moins cher grâce à l'achat groupé. Voici comment profiter pleinement de la plateforme :",
+    "sections": [
+      {
+        "title": "1. Découvrir les offres",
+        "paragraphs": [
+          "Parcourez les offres disponibles sur la plateforme :"
+        ],
+        "bullets": [
+          "produits du quotidien",
+          "biens en gros",
+          "offres négociées exclusives",
+          "Chaque offre indique :",
+          "le prix actuel sur dealTogether",
+          "le prix affiché sur le marché actuel",
+          "le nombre d'acheteurs requis"
+        ]
+      },
+      {
+        "title": "2. Rejoindre un achat groupé",
+        "paragraphs": [
+          "Sélectionnez une offre et rejoignez un groupe existant ou créez le vôtre :"
+        ],
+        "bullets": [
+          "Plus il y a d'acheteurs",
+          "plus le prix baisse"
+        ]
+      },
+      {
+        "title": "3. Réserver et payer",
+        "paragraphs": [
+          "Vous validez une offre et confirmez le paiement.",
+          "Votre paiement sera traité sous réserve que l'offre soit complétée.",
+          "Le paiement est validé lorsque l'offre est complète avec le nombre d'acheteurs requis par le vendeur."
+        ]
+      },
+      {
+        "title": "4. Activation de l'offre",
+        "paragraphs": [
+          "Lorsque le nombre requis d'acheteurs est atteint :"
+        ],
+        "bullets": [
+          "Le prix final a été attribué.",
+          "La commande est confirmée."
+        ]
+      },
+      {
+        "title": "5. Livraison ou retrait",
+        "paragraphs": [
+          "Vous recevrez votre produit :"
+        ],
+        "bullets": [
+          "à domicile",
+          "ou en point de collecte",
+          "Les délais de livraison sont précisés par le vendeur."
+        ]
+      },
+      {
+        "title": "Sécurité et garantie",
+        "bullets": [
+          "paiements sécurisés",
+          "vendeurs vérifiés",
+          "support client disponible"
+        ]
+      },
+      {
+        "title": "Conseil",
+        "paragraphs": [
+          "Invitez vos amis et votre famille à rejoindre votre groupe pour débloquer les meilleurs prix plus rapidement.",
+          "Achetez ensemble, économisez plus."
+        ]
+      }
+    ]
+  },
+  "faq": {
+    "eyebrow": "FAQ",
+    "title": "FAQ – Acheteurs",
+    "intro": "Nous sommes là pour rendre votre expérience simple, transparente et avantageuse.",
+    "sections": [
+      {
+        "title": "Comment obtenir le meilleur prix ?",
+        "paragraphs": [
+          "Le prix diminue à mesure que le nombre d'acheteurs augmente. Plus vous êtes nombreux, plus vous économisez."
+        ]
+      },
+      {
+        "title": "Que se passe-t-il si le groupe n'est pas complété ?",
+        "paragraphs": [
+          "La commande est annulée.",
+          "Vous ne serez pas débité ou vous serez remboursé"
+        ]
+      },
+      {
+        "title": "Quand serai-je débité ?",
+        "paragraphs": [
+          "Selon l'offre :",
+          "soit immédiatement (avec une garantie de remboursement)",
+          "seulement lorsque l'offre est validée"
+        ]
+      },
+      {
+        "title": "Les produits sont-ils garantis ?",
+        "paragraphs": [
+          "Oui. Tous les vendeurs sont sélectionnés et doivent respecter des normes de qualité."
+        ]
+      },
+      {
+        "title": "Puis-je annuler ma commande ?",
+        "paragraphs": [
+          "Oui, sous certaines conditions précisées dans la politique de remboursement."
+        ]
+      },
+      {
+        "title": "Combien de temps prend la livraison ?",
+        "paragraphs": [
+          "Les délais de livraison varient selon le fournisseur et sont indiqués sur chaque offre."
+        ]
+      },
+      {
+        "title": "Que dois-je faire si je rencontre un problème ?",
+        "paragraphs": [
+          "Vous pouvez contacter le support ou signaler un problème directement depuis votre compte."
+        ]
+      },
+      {
+        "title": "Puis-je créer mon propre groupe ?",
+        "paragraphs": [
+          "Oui. Vous pouvez lancer un achat groupé et inviter d'autres personnes à vous rejoindre."
+        ]
+      },
+      {
+        "title": "Les paiements sont-ils sécurisés ?",
+        "paragraphs": [
+          "Oui. Toutes les transactions sont traitées par des prestataires certifiés."
+        ]
+      }
+    ]
+  },
+  "refunds": {
+    "eyebrow": "Politique de remboursement",
+    "title": "Politique de remboursement",
+    "intro": "Si le seuil d'achat n'est pas atteint, aucun paiement n'est débité ou un remboursement est émis.",
+    "lastUpdated": "1 avril 2026",
+    "sections": [
+      {
+        "title": "1. Annulation du groupe",
+        "paragraphs": [
+          "Si le seuil d'achat n'est pas atteint :"
+        ],
+        "bullets": [
+          "La commande est annulée.",
+          "Aucun paiement n'est débité ou un remboursement est émis."
+        ]
+      },
+      {
+        "title": "2. Produits non conformes",
+        "paragraphs": [
+          "Vous pouvez demander un remboursement si :"
+        ],
+        "bullets": [
+          "le produit est défectueux",
+          "Le produit ne correspond pas à la description"
+        ]
+      },
+      {
+        "title": "3. Délais",
+        "paragraphs": [
+          "Les demandes doivent être faites dans les 7 jours suivant la réception."
+        ]
+      },
+      {
+        "title": "4. Processus",
+        "bullets": [
+          "Contacter le support",
+          "Fournir des preuves (photos, description)",
+          "Analyse dans les 5 jours ouvrables"
+        ]
+      },
+      {
+        "title": "5. Méthode de remboursement",
+        "paragraphs": [
+          "Remboursement via le mode de paiement d'origine"
+        ]
+      },
+      {
+        "title": "6. Exceptions",
+        "paragraphs": [
+          "Certains produits peuvent être non remboursables (indiqué sur la page du produit)."
+        ]
+      },
+      {
+        "title": "7. Contact",
+        "paragraphs": [
+          "Pour toute question : contact@hanacalgary.ca"
+        ]
+      }
+    ]
+  },
+  "becomeSeller": {
+    "eyebrow": "Devenir vendeur",
+    "title": "Devenir vendeur sur DealTogether",
+    "intro": "Rejoignez une plateforme conçue pour augmenter vos ventes grâce à la puissance du volume.",
+    "sections": [
+      {
+        "title": "Pourquoi vendre sur DealTogether ?",
+        "bullets": [
+          "Accès à une base de données d'acheteurs engagés",
+          "Augmentation du volume des ventes",
+          "Réduction des coûts marketing",
+          "Prévisibilité des commandes"
+        ]
+      },
+      {
+        "title": "Conditions pour rejoindre",
+        "paragraphs": [
+          "Pour devenir vendeur, vous devez :"
+        ],
+        "bullets": [
+          "proposer des produits de qualité",
+          "garantir des capacités de production et de livraison",
+          "respecter les délais annoncés"
+        ]
+      },
+      {
+        "title": "Comment cela fonctionne du point de vue du vendeur",
+        "bullets": [
+          "plan tarifaire par paliers.",
+          "Les acheteurs rejoignent l'offre",
+          "Une fois le seuil atteint, la commande est validée.",
+          "Vous recevez votre paiement",
+          "Vous livrez les produits"
+        ]
+      },
+      {
+        "title": "Modèle économique",
+        "paragraphs": [
+          "DealTogether applique une commission sur chaque vente réalisée via la plateforme."
+        ]
+      },
+      {
+        "title": "Support",
+        "paragraphs": [
+          "Nous vous aidons à :"
+        ],
+        "bullets": [
+          "structurer vos offres",
+          "optimiser vos volumes",
+          "atteindre rapidement les seuils"
+        ]
+      },
+      {
+        "title": "Notre objectif",
+        "paragraphs": [
+          "Créer une relation gagnant-gagnant :"
+        ],
+        "bullets": [
+          "plus de ventes pour vous",
+          "de meilleurs prix pour les clients",
+          "Rejoignez DealTogether et développez votre activité autrement."
+        ]
+      }
+    ]
+  },
+  "sellerTerms": {
+    "eyebrow": "Conditions vendeurs",
+    "title": "Conditions pour les vendeurs",
+    "intro": "Les vendeurs doivent fournir des informations légales, des produits conformes et une capacité logistique.",
+    "lastUpdated": "1 avril 2026",
+    "sections": [
+      {
+        "title": "1. Inscription",
+        "paragraphs": [
+          "Les vendeurs doivent fournir :"
+        ],
+        "bullets": [
+          "Informations légales",
+          "Produits conformes",
+          "Capacité logistique"
+        ]
+      },
+      {
+        "title": "2. Obligations",
+        "paragraphs": [
+          "Le vendeur s'engage à :"
+        ],
+        "bullets": [
+          "Exécuter les commandes",
+          "Respecter les délais",
+          "Maintenir la qualité"
+        ]
+      },
+      {
+        "title": "3. Commission",
+        "paragraphs": [
+          "DealTogether applique une commission sur chaque vente négociée directement avec le vendeur."
+        ]
+      },
+      {
+        "title": "4. Paiement",
+        "paragraphs": [
+          "Les paiements sont effectués après :",
+          "Confirmation complète de l'offre"
+        ]
+      },
+      {
+        "title": "5. Litiges",
+        "paragraphs": [
+          "Le vendeur est responsable de :"
+        ],
+        "bullets": [
+          "gérer les retours",
+          "résoudre les réclamations"
+        ]
+      },
+      {
+        "title": "6. Résiliation",
+        "paragraphs": [
+          "DealTogether peut suspendre un vendeur en cas de non-conformité."
+        ]
+      },
+      {
+        "title": "7. Qualité",
+        "paragraphs": [
+          "Une charte qualité doit être respectée en permanence."
+        ]
+      }
+    ]
+  },
+  "supplierCharter": {
+    "eyebrow": "Charte fournisseur",
+    "title": "Charte fournisseur",
+    "intro": "Chez DealTogether, la qualité et la confiance sont essentielles. En tant que fournisseur, vous vous engagez à respecter les normes suivantes :",
+    "sections": [
+      {
+        "title": "Qualité des produits",
+        "bullets": [
+          "Produits conformes à la description",
+          "Normes de sécurité respectées",
+          "Aucun produit contrefait ou dangereux"
+        ]
+      },
+      {
+        "title": "Délais",
+        "bullets": [
+          "Respect des délais annoncés",
+          "Communication proactive en cas de retard"
+        ]
+      },
+      {
+        "title": "Livraison",
+        "bullets": [
+          "Emballage sécurisé",
+          "Logistique fiable",
+          "Suivi des commandes"
+        ]
+      },
+      {
+        "title": "Service client",
+        "bullets": [
+          "Réactivité aux demandes",
+          "Gestion des retours et réclamations",
+          "Attitude professionnelle"
+        ]
+      },
+      {
+        "title": "Transparence",
+        "bullets": [
+          "Informations produit claires",
+          "Prix justifiés",
+          "Aucune pratique trompeuse"
+        ]
+      },
+      {
+        "title": "Non-respect",
+        "paragraphs": [
+          "Le non-respect de cette charte peut entraîner :"
+        ],
+        "bullets": [
+          "suspension",
+          "déréférencement",
+          "résiliation du partenariat"
+        ]
+      },
+      {
+        "title": "Notre objectif",
+        "paragraphs": [
+          "Notre objectif est de garantir une expérience irréprochable pour tous."
+        ]
+      }
+    ]
+  },
+  "terms": {
+    "eyebrow": "Conditions d'utilisation",
+    "title": "Conditions d'utilisation de DealTogether",
+    "intro": "En accédant à la plateforme DealTogether et en l'utilisant, vous acceptez d'être lié par les présentes conditions d'utilisation.",
+    "lastUpdated": "1 avril 2026",
+    "sections": [
+      {
+        "title": "1. Acceptation des conditions",
+        "paragraphs": [
+          "En accédant à la plateforme DealTogether (« la Plateforme ») et en l'utilisant, vous acceptez d'être lié par les présentes conditions d'utilisation. Si vous n'acceptez pas ces conditions, vous ne devez pas utiliser nos services."
+        ]
+      },
+      {
+        "title": "2. Description du service",
+        "paragraphs": [
+          "DealTogether est une plateforme d'achat groupé qui met en relation :"
+        ],
+        "bullets": [
+          "des acheteurs souhaitant bénéficier de prix réduits",
+          "des vendeurs / fournisseurs proposant des produits ou services",
+          "Les offres sont activées lorsque le nombre minimum de participants est atteint."
+        ]
+      },
+      {
+        "title": "3. Création de compte",
+        "paragraphs": [
+          "Vous acceptez de :"
+        ],
+        "bullets": [
+          "Fournir des informations exactes et complètes",
+          "Garder vos identifiants confidentiels",
+          "Vous êtes responsable de toute activité sur votre compte.",
+          "DealTogether se réserve le droit de suspendre ou de supprimer un compte en cas de violation."
+        ]
+      },
+      {
+        "title": "4. Fonctionnement des achats",
+        "bullets": [
+          "Les prix dépendent du volume d'acheteurs.",
+          "Une transaction peut être annulée si le seuil minimum n'est pas atteint",
+          "Les délais de livraison sont fournis par les vendeurs."
+        ]
+      },
+      {
+        "title": "5. Paiement",
+        "bullets": [
+          "Les paiements sont sécurisés via des prestataires tiers.",
+          "Le paiement peut être autorisé au moment de la commande.",
+          "Le débit peut être conditionné à la validation par le groupe"
+        ]
+      },
+      {
+        "title": "6. Responsabilités des vendeurs",
+        "paragraphs": [
+          "Les vendeurs s'engagent à :"
+        ],
+        "bullets": [
+          "Fournir des produits conformes",
+          "Respecter les délais annoncés",
+          "Gérer les retours et les réclamations",
+          "DealTogether agit comme intermédiaire et n'est pas le vendeur des produits."
+        ]
+      },
+      {
+        "title": "7. Limitation de responsabilité",
+        "paragraphs": [
+          "DealTogether ne peut être tenu responsable de :"
+        ],
+        "bullets": [
+          "défauts de produits",
+          "retards de livraison",
+          "pertes indirectes ou financières"
+        ]
+      },
+      {
+        "title": "8. Propriété intellectuelle",
+        "paragraphs": [
+          "Tous les contenus (logo, textes, design) sont la propriété de DealTogether et ne peuvent être utilisés sans autorisation."
+        ]
+      },
+      {
+        "title": "9. Résiliation",
+        "paragraphs": [
+          "Nous pouvons suspendre ou résilier votre accès à tout moment si vous ne respectez pas les conditions."
+        ]
+      },
+      {
+        "title": "10. Droit applicable",
+        "paragraphs": [
+          "Ces conditions sont régies par les lois de la province de l'Alberta et du Canada."
+        ]
+      },
+      {
+        "title": "11. Contact",
+        "paragraphs": [
+          "Pour toute question : contact@hanacalgary.ca"
+        ]
+      }
+    ]
+  },
+  "privacy": {
+    "eyebrow": "Politique de confidentialité",
+    "title": "Politique de confidentialité",
+    "intro": "Cette politique explique les données que nous collectons, comment nous les utilisons et quels sont vos droits.",
+    "lastUpdated": "1 avril 2026",
+    "sections": [
+      {
+        "title": "1. Données collectées",
+        "paragraphs": [
+          "Nous collectons :"
+        ],
+        "bullets": [
+          "Nom, e-mail, numéro de téléphone",
+          "Informations de paiement (via des prestataires sécurisés)",
+          "Données de navigation"
+        ]
+      },
+      {
+        "title": "2. Utilisation des données",
+        "paragraphs": [
+          "Vos données sont utilisées pour :"
+        ],
+        "bullets": [
+          "Traiter les commandes",
+          "Améliorer nos services",
+          "Envoyer des communications marketing (avec consentement)"
+        ]
+      },
+      {
+        "title": "3. Partage des données",
+        "paragraphs": [
+          "Nous pouvons partager vos données avec :"
+        ],
+        "bullets": [
+          "Les fournisseurs et vendeurs",
+          "Les prestataires de paiement",
+          "Les services techniques",
+          "Nous ne vendons pas vos données."
+        ]
+      },
+      {
+        "title": "4. Sécurité",
+        "paragraphs": [
+          "Nous mettons en oeuvre des mesures de sécurité pour protéger vos informations."
+        ]
+      },
+      {
+        "title": "5. Conservation des données",
+        "paragraphs": [
+          "Les données sont conservées aussi longtemps que nécessaire pour :"
+        ],
+        "bullets": [
+          "fournir les services",
+          "respecter les obligations légales"
+        ]
+      },
+      {
+        "title": "6. Vos droits",
+        "paragraphs": [
+          "Vous pouvez :"
+        ],
+        "bullets": [
+          "Accéder à vos données",
+          "Demander leur modification ou leur suppression",
+          "Retirer votre consentement"
+        ]
+      },
+      {
+        "title": "7. Cookies",
+        "paragraphs": [
+          "Nous utilisons des cookies pour :"
+        ],
+        "bullets": [
+          "améliorer l'expérience utilisateur",
+          "analyser le trafic"
+        ]
+      },
+      {
+        "title": "8. Contact",
+        "paragraphs": [
+          "Pour toute demande : contact@hanacalgary.ca"
+        ]
+      }
+    ]
+  },
+  "cookies": {
+    "eyebrow": "Politique de cookies",
+    "title": "Politique de cookies",
+    "intro": "Nous utilisons des cookies pour le fonctionnement, l'analyse et le marketing.",
+    "lastUpdated": "1 avril 2026",
+    "sections": [
+      {
+        "title": "Nous utilisons des cookies pour :",
+        "paragraphs": []
+      },
+      {
+        "title": "1. Fonctionnement",
+        "bullets": [
+          "connexion utilisateur",
+          "panier"
+        ]
+      },
+      {
+        "title": "2. Analyse",
+        "bullets": [
+          "trafic",
+          "comportement utilisateur"
+        ]
+      },
+      {
+        "title": "3. Marketing",
+        "bullets": [
+          "publicité ciblée"
+        ]
+      },
+      {
+        "title": "Gestion",
+        "paragraphs": [
+          "Vous pouvez configurer vos préférences dans votre navigateur."
+        ]
+      },
+      {
+        "title": "Consentement",
+        "paragraphs": [
+          "En utilisant le site, vous acceptez l'utilisation des cookies."
+        ]
+      }
+    ]
+  },
+  "legalNotice": {
+    "eyebrow": "Mentions légales",
+    "title": "Mentions légales",
+    "intro": "Informations sur la société, l'hébergement et la responsabilité juridique de DealTogether.",
+    "sections": [
+      {
+        "title": "Société",
+        "paragraphs": [
+          "Société : DealTogether Statut : Corporation Adresse : Cornerstone Blvd NE, Calgary, AB E-mail : contact@dealtogether.ca"
+        ]
+      },
+      {
+        "title": "Hébergement",
+        "paragraphs": [
+          "Hostinger"
+        ]
+      },
+      {
+        "title": "Responsabilité",
+        "paragraphs": [
+          "DealTogether agit comme plateforme intermédiaire entre acheteurs et vendeurs."
+        ]
+      },
+      {
+        "title": "Propriété",
+        "paragraphs": [
+          "Tout le contenu est protégé par les lois sur la propriété intellectuelle."
+        ]
+      }
+    ]
+  }
+}

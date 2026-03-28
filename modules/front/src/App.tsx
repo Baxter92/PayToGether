@@ -37,6 +37,7 @@ import AdminCategories from "./pages/admin/categories";
 import AdminReports from "./pages/admin/reports";
 import AdminHero from "./pages/admin/hero";
 import PaymentSuccess from "./pages/checkout/PaymentSuccess";
+import FooterContentPage from "./pages/footerContent";
 
 function App(): JSX.Element {
   return (
@@ -76,6 +77,51 @@ function App(): JSX.Element {
             {/* Routes avec MainLayout */}
             <Route element={<MainLayout />}>
               <Route path={PATHS.HOME} element={<Home />} />
+              <Route
+                path={PATHS.ABOUT}
+                element={<FooterContentPage page="about" />}
+              />
+              <Route
+                path={PATHS.MISSION}
+                element={<FooterContentPage page="mission" />}
+              />
+              <Route
+                path={PATHS.HOW_IT_WORKS}
+                element={<FooterContentPage page="howItWorks" />}
+              />
+              <Route path={PATHS.FAQ} element={<FooterContentPage page="faq" />} />
+              <Route
+                path={PATHS.REFUNDS}
+                element={<FooterContentPage page="refunds" />}
+              />
+              <Route
+                path={PATHS.TERMS}
+                element={<FooterContentPage page="terms" />}
+              />
+              <Route
+                path={PATHS.PRIVACY}
+                element={<FooterContentPage page="privacy" />}
+              />
+              <Route
+                path={PATHS.COOKIES}
+                element={<FooterContentPage page="cookies" />}
+              />
+              <Route
+                path={PATHS.LEGAL_NOTICE}
+                element={<FooterContentPage page="legalNotice" />}
+              />
+              <Route
+                path={PATHS.BECOME_SELLER}
+                element={<FooterContentPage page="becomeSeller" />}
+              />
+              <Route
+                path={PATHS.SELLER_TERMS}
+                element={<FooterContentPage page="sellerTerms" />}
+              />
+              <Route
+                path={PATHS.SUPPLIER_CHARTER}
+                element={<FooterContentPage page="supplierCharter" />}
+              />
               <Route path={PATHS.DEAL_DETAIL()} element={<DealDetail />} />
               <Route path={PATHS.SEARCH} element={<SearchPage />} />
               <Route path={PATHS.DEALS} element={<Deals />} />

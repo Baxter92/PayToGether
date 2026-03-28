@@ -18,6 +18,7 @@ i18n
       "nav",
       "header",
       "footer",
+      "footerPages",
       "home",
       "deals",
       "search",

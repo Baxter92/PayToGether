@@ -4,12 +4,14 @@ import Form from "@/common/containers/Form";
 import type { DeliveryData } from "../types";
 import type { JSX } from "react";
 import * as z from "zod";
+import { formatCurrency } from "@/common/utils";
 
 export interface IDeliveryFormProps {
   defaultValue?: "home" | "pickup";
   onSubmit: (data: DeliveryData) => void;
   onBack?: () => void;
   isSubmitting?: boolean;
+  deliveryFee: number;
 }
 
 const deliverySchema = z.object({
@@ -20,6 +22,7 @@ export function DeliveryForm({
   onSubmit,
   onBack,
   isSubmitting,
+  deliveryFee,
 }: IDeliveryFormProps): JSX.Element {
   const { t } = useTranslation("checkout");
 
@@ -30,7 +33,10 @@ export function DeliveryForm({
       type: "radio",
       defaultValue: "pickup",
       items: [
-        { label: `${t("homeDelivery")}`, value: "home" },
+        {
+          label: `${t("homeDelivery")} (${formatCurrency(deliveryFee)})`,
+          value: "home",
+        },
         { label: t("pickupDelivery"), value: "pickup" },
       ],
     },
