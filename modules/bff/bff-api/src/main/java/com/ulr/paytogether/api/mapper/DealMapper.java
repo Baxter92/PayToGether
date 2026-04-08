@@ -50,6 +50,7 @@ public class DealMapper {
                 .dateExpiration(deal.getDateExpiration())
                 .ville(deal.getVille())
                 .pays(deal.getPays())
+                .favoris(deal.getFavoris())
                 .dateCreation(deal.getDateCreation())
                 .dateModification(deal.getDateModification())
                 .moyenneCommentaires(deal.getMoyenneCommentaires())

@@ -38,6 +38,7 @@ public class DealModele {
     private LocalDateTime dateExpiration;
     private String ville;
     private String pays;
+    private Boolean favoris; // Indique si le deal est marqué comme favori par les administrateurs
     private LocalDateTime dateCreation;
     private LocalDateTime dateModification;
 

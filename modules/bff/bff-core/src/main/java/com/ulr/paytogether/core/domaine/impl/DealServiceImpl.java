@@ -211,24 +211,37 @@ public class DealServiceImpl implements DealService {
         // Mettre à jour le statut
         DealModele dealMisAJour = dealProvider.mettreAJourStatut(uuid, nouveauStatut);
 
-        // TODO : Réactiver l'indexation automatique après avoir corrigé la structure d'index
-        /*
         // Gérer l'indexation Elasticsearch selon le nouveau statut
         try {
-            if (nouveauStatut == StatutDeal.PUBLIE) {
-                dealRechercheService.mettreAJourIndexDeal(dealMisAJour);
-                log.info("Deal {} réindexé dans Elasticsearch (statut PUBLIE)", uuid);
-            } else {
-                // Supprimer de l'index si non publié
-                dealRechercheService.supprimerIndexDeal(uuid);
-                log.info("Deal {} supprimé de l'index Elasticsearch (statut {})", uuid, nouveauStatut);
+            if (dealRechercheService != null) {
+                if (nouveauStatut == StatutDeal.PUBLIE) {
+                    dealRechercheService.mettreAJourIndexDeal(dealMisAJour);
+                    log.info("✅ Deal {} réindexé dans Elasticsearch (statut PUBLIE)", uuid);
+                } else {
+                    // Supprimer de l'index si non publié (BROUILLON, EXPIRE, ANNULE, TERMINE)
+                    dealRechercheService.supprimerIndexDeal(uuid);
+                    log.info("✅ Deal {} supprimé de l'index Elasticsearch (statut {})", uuid, nouveauStatut);
+                }
             }
         } catch (Exception e) {
-            log.error("Erreur lors de la gestion de l'index Elasticsearch pour le deal {} : {}", uuid, e.getMessage());
+            log.error("⚠️ Erreur lors de la gestion de l'index Elasticsearch pour le deal {} : {}", uuid, e.getMessage());
         }
-        */
 
         return dealMisAJour;
+    }
+
+    @Transactional
+    @Override
+    public DealModele basculerFavoris(UUID uuid) {
+        log.info("🔄 Basculement du statut favoris pour le deal: {}", uuid);
+
+        // Vérifier que le deal existe
+        dealProvider.trouverParUuid(uuid)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "deal.non.trouve", uuid.toString()));
+
+        // Basculer le statut favoris
+        return dealProvider.basculerFavoris(uuid);
     }
 
     @Transactional
@@ -312,8 +325,23 @@ public class DealServiceImpl implements DealService {
             // Vérifier si la date d'expiration est dépassée
             if (deal.getDateExpiration() != null && deal.getDateExpiration().isBefore(maintenant)) {
                 log.info("Deal {} expiré (date expiration: {})", deal.getUuid(), deal.getDateExpiration());
+
+                // Mettre à jour le statut en base de données
                 dealProvider.mettreAJourStatut(deal.getUuid(), StatutDeal.EXPIRE);
                 nombreDealsExpires++;
+
+                // Supprimer de l'index Elasticsearch
+                try {
+                    if (dealRechercheService != null) {
+                        dealRechercheService.supprimerIndexDeal(deal.getUuid());
+                        log.info("✅ Deal {} supprimé de l'index Elasticsearch (expiré)", deal.getUuid());
+                    }
+                } catch (Exception e) {
+                    log.error("⚠️ Erreur lors de la suppression de l'index Elasticsearch pour le deal expiré {} : {}",
+                        deal.getUuid(), e.getMessage());
+                }
+
+                // Publier l'événement d'annulation
                 var dealAnnuleEvent = DealCancelledEvent.builder()
                         .dealUuid(deal.getUuid())
                         .nomMarchand(deal.getCreateur().getNom())
@@ -330,7 +358,7 @@ public class DealServiceImpl implements DealService {
         }
 
         if (nombreDealsExpires > 0) {
-            log.info("{} deal(s) mis à jour vers le statut EXPIRE", nombreDealsExpires);
+            log.info("{} deal(s) mis à jour vers le statut EXPIRE et supprimés de l'index Elasticsearch", nombreDealsExpires);
         }
     }
 }

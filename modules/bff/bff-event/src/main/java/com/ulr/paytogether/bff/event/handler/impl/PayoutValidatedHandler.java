@@ -54,9 +54,9 @@ public class PayoutValidatedHandler implements ConsumerHandler {
             // Envoyer l'email au vendeur pour lui demander d'uploader sa facture
             // L'email est la seule opération, donc on l'isole pour éviter les doublons
             envoyerEmailDemandFacture(event);
-                
+
         } catch (Exception e) {
-            log.error("Erreur lors du traitement de PayoutValidatedEvent pour la commande {}: {}", 
+            log.error("Erreur lors du traitement de PayoutValidatedEvent pour la commande {}: {}",
                 event.getCommandeUuid(), e.getMessage(), e);
             // Ne pas propager l'exception pour éviter les doublons d'emails en cas de retry
         }

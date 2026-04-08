@@ -55,6 +55,11 @@ public interface DealService {
     DealModele mettreAJourStatut(UUID uuid, StatutDeal statut);
 
     /**
+     * Basculer le statut favoris d'un deal (true <-> false)
+     */
+    DealModele basculerFavoris(UUID uuid);
+
+    /**
      * Mettre à jour uniquement les images d'un deal
      */
     DealModele mettreAJourImages(UUID uuid, DealModele deal);

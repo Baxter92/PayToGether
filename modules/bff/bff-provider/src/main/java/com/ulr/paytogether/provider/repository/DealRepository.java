@@ -21,10 +21,18 @@ public interface DealRepository extends JpaRepository<DealJpa, UUID> {
 
     /**
      * Recherche tous les deals par statut
+     * Tri : favoris en premier (DESC), puis par date de création (DESC)
      * @param statut le statut du deal
-     * @return la liste des deals
+     * @return la liste des deals triée (favoris en premier)
      */
-    List<DealJpa> findByStatut(StatutDeal statut);
+    List<DealJpa> findByStatutOrderByFavorisDescDateCreationDesc(StatutDeal statut);
+
+    /**
+     * Recherche tous les deals (tous statuts confondus)
+     * Tri : favoris en premier (DESC), puis par date de création (DESC)
+     * @return la liste de tous les deals triée (favoris en premier)
+     */
+    List<DealJpa> findAllByOrderByFavorisDescDateCreationDesc();
 
     /**
      * Recherche tous les deals d'un créateur

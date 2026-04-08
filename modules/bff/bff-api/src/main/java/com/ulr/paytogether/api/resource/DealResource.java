@@ -121,6 +121,17 @@ public class DealResource {
     }
 
     /**
+     * Basculer le statut favoris d'un deal (ADMIN uniquement)
+     * Toggle entre true et false
+     */
+    @PatchMapping("/{uuid}/favoris")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<DealResponseDto> basculerFavoris(@PathVariable UUID uuid) {
+        log.info("Basculement du statut favoris du deal: {}", uuid);
+        return ResponseEntity.ok(dealApiAdapter.basculerFavoris(uuid));
+    }
+
+    /**
      * Mettre à jour uniquement les images d'un deal
      * Les anciennes images seront supprimées et remplacées par les nouvelles
      */

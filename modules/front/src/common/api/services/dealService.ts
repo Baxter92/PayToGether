@@ -63,4 +63,7 @@ export const dealService = {
     apiClient.get<any[]>(`/deals/${dealUuid}/participants`),
 
   myPayments: () => apiClient.get<MyPaymentsDTO[]>("/deals/mes-paiements"),
+
+  toggleFavoris: (uuid: string) =>
+    apiClient.patch<DealDTO>(`/deals/${uuid}/favoris`),
 };

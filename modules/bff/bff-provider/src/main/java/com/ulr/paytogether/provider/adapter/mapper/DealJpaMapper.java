@@ -39,6 +39,7 @@ public class DealJpaMapper {
                 .dateExpiration(jpaDeal.getDateExpiration())
                 .ville(jpaDeal.getVille())
                 .pays(jpaDeal.getPays())
+                .favoris(jpaDeal.getFavoris())
                 .dateCreation(jpaDeal.getDateCreation())
                 .dateModification(jpaDeal.getDateModification())
                 .build();
@@ -67,6 +68,7 @@ public class DealJpaMapper {
                 .dateExpiration(modele.getDateExpiration())
                 .ville(modele.getVille())
                 .pays(modele.getPays())
+                .favoris(modele.getFavoris() != null ? modele.getFavoris() : false)
                 .dateCreation(modele.getDateCreation())
                 .dateModification(modele.getDateModification())
                 .build();

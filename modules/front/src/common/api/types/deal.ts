@@ -34,6 +34,7 @@ export interface DealDTO {
   listePointsForts: string[];
   ville: string;
   pays: string;
+  favoris?: boolean;
   dateCreation: string;
   dateModification: string;
 }

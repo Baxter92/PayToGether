@@ -82,6 +82,11 @@ public class DealApiAdapter {
         return dealMapper.versDTO(updated);
     }
 
+    public DealResponseDto basculerFavoris(UUID uuid) {
+        var updated = dealService.basculerFavoris(uuid);
+        return dealMapper.versDTO(updated);
+    }
+
     public DealResponseDto mettreAJourImages(UUID uuid, MiseAJourImagesDealDTO dto) {
         var dealModele = com.ulr.paytogether.core.modele.DealModele.builder()
                 .uuid(uuid)

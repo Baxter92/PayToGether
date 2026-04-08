@@ -1,18 +1,22 @@
 import { useState, type ReactElement } from "react";
-import { Eye, Plus } from "lucide-react";
+import { Eye, Plus, Heart } from "lucide-react";
 import { Button } from "@/common/components/ui/button";
 import { useI18n } from "@/common/hooks/useI18n";
 import DealsList from "@/common/containers/DealList";
 import { CreateDealModal } from "@/pages/profile/components/CreateDealModal";
 import { ViewDetailDealModal } from "./containers/ViewDetailDealModal";
-import { useDeals, type DealDTO } from "@/common/api";
+import { FavorisDealModal } from "./containers/FavorisDealModal";
+import { useDeals, useToggleDealFavoris, type DealDTO } from "@/common/api";
+import { toast } from "sonner";
 
 export default function AdminDeals(): ReactElement {
   const [open, setOpen] = useState(false);
   const [openDetail, setOpenDetail] = useState(false);
+  const [openFavoris, setOpenFavoris] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState<any>();
   const { t: tAdmin } = useI18n("admin");
   const { data: dealsData, isLoading, refetch } = useDeals();
+  const toggleFavoris = useToggleDealFavoris();
 
   const mappedDeals = (dealsData ?? []).map((deal: DealDTO) => {
     const expirationDate = deal.dateExpiration
@@ -52,9 +56,28 @@ export default function AdminDeals(): ReactElement {
           ? Math.max(0, Math.round((1 - deal.prixPart / deal.prixDeal) * 100))
           : 0,
       status: deal.statut,
+      favoris: deal.favoris,
       raw: deal,
     };
   });
+
+  const handleToggleFavoris = async () => {
+    if (!selectedDeal?.raw?.uuid) return;
+
+    try {
+      await toggleFavoris.mutateAsync(selectedDeal.raw.uuid);
+      toast.success(
+        selectedDeal.raw.favoris
+          ? tAdmin("deals.removeFavoriteSuccess")
+          : tAdmin("deals.addFavoriteSuccess")
+      );
+      refetch();
+    } catch (error) {
+      toast.error(tAdmin("deals.favoriteError"));
+    } finally {
+      setOpenFavoris(false);
+    }
+  };
 
   return (
     <section className="space-y-6">
@@ -98,6 +121,18 @@ export default function AdminDeals(): ReactElement {
                 },
                 tooltip: tAdmin("deals.viewDetail"),
               },
+              {
+                leftIcon: <Heart />,
+                onClick: () => {
+                  setSelectedDeal(row.original);
+                  setOpenFavoris(true);
+                },
+                tooltip: row.original.favoris
+                  ? tAdmin("deals.removeFavorite")
+                  : tAdmin("deals.addFavorite"),
+                variant: row.original.favoris ? "default" : "ghost",
+                className: row.original.favoris ? "text-red-500 hover:text-red-600" : "",
+              },
             ],
           }}
         />
@@ -114,6 +149,14 @@ export default function AdminDeals(): ReactElement {
         open={openDetail}
         onClose={() => setOpenDetail(false)}
         deal={selectedDeal}
+      />
+      <FavorisDealModal
+        open={openFavoris}
+        onClose={() => setOpenFavoris(false)}
+        onConfirm={handleToggleFavoris}
+        dealTitre={selectedDeal?.title || ""}
+        isFavori={selectedDeal?.raw?.favoris || false}
+        isLoading={toggleFavoris.isPending}
       />
     </section>
   );

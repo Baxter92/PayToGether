@@ -98,6 +98,10 @@ public class DealJpa {
     @Column(length = 100)
     private String pays;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean favoris = false;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime dateCreation;

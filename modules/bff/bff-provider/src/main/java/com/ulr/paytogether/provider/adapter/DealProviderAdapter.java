@@ -115,7 +115,7 @@ public class DealProviderAdapter implements DealProvider {
 
     @Override
     public List<DealModele> trouverTous() {
-        return jpaRepository.findAll()
+        return jpaRepository.findAllByOrderByFavorisDescDateCreationDesc()
                 .stream()
                 .map(mapper::versModele)
                 .collect(Collectors.toList());
@@ -123,7 +123,7 @@ public class DealProviderAdapter implements DealProvider {
 
     @Override
     public List<DealModele> trouverParStatut(StatutDeal statut) {
-        return jpaRepository.findByStatut(statut)
+        return jpaRepository.findByStatutOrderByFavorisDescDateCreationDesc(statut)
                 .stream()
                 .map(mapper::versModele)
                 .collect(Collectors.toList());
@@ -280,6 +280,23 @@ public class DealProviderAdapter implements DealProvider {
 
         deal.setStatut(statut);
         DealJpa sauvegarde = jpaRepository.save(deal);
+        return mapper.versModele(sauvegarde);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public DealModele basculerFavoris(UUID uuid) {
+        log.info("🔄 Basculement du statut favoris pour le deal: {}", uuid);
+
+        DealJpa deal = jpaRepository.findById(uuid)
+                .orElseThrow(() -> new IllegalArgumentException("Deal non trouvé pour l'UUID : " + uuid));
+
+        // Basculer le statut (true -> false, false -> true)
+        deal.setFavoris(!deal.getFavoris());
+
+        DealJpa sauvegarde = jpaRepository.save(deal);
+
+        log.info("✅ Statut favoris mis à jour: {} pour le deal: {}", sauvegarde.getFavoris(), uuid);
         return mapper.versModele(sauvegarde);
     }
 

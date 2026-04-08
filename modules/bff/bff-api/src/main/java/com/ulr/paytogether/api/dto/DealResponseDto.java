@@ -47,6 +47,7 @@ private List<String> listePointsForts;
 private LocalDateTime dateExpiration;
 private String ville;
 private String pays;
+private Boolean favoris; // Indique si le deal est marqué comme favori
 
 private LocalDateTime dateCreation;
 private LocalDateTime dateModification;

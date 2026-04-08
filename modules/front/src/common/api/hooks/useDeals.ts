@@ -360,3 +360,23 @@ export const useMyPayments = () => {
     queryFn: () => dealService.myPayments(),
   });
 };
+
+export const useToggleDealFavoris = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<DealDTO, Error, string>({
+    mutationFn: (dealUuid: string) => dealService.toggleFavoris(dealUuid),
+    onSuccess: (updatedDeal) => {
+      // Invalider toutes les listes de deals
+      queryClient.invalidateQueries({ queryKey: dealKeys.lists() });
+      // Invalider le détail du deal
+      queryClient.invalidateQueries({
+        queryKey: dealKeys.detail(updatedDeal.uuid),
+      });
+      // Invalider les deals du créateur
+      queryClient.invalidateQueries({
+        queryKey: dealKeys.byCreateur(updatedDeal.createurUuid),
+      });
+    },
+  });
+};
