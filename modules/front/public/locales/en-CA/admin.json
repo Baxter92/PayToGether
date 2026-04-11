@@ -1,5 +1,9 @@
 {
   "title": "Admin",
+  "common": {
+    "cancel": "Cancel",
+    "loading": "Loading..."
+  },
   "sidebar": {
     "main": "Main",
     "dashboard": "Dashboard",

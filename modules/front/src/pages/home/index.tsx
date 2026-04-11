@@ -20,7 +20,18 @@ export default function Home(): JSX.Element {
   const { t } = useI18n("home");
   const { data: dealsData, isLoading } = useDealsByStatut(StatutDeal.PUBLIE);
   const { data: publicitesData = [] } = usePublicitesActives();
-  const allDeals = (dealsData ?? []).map(mapDealToView);
+
+  // Mapper et trier : favoris en premier, puis le reste
+  const allDeals = useMemo(() => {
+    const mapped = (dealsData ?? []).map(mapDealToView);
+    return mapped.sort((a, b) => {
+      // Favoris en premier
+      if (a.favoris && !b.favoris) return -1;
+      if (!a.favoris && b.favoris) return 1;
+      return 0;
+    });
+  }, [dealsData]);
+
   type HeroSlide = ComponentProps<typeof Hero>["slides"][number];
 
   const heroImageQueries = useQueries({
@@ -61,8 +72,8 @@ export default function Home(): JSX.Element {
   const popularDeals = useMemo(
     () =>
       [...allDeals]
-        .sort((a, b) => (b.discount || 0) - (a.discount || 0))
-        .slice(0, 4),
+        .filter((deal) => deal.favoris)
+        .sort((a, b) => (b.discount || 0) - (a.discount || 0)),
     [allDeals],
   );
 

@@ -14,12 +14,19 @@ spec:
     metadata:
       labels:
         app: bff
+      annotations:
+        # Annotations pour que Prometheus découvre et scrape ce pod
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/port: "8080"
     spec:
       containers:
         - name: bff
-          image: docker.io/14152021/dealtogether:bff-v1.0.46
+          image: docker.io/14152021/dealtogether:bff-v1.0.47
           ports:
             - containerPort: 8080
+              name: http
+              protocol: TCP
           env:
             # Configuration API Auth (service connect)
             - name: API_AUTH_URL

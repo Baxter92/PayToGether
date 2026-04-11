@@ -73,6 +73,8 @@ public class DealDTO {
     private String ville;
     private String pays;
 
+    private Boolean favoris;
+
     private LocalDateTime dateCreation;
     private LocalDateTime dateModification;
 

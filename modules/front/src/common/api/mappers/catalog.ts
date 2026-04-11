@@ -1,7 +1,30 @@
 import type { CategoryDTO, DealDTO } from "@/common/api/types";
 import type { ICategory } from "@/common/containers/CategoryCard/type";
+import type { ImageResponse } from "../hooks/useImageUpload";
 
 const DAY_MS = 1000 * 60 * 60 * 24;
+
+export interface DealView {
+  id: string;
+  title: string;
+  subtitle: string;
+  image: string | Partial<ImageResponse>;
+  originalPrice: number;
+  groupPrice: number;
+  strikePrice: number;
+  unit: number;
+  sold: number;
+  participants: number;
+  total: number;
+  deadline: string;
+  category: string;
+  city: string;
+  discount: number;
+  popular: boolean;
+  favoris: boolean;
+  status: string;
+  raw: DealDTO;
+}
 
 export const mapCategoryToView = (category: CategoryDTO): ICategory => {
   return {
@@ -12,7 +35,7 @@ export const mapCategoryToView = (category: CategoryDTO): ICategory => {
   };
 };
 
-export const mapDealToView = (deal: DealDTO) => {
+export const mapDealToView = (deal: DealDTO): DealView => {
   const expiration = deal.dateExpiration ? new Date(deal.dateExpiration) : null;
   const now = new Date();
   const deadline =
@@ -45,6 +68,7 @@ export const mapDealToView = (deal: DealDTO) => {
     city: deal.ville || "",
     discount,
     popular: false,
+    favoris: deal.favoris || false,
     status: deal.statut,
     raw: deal,
   };

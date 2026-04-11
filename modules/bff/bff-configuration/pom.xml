@@ -59,6 +59,12 @@
       <artifactId>spring-boot-starter-actuator</artifactId>
     </dependency>
 
+    <!-- Micrometer Prometheus Registry pour exposer les métriques -->
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-registry-prometheus</artifactId>
+    </dependency>
+
     <!-- WebFlux pour WebClient -->
     <dependency>
       <groupId>org.springframework.boot</groupId>

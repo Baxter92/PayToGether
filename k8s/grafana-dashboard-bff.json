@@ -1,0 +1,89 @@
+{
+  "dashboard": {
+    "title": "PayToGether BFF - Monitoring",
+    "tags": ["paytogether", "bff", "spring-boot"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "panels": [
+      {
+        "title": "Requêtes HTTP par seconde",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "rate(http_server_requests_seconds_count{app=\"bff\"}[5m])",
+            "legendFormat": "{{method}} {{uri}} {{status}}"
+          }
+        ]
+      },
+      {
+        "title": "Latence p95 (ms)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{app=\"bff\"}[5m])) * 1000",
+            "legendFormat": "{{method}} {{uri}}"
+          }
+        ]
+      },
+      {
+        "title": "Taux d'erreur (%)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(http_server_requests_seconds_count{app=\"bff\",status=~\"5..\"}[5m]) / rate(http_server_requests_seconds_count{app=\"bff\"}[5m]) * 100",
+            "legendFormat": "Erreurs 5xx"
+          }
+        ]
+      },
+      {
+        "title": "Utilisation Mémoire JVM",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "targets": [
+          {
+            "expr": "jvm_memory_used_bytes{app=\"bff\",area=\"heap\"} / 1024 / 1024",
+            "legendFormat": "Heap utilisé (MB)"
+          },
+          {
+            "expr": "jvm_memory_max_bytes{app=\"bff\",area=\"heap\"} / 1024 / 1024",
+            "legendFormat": "Heap max (MB)"
+          }
+        ]
+      },
+      {
+        "title": "Connexions Base de Données",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+        "targets": [
+          {
+            "expr": "hikaricp_connections_active{app=\"bff\"}",
+            "legendFormat": "Actives"
+          },
+          {
+            "expr": "hikaricp_connections_idle{app=\"bff\"}",
+            "legendFormat": "Inactives"
+          },
+          {
+            "expr": "hikaricp_connections_pending{app=\"bff\"}",
+            "legendFormat": "En attente"
+          }
+        ]
+      },
+      {
+        "title": "CPU Usage (%)",
+        "type": "gauge",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+        "targets": [
+          {
+            "expr": "process_cpu_usage{app=\"bff\"} * 100",
+            "legendFormat": "CPU Usage"
+          }
+        ]
+      }
+    ]
+  }
+}
+
