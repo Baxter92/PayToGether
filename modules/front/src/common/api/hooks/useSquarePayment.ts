@@ -66,11 +66,18 @@ export const useSquarePayment = () => {
           return;
         }
 
-        // Charger le script Square
+        // Déterminer l'environnement (SANDBOX ou PRODUCTION)
+        const environment = import.meta.env.VITE_SQUARE_ENVIRONMENT || "SANDBOX";
+        const isProduction = environment.toUpperCase() === "PRODUCTION";
+
+        // Charger le script Square correspondant à l'environnement
         const script = document.createElement("script");
-        script.src = "https://sandbox.web.squarecdn.com/v1/square.js";
+        script.src = isProduction
+          ? "https://web.squarecdn.com/v1/square.js"
+          : "https://sandbox.web.squarecdn.com/v1/square.js";
         script.async = true;
         script.onload = () => {
+          console.log(`Square SDK chargé (${environment})`);
           setIsSquareLoaded(true);
         };
         script.onerror = () => {
