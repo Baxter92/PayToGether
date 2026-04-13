@@ -94,19 +94,22 @@ public class InvoiceGeneratorServiceImpl implements InvoiceGeneratorService {
         breakdown.fraisLivraison = isHomeDelivery ? 
             BigDecimal.valueOf(HOME_DELIVERY_FEE) : BigDecimal.ZERO;
         
-        // montantTotal = (sousTotal + fraisService) * (1 + TVA) + fraisLivraison
-        // montantTotal = (sousTotal * 1.05) * 1.05 + fraisLivraison
-        // montantTotal - fraisLivraison = sousTotal * 1.05 * 1.05
-        // (montantTotal - fraisLivraison) / 1.1025 = sousTotal
-        
+        // Calcul inverse:
+        // Total = sousTotal + (sousTotal × 0.05) + ((sousTotal + sousTotal × 0.05) × 0.05) + fraisLivraison
+        // Total = sousTotal × (1 + 0.05 + 0.05 + 0.05²) + fraisLivraison
+        // Total = sousTotal × 1.1025 + fraisLivraison
+        // sousTotal = (Total - fraisLivraison) / 1.1025
+
         BigDecimal montantSansFraisLivraison = montantTotal.subtract(breakdown.fraisLivraison);
         breakdown.sousTotal = montantSansFraisLivraison
             .divide(BigDecimal.valueOf(1.1025), 2, RoundingMode.HALF_UP);
         
-        // Frais de service = 0, version nécéssaire du lancement de l'application
-        breakdown.fraisService = BigDecimal.ZERO;
-        
-        // TVA = (sousTotal + fraisService) * 5%
+        // Frais de service = sous-total × 5%
+        breakdown.fraisService = breakdown.sousTotal
+            .multiply(BigDecimal.valueOf(SERVICE_FEE_RATE))
+            .setScale(2, RoundingMode.HALF_UP);
+
+        // TVA = (sous-total + frais de service) × 5%
         BigDecimal baseAvantTva = breakdown.sousTotal.add(breakdown.fraisService);
         breakdown.tva = baseAvantTva
             .multiply(BigDecimal.valueOf(TVA_RATE))

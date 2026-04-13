@@ -78,6 +78,7 @@ export default function SquarePaymentForm({
   const SQUARE_APPLICATION_ID =
     import.meta.env.VITE_SQUARE_APPLICATION_ID || "sandbox-sq0idb-YOUR_APP_ID";
   const SQUARE_LOCATION_ID = import.meta.env.VITE_SQUARE_LOCATION_ID || "main";
+  const SQUARE_ENVIRONMENT = import.meta.env.VITE_SQUARE_ENVIRONMENT || "sandbox";
 
   useEffect(() => {
     if (!isSquareLoaded || !window.Square) return;
@@ -87,6 +88,9 @@ export default function SquarePaymentForm({
         const paymentsInstance = window.Square.payments(
           SQUARE_APPLICATION_ID,
           SQUARE_LOCATION_ID,
+          {
+            environment: SQUARE_ENVIRONMENT.toLowerCase() as "production" | "sandbox"
+          }
         );
         setPayments(paymentsInstance);
 

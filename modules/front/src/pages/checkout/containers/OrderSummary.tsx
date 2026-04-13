@@ -6,13 +6,13 @@ import { useFormattedCurrency } from "@/common/hooks/useI18n";
 import type { JSX } from "react";
 import { Separator } from "@/common/components/ui/separator";
 
-interface OrderSummaryProps {
+export interface OrderSummaryProps {
   deal?: CheckoutState["deal"];
   qty: number;
   subtotal: number;
   deliveryFee: number;
   tax: number;
-  fees: number;
+  serviceFees: number;
   total: number;
 }
 
@@ -23,7 +23,7 @@ export default function OrderSummary({
   deliveryFee,
   total,
   tax,
-  fees,
+  serviceFees,
 }: OrderSummaryProps): JSX.Element {
   const { t } = useI18n("checkout");
   const formatCurrency = useFormattedCurrency();
@@ -69,22 +69,18 @@ export default function OrderSummary({
             </span>
           </HStack>
           <HStack justify="between" className="text-sm">
-            <span className="text-muted-foreground">{t("fees")}</span>
-            <HStack spacing={10} className="flex items-center gap-4">
-              <span className="text-muted-foreground text-sm line-through">
-                {formatCurrency(subtotal * 0.05)}
-              </span>
-              <span className="font-medium text-foreground">
-                {formatCurrency(fees)}
-              </span>
-            </HStack>
+            <span className="text-muted-foreground">{t("serviceFees")} (5%)</span>
+            <span className="font-medium text-foreground">
+              {formatCurrency(serviceFees)}
+            </span>
           </HStack>
           <HStack justify="between" className="text-sm">
-            <span className="text-muted-foreground">{t("taxName")}</span>
+            <span className="text-muted-foreground">{t("taxName")} (5%)</span>
             <span className="font-medium text-foreground">
               {formatCurrency(tax)}
             </span>
           </HStack>
+
           {deliveryFee && deliveryFee > 0 ? (
             <HStack justify="between" className="text-sm">
               <span className="text-muted-foreground">

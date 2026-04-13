@@ -433,7 +433,7 @@ export default function AdminOrders(): ReactElement {
             order={selectedOrder}
             customers={customers}
             onValidate={handleValidateCustomers}
-            isReadOnly={selectedOrder?.statut === StatutCommande.TERMINE && !isAdmin}
+            isReadOnly={selectedOrder?.statut === StatutCommande.TERMINE}
           />
         </>
       )}

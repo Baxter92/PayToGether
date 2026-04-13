@@ -41,6 +41,7 @@
   "complementAddressPlaceholder": "Complement address (optional)",
   "postalCodeRequired": "Postal code required",
   "fees": "Service fees",
+  "serviceFees": "Service fees",
   "taxName": "GST",
   "checkout": {
     "title": "Complete your order",
