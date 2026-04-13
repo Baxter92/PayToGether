@@ -12,10 +12,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - dev.dealtogether.ca
+    - dealtogether.ca
     secretName: front-tls
   rules:
-  - host: dev.dealtogether.ca
+  - host: dealtogether.ca
     http:
       paths:
       - path: /
