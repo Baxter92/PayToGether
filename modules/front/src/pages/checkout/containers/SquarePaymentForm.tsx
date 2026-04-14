@@ -143,8 +143,13 @@ export default function SquarePaymentForm({
           applePayRef.current = applePayInstance;
           setApplePayAvailable(true);
           console.log("✅ Apple Pay disponible");
-        } catch (e) {
-          console.log("❌ Apple Pay non disponible:", e);
+          console.log("   - Navigateur:", navigator.userAgent.includes('Safari') ? 'Safari' : 'Autre');
+          console.log("   - Plateforme:", navigator.platform);
+        } catch (e: any) {
+          console.log("❌ Apple Pay non disponible");
+          console.log("   - Raison:", e.message || e);
+          console.log("   - Navigateur:", navigator.userAgent.includes('Safari') ? 'Safari' : 'Autre');
+          console.log("   - Note: Apple Pay nécessite Safari sur macOS/iOS avec Touch ID/Face ID");
           setApplePayAvailable(false);
         }
 
@@ -174,13 +179,16 @@ export default function SquarePaymentForm({
     };
   }, [isSquareLoaded, SQUARE_APPLICATION_ID, SQUARE_LOCATION_ID, data.montant]);
 
-  // Attacher Google Pay au DOM quand sélectionné
+  // Attacher/Détacher Google Pay au DOM quand sélectionné
   useEffect(() => {
     if (selectedMethod === "googlePay" && googlePayRef.current && googlePayContainerRef.current) {
       const attachGooglePay = async () => {
         try {
-          await googlePayRef.current.attach(googlePayContainerRef.current);
-          console.log("✅ Google Pay attaché au DOM");
+          // Vérifier si le conteneur est vide avant d'attacher
+          if (googlePayContainerRef.current && googlePayContainerRef.current.children.length === 0) {
+            await googlePayRef.current.attach(googlePayContainerRef.current);
+            console.log("✅ Google Pay attaché au DOM");
+          }
         } catch (e) {
           console.error("❌ Erreur lors de l'attachement de Google Pay:", e);
         }
@@ -189,13 +197,16 @@ export default function SquarePaymentForm({
     }
   }, [selectedMethod]);
 
-  // Attacher Apple Pay au DOM quand sélectionné
+  // Attacher/Détacher Apple Pay au DOM quand sélectionné
   useEffect(() => {
     if (selectedMethod === "applePay" && applePayRef.current && applePayContainerRef.current) {
       const attachApplePay = async () => {
         try {
-          await applePayRef.current.attach(applePayContainerRef.current);
-          console.log("✅ Apple Pay attaché au DOM");
+          // Vérifier si le conteneur est vide avant d'attacher
+          if (applePayContainerRef.current && applePayContainerRef.current.children.length === 0) {
+            await applePayRef.current.attach(applePayContainerRef.current);
+            console.log("✅ Apple Pay attaché au DOM");
+          }
         } catch (e) {
           console.error("❌ Erreur lors de l'attachement d'Apple Pay:", e);
         }
