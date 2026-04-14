@@ -2,6 +2,7 @@ package com.ulr.paytogether.bff.eventdispatcher.repository;
 
 import com.ulr.paytogether.bff.eventdispatcher.entity.EventRecordJpa;
 import com.ulr.paytogether.bff.eventdispatcher.entity.EventRecordJpa.EventStatus;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -23,6 +24,11 @@ public interface EventRecordRepository extends JpaRepository<EventRecordJpa, UUI
      * Trouve tous les événements en attente de traitement
      */
     List<EventRecordJpa> findByStatus(EventStatus status);
+
+    /**
+     * Trouve tous les événements avec pagination (pour admin)
+     */
+    Page<EventRecordJpa> findByStatus(EventStatus status, Pageable pageable);
 
     /**
      * Trouve un nombre limité d'événements PENDING, triés par date d'occurrence (les plus anciens en premier)
@@ -72,5 +78,11 @@ public interface EventRecordRepository extends JpaRepository<EventRecordJpa, UUI
      * Trouve les événements d'une classe source spécifique
      */
     List<EventRecordJpa> findBySourceClass(String sourceClass);
+
+    /**
+     * Trouve les événements FAILED avant une date donnée (pour batch de retraitement)
+     */
+    @Query("SELECT e FROM EventRecordJpa e WHERE e.status = 'FAILED' AND e.failedAt < :threshold ORDER BY e.failedAt ASC")
+    Page<EventRecordJpa> findFailedEventsBefore(@Param("threshold") LocalDateTime threshold, Pageable pageable);
 }
 

@@ -26,6 +26,13 @@
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
 
+    <!-- Dépendance vers bff-event-dispatcher pour les endpoints admin d'événements -->
+    <dependency>
+      <groupId>com.ulr.paytogether</groupId>
+      <artifactId>bff-event-dispatcher</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+
     <!-- Dépendance vers bff-provider -->
     <dependency>
       <groupId>com.ulr.paytogether</groupId>

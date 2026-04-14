@@ -55,6 +55,10 @@ public class EventRecordJpa {
     @Builder.Default
     private Integer maxAttempts = 3;
 
+    @Column(name = "retry_count", nullable = false)
+    @Builder.Default
+    private Integer retryCount = 0;  // Nombre de retraitements manuels
+
     @Column(name = "last_attempt_at")
     private LocalDateTime lastAttemptAt;
 
@@ -95,10 +99,11 @@ public class EventRecordJpa {
      * Enum pour le statut de l'événement
      */
     public enum EventStatus {
-        PENDING,    // En attente de traitement
-        PROCESSING, // En cours de traitement
-        CONSUMED,   // Consommé avec succès
-        FAILED      // Échec après max tentatives
+        PENDING,              // En attente de traitement
+        PROCESSING,           // En cours de traitement
+        CONSUMED,             // Consommé avec succès
+        FAILED,               // Échec (peut être retraité manuellement)
+        PERMANENTLY_FAILED    // Échec permanent après retraitement manuel (ne sera plus retraité)
     }
 }
 

@@ -9,31 +9,25 @@ import org.springframework.retry.annotation.Retryable;
  * Chaque handler doit implémenter cette interface pour pouvoir consommer
  * les événements publiés par le module core.
  *
- * ⚠️ STRATÉGIE DE RETRY AUTOMATIQUE :
- * Tous les handlers héritent automatiquement d'une stratégie de retry avec backoff exponentiel :
- * - Nombre maximum de tentatives : 3
- * - Délai initial : 1 seconde
- * - Facteur multiplicatif : 1.5 (backoff exponentiel)
- * - Délai maximum : 30 secondes
- * - Jitter : activé (pour éviter les collisions)
+ * ⚠️ STRATÉGIE DE RETRY DÉSACTIVÉE :
+ * Les retry automatiques sont DÉSACTIVÉS (maxAttempts = 1).
+ * En cas d'échec, l'événement est immédiatement marqué comme FAILED.
  *
- * Séquence de retry :
- * - Tentative 1 : immédiat
- * - Tentative 2 : ~1 seconde (+ jitter aléatoire)
- * - Tentative 3 : ~1.5 secondes (+ jitter aléatoire)
+ * Les événements FAILED pourront être retraités plus tard via un batch manuel
+ * ou un endpoint de retry.
+ *
+ * Avantages :
+ * - Pas de doublons (emails, notifications, etc.)
+ * - Contrôle total sur les retry
+ * - Meilleure traçabilité des échecs
  *
  * Si vous avez besoin d'une configuration différente pour un handler spécifique,
  * vous pouvez surcharger @Retryable sur la méthode du handler.
  */
 @Retryable(
     retryFor = Exception.class,
-    maxAttempts = 3,
-    backoff = @Backoff(
-        delay = 1000,           // 1 seconde
-        multiplier = 1.5,       // Facteur 1.5 (backoff exponentiel)
-        maxDelay = 30000,       // Max 30 secondes
-        random = true           // Jitter activé
-    )
+    maxAttempts = 1,  // ✅ UNE SEULE TENTATIVE - Pas de retry automatique
+    backoff = @Backoff(delay = 0)  // Pas de délai
 )
 public interface ConsumerHandler {
     // Marker interface - tous les handlers doivent l'implémenter

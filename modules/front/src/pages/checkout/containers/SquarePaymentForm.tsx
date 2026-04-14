@@ -22,7 +22,6 @@ import {
   CreditCard,
   Smartphone,
   Apple,
-  DollarSign,
   CheckCircle2,
   ShieldCheck,
 } from "lucide-react";
@@ -50,7 +49,7 @@ interface SquarePaymentFormProps {
 
 /**
  * Square payment form
- * Supports: Card, Google Pay, Apple Pay, Cash App Pay
+ * Supports: Card, Google Pay, Apple Pay
  */
 export default function SquarePaymentForm({
   data,
@@ -65,15 +64,23 @@ export default function SquarePaymentForm({
 
   const [payments, setPayments] = useState<any>(null);
   const cardRef = useRef<any>(null);
+  const googlePayRef = useRef<any>(null);
+  const applePayRef = useRef<any>(null);
+
   const [selectedMethod, setSelectedMethod] =
     useState<SquarePaymentMethod>("card");
   const [initError, setInitError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  const [googlePayAvailable, setGooglePayAvailable] = useState(false);
+  const [applePayAvailable, setApplePayAvailable] = useState(false);
+
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const cardContainerRef = useRef<HTMLDivElement>(null);
+  const googlePayContainerRef = useRef<HTMLDivElement>(null);
+  const applePayContainerRef = useRef<HTMLDivElement>(null);
 
   const SQUARE_APPLICATION_ID =
     import.meta.env.VITE_SQUARE_APPLICATION_ID || "sandbox-sq0idb-YOUR_APP_ID";
@@ -94,9 +101,52 @@ export default function SquarePaymentForm({
         );
         setPayments(paymentsInstance);
 
+        // Initialiser Card (toujours disponible)
         const cardInstance = await paymentsInstance.card();
         await cardInstance.attach(cardContainerRef.current);
         cardRef.current = cardInstance;
+
+        // Vérifier et initialiser Google Pay
+        try {
+          const paymentRequest = paymentsInstance.paymentRequest({
+            countryCode: "CA",
+            currencyCode: "CAD",
+            total: {
+              amount: data.montant.toString(),
+              label: "Total",
+            },
+          });
+
+          const googlePayInstance = await paymentsInstance.googlePay(paymentRequest);
+          await googlePayInstance.attach(googlePayContainerRef.current);
+          googlePayRef.current = googlePayInstance;
+          setGooglePayAvailable(true);
+          console.log("Google Pay disponible");
+        } catch (e) {
+          console.log("Google Pay non disponible:", e);
+          setGooglePayAvailable(false);
+        }
+
+        // Vérifier et initialiser Apple Pay
+        try {
+          const paymentRequest = paymentsInstance.paymentRequest({
+            countryCode: "CA",
+            currencyCode: "CAD",
+            total: {
+              amount: data.montant.toString(),
+              label: "Total",
+            },
+          });
+
+          const applePayInstance = await paymentsInstance.applePay(paymentRequest);
+          await applePayInstance.attach(applePayContainerRef.current);
+          applePayRef.current = applePayInstance;
+          setApplePayAvailable(true);
+          console.log("Apple Pay disponible");
+        } catch (e) {
+          console.log("Apple Pay non disponible:", e);
+          setApplePayAvailable(false);
+        }
 
         setIsInitialized(true);
       } catch (error: any) {
@@ -113,8 +163,16 @@ export default function SquarePaymentForm({
         cardRef.current.destroy();
         cardRef.current = null;
       }
+      if (googlePayRef.current) {
+        googlePayRef.current.destroy();
+        googlePayRef.current = null;
+      }
+      if (applePayRef.current) {
+        applePayRef.current.destroy();
+        applePayRef.current = null;
+      }
     };
-  }, [isSquareLoaded, SQUARE_APPLICATION_ID, SQUARE_LOCATION_ID]);
+  }, [isSquareLoaded, SQUARE_APPLICATION_ID, SQUARE_LOCATION_ID, data.montant]);
 
   const handleInitiatePayment = () => {
     setShowConfirmDialog(true);
@@ -124,15 +182,31 @@ export default function SquarePaymentForm({
     setShowConfirmDialog(false);
     setIsProcessing(true);
 
-    const card = cardRef.current;
-    if (!card || !payments) {
+    if (!payments) {
       onError?.(t("squarePayment.errors.notInitialized"));
       setIsProcessing(false);
       return;
     }
 
     try {
-      const result = await card.tokenize();
+      let paymentMethod: any;
+
+      // Sélectionner la méthode de paiement appropriée
+      if (selectedMethod === "card") {
+        paymentMethod = cardRef.current;
+      } else if (selectedMethod === "googlePay") {
+        paymentMethod = googlePayRef.current;
+      } else if (selectedMethod === "applePay") {
+        paymentMethod = applePayRef.current;
+      }
+
+      if (!paymentMethod) {
+        onError?.(t("squarePayment.errors.notInitialized"));
+        setIsProcessing(false);
+        return;
+      }
+
+      const result = await paymentMethod.tokenize();
 
       if (result.status === "OK" && result.token) {
         const { dealUuid, utilisateurUuid, montant, ...rest } = data;
@@ -183,11 +257,10 @@ export default function SquarePaymentForm({
   };
 
   const getMethodePaiementEnum = (method: SquarePaymentMethod): string => {
-    const map = {
+    const map: Record<SquarePaymentMethod, string> = {
       card: "SQUARE_CARD",
       googlePay: "SQUARE_GOOGLE_PAY",
       applePay: "SQUARE_APPLE_PAY",
-      cashAppPay: "SQUARE_CASH_APP_PAY",
     };
     return map[method];
   };
@@ -341,7 +414,7 @@ export default function SquarePaymentForm({
               <label className="text-sm font-medium mb-2 block">
                 {t("squarePayment.methodLabel")}
               </label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 <Button
                   type="button"
                   variant={selectedMethod === "card" ? "default" : "outline"}
@@ -359,7 +432,7 @@ export default function SquarePaymentForm({
                   }
                   onClick={() => setSelectedMethod("googlePay")}
                   className="flex items-center gap-2"
-                  disabled={isProcessing}
+                  disabled={isProcessing || !googlePayAvailable}
                 >
                   <Smartphone className="w-4 h-4" />
                   {t("squarePayment.methods.googlePay")}
@@ -371,26 +444,22 @@ export default function SquarePaymentForm({
                   }
                   onClick={() => setSelectedMethod("applePay")}
                   className="flex items-center gap-2"
-                  disabled={isProcessing}
+                  disabled={isProcessing || !applePayAvailable}
                 >
                   <Apple className="w-4 h-4" />
                   {t("squarePayment.methods.applePay")}
                 </Button>
-                <Button
-                  type="button"
-                  variant={
-                    selectedMethod === "cashAppPay" ? "default" : "outline"
-                  }
-                  onClick={() => setSelectedMethod("cashAppPay")}
-                  className="flex items-center gap-2"
-                  disabled={isProcessing}
-                >
-                  <DollarSign className="w-4 h-4" />
-                  {t("squarePayment.methods.cashAppPay")}
-                </Button>
               </div>
+
+              {/* Info sur la disponibilité */}
+              {!googlePayAvailable && !applePayAvailable && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  {t("squarePayment.digitalWalletsNotAvailable")}
+                </p>
+              )}
             </div>
 
+            {/* Formulaire de carte */}
             {selectedMethod === "card" && (
               <div>
                 <label className="text-sm font-medium mb-2 block">
@@ -399,6 +468,34 @@ export default function SquarePaymentForm({
                 <div
                   ref={cardContainerRef}
                   id="card-container"
+                  className="border rounded-md p-3 bg-white"
+                />
+              </div>
+            )}
+
+            {/* Bouton Google Pay */}
+            {selectedMethod === "googlePay" && googlePayAvailable && (
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  {t("squarePayment.googlePayInfo")}
+                </label>
+                <div
+                  ref={googlePayContainerRef}
+                  id="google-pay-container"
+                  className="border rounded-md p-3 bg-white"
+                />
+              </div>
+            )}
+
+            {/* Bouton Apple Pay */}
+            {selectedMethod === "applePay" && applePayAvailable && (
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  {t("squarePayment.applePayInfo")}
+                </label>
+                <div
+                  ref={applePayContainerRef}
+                  id="apple-pay-container"
                   className="border rounded-md p-3 bg-white"
                 />
               </div>

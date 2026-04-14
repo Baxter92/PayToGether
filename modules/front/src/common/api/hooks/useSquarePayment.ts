@@ -6,8 +6,7 @@ import { apiClient } from "@/common/api/services/apiClient";
 export type SquarePaymentMethod =
   | "card"
   | "googlePay"
-  | "applePay"
-  | "cashAppPay";
+  | "applePay";
 
 export interface SquarePaymentRequest {
   dealUuid: string;
@@ -26,8 +25,7 @@ export interface SquarePaymentRequest {
   methodePaiement:
     | "SQUARE_CARD"
     | "SQUARE_GOOGLE_PAY"
-    | "SQUARE_APPLE_PAY"
-    | "SQUARE_CASH_APP_PAY";
+    | "SQUARE_APPLE_PAY";
   locationId?: string;
 }
 

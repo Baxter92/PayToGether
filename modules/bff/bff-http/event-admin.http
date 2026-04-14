@@ -1,0 +1,135 @@
+### ========================================
+### EVENT ADMIN - Gestion des événements en échec
+### ========================================
+
+@baseUrl = https://devbff.dealtogether.ca/api
+# @baseUrl = http://localhost:8080/api
+
+### Variables
+@adminToken = Bearer YOUR_ADMIN_TOKEN_HERE
+
+### ========================================
+### 1. Récupérer les statistiques des événements
+### ========================================
+GET {{baseUrl}}/admin/events/stats
+Authorization: {{adminToken}}
+
+### ========================================
+### 2. Lister tous les événements FAILED (page 0, size 20)
+### ========================================
+GET {{baseUrl}}/admin/events/failed?page=0&size=20
+Authorization: {{adminToken}}
+
+### ========================================
+### 3. Lister tous les événements PERMANENTLY_FAILED
+### ========================================
+# Ces événements ont échoué après retraitement manuel
+# Ils ne seront JAMAIS retraités automatiquement
+GET {{baseUrl}}/admin/events/permanently-failed?page=0&size=20
+Authorization: {{adminToken}}
+
+### ========================================
+### 4. Lister tous les événements FAILED (page 1)
+### ========================================
+GET {{baseUrl}}/admin/events/failed?page=1&size=10
+Authorization: {{adminToken}}
+
+### ========================================
+### 5. Retraiter UN événement en échec spécifique
+### ========================================
+# ⚠️ IMPORTANT : Si l'événement échoue à nouveau après ce retraitement,
+# il sera marqué PERMANENTLY_FAILED et ne pourra plus être retraité automatiquement
+# Remplacer {eventId} par l'UUID réel de l'événement
+POST {{baseUrl}}/admin/events/{eventId}/retry
+Authorization: {{adminToken}}
+
+### Exemple avec un UUID
+POST {{baseUrl}}/admin/events/123e4567-e89b-12d3-a456-426614174000/retry
+Authorization: {{adminToken}}
+
+### ========================================
+### 6. Retraiter TOUS les événements FAILED (limite 50)
+### ========================================
+# ⚠️ À utiliser avec précaution !
+# ⚠️ Les événements qui échouent à nouveau seront marqués PERMANENTLY_FAILED
+POST {{baseUrl}}/admin/events/retry-all?limit=50
+Authorization: {{adminToken}}
+
+### ========================================
+### 7. Retraiter TOUS les événements FAILED (limite 10 - test)
+### ========================================
+POST {{baseUrl}}/admin/events/retry-all?limit=10
+Authorization: {{adminToken}}
+
+### ========================================
+### 8. Supprimer un événement en échec (cleanup)
+### ========================================
+# Remplacer {eventId} par l'UUID réel de l'événement
+DELETE {{baseUrl}}/admin/events/{eventId}
+Authorization: {{adminToken}}
+
+### Exemple avec un UUID
+DELETE {{baseUrl}}/admin/events/123e4567-e89b-12d3-a456-426614174000
+Authorization: {{adminToken}}
+
+### ========================================
+### 9. Nettoyage des événements anciens (en développement)
+### ========================================
+DELETE {{baseUrl}}/admin/events/cleanup?daysOld=30
+Authorization: {{adminToken}}
+
+### ========================================
+### SCÉNARIOS D'UTILISATION
+### ========================================
+
+### Scénario 1 : Vérifier s'il y a des événements en échec
+# 1. Récupérer les stats
+GET {{baseUrl}}/admin/events/stats
+Authorization: {{adminToken}}
+
+###
+# 2. Si failed > 0, lister les événements
+GET {{baseUrl}}/admin/events/failed?page=0&size=20
+Authorization: {{adminToken}}
+
+### Scénario 2 : Retraiter un événement spécifique qui a échoué
+# 1. Lister les événements FAILED
+GET {{baseUrl}}/admin/events/failed?page=0&size=20
+Authorization: {{adminToken}}
+
+###
+# 2. Copier l'UUID de l'événement à retraiter
+# 3. Retraiter l'événement
+POST {{baseUrl}}/admin/events/YOUR_EVENT_UUID_HERE/retry
+Authorization: {{adminToken}}
+
+### Scénario 3 : Retraiter tous les événements en échec (batch)
+# ⚠️ Utiliser après avoir corrigé la cause des échecs !
+POST {{baseUrl}}/admin/events/retry-all?limit=50
+Authorization: {{adminToken}}
+
+### ========================================
+### NOTES IMPORTANTES
+### ========================================
+#
+# 1. Les retry automatiques sont DÉSACTIVÉS
+#    - En cas d'échec, l'événement est immédiatement marqué FAILED
+#    - Pas de doublons (emails, notifications, etc.)
+#
+# 2. Retraitement manuel via API
+#    - Consulter les événements FAILED via /api/admin/events/failed
+#    - Retraiter un événement spécifique via /api/admin/events/{eventId}/retry
+#    - Retraiter tous les événements via /api/admin/events/retry-all
+#
+# 3. Batch planifié (à créer)
+#    - Créer un @Scheduled dans EventConsumerService
+#    - Exécuter tous les jours à 3h du matin par exemple
+#    - Retraiter automatiquement les événements FAILED de plus de 24h
+#
+# 4. Sécurité
+#    - TOUS les endpoints sont sous /api/admin/events
+#    - Nécessitent un token admin
+#    - À protéger avec @PreAuthorize("hasRole('ADMIN')")
+#
+### ========================================
+

@@ -311,28 +311,58 @@ public class EventConsumerService {
     }
 
     /**
-     * Gère l'échec d'un événement avec retry
+     * Gère l'échec d'un événement SANS retry automatique.
+     *
+     * ⚠️ CHANGEMENT IMPORTANT : Désactivation des retry automatiques
+     * En cas d'échec, l'événement est marqué comme FAILED (première fois)
+     * ou PERMANENTLY_FAILED (après retraitement manuel).
+     *
+     * Logique :
+     * - Premier échec → FAILED (peut être retraité manuellement)
+     * - Échec après retraitement manuel → PERMANENTLY_FAILED (ne sera plus retraité)
+     *
+     * Avantages :
+     * - Évite les doublons (emails, notifications, etc.)
+     * - Contrôle total sur les retry via batch manuel
+     * - Évite de boucler sur des événements qui échouent systématiquement
+     * - Meilleure traçabilité des échecs
+     *
+     * Les événements FAILED peuvent être retraités via :
+     * - Un endpoint de retry manuel
+     * - Un batch planifié
+     *
+     * Les événements PERMANENTLY_FAILED ne seront JAMAIS retraités automatiquement.
      */
     private void handleFailure(EventRecordJpa eventRecord, String errorMessage) {
         eventRecord.setAttempts(eventRecord.getAttempts() + 1);
         eventRecord.setErrorMessage(errorMessage);
 
-        boolean isFinalFailure = eventRecord.getAttempts() >= eventRecord.getMaxAttempts();
+        // Vérifier si c'est un retraitement (retryCount > 0)
+        boolean isRetry = eventRecord.getRetryCount() > 0;
 
-        // ❌ NE PLUS PUBLIER HandlerFailedEvent pour éviter la boucle infinie et les doublons
-        // Les logs suffisent pour tracer les échecs
-        log.error("❌ Handler failed for event {} of type {} (attempt {}/{}, final={}): {}",
-                eventRecord.getEventId(), eventRecord.getEventType(),
-                eventRecord.getAttempts(), eventRecord.getMaxAttempts(),
-                isFinalFailure, errorMessage);
+        if (isRetry) {
+            // ⚠️ Échec après retraitement manuel → PERMANENTLY_FAILED
+            log.error("❌ Handler failed AFTER RETRY for event {} of type {} (retryCount={}, attempt {}): {}",
+                    eventRecord.getEventId(), eventRecord.getEventType(),
+                    eventRecord.getRetryCount(), eventRecord.getAttempts(), errorMessage);
 
-        if (isFinalFailure) {
-            markAsFailed(eventRecord, "Max attempts reached: " + errorMessage);
-        } else {
-            eventRecord.setStatus(EventRecordJpa.EventStatus.PENDING);
+            // Marquer comme PERMANENTLY_FAILED pour ne plus être retraité
+            eventRecord.setStatus(EventRecordJpa.EventStatus.PERMANENTLY_FAILED);
+            eventRecord.setFailedAt(LocalDateTime.now());
             eventRecordRepository.save(eventRecord);
-            log.warn("Event {} failed, will retry. Attempt {}/{}",
-                    eventRecord.getEventId(), eventRecord.getAttempts(), eventRecord.getMaxAttempts());
+
+            log.warn("⛔ Event {} marked as PERMANENTLY_FAILED - will NOT be retried automatically",
+                eventRecord.getEventId());
+        } else {
+            // ✅ Premier échec → FAILED (peut être retraité manuellement)
+            log.error("❌ Handler failed for event {} of type {} (attempt {}): {}",
+                    eventRecord.getEventId(), eventRecord.getEventType(),
+                    eventRecord.getAttempts(), errorMessage);
+
+            // Marquer immédiatement comme FAILED
+            markAsFailed(eventRecord, "Failed on attempt " + eventRecord.getAttempts() + ": " + errorMessage);
+
+            log.warn("⚠️ Event {} marked as FAILED - can be retried manually later", eventRecord.getEventId());
         }
     }
 
