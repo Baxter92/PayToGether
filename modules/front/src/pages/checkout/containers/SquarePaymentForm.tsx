@@ -106,7 +106,7 @@ export default function SquarePaymentForm({
         await cardInstance.attach(cardContainerRef.current);
         cardRef.current = cardInstance;
 
-        // Vérifier et initialiser Google Pay
+        // Vérifier la disponibilité de Google Pay (SANS attacher au DOM)
         try {
           const paymentRequest = paymentsInstance.paymentRequest({
             countryCode: "CA",
@@ -117,17 +117,17 @@ export default function SquarePaymentForm({
             },
           });
 
+          // Vérifier si Google Pay est supporté
           const googlePayInstance = await paymentsInstance.googlePay(paymentRequest);
-          await googlePayInstance.attach(googlePayContainerRef.current);
           googlePayRef.current = googlePayInstance;
           setGooglePayAvailable(true);
-          console.log("Google Pay disponible");
+          console.log("✅ Google Pay disponible");
         } catch (e) {
-          console.log("Google Pay non disponible:", e);
+          console.log("❌ Google Pay non disponible:", e);
           setGooglePayAvailable(false);
         }
 
-        // Vérifier et initialiser Apple Pay
+        // Vérifier la disponibilité d'Apple Pay (SANS attacher au DOM)
         try {
           const paymentRequest = paymentsInstance.paymentRequest({
             countryCode: "CA",
@@ -138,13 +138,13 @@ export default function SquarePaymentForm({
             },
           });
 
+          // Vérifier si Apple Pay est supporté
           const applePayInstance = await paymentsInstance.applePay(paymentRequest);
-          await applePayInstance.attach(applePayContainerRef.current);
           applePayRef.current = applePayInstance;
           setApplePayAvailable(true);
-          console.log("Apple Pay disponible");
+          console.log("✅ Apple Pay disponible");
         } catch (e) {
-          console.log("Apple Pay non disponible:", e);
+          console.log("❌ Apple Pay non disponible:", e);
           setApplePayAvailable(false);
         }
 
@@ -173,6 +173,36 @@ export default function SquarePaymentForm({
       }
     };
   }, [isSquareLoaded, SQUARE_APPLICATION_ID, SQUARE_LOCATION_ID, data.montant]);
+
+  // Attacher Google Pay au DOM quand sélectionné
+  useEffect(() => {
+    if (selectedMethod === "googlePay" && googlePayRef.current && googlePayContainerRef.current) {
+      const attachGooglePay = async () => {
+        try {
+          await googlePayRef.current.attach(googlePayContainerRef.current);
+          console.log("✅ Google Pay attaché au DOM");
+        } catch (e) {
+          console.error("❌ Erreur lors de l'attachement de Google Pay:", e);
+        }
+      };
+      attachGooglePay();
+    }
+  }, [selectedMethod]);
+
+  // Attacher Apple Pay au DOM quand sélectionné
+  useEffect(() => {
+    if (selectedMethod === "applePay" && applePayRef.current && applePayContainerRef.current) {
+      const attachApplePay = async () => {
+        try {
+          await applePayRef.current.attach(applePayContainerRef.current);
+          console.log("✅ Apple Pay attaché au DOM");
+        } catch (e) {
+          console.error("❌ Erreur lors de l'attachement d'Apple Pay:", e);
+        }
+      };
+      attachApplePay();
+    }
+  }, [selectedMethod]);
 
   const handleInitiatePayment = () => {
     setShowConfirmDialog(true);
