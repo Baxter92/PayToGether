@@ -101,55 +101,66 @@ export default function SquarePaymentForm({
         );
         setPayments(paymentsInstance);
 
-        // Initialiser Card (toujours disponible)
+        // Initialiser Card (toujours disponible) et attacher UNE SEULE FOIS
         const cardInstance = await paymentsInstance.card();
         await cardInstance.attach(cardContainerRef.current);
         cardRef.current = cardInstance;
+        console.log("✅ Card initialisé et attaché");
 
-        // Vérifier la disponibilité de Google Pay (SANS attacher au DOM)
+        // Créer UN SEUL PaymentRequest partagé pour Google Pay et Apple Pay
+        const paymentRequest = paymentsInstance.paymentRequest({
+          countryCode: "CA",
+          currencyCode: "CAD",
+          total: {
+            amount: data.montant.toString(),
+            label: "Total",
+          },
+          requestShippingAddress: false,  // Déjà collecté dans ShippingForm
+          requestBillingInfo: false,      // Pas nécessaire
+        });
+
+        // Initialiser Google Pay (vérifier disponibilité + attacher UNE SEULE FOIS)
         try {
-          const paymentRequest = paymentsInstance.paymentRequest({
-            countryCode: "CA",
-            currencyCode: "CAD",
-            total: {
-              amount: data.montant.toString(),
-              label: "Total",
-            },
-          });
-
-          // Vérifier si Google Pay est supporté
           const googlePayInstance = await paymentsInstance.googlePay(paymentRequest);
+
+          // Attacher immédiatement au DOM (même si caché)
+          await googlePayInstance.attach(googlePayContainerRef.current);
           googlePayRef.current = googlePayInstance;
           setGooglePayAvailable(true);
-          console.log("✅ Google Pay disponible");
-        } catch (e) {
-          console.log("❌ Google Pay non disponible:", e);
+          console.log("✅ Google Pay initialisé et attaché");
+        } catch (e: any) {
+          console.group("❌ Google Pay non disponible");
+          console.log("Code erreur:", e.code || "N/A");
+          console.log("Message:", e.message || e);
+          console.groupEnd();
           setGooglePayAvailable(false);
         }
 
-        // Vérifier la disponibilité d'Apple Pay (SANS attacher au DOM)
+        // Initialiser Apple Pay (vérifier disponibilité + attacher UNE SEULE FOIS)
         try {
-          const paymentRequest = paymentsInstance.paymentRequest({
-            countryCode: "CA",
-            currencyCode: "CAD",
-            total: {
-              amount: data.montant.toString(),
-              label: "Total",
-            },
-          });
-
-          // Vérifier si Apple Pay est supporté
           const applePayInstance = await paymentsInstance.applePay(paymentRequest);
+
+          // Attacher immédiatement au DOM (même si caché)
+          await applePayInstance.attach(applePayContainerRef.current);
           applePayRef.current = applePayInstance;
           setApplePayAvailable(true);
-          console.log("✅ Apple Pay disponible");
+          console.log("✅ Apple Pay initialisé et attaché");
           console.log("   - Navigateur:", navigator.userAgent.includes('Safari') ? 'Safari' : 'Autre');
           console.log("   - Plateforme:", navigator.platform);
         } catch (e: any) {
-          console.log("❌ Apple Pay non disponible");
-          console.log("   - Raison:", e.message || e);
-          console.log("   - Navigateur:", navigator.userAgent.includes('Safari') ? 'Safari' : 'Autre');
-          console.log("   - Note: Apple Pay nécessite Safari sur macOS/iOS avec Touch ID/Face ID");
+          console.group("❌ Apple Pay non disponible");
+          console.log("Code erreur:", e.code || "N/A");
+          console.log("Message:", e.message || e);
+          console.log("Navigateur:", navigator.userAgent.includes('Safari') ? 'Safari' : 'Autre');
+          console.log("Plateforme:", navigator.platform);
+
+          if (e.code === "DOMAIN_NOT_VERIFIED") {
+            console.error("⚠️ CRITIQUE: Domaine non vérifié dans Square Dashboard");
+            console.log("→ Vérifier: https://developer.squareup.com/docs/web-payments/apple-pay#step-1-register-your-web-domain");
+          }
+
+          console.log("Note: Apple Pay nécessite Safari sur macOS/iOS avec Touch ID/Face ID");
+          console.groupEnd();
           setApplePayAvailable(false);
         }
 
@@ -164,6 +175,7 @@ export default function SquarePaymentForm({
     initializeSquare();
 
     return () => {
+      // Nettoyer tous les éléments à la destruction du composant
       if (cardRef.current) {
         cardRef.current.destroy();
         cardRef.current = null;
@@ -179,60 +191,6 @@ export default function SquarePaymentForm({
     };
   }, [isSquareLoaded, SQUARE_APPLICATION_ID, SQUARE_LOCATION_ID, data.montant]);
 
-  // Gérer l'attachement/détachement quand la méthode change
-  useEffect(() => {
-    const attachPaymentMethod = async () => {
-      try {
-        // Détacher toutes les méthodes d'abord
-        if (cardRef.current && cardContainerRef.current && cardContainerRef.current.children.length > 0) {
-          if (selectedMethod !== "card") {
-            await cardRef.current.detach();
-            console.log("🔄 Card détaché");
-          }
-        }
-
-        if (googlePayRef.current && googlePayContainerRef.current && googlePayContainerRef.current.children.length > 0) {
-          if (selectedMethod !== "googlePay") {
-            await googlePayRef.current.detach();
-            console.log("🔄 Google Pay détaché");
-          }
-        }
-
-        if (applePayRef.current && applePayContainerRef.current && applePayContainerRef.current.children.length > 0) {
-          if (selectedMethod !== "applePay") {
-            await applePayRef.current.detach();
-            console.log("🔄 Apple Pay détaché");
-          }
-        }
-
-        // Attacher la méthode sélectionnée
-        if (selectedMethod === "card" && cardRef.current && cardContainerRef.current) {
-          if (cardContainerRef.current.children.length === 0) {
-            await cardRef.current.attach(cardContainerRef.current);
-            console.log("✅ Card attaché au DOM");
-          }
-        }
-
-        if (selectedMethod === "googlePay" && googlePayRef.current && googlePayContainerRef.current) {
-          if (googlePayContainerRef.current.children.length === 0) {
-            await googlePayRef.current.attach(googlePayContainerRef.current);
-            console.log("✅ Google Pay attaché au DOM");
-          }
-        }
-
-        if (selectedMethod === "applePay" && applePayRef.current && applePayContainerRef.current) {
-          if (applePayContainerRef.current.children.length === 0) {
-            await applePayRef.current.attach(applePayContainerRef.current);
-            console.log("✅ Apple Pay attaché au DOM");
-          }
-        }
-      } catch (e) {
-        console.error("❌ Erreur lors de l'attachement/détachement:", e);
-      }
-    };
-
-    attachPaymentMethod();
-  }, [selectedMethod]);
 
   const handleInitiatePayment = () => {
     setShowConfirmDialog(true);
@@ -519,23 +477,21 @@ export default function SquarePaymentForm({
               )}
             </div>
 
-            {/* Formulaire de carte */}
-            {selectedMethod === "card" && (
-              <div>
-                <label className="text-sm font-medium mb-2 block">
-                  {t("squarePayment.cardInfo")}
-                </label>
-                <div
-                  ref={cardContainerRef}
-                  id="card-container"
-                  className="border rounded-md p-3 bg-white"
-                />
-              </div>
-            )}
+            {/* Formulaire de carte - Toujours dans le DOM, montré/caché avec CSS */}
+            <div style={{ display: selectedMethod === "card" ? "block" : "none" }}>
+              <label className="text-sm font-medium mb-2 block">
+                {t("squarePayment.cardInfo")}
+              </label>
+              <div
+                ref={cardContainerRef}
+                id="card-container"
+                className="border rounded-md p-3 bg-white"
+              />
+            </div>
 
-            {/* Bouton Google Pay */}
-            {selectedMethod === "googlePay" && googlePayAvailable && (
-              <div>
+            {/* Bouton Google Pay - Toujours dans le DOM, montré/caché avec CSS */}
+            {googlePayAvailable && (
+              <div style={{ display: selectedMethod === "googlePay" ? "block" : "none" }}>
                 <label className="text-sm font-medium mb-2 block">
                   {t("squarePayment.googlePayInfo")}
                 </label>
@@ -547,9 +503,9 @@ export default function SquarePaymentForm({
               </div>
             )}
 
-            {/* Bouton Apple Pay */}
-            {selectedMethod === "applePay" && applePayAvailable && (
-              <div>
+            {/* Bouton Apple Pay - Toujours dans le DOM, montré/caché avec CSS */}
+            {applePayAvailable && (
+              <div style={{ display: selectedMethod === "applePay" ? "block" : "none" }}>
                 <label className="text-sm font-medium mb-2 block">
                   {t("squarePayment.applePayInfo")}
                 </label>
