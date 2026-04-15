@@ -183,23 +183,36 @@ export default function SquarePaymentForm({
   useEffect(() => {
     const attachPaymentMethod = async () => {
       try {
-        // Détacher Card si on quitte cette méthode
-        if (selectedMethod !== "card" && cardRef.current && cardContainerRef.current) {
-          if (cardContainerRef.current.children.length > 0) {
-            cardRef.current.detach();
+        // Détacher toutes les méthodes d'abord
+        if (cardRef.current && cardContainerRef.current && cardContainerRef.current.children.length > 0) {
+          if (selectedMethod !== "card") {
+            await cardRef.current.detach();
             console.log("🔄 Card détaché");
           }
         }
 
-        // Réattacher Card si on revient
-        if (selectedMethod === "card" && cardRef.current && cardContainerRef.current) {
-          if (cardContainerRef.current.children.length === 0) {
-            await cardRef.current.attach(cardContainerRef.current);
-            console.log("✅ Card réattaché au DOM");
+        if (googlePayRef.current && googlePayContainerRef.current && googlePayContainerRef.current.children.length > 0) {
+          if (selectedMethod !== "googlePay") {
+            await googlePayRef.current.detach();
+            console.log("🔄 Google Pay détaché");
           }
         }
 
-        // Attacher Google Pay si sélectionné
+        if (applePayRef.current && applePayContainerRef.current && applePayContainerRef.current.children.length > 0) {
+          if (selectedMethod !== "applePay") {
+            await applePayRef.current.detach();
+            console.log("🔄 Apple Pay détaché");
+          }
+        }
+
+        // Attacher la méthode sélectionnée
+        if (selectedMethod === "card" && cardRef.current && cardContainerRef.current) {
+          if (cardContainerRef.current.children.length === 0) {
+            await cardRef.current.attach(cardContainerRef.current);
+            console.log("✅ Card attaché au DOM");
+          }
+        }
+
         if (selectedMethod === "googlePay" && googlePayRef.current && googlePayContainerRef.current) {
           if (googlePayContainerRef.current.children.length === 0) {
             await googlePayRef.current.attach(googlePayContainerRef.current);
@@ -207,7 +220,6 @@ export default function SquarePaymentForm({
           }
         }
 
-        // Attacher Apple Pay si sélectionné
         if (selectedMethod === "applePay" && applePayRef.current && applePayContainerRef.current) {
           if (applePayContainerRef.current.children.length === 0) {
             await applePayRef.current.attach(applePayContainerRef.current);
@@ -215,7 +227,7 @@ export default function SquarePaymentForm({
           }
         }
       } catch (e) {
-        console.error("❌ Erreur lors de l'attachement:", e);
+        console.error("❌ Erreur lors de l'attachement/détachement:", e);
       }
     };
 
