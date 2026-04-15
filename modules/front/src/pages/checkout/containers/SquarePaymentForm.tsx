@@ -179,40 +179,47 @@ export default function SquarePaymentForm({
     };
   }, [isSquareLoaded, SQUARE_APPLICATION_ID, SQUARE_LOCATION_ID, data.montant]);
 
-  // Attacher/Détacher Google Pay au DOM quand sélectionné
+  // Gérer l'attachement/détachement quand la méthode change
   useEffect(() => {
-    if (selectedMethod === "googlePay" && googlePayRef.current && googlePayContainerRef.current) {
-      const attachGooglePay = async () => {
-        try {
-          // Vérifier si le conteneur est vide avant d'attacher
-          if (googlePayContainerRef.current && googlePayContainerRef.current.children.length === 0) {
+    const attachPaymentMethod = async () => {
+      try {
+        // Détacher Card si on quitte cette méthode
+        if (selectedMethod !== "card" && cardRef.current && cardContainerRef.current) {
+          if (cardContainerRef.current.children.length > 0) {
+            cardRef.current.detach();
+            console.log("🔄 Card détaché");
+          }
+        }
+
+        // Réattacher Card si on revient
+        if (selectedMethod === "card" && cardRef.current && cardContainerRef.current) {
+          if (cardContainerRef.current.children.length === 0) {
+            await cardRef.current.attach(cardContainerRef.current);
+            console.log("✅ Card réattaché au DOM");
+          }
+        }
+
+        // Attacher Google Pay si sélectionné
+        if (selectedMethod === "googlePay" && googlePayRef.current && googlePayContainerRef.current) {
+          if (googlePayContainerRef.current.children.length === 0) {
             await googlePayRef.current.attach(googlePayContainerRef.current);
             console.log("✅ Google Pay attaché au DOM");
           }
-        } catch (e) {
-          console.error("❌ Erreur lors de l'attachement de Google Pay:", e);
         }
-      };
-      attachGooglePay();
-    }
-  }, [selectedMethod]);
 
-  // Attacher/Détacher Apple Pay au DOM quand sélectionné
-  useEffect(() => {
-    if (selectedMethod === "applePay" && applePayRef.current && applePayContainerRef.current) {
-      const attachApplePay = async () => {
-        try {
-          // Vérifier si le conteneur est vide avant d'attacher
-          if (applePayContainerRef.current && applePayContainerRef.current.children.length === 0) {
+        // Attacher Apple Pay si sélectionné
+        if (selectedMethod === "applePay" && applePayRef.current && applePayContainerRef.current) {
+          if (applePayContainerRef.current.children.length === 0) {
             await applePayRef.current.attach(applePayContainerRef.current);
             console.log("✅ Apple Pay attaché au DOM");
           }
-        } catch (e) {
-          console.error("❌ Erreur lors de l'attachement d'Apple Pay:", e);
         }
-      };
-      attachApplePay();
-    }
+      } catch (e) {
+        console.error("❌ Erreur lors de l'attachement:", e);
+      }
+    };
+
+    attachPaymentMethod();
   }, [selectedMethod]);
 
   const handleInitiatePayment = () => {

@@ -114,7 +114,7 @@ public class PaymentNotificationHandler implements ConsumerHandler {
                 variables.put("raisonEchec", "Veuillez vérifier les informations de votre carte ou contacter votre banque.");
             }
 
-            String template = isCondirmed ? "notification-paiement-reussi" : "notification-paiement-echoue";
+            String template = isCondirmed ? "notification-paiement-reussi-en" : "notification-paiement-echoue-en";
             // Appeler le service métier pour envoyer l'email
             emailNotificationService.envoyerNotification(
                 event.getEmail(),

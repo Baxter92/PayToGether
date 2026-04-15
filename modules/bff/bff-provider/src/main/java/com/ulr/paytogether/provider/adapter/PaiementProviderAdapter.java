@@ -130,7 +130,7 @@ public class PaiementProviderAdapter implements PaiementProvider {
         UtilisateurJpa utilisateurJpa = utilisateurRepository.findById(utilisateurUuid)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé pour l'UUID : " + utilisateurUuid));
 
-        return jpaRepository.findByUtilisateurJpa(utilisateurJpa)
+        return jpaRepository.findByUtilisateurJpaOrderByDatePaiementDesc(utilisateurJpa)
                 .stream()
                 .map(mapper::versModele)
                 .collect(Collectors.toList());
@@ -138,7 +138,7 @@ public class PaiementProviderAdapter implements PaiementProvider {
 
     @Override
     public List<PaiementModele> trouverParCommande(UUID commandeUuid) {
-        return jpaRepository.findByCommandeJpaUuid(commandeUuid)
+        return jpaRepository.findByCommandeJpaUuidOrderByDatePaiementDesc(commandeUuid)
                 .stream()
                 .map(mapper::versModele)
                 .collect(Collectors.toList());
@@ -230,7 +230,7 @@ public class PaiementProviderAdapter implements PaiementProvider {
         UtilisateurJpa utilisateurJpa = utilisateurRepository.findByKeycloakId(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé pour le Keycloak ID : " + userId));
 
-        return jpaRepository.findByUtilisateurJpa(utilisateurJpa)
+        return jpaRepository.findByUtilisateurJpaOrderByDatePaiementDesc(utilisateurJpa)
                 .stream()
                 .map(mapper::versModeleComplet)
                 .collect(Collectors.toList());
@@ -241,7 +241,7 @@ public class PaiementProviderAdapter implements PaiementProvider {
         UtilisateurJpa utilisateurJpa = utilisateurRepository.findById(uuid)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé pour l'UUID : " + uuid));
 
-        List<PaiementJpa> paiements = jpaRepository.findByUtilisateurJpa(utilisateurJpa);
+        List<PaiementJpa> paiements = jpaRepository.findByUtilisateurJpaOrderByDatePaiementDesc(utilisateurJpa);
         List<CommandeJpa> commandeJpas = new ArrayList<>();
         List<CommandeUtilisateurJpa> commandeUtilisateurJpas = new ArrayList<>();
         paiements.forEach(p -> {;

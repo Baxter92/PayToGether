@@ -5,6 +5,7 @@ import com.ulr.paytogether.provider.adapter.entity.PaiementJpa;
 import com.ulr.paytogether.core.enumeration.StatutPaiement;
 import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -19,32 +20,39 @@ import java.util.UUID;
 public interface PaiementRepository extends JpaRepository<PaiementJpa, UUID> {
 
     /**
-     * Recherche tous les paiements d'un utilisateur
+     * Recherche tous les paiements triés par date de paiement décroissante
+     * Override de findAll() pour ajouter le tri
+     */
+    @Query("SELECT p FROM PaiementJpa p ORDER BY p.datePaiement DESC")
+    List<PaiementJpa> findAll();
+
+    /**
+     * Recherche tous les paiements d'un utilisateur triés par date décroissante
      * @param utilisateurJpa l'utilisateur
      * @return la liste des paiements
      */
-    List<PaiementJpa> findByUtilisateurJpa(UtilisateurJpa utilisateurJpa);
+    List<PaiementJpa> findByUtilisateurJpaOrderByDatePaiementDesc(UtilisateurJpa utilisateurJpa);
 
     /**
-     * Recherche tous les paiements par statut
+     * Recherche tous les paiements par statut triés par date décroissante
      * @param statut le statut du paiement
      * @return la liste des paiements
      */
-    List<PaiementJpa> findByStatut(StatutPaiement statut);
+    List<PaiementJpa> findByStatutOrderByDatePaiementDesc(StatutPaiement statut);
 
     /**
-     * Recherche tous les paiements d'une commande
+     * Recherche tous les paiements d'une commande triés par date décroissante
      * @param commandeJpa la commande
      * @return la liste des paiements
      */
-    List<PaiementJpa> findByCommandeJpa(CommandeJpa commandeJpa);
+    List<PaiementJpa> findByCommandeJpaOrderByDatePaiementDesc(CommandeJpa commandeJpa);
 
     /**
-     * Recherche tous les paiements d'une commande par UUID
+     * Recherche tous les paiements d'une commande par UUID triés par date décroissante
      * @param commandeUuid l'UUID de la commande
      * @return la liste des paiements
      */
-    List<PaiementJpa> findByCommandeJpaUuid(UUID commandeUuid);
+    List<PaiementJpa> findByCommandeJpaUuidOrderByDatePaiementDesc(UUID commandeUuid);
 
     /**
      * Recherche un paiement par transactionId

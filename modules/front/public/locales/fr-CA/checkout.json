@@ -123,12 +123,16 @@
     }
   },
   "paymentSuccess": {
-    "title": "Paiement initialisÃ© !",
-    "subtitle": "Votre transaction a Ã©tÃ© enregistrÃ©e avec succÃ¨s",
-    "processing": "Votre paiement est en cours de traitement",
-    "emailNotice": "Vous recevrez une confirmation par email dans quelques instants.",
-    "orderTracking": "Vous pouvez consulter l'Ã©tat de votre commande dans votre profil.",
-    "backHome": "Retour Ã  l'accueil",
+    "title": "Paiement en cours",
+    "subtitle": "Votre transaction est en cours de traitement",
+    "processing": "Paiement en cours de traitement",
+    "processingDescription": "Votre paiement est en cours de traitement. Veuillez patienter quelques instants.",
+    "emailNotice": "Vous recevrez un email de confirmation dans quelques minutes.",
+    "emailTitle": "Notification par email",
+    "emailConfirm": "Email de confirmation si le paiement est accepté",
+    "emailFailed": "Email d'information si le paiement échoue",
+    "orderTracking": "Vous pourrez suivre votre commande dans votre espace client.",
+    "backHome": "Retour à l'accueil",
     "thankYou": "Merci pour votre confiance !"
   },
   "orderSuccess": {

@@ -12,6 +12,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Batch planifié pour retraiter automatiquement les événements en échec.
@@ -21,6 +23,15 @@ import java.time.LocalDateTime;
  * events.retry.batch.enabled=true
  * events.retry.batch.olderThanHours=24  # Retraiter les événements échoués depuis plus de 24h
  * events.retry.batch.limit=50           # Limite de 50 événements par exécution
+ *
+ * ⚠️ EXCLUSIONS IMPORTANTES
+ * Les événements de paiement sont EXCLUS du batch automatique :
+ * - PaymentInitiatedEvent
+ * - PaymentSuccessfulEvent
+ * - PaymentFailedEvent
+ *
+ * Ces événements nécessitent un retraitement manuel via API admin pour éviter
+ * les doublons (emails multiples, notifications, etc.)
  *
  * Exemple de configuration :
  * events.retry.batch.enabled=true
@@ -87,9 +98,25 @@ public class FailedEventsRetryBatch {
             int successCount = 0;
             int failureCount = 0;
             int permanentlyFailedCount = 0;
+            int skippedPaymentEvents = 0;
+
+            // Types d'événements de paiement à exclure du batch automatique
+            List<String> excludedPaymentEventTypes = Arrays.asList(
+                "PaymentInitiatedEvent",
+                "PaymentSuccessfulEvent",
+                "PaymentFailedEvent"
+            );
 
             for (EventRecordJpa event : failedEvents.getContent()) {
                 try {
+                    if (excludedPaymentEventTypes.contains(event.getEventType())) {
+                        skippedPaymentEvents++;
+                        log.warn("⚠️ Événement de paiement {} (type: {}) EXCLU du batch automatique",
+                            event.getEventId(), event.getEventType());
+                        log.info("   → Nécessite un retraitement manuel via API admin");
+                        continue; // Passer au suivant
+                    }
+
                     log.info("Retraitement de l'événement {} (type: {}, échec le: {}, retryCount actuel: {})",
                         event.getEventId(),
                         event.getEventType(),
@@ -134,10 +161,16 @@ public class FailedEventsRetryBatch {
             log.info("  - Succès : {}", successCount);
             log.info("  - Échecs : {}", failureCount);
             log.info("  - Marqués PERMANENTLY_FAILED : {}", permanentlyFailedCount);
+            log.info("  - Événements de paiement exclus : {}", skippedPaymentEvents);
 
             if (permanentlyFailedCount > 0) {
                 log.warn("⚠️ {} événement(s) marqué(s) PERMANENTLY_FAILED - ne seront plus retraités",
                     permanentlyFailedCount);
+            }
+
+            if (skippedPaymentEvents > 0) {
+                log.warn("⚠️ {} événement(s) de paiement EXCLUS du batch - nécessitent un retraitement manuel",
+                    skippedPaymentEvents);
             }
 
             log.info("========================================");

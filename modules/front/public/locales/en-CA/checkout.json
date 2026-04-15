@@ -123,11 +123,15 @@
     }
   },
   "paymentSuccess": {
-    "title": "Payment initialized!",
-    "subtitle": "Your transaction has been recorded successfully",
-    "processing": "Your payment is being processed",
-    "emailNotice": "You will receive a confirmation email shortly.",
-    "orderTracking": "You can check your order status in your profile.",
+    "title": "Payment in progress",
+    "subtitle": "Your transaction is being processed",
+    "processing": "Payment being processed",
+    "processingDescription": "Your payment is being processed. Please wait a few moments.",
+    "emailNotice": "You will receive a confirmation email in a few minutes.",
+    "emailTitle": "Email notification",
+    "emailConfirm": "Confirmation email if payment is accepted",
+    "emailFailed": "Information email if payment fails",
+    "orderTracking": "You can track your order in your account.",
     "backHome": "Back to home",
     "thankYou": "Thank you for your trust!"
   },

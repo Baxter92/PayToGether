@@ -2,13 +2,11 @@ package com.ulr.paytogether.provider.adapter;
 
 import com.ulr.paytogether.core.enumeration.StatutCommande;
 import com.ulr.paytogether.core.enumeration.StatutCommandeUtilisateur;
+import com.ulr.paytogether.core.enumeration.StatutPaiement;
 import com.ulr.paytogether.core.modele.CommandeModele;
 import com.ulr.paytogether.core.modele.CommandeUtilisateurModele;
 import com.ulr.paytogether.core.provider.CommandeProvider;
-import com.ulr.paytogether.provider.adapter.entity.CommandeJpa;
-import com.ulr.paytogether.provider.adapter.entity.CommandeUtilisateurJpa;
-import com.ulr.paytogether.provider.adapter.entity.DealJpa;
-import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
+import com.ulr.paytogether.provider.adapter.entity.*;
 import com.ulr.paytogether.provider.adapter.mapper.CommandeJpaMapper;
 import com.ulr.paytogether.provider.adapter.mapper.CommandeUtilisateurJpaMapper;
 import com.ulr.paytogether.provider.repository.CommandeRepository;
@@ -65,7 +63,7 @@ public class CommandeProviderAdapter implements CommandeProvider {
         UtilisateurJpa marchandJpa = utilisateurRepository.findById(utilisateurUuid)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'UUID : " + utilisateurUuid));
 
-        return jpaRepository.findByMarchandJpa(marchandJpa)
+        return jpaRepository.findByMarchandJpaOrderByDateCreationDesc(marchandJpa)
                 .stream()
                 .map(mapper::versModele)
                 .collect(Collectors.toList());
@@ -101,9 +99,14 @@ public class CommandeProviderAdapter implements CommandeProvider {
                     CommandeModele commande = mapper.versModele(commandeJpa);
 
                     // Calculer le montant total des paiements pour cette commande
-                    var montantTotal = paiementRepository.findByCommandeJpaUuid(commandeJpa.getUuid())
+                    // Filtre: CONFIRME, EN_ATTENTE, PROCESSING uniquement
+                    var montantTotal = paiementRepository.findByCommandeJpaUuidOrderByDatePaiementDesc(commandeJpa.getUuid())
                             .stream()
-                            .map(p -> p.getMontant())
+                            .filter(p -> {
+                                var availableStatut = List.of(StatutPaiement.CONFIRME, StatutPaiement.EN_ATTENTE, StatutPaiement.PROCESSING);
+                                return availableStatut.contains(p.getStatut());
+                            })
+                            .map(PaiementJpa::getMontant)
                             .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
 
                     commande.setMontantTotalPaiements(montantTotal);
@@ -124,14 +127,19 @@ public class CommandeProviderAdapter implements CommandeProvider {
         UtilisateurJpa marchandJpa = utilisateurRepository.findById(marchandUuid)
                 .orElseThrow(() -> new IllegalArgumentException("Marchand non trouvé avec l'UUID: " + marchandUuid));
         
-        return jpaRepository.findByMarchandJpa(marchandJpa).stream()
+        return jpaRepository.findByMarchandJpaOrderByDateCreationDesc(marchandJpa).stream()
                 .map(commandeJpa -> {
                     CommandeModele commande = mapper.versModele(commandeJpa);
 
                     // Calculer le montant total des paiements pour cette commande
-                    var montantTotal = paiementRepository.findByCommandeJpaUuid(commandeJpa.getUuid())
+                    // Filtre: CONFIRME, EN_ATTENTE, PROCESSING uniquement
+                    var montantTotal = paiementRepository.findByCommandeJpaUuidOrderByDatePaiementDesc(commandeJpa.getUuid())
                             .stream()
-                            .map(p -> p.getMontant())
+                            .filter(p -> {
+                                var availableStatut = List.of(StatutPaiement.CONFIRME, StatutPaiement.EN_ATTENTE, StatutPaiement.PROCESSING);
+                                return availableStatut.contains(p.getStatut());
+                            })
+                            .map(PaiementJpa::getMontant)
                             .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
 
                     commande.setMontantTotalPaiements(montantTotal);

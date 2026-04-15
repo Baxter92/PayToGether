@@ -20,6 +20,13 @@ import java.util.UUID;
 public interface CommandeRepository extends JpaRepository<CommandeJpa, UUID> {
 
     /**
+     * Recherche toutes les commandes triées par date de création décroissante
+     * Override de findAll() pour ajouter le tri
+     */
+    @Query("SELECT c FROM CommandeJpa c ORDER BY c.dateCreation DESC")
+    List<CommandeJpa> findAll();
+
+    /**
      * Recherche une commande par numéro
      * @param numeroCommande le numéro de commande
      * @return un Optional contenant la commande si elle existe
@@ -27,11 +34,11 @@ public interface CommandeRepository extends JpaRepository<CommandeJpa, UUID> {
     Optional<CommandeJpa> findByNumeroCommande(String numeroCommande);
 
     /**
-     * Recherche toutes les commandes d'un utilisateur (vendeur)
+     * Recherche toutes les commandes d'un utilisateur (vendeur) triées par date décroissante
      * @param marchandJpa l'utilisateur marchand
      * @return la liste des commandes
      */
-    List<CommandeJpa> findByMarchandJpa(UtilisateurJpa marchandJpa);
+    List<CommandeJpa> findByMarchandJpaOrderByDateCreationDesc(UtilisateurJpa marchandJpa);
 
     /**
      * Recherche toutes les commandes d'un deal

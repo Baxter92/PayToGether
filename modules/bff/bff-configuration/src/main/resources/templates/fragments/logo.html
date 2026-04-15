@@ -5,10 +5,11 @@
 </head>
 <body>
     <!-- Fragment de logo réutilisable -->
-    <div th:fragment="logo" style="text-align: center; margin-bottom: 20px;">
+    <div th:fragment="logo" style="text-align: center; padding: 20px; background: white;">
         <img src="https://devbff.dealtogether.ca/images/dealtogetherlogo.png"
-             alt="DealTogether"
-             style="max-width: 200px; height: auto; display: block; margin: 0 auto;" />
+             alt="DealTogether Logo"
+             style="max-width: 200px; height: auto; display: block; margin: 0 auto;"
+             onerror="this.style.display='none'" />
     </div>
 </body>
 </html>
