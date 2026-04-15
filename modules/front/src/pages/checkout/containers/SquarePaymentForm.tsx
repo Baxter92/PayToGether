@@ -489,33 +489,33 @@ export default function SquarePaymentForm({
               />
             </div>
 
-            {/* Bouton Google Pay - Toujours dans le DOM, montré/caché avec CSS */}
-            {googlePayAvailable && (
-              <div style={{ display: selectedMethod === "googlePay" ? "block" : "none" }}>
-                <label className="text-sm font-medium mb-2 block">
-                  {t("squarePayment.googlePayInfo")}
-                </label>
-                <div
-                  ref={googlePayContainerRef}
-                  id="google-pay-container"
-                  className="border rounded-md p-3 bg-white"
-                />
-              </div>
-            )}
+            {/* Bouton Google Pay - Toujours dans le DOM (même si non disponible), montré/caché avec CSS */}
+            <div style={{
+              display: selectedMethod === "googlePay" && googlePayAvailable ? "block" : "none"
+            }}>
+              <label className="text-sm font-medium mb-2 block">
+                {t("squarePayment.googlePayInfo")}
+              </label>
+              <div
+                ref={googlePayContainerRef}
+                id="google-pay-container"
+                className="border rounded-md p-3 bg-white"
+              />
+            </div>
 
-            {/* Bouton Apple Pay - Toujours dans le DOM, montré/caché avec CSS */}
-            {applePayAvailable && (
-              <div style={{ display: selectedMethod === "applePay" ? "block" : "none" }}>
-                <label className="text-sm font-medium mb-2 block">
-                  {t("squarePayment.applePayInfo")}
-                </label>
-                <div
-                  ref={applePayContainerRef}
-                  id="apple-pay-container"
-                  className="border rounded-md p-3 bg-white"
-                />
-              </div>
-            )}
+            {/* Bouton Apple Pay - Toujours dans le DOM (même si non disponible), montré/caché avec CSS */}
+            <div style={{
+              display: selectedMethod === "applePay" && applePayAvailable ? "block" : "none"
+            }}>
+              <label className="text-sm font-medium mb-2 block">
+                {t("squarePayment.applePayInfo")}
+              </label>
+              <div
+                ref={applePayContainerRef}
+                id="apple-pay-container"
+                className="border rounded-md p-3 bg-white"
+              />
+            </div>
 
             <HStack spacing={2} justify="end">
               {onBack && (
