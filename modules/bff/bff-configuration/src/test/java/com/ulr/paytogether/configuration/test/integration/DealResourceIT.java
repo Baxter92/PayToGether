@@ -351,7 +351,7 @@ class DealResourceIT extends AbstractIT {
         // Vérifier que tout existe avant suppression
         assertTrue(dealRepository.findById(deal.getUuid()).isPresent(), "Le deal devrait exister");
         assertTrue(commandeRepository.findById(commande.getUuid()).isPresent(), "La commande devrait exister");
-        assertEquals(2, paiementRepository.findByCommandeJpa(commande).size(), "2 paiements devraient exister");
+        assertEquals(2, paiementRepository.findByCommandeJpaOrderByDatePaiementDesc(commande).size(), "2 paiements devraient exister");
         assertEquals(2, commandeUtilisateurRepository.findByCommandeJpaUuid(commande.getUuid()).size(), "2 CommandeUtilisateurs devraient exister");
 
         // Récupérer les UUIDs des entités pour vérifier leur suppression
