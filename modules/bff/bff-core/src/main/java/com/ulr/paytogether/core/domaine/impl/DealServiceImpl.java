@@ -102,16 +102,44 @@ public class DealServiceImpl implements DealService {
     }
 
     /**
-     * Enrichit un deal avec les statistiques calculées
+     * Enrichit un deal avec les statistiques calculées en parallèle
+     * Utilise CompletableFuture pour paralléliser les 3 calculs
+     *
      * @param deal Deal à enrichir
      * @return Deal enrichi avec moyenne commentaires et nombre participants réels
      */
     private DealModele enrichirAvecStatistiques(DealModele deal) {
-        if (deal != null && deal.getUuid() != null) {
-            deal.setMoyenneCommentaires(dealProvider.calculerMoyenneCommentaires(deal.getUuid()));
-            deal.setNombreParticipantsReel(dealProvider.compterParticipantsReels(deal.getUuid()));
-            deal.setNombrePartsAchetees(dealProvider.calculerNombrePartsAchetees(deal.getUuid()));
+        if (deal == null || deal.getUuid() == null) {
+            return deal;
         }
+
+        long start = System.currentTimeMillis();
+
+        // Parallélisation des 3 calculs avec CompletableFuture
+        var futureMoyenne = java.util.concurrent.CompletableFuture.supplyAsync(() ->
+            dealProvider.calculerMoyenneCommentaires(deal.getUuid())
+        );
+
+        var futureParticipants = java.util.concurrent.CompletableFuture.supplyAsync(() ->
+            dealProvider.compterParticipantsReels(deal.getUuid())
+        );
+
+        var futureParts = java.util.concurrent.CompletableFuture.supplyAsync(() ->
+            dealProvider.calculerNombrePartsAchetees(deal.getUuid())
+        );
+
+        // Attendre que tous les calculs soient terminés
+        java.util.concurrent.CompletableFuture.allOf(futureMoyenne, futureParticipants, futureParts)
+                .join();
+
+        // Assigner les résultats
+        deal.setMoyenneCommentaires(futureMoyenne.join());
+        deal.setNombreParticipantsReel(futureParticipants.join());
+        deal.setNombrePartsAchetees(futureParts.join());
+
+        long duration = System.currentTimeMillis() - start;
+        log.debug("⚡ Statistiques enrichies en {}ms (parallèle)", duration);
+
         return deal;
     }
 

@@ -9,6 +9,7 @@ import com.ulr.paytogether.provider.adapter.entity.*;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
 import com.ulr.paytogether.provider.adapter.mapper.DealJpaMapper;
 import com.ulr.paytogether.provider.repository.*;
+import com.ulr.paytogether.provider.utils.AsyncPresignedUrlService;
 import com.ulr.paytogether.provider.utils.FileManager;
 import com.ulr.paytogether.provider.utils.Tools;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,7 @@ public class DealProviderAdapter implements DealProvider {
     private final CommentaireRepository commentaireRepository;
     private final AdresseRepository adresseRepository;
     private final PaiementRepository paiementRepository;
+    private final AsyncPresignedUrlService asyncPresignedUrlService;
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -95,16 +97,44 @@ public class DealProviderAdapter implements DealProvider {
         return modeleSauvegarde;
     }
 
+    /**
+     * Génère les URLs présignées pour les images PENDING en parallèle
+     * Utilise les Virtual Threads pour optimiser les appels I/O vers MinIO
+     */
     private void setPresignUrl(DealModele modeleSauvegarde) {
-        // Gérer les fichiers associés au deal (génération des URL présignées)
-        if (modeleSauvegarde.getListeImages() != null && !modeleSauvegarde.getListeImages().isEmpty()) {
-            modeleSauvegarde.getListeImages().stream()
-                    .filter(imageDealModele -> imageDealModele.getStatut() == StatutImage.PENDING)
-                    .forEach(imageDealModele -> {
-                        String presignedUrl = fileManager.generatePresignedUrl(Tools.DIRECTORY_DEALS_IMAGES, imageDealModele.getUrlImage());
-                        imageDealModele.setPresignUrl(presignedUrl);
-            });
+        if (modeleSauvegarde.getListeImages() == null || modeleSauvegarde.getListeImages().isEmpty()) {
+            return;
         }
+
+        // Filtrer les images PENDING
+        var imagesPending = modeleSauvegarde.getListeImages().stream()
+                .filter(img -> img.getStatut() == StatutImage.PENDING)
+                .toList();
+
+        if (imagesPending.isEmpty()) {
+            return;
+        }
+
+        long start = System.currentTimeMillis();
+
+        // Génération en parallèle avec Virtual Threads via CompletableFuture
+        List<String> fileNames = imagesPending.stream()
+                .map(ImageDealModele::getUrlImage)
+                .toList();
+
+        List<String> presignedUrls = asyncPresignedUrlService.generatePresignedUrlsInParallel(
+                Tools.DIRECTORY_DEALS_IMAGES,
+                fileNames
+        );
+
+        // Assigner les URLs présignées aux images
+        for (int i = 0; i < imagesPending.size(); i++) {
+            imagesPending.get(i).setPresignUrl(presignedUrls.get(i));
+        }
+
+        long duration = System.currentTimeMillis() - start;
+        log.debug("⚡ {} URLs présignées générées en {}ms (parallèle avec Virtual Threads)",
+                  imagesPending.size(), duration);
     }
 
     @Transactional(readOnly = true)
