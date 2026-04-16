@@ -14,9 +14,10 @@ import com.ulr.paytogether.core.enumeration.StatutDeal;
 import com.ulr.paytogether.core.modele.ImageDealModele;
 import com.ulr.paytogether.core.provider.DealProvider;
 import io.micrometer.common.util.StringUtils;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +46,7 @@ public class DealServiceImpl implements DealService {
     }
 
     @Transactional
+    @CacheEvict(value = {"deals", "deal-statut", "deal-createur", "deal-categorie", "villes"}, allEntries = true)
     @Override
     public DealModele creer(DealModele deal) {
         // Validation du deal avant création
@@ -82,12 +84,16 @@ public class DealServiceImpl implements DealService {
         return dealCree;
     }
 
+    @Transactional(readOnly = true)
+    @Cacheable(value = "deal-uuid", key = "#uuid")
     @Override
     public Optional<DealModele> lireParUuid(UUID uuid) {
         return dealProvider.trouverParUuid(uuid)
                 .map(this::enrichirAvecStatistiques);
     }
 
+    @Transactional(readOnly = true)
+    @Cacheable(value = "deals")
     @Override
     public List<DealModele> lireTous() {
         return dealProvider.trouverTous().stream()
@@ -109,7 +115,8 @@ public class DealServiceImpl implements DealService {
         return deal;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
+    @Cacheable(value = "deal-statut", key = "#statut")
     @Override
     public List<DealModele> lireParStatut(StatutDeal statut) {
         // Vérifier et mettre à jour les deals expirés avant de retourner les résultats
@@ -120,6 +127,8 @@ public class DealServiceImpl implements DealService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    @Cacheable(value = "deal-createur", key = "#createurUuid")
     @Override
     public List<DealModele> lireParCreateur(UUID createurUuid) {
         return dealProvider.trouverParCreateur(createurUuid).stream()
@@ -127,6 +136,8 @@ public class DealServiceImpl implements DealService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    @Cacheable(value = "deal-categorie", key = "#categorieUuid")
     @Override
     public List<DealModele> lireParCategorie(UUID categorieUuid) {
         return dealProvider.trouverParCategorie(categorieUuid).stream()
@@ -135,6 +146,7 @@ public class DealServiceImpl implements DealService {
     }
 
     @Transactional
+    @CacheEvict(value = {"deals", "deal-uuid", "deal-statut", "deal-createur", "deal-categorie"}, allEntries = true)
     @Override
     public DealModele mettreAJour(UUID uuid, DealModele deal) {
         // Validation partielle du deal avant mise à jour (sans statut)
@@ -198,6 +210,7 @@ public class DealServiceImpl implements DealService {
     }
 
     @Transactional
+    @CacheEvict(value = {"deals", "deal-uuid", "deal-statut", "deal-createur", "deal-categorie"}, allEntries = true)
     @Override
     public DealModele mettreAJourStatut(UUID uuid, StatutDeal nouveauStatut) {
         // Récupérer le deal existant
@@ -231,6 +244,7 @@ public class DealServiceImpl implements DealService {
     }
 
     @Transactional
+    @CacheEvict(value = {"deals", "deal-uuid"}, allEntries = true)
     @Override
     public DealModele basculerFavoris(UUID uuid) {
         log.info("🔄 Basculement du statut favoris pour le deal: {}", uuid);
@@ -245,6 +259,7 @@ public class DealServiceImpl implements DealService {
     }
 
     @Transactional
+    @CacheEvict(value = {"deals", "deal-uuid"}, allEntries = true)
     @Override
     public DealModele mettreAJourImages(UUID uuid, DealModele deal) {
         // Vérifier que le deal existe
@@ -259,6 +274,8 @@ public class DealServiceImpl implements DealService {
         return dealProvider.mettreAJourImages(uuid, deal);
     }
 
+    @Transactional
+    @CacheEvict(value = {"deals", "deal-uuid", "deal-statut", "deal-createur", "deal-categorie"}, allEntries = true)
     @Override
     public void supprimerParUuid(UUID uuid) {
         DealModele dealModele = dealProvider.trouverParUuid(uuid)
@@ -291,6 +308,8 @@ public class DealServiceImpl implements DealService {
         eventPublisher.publishAsync(dealAnnuleEvent);
     }
 
+    @Transactional(readOnly = true)
+    @Cacheable(value = "villes")
     @Override
     public Set<String> lireVillesDisponibles() {
         return dealProvider.trouverTous().stream()
@@ -305,6 +324,7 @@ public class DealServiceImpl implements DealService {
         dealProvider.mettreAJourStatutImage(dealUuid, imageUuid, statut);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public String obtenirUrlLectureImage(UUID dealUuid, UUID imageUuid) {
         return dealProvider.obtenirUrlLectureImage(dealUuid, imageUuid);

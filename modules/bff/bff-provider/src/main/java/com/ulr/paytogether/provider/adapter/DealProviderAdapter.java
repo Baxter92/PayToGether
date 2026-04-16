@@ -107,12 +107,14 @@ public class DealProviderAdapter implements DealProvider {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Optional<DealModele> trouverParUuid(UUID uuid) {
         return jpaRepository.findById(uuid)
                 .map(mapper::versModele);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<DealModele> trouverTous() {
         return jpaRepository.findAllByOrderByFavorisDescDateCreationDesc()
@@ -121,6 +123,7 @@ public class DealProviderAdapter implements DealProvider {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<DealModele> trouverParStatut(StatutDeal statut) {
         return jpaRepository.findByStatutOrderByFavorisDescDateCreationDesc(statut)
@@ -129,6 +132,7 @@ public class DealProviderAdapter implements DealProvider {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<DealModele> trouverParCreateur(UUID createurUuid) {
         UtilisateurJpa marchandJpa = utilisateurRepository.findById(createurUuid)
@@ -139,6 +143,7 @@ public class DealProviderAdapter implements DealProvider {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<DealModele> trouverParCategorie(UUID categorieUuid) {
         CategorieJpa categorieJpa = categorieRepository.findById(categorieUuid)
@@ -414,6 +419,7 @@ public class DealProviderAdapter implements DealProvider {
                 );
     }
 
+    @Transactional(readOnly = true)
     @Override
     public String obtenirUrlLectureImage(UUID dealUuid, UUID imageUuid) {
         // Récupérer le deal
@@ -517,6 +523,7 @@ public class DealProviderAdapter implements DealProvider {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Optional<ImageDealModele> trouverImageParUuid(UUID dealUuid, UUID imageUuid) {
         return jpaRepository.findById(dealUuid)
@@ -533,6 +540,7 @@ public class DealProviderAdapter implements DealProvider {
                 );
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Double calculerMoyenneCommentaires(UUID dealUuid) {
         log.debug("Calcul de la moyenne des commentaires pour le deal: {}", dealUuid);
@@ -540,6 +548,7 @@ public class DealProviderAdapter implements DealProvider {
         return moyenne != null ? Math.round(moyenne * 10.0) / 10.0 : null; // Arrondi à 1 décimale
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Long compterParticipantsReels(UUID dealUuid) {
         log.debug("Comptage des participants réels pour le deal: {}", dealUuid);
@@ -548,6 +557,7 @@ public class DealProviderAdapter implements DealProvider {
                 .orElse(0L);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Long calculerNombrePartsAchetees(UUID dealUuid) {
         log.debug("Calcul du nombre total de parts achetées pour le deal: {}", dealUuid);
