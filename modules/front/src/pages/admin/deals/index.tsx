@@ -4,6 +4,7 @@ import { Button } from "@/common/components/ui/button";
 import { useI18n } from "@/common/hooks/useI18n";
 import DealsList from "@/common/containers/DealList";
 import Pagination from "@/common/components/Pagination";
+import { DealTableSkeleton } from "@/common/components/skeletons";
 import { CreateDealModal } from "@/pages/profile/components/CreateDealModal";
 import { ViewDetailDealModal } from "./containers/ViewDetailDealModal";
 import { FavorisDealModal } from "./containers/FavorisDealModal";
@@ -114,9 +115,7 @@ export default function AdminDeals(): ReactElement {
       </header>
 
       {isLoading ? (
-        <div className="text-center py-8 text-muted-foreground">
-          Chargement...
-        </div>
+        <DealTableSkeleton rows={size} />
       ) : (
         <>
           <DealsList

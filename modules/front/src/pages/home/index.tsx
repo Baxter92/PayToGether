@@ -13,6 +13,7 @@ import DealsList from "@/common/containers/DealList";
 import { Heading } from "@/common/containers/Heading";
 import { VStack } from "@/common/components";
 import Pagination from "@/common/components/Pagination";
+import { DealGridSkeleton, HeroSkeleton } from "@/common/components/skeletons";
 import { Button } from "@/common/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { PATHS } from "@/common/constants/path";
@@ -22,7 +23,8 @@ export default function Home(): JSX.Element {
   const { t } = useI18n("home");
 
   // Utiliser la version non paginée pour les sections "Popular"
-  const { data: dealsDataNonPaginated } = useDealsByStatut(StatutDeal.PUBLIE);
+  const { data: dealsDataNonPaginated, isLoading: isLoadingNonPaginated } =
+    useDealsByStatut(StatutDeal.PUBLIE);
 
   // Utiliser la version paginée pour la section "All Deals"
   const {
@@ -35,7 +37,8 @@ export default function Home(): JSX.Element {
     setPage,
   } = useDealsByStatutPaginated(StatutDeal.PUBLIE);
 
-  const { data: publicitesData = [] } = usePublicitesActives();
+  const { data: publicitesData = [], isLoading: isLoadingPublicites } =
+    usePublicitesActives();
 
   // Mapper et trier : favoris en premier, puis le reste (pour la section populaire)
   const allDealsNonPaginated = useMemo(() => {
@@ -100,7 +103,12 @@ export default function Home(): JSX.Element {
 
   return (
     <div className="mx-auto">
-      {heroSlides.length > 0 ? <Hero slides={heroSlides} /> : null}
+      {/* Hero Section with Skeleton */}
+      {isLoadingPublicites ? (
+        <HeroSkeleton />
+      ) : heroSlides.length > 0 ? (
+        <Hero slides={heroSlides} />
+      ) : null}
 
       {/* Promotional Deals Section */}
       {/* <section className="py-16 bg-background">
@@ -161,12 +169,17 @@ export default function Home(): JSX.Element {
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>
-          <DealsList
-            deals={popularDeals}
-            showFilters={false}
-            showPagination={false}
-            itemsPerPage={4}
-          />
+
+          {isLoadingNonPaginated ? (
+            <DealGridSkeleton count={4} />
+          ) : (
+            <DealsList
+              deals={popularDeals}
+              showFilters={false}
+              showPagination={false}
+              itemsPerPage={4}
+            />
+          )}
         </VStack>
       </section>
 
@@ -196,9 +209,7 @@ export default function Home(): JSX.Element {
           </div>
 
           {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Chargement...
-            </div>
+            <DealGridSkeleton count={size} />
           ) : (
             <>
               <DealsList
