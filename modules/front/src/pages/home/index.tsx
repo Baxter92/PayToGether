@@ -1,6 +1,7 @@
 import {
   publiciteService,
   useDealsByStatut,
+  useDealsByStatutPaginated,
   usePublicitesActives,
 } from "@/common/api";
 import { mapDealToView } from "@/common/api/mappers/catalog";
@@ -11,6 +12,7 @@ import { useMemo, type ComponentProps, type JSX } from "react";
 import DealsList from "@/common/containers/DealList";
 import { Heading } from "@/common/containers/Heading";
 import { VStack } from "@/common/components";
+import Pagination from "@/common/components/Pagination";
 import { Button } from "@/common/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { PATHS } from "@/common/constants/path";
@@ -18,19 +20,38 @@ import { useQueries } from "@tanstack/react-query";
 
 export default function Home(): JSX.Element {
   const { t } = useI18n("home");
-  const { data: dealsData, isLoading } = useDealsByStatut(StatutDeal.PUBLIE);
+
+  // Utiliser la version non paginée pour les sections "Popular"
+  const { data: dealsDataNonPaginated } = useDealsByStatut(StatutDeal.PUBLIE);
+
+  // Utiliser la version paginée pour la section "All Deals"
+  const {
+    deals: dealsDataPaginated,
+    isLoading,
+    page,
+    size,
+    totalElements,
+    totalPages,
+    setPage,
+  } = useDealsByStatutPaginated(StatutDeal.PUBLIE);
+
   const { data: publicitesData = [] } = usePublicitesActives();
 
-  // Mapper et trier : favoris en premier, puis le reste
-  const allDeals = useMemo(() => {
-    const mapped = (dealsData ?? []).map(mapDealToView);
+  // Mapper et trier : favoris en premier, puis le reste (pour la section populaire)
+  const allDealsNonPaginated = useMemo(() => {
+    const mapped = (dealsDataNonPaginated ?? []).map(mapDealToView);
     return mapped.sort((a, b) => {
       // Favoris en premier
       if (a.favoris && !b.favoris) return -1;
       if (!a.favoris && b.favoris) return 1;
       return 0;
     });
-  }, [dealsData]);
+  }, [dealsDataNonPaginated]);
+
+  // Mapper les deals paginés pour la section "All Deals"
+  const allDealsPaginated = useMemo(() => {
+    return (dealsDataPaginated ?? []).map(mapDealToView);
+  }, [dealsDataPaginated]);
 
   type HeroSlide = ComponentProps<typeof Hero>["slides"][number];
 
@@ -68,13 +89,13 @@ export default function Home(): JSX.Element {
     [heroImageQueries, publicitesData, t],
   );
 
-  // const featuredDeals = useMemo(() => allDeals.slice(0, 4), [allDeals]);
+  // const featuredDeals = useMemo(() => allDealsNonPaginated.slice(0, 4), [allDealsNonPaginated]);
   const popularDeals = useMemo(
     () =>
-      [...allDeals]
+      [...allDealsNonPaginated]
         .filter((deal) => deal.favoris)
         .sort((a, b) => (b.discount || 0) - (a.discount || 0)),
-    [allDeals],
+    [allDealsNonPaginated],
   );
 
   return (
@@ -179,7 +200,24 @@ export default function Home(): JSX.Element {
               Chargement...
             </div>
           ) : (
-            <DealsList deals={allDeals} showFilters={false} />
+            <>
+              <DealsList
+                deals={allDealsPaginated}
+                showFilters={false}
+                showPagination={false}
+              />
+
+              {/* Pagination */}
+              <Pagination
+                page={page + 1}
+                totalPages={totalPages}
+                onChange={(newPage) => setPage(newPage - 1)}
+                perPage={size}
+                totalItems={totalElements}
+                showSummary={true}
+                align="center"
+              />
+            </>
           )}
         </VStack>
       </section>

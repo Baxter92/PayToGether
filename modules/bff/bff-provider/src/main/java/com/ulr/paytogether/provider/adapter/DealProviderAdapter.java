@@ -4,6 +4,7 @@ import com.ulr.paytogether.core.enumeration.StatutCommande;
 import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.modele.DealModele;
 import com.ulr.paytogether.core.modele.ImageDealModele;
+import com.ulr.paytogether.core.modele.PageModele;
 import com.ulr.paytogether.core.provider.DealProvider;
 import com.ulr.paytogether.provider.adapter.entity.*;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
@@ -15,6 +16,10 @@ import com.ulr.paytogether.provider.utils.Tools;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -155,11 +160,53 @@ public class DealProviderAdapter implements DealProvider {
 
     @Transactional(readOnly = true)
     @Override
+    public PageModele<DealModele> trouverTous(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "favoris", "dateCreation"));
+        Page<DealJpa> pageJpa = jpaRepository.findAll(pageable);
+
+        List<DealModele> content = pageJpa.getContent().stream()
+                .map(mapper::versModele)
+                .collect(Collectors.toList());
+
+        return PageModele.<DealModele>builder()
+                .content(content)
+                .page(pageJpa.getNumber())
+                .size(pageJpa.getSize())
+                .totalElements(pageJpa.getTotalElements())
+                .totalPages(pageJpa.getTotalPages())
+                .first(pageJpa.isFirst())
+                .last(pageJpa.isLast())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
     public List<DealModele> trouverParStatut(StatutDeal statut) {
         return jpaRepository.findByStatutOrderByFavorisDescDateCreationDesc(statut)
                 .stream()
                 .map(mapper::versModele)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public PageModele<DealModele> trouverParStatut(StatutDeal statut, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "favoris", "dateCreation"));
+        Page<DealJpa> pageJpa = jpaRepository.findByStatut(statut, pageable);
+
+        List<DealModele> content = pageJpa.getContent().stream()
+                .map(mapper::versModele)
+                .collect(Collectors.toList());
+
+        return PageModele.<DealModele>builder()
+                .content(content)
+                .page(pageJpa.getNumber())
+                .size(pageJpa.getSize())
+                .totalElements(pageJpa.getTotalElements())
+                .totalPages(pageJpa.getTotalPages())
+                .first(pageJpa.isFirst())
+                .last(pageJpa.isLast())
+                .build();
     }
 
     @Transactional(readOnly = true)
@@ -175,6 +222,30 @@ public class DealProviderAdapter implements DealProvider {
 
     @Transactional(readOnly = true)
     @Override
+    public PageModele<DealModele> trouverParCreateur(UUID createurUuid, int page, int size) {
+        UtilisateurJpa marchandJpa = utilisateurRepository.findById(createurUuid)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé pour l'UUID : " + createurUuid));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "favoris", "dateCreation"));
+        Page<DealJpa> pageJpa = jpaRepository.findByMarchandJpa(marchandJpa, pageable);
+
+        List<DealModele> content = pageJpa.getContent().stream()
+                .map(mapper::versModele)
+                .collect(Collectors.toList());
+
+        return PageModele.<DealModele>builder()
+                .content(content)
+                .page(pageJpa.getNumber())
+                .size(pageJpa.getSize())
+                .totalElements(pageJpa.getTotalElements())
+                .totalPages(pageJpa.getTotalPages())
+                .first(pageJpa.isFirst())
+                .last(pageJpa.isLast())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
     public List<DealModele> trouverParCategorie(UUID categorieUuid) {
         CategorieJpa categorieJpa = categorieRepository.findById(categorieUuid)
                 .orElseThrow(() -> new IllegalArgumentException("Catégorie non trouvée pour l'UUID : " + categorieUuid));
@@ -183,6 +254,30 @@ public class DealProviderAdapter implements DealProvider {
                 .stream()
                 .map(mapper::versModele)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public PageModele<DealModele> trouverParCategorie(UUID categorieUuid, int page, int size) {
+        CategorieJpa categorieJpa = categorieRepository.findById(categorieUuid)
+                .orElseThrow(() -> new IllegalArgumentException("Catégorie non trouvée pour l'UUID : " + categorieUuid));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "favoris", "dateCreation"));
+        Page<DealJpa> pageJpa = jpaRepository.findByCategorieJpa(categorieJpa, pageable);
+
+        List<DealModele> content = pageJpa.getContent().stream()
+                .map(mapper::versModele)
+                .collect(Collectors.toList());
+
+        return PageModele.<DealModele>builder()
+                .content(content)
+                .page(pageJpa.getNumber())
+                .size(pageJpa.getSize())
+                .totalElements(pageJpa.getTotalElements())
+                .totalPages(pageJpa.getTotalPages())
+                .first(pageJpa.isFirst())
+                .last(pageJpa.isLast())
+                .build();
     }
 
     @Transactional(rollbackFor = Exception.class)

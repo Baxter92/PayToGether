@@ -2,6 +2,7 @@ package com.ulr.paytogether.core.domaine.impl;
 
 import com.ulr.paytogether.core.domaine.service.CategorieService;
 import com.ulr.paytogether.core.modele.CategorieModele;
+import com.ulr.paytogether.core.modele.PageModele;
 import com.ulr.paytogether.core.provider.CategorieProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,12 @@ public class CategorieServiceImpl implements CategorieService {
     public List<CategorieModele> lireTous() {
         log.debug("Lecture de toutes les catégories");
         return categorieProvider.trouverTous();
+    }
+
+    @Override
+    public PageModele<CategorieModele> lireTous(int page, int size) {
+        log.debug("Lecture de toutes les catégories avec pagination (page: {}, size: {})", page, size);
+        return categorieProvider.trouverTous(page, size);
     }
 
     @Override

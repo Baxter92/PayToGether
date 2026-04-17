@@ -4,6 +4,7 @@ import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.modele.DealModele;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
 import com.ulr.paytogether.core.modele.ImageDealModele;
+import com.ulr.paytogether.core.modele.PageModele;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,11 +21,46 @@ public interface DealProvider {
 
     List<DealModele> trouverTous();
 
+    /**
+     * Trouver tous les deals avec pagination
+     * @param page Numéro de la page (commence à 0)
+     * @param size Taille de la page
+     * @return Page de deals
+     */
+    PageModele<DealModele> trouverTous(int page, int size);
+
     List<DealModele> trouverParStatut(StatutDeal statut);
+
+    /**
+     * Trouver les deals par statut avec pagination
+     * @param statut Statut du deal
+     * @param page Numéro de la page (commence à 0)
+     * @param size Taille de la page
+     * @return Page de deals
+     */
+    PageModele<DealModele> trouverParStatut(StatutDeal statut, int page, int size);
 
     List<DealModele> trouverParCreateur(UUID createurUuid);
 
+    /**
+     * Trouver les deals par créateur avec pagination
+     * @param createurUuid UUID du créateur
+     * @param page Numéro de la page (commence à 0)
+     * @param size Taille de la page
+     * @return Page de deals
+     */
+    PageModele<DealModele> trouverParCreateur(UUID createurUuid, int page, int size);
+
     List<DealModele> trouverParCategorie(UUID categorieUuid);
+
+    /**
+     * Trouver les deals par catégorie avec pagination
+     * @param categorieUuid UUID de la catégorie
+     * @param page Numéro de la page (commence à 0)
+     * @param size Taille de la page
+     * @return Page de deals
+     */
+    PageModele<DealModele> trouverParCategorie(UUID categorieUuid, int page, int size);
 
     DealModele mettreAJour(UUID uuid, DealModele deal);
 

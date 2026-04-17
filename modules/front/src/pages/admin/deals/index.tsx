@@ -3,10 +3,15 @@ import { Eye, Plus, Heart } from "lucide-react";
 import { Button } from "@/common/components/ui/button";
 import { useI18n } from "@/common/hooks/useI18n";
 import DealsList from "@/common/containers/DealList";
+import Pagination from "@/common/components/Pagination";
 import { CreateDealModal } from "@/pages/profile/components/CreateDealModal";
 import { ViewDetailDealModal } from "./containers/ViewDetailDealModal";
 import { FavorisDealModal } from "./containers/FavorisDealModal";
-import { useDeals, useToggleDealFavoris, type DealDTO } from "@/common/api";
+import {
+  useDealsPaginated,
+  useToggleDealFavoris,
+  type DealDTO,
+} from "@/common/api";
 import { toast } from "sonner";
 
 export default function AdminDeals(): ReactElement {
@@ -15,7 +20,19 @@ export default function AdminDeals(): ReactElement {
   const [openFavoris, setOpenFavoris] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState<any>();
   const { t: tAdmin } = useI18n("admin");
-  const { data: dealsData, isLoading, refetch } = useDeals();
+
+  // Utiliser le hook paginé
+  const {
+    deals: dealsData,
+    isLoading,
+    page,
+    size,
+    totalElements,
+    totalPages,
+    setPage,
+    refetch,
+  } = useDealsPaginated();
+
   const toggleFavoris = useToggleDealFavoris();
 
   const mappedDeals = (dealsData ?? []).map((deal: DealDTO) => {
@@ -101,41 +118,57 @@ export default function AdminDeals(): ReactElement {
           Chargement...
         </div>
       ) : (
-        <DealsList
-          deals={mappedDeals}
-          viewMode="list"
-          viewModeToggleable={false}
-          showFilters
-          filterPosition="top"
-          availableFilters={["search", "category", "status"]}
-          showPagination
-          itemsPerPage={10}
-          isAdmin={true}
-          tableProps={{
-            actionsRow: ({ row }) => [
-              {
-                leftIcon: <Eye />,
-                onClick: () => {
-                  setSelectedDeal(row.original);
-                  setOpenDetail(true);
+        <>
+          <DealsList
+            deals={mappedDeals}
+            viewMode="list"
+            viewModeToggleable={false}
+            showFilters
+            filterPosition="top"
+            availableFilters={["search", "category", "status"]}
+            showPagination={false} // Désactiver la pagination interne
+            isAdmin={true}
+            tableProps={{
+              actionsRow: ({ row }) => [
+                {
+                  leftIcon: <Eye />,
+                  onClick: () => {
+                    setSelectedDeal(row.original);
+                    setOpenDetail(true);
+                  },
+                  tooltip: tAdmin("deals.viewDetail"),
                 },
-                tooltip: tAdmin("deals.viewDetail"),
-              },
-              {
-                leftIcon: <Heart />,
-                onClick: () => {
-                  setSelectedDeal(row.original);
-                  setOpenFavoris(true);
+                {
+                  leftIcon: <Heart />,
+                  onClick: () => {
+                    setSelectedDeal(row.original);
+                    setOpenFavoris(true);
+                  },
+                  tooltip: row.original.favoris
+                    ? tAdmin("deals.removeFavorite")
+                    : tAdmin("deals.addFavorite"),
+                  variant: row.original.favoris ? "default" : "ghost",
+                  className: row.original.favoris
+                    ? "text-red-500 hover:text-red-600"
+                    : "",
                 },
-                tooltip: row.original.favoris
-                  ? tAdmin("deals.removeFavorite")
-                  : tAdmin("deals.addFavorite"),
-                variant: row.original.favoris ? "default" : "ghost",
-                className: row.original.favoris ? "text-red-500 hover:text-red-600" : "",
-              },
-            ],
-          }}
-        />
+              ],
+            }}
+          />
+
+          {/* Pagination externe */}
+          <div className="mt-6">
+            <Pagination
+              page={page + 1} // Composant attend page 1-based
+              totalPages={totalPages}
+              onChange={(newPage) => setPage(newPage - 1)} // Convertir en 0-based
+              perPage={size}
+              totalItems={totalElements}
+              showSummary={true}
+              align="center"
+            />
+          </div>
+        </>
       )}
 
       <CreateDealModal

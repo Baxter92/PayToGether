@@ -1,11 +1,16 @@
 package com.ulr.paytogether.provider.adapter;
 
 import com.ulr.paytogether.core.modele.CategorieModele;
+import com.ulr.paytogether.core.modele.PageModele;
 import com.ulr.paytogether.core.provider.CategorieProvider;
 import com.ulr.paytogether.provider.adapter.entity.CategorieJpa;
 import com.ulr.paytogether.provider.adapter.mapper.CategorieJpaMapper;
 import com.ulr.paytogether.provider.repository.CategorieRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -50,6 +55,26 @@ public class CategorieProviderAdapter implements CategorieProvider {
                 .stream()
                 .map(mapper::versModele)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public PageModele<CategorieModele> trouverTous(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "nom"));
+        Page<CategorieJpa> pageJpa = jpaRepository.findAll(pageable);
+
+        List<CategorieModele> content = pageJpa.getContent().stream()
+                .map(mapper::versModele)
+                .collect(Collectors.toList());
+
+        return PageModele.<CategorieModele>builder()
+                .content(content)
+                .page(pageJpa.getNumber())
+                .size(pageJpa.getSize())
+                .totalElements(pageJpa.getTotalElements())
+                .totalPages(pageJpa.getTotalPages())
+                .first(pageJpa.isFirst())
+                .last(pageJpa.isLast())
+                .build();
     }
 
     @Override

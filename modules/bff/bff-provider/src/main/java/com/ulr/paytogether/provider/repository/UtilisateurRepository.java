@@ -2,6 +2,8 @@ package com.ulr.paytogether.provider.repository;
 
 import com.ulr.paytogether.core.enumeration.RoleUtilisateur;
 import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -44,9 +46,17 @@ public interface UtilisateurRepository extends JpaRepository<UtilisateurJpa, UUI
     Optional<UtilisateurJpa> findByKeycloakId(String keycloakId);
 
     /**
-     *
-     * @param role
-     * @return
+     * Recherche tous les utilisateurs par rôle
+     * @param role le rôle
+     * @return liste des utilisateurs
      */
     List<UtilisateurJpa> findByRole(RoleUtilisateur role);
+
+    /**
+     * Recherche tous les utilisateurs par rôle avec pagination
+     * @param role le rôle
+     * @param pageable paramètres de pagination
+     * @return page d'utilisateurs
+     */
+    Page<UtilisateurJpa> findByRole(RoleUtilisateur role, Pageable pageable);
 }

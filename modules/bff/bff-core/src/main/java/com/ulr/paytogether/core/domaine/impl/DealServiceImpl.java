@@ -12,6 +12,7 @@ import com.ulr.paytogether.core.exception.ResourceNotFoundException;
 import com.ulr.paytogether.core.modele.DealModele;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
 import com.ulr.paytogether.core.modele.ImageDealModele;
+import com.ulr.paytogether.core.modele.PageModele;
 import com.ulr.paytogether.core.provider.DealProvider;
 import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -101,6 +102,20 @@ public class DealServiceImpl implements DealService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public PageModele<DealModele> lireTous(int page, int size) {
+        PageModele<DealModele> pageModele = dealProvider.trouverTous(page, size);
+
+        // Enrichir chaque deal avec les statistiques
+        List<DealModele> dealsEnrichis = pageModele.getContent().stream()
+                .map(this::enrichirAvecStatistiques)
+                .collect(Collectors.toList());
+
+        pageModele.setContent(dealsEnrichis);
+        return pageModele;
+    }
+
     /**
      * Enrichit un deal avec les statistiques calculées en parallèle
      * Utilise CompletableFuture pour paralléliser les 3 calculs
@@ -156,6 +171,23 @@ public class DealServiceImpl implements DealService {
     }
 
     @Transactional(readOnly = true)
+    @Override
+    public PageModele<DealModele> lireParStatut(StatutDeal statut, int page, int size) {
+        // Vérifier et mettre à jour les deals expirés avant de retourner les résultats
+        verifierEtMettreAJourDealsExpires();
+
+        PageModele<DealModele> pageModele = dealProvider.trouverParStatut(statut, page, size);
+
+        // Enrichir chaque deal avec les statistiques
+        List<DealModele> dealsEnrichis = pageModele.getContent().stream()
+                .map(this::enrichirAvecStatistiques)
+                .collect(Collectors.toList());
+
+        pageModele.setContent(dealsEnrichis);
+        return pageModele;
+    }
+
+    @Transactional(readOnly = true)
     @Cacheable(value = "deal-createur", key = "#createurUuid")
     @Override
     public List<DealModele> lireParCreateur(UUID createurUuid) {
@@ -165,12 +197,40 @@ public class DealServiceImpl implements DealService {
     }
 
     @Transactional(readOnly = true)
+    @Override
+    public PageModele<DealModele> lireParCreateur(UUID createurUuid, int page, int size) {
+        PageModele<DealModele> pageModele = dealProvider.trouverParCreateur(createurUuid, page, size);
+
+        // Enrichir chaque deal avec les statistiques
+        List<DealModele> dealsEnrichis = pageModele.getContent().stream()
+                .map(this::enrichirAvecStatistiques)
+                .collect(Collectors.toList());
+
+        pageModele.setContent(dealsEnrichis);
+        return pageModele;
+    }
+
+    @Transactional(readOnly = true)
     @Cacheable(value = "deal-categorie", key = "#categorieUuid")
     @Override
     public List<DealModele> lireParCategorie(UUID categorieUuid) {
         return dealProvider.trouverParCategorie(categorieUuid).stream()
                 .map(this::enrichirAvecStatistiques)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public PageModele<DealModele> lireParCategorie(UUID categorieUuid, int page, int size) {
+        PageModele<DealModele> pageModele = dealProvider.trouverParCategorie(categorieUuid, page, size);
+
+        // Enrichir chaque deal avec les statistiques
+        List<DealModele> dealsEnrichis = pageModele.getContent().stream()
+                .map(this::enrichirAvecStatistiques)
+                .collect(Collectors.toList());
+
+        pageModele.setContent(dealsEnrichis);
+        return pageModele;
     }
 
     @Transactional

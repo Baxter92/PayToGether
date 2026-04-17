@@ -2,6 +2,7 @@ package com.ulr.paytogether.provider.adapter;
 
 import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.modele.ImageModele;
+import com.ulr.paytogether.core.modele.PageModele;
 import com.ulr.paytogether.core.modele.PubliciteModele;
 import com.ulr.paytogether.core.provider.PubliciteProvider;
 import com.ulr.paytogether.provider.adapter.entity.ImageJpa;
@@ -13,6 +14,10 @@ import com.ulr.paytogether.provider.utils.Tools;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -88,11 +93,51 @@ public class PubliciteProviderAdapter implements PubliciteProvider {
     }
 
     @Override
+    public PageModele<PubliciteModele> trouverTous(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateCreation"));
+        Page<PubliciteJpa> pageJpa = jpaRepository.findAll(pageable);
+
+        List<PubliciteModele> content = pageJpa.getContent().stream()
+                .map(mapper::versModele)
+                .collect(Collectors.toList());
+
+        return PageModele.<PubliciteModele>builder()
+                .content(content)
+                .page(pageJpa.getNumber())
+                .size(pageJpa.getSize())
+                .totalElements(pageJpa.getTotalElements())
+                .totalPages(pageJpa.getTotalPages())
+                .first(pageJpa.isFirst())
+                .last(pageJpa.isLast())
+                .build();
+    }
+
+    @Override
     public List<PubliciteModele> trouverActives() {
         return jpaRepository.findByActiveTrue()
                 .stream()
                 .map(mapper::versModele)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public PageModele<PubliciteModele> trouverActives(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateCreation"));
+        Page<PubliciteJpa> pageJpa = jpaRepository.findByActiveTrue(pageable);
+
+        List<PubliciteModele> content = pageJpa.getContent().stream()
+                .map(mapper::versModele)
+                .collect(Collectors.toList());
+
+        return PageModele.<PubliciteModele>builder()
+                .content(content)
+                .page(pageJpa.getNumber())
+                .size(pageJpa.getSize())
+                .totalElements(pageJpa.getTotalElements())
+                .totalPages(pageJpa.getTotalPages())
+                .first(pageJpa.isFirst())
+                .last(pageJpa.isLast())
+                .build();
     }
 
     @Override

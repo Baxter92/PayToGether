@@ -6,6 +6,7 @@ import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.enumeration.StatutUtilisateur;
 import com.ulr.paytogether.core.modele.DealAvecStatutModele;
 import com.ulr.paytogether.core.modele.MarchandAvecDealsModele;
+import com.ulr.paytogether.core.modele.PageModele;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
 import com.ulr.paytogether.core.provider.DealParticipantProvider;
 import com.ulr.paytogether.core.provider.PaiementProvider;
@@ -23,6 +24,10 @@ import com.ulr.paytogether.wsclient.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -99,11 +104,51 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
     }
 
     @Override
+    public PageModele<UtilisateurModele> trouverTous(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "nom", "prenom"));
+        Page<UtilisateurJpa> pageJpa = jpaRepository.findAll(pageable);
+
+        List<UtilisateurModele> content = pageJpa.getContent().stream()
+                .map(mapper::versModele)
+                .collect(Collectors.toList());
+
+        return PageModele.<UtilisateurModele>builder()
+                .content(content)
+                .page(pageJpa.getNumber())
+                .size(pageJpa.getSize())
+                .totalElements(pageJpa.getTotalElements())
+                .totalPages(pageJpa.getTotalPages())
+                .first(pageJpa.isFirst())
+                .last(pageJpa.isLast())
+                .build();
+    }
+
+    @Override
     public List<UtilisateurModele> trouverTousMarchands() {
         return jpaRepository.findByRole(RoleUtilisateur.VENDEUR)
                 .stream()
                 .map(mapper::versModele)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public PageModele<UtilisateurModele> trouverTousMarchands(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "nom", "prenom"));
+        Page<UtilisateurJpa> pageJpa = jpaRepository.findByRole(RoleUtilisateur.VENDEUR, pageable);
+
+        List<UtilisateurModele> content = pageJpa.getContent().stream()
+                .map(mapper::versModele)
+                .collect(Collectors.toList());
+
+        return PageModele.<UtilisateurModele>builder()
+                .content(content)
+                .page(pageJpa.getNumber())
+                .size(pageJpa.getSize())
+                .totalElements(pageJpa.getTotalElements())
+                .totalPages(pageJpa.getTotalPages())
+                .first(pageJpa.isFirst())
+                .last(pageJpa.isLast())
+                .build();
     }
 
     @Override

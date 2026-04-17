@@ -2,6 +2,7 @@ package com.ulr.paytogether.core.provider;
 
 import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.modele.MarchandAvecDealsModele;
+import com.ulr.paytogether.core.modele.PageModele;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
 
 import java.util.List;
@@ -36,9 +37,25 @@ public interface UtilisateurProvider {
     List<UtilisateurModele> trouverTous();
 
     /**
+     * Trouver tous les utilisateurs avec pagination
+     * @param page Numéro de la page (commence à 0)
+     * @param size Taille de la page
+     * @return Page d'utilisateurs
+     */
+    PageModele<UtilisateurModele> trouverTous(int page, int size);
+
+    /**
      * Trouver tous les utilisateurs
      */
     List<UtilisateurModele> trouverTousMarchands();
+
+    /**
+     * Trouver tous les marchands avec pagination
+     * @param page Numéro de la page (commence à 0)
+     * @param size Taille de la page
+     * @return Page de marchands
+     */
+    PageModele<UtilisateurModele> trouverTousMarchands(int page, int size);
 
     /**
      * Mettre à jour un utilisateur

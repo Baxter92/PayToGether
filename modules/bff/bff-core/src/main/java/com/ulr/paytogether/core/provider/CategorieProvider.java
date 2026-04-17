@@ -1,6 +1,7 @@
 package com.ulr.paytogether.core.provider;
 
 import com.ulr.paytogether.core.modele.CategorieModele;
+import com.ulr.paytogether.core.modele.PageModele;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +19,14 @@ public interface CategorieProvider {
     Optional<CategorieModele> trouverParNom(String nom);
 
     List<CategorieModele> trouverTous();
+
+    /**
+     * Trouver toutes les catégories avec pagination
+     * @param page Numéro de la page (commence à 0)
+     * @param size Taille de la page
+     * @return Page de catégories
+     */
+    PageModele<CategorieModele> trouverTous(int page, int size);
 
     CategorieModele mettreAJour(UUID uuid, CategorieModele categorie);
 

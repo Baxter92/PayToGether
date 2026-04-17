@@ -3,6 +3,7 @@ package com.ulr.paytogether.core.domaine.service;
 import com.ulr.paytogether.core.enumeration.StatutImage;
 import com.ulr.paytogether.core.modele.DealModele;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
+import com.ulr.paytogether.core.modele.PageModele;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,9 +31,26 @@ public interface DealService {
     List<DealModele> lireTous();
 
     /**
+     * Lire tous les deals avec pagination
+     * @param page Numéro de la page (commence à 0)
+     * @param size Taille de la page
+     * @return Page de deals
+     */
+    PageModele<DealModele> lireTous(int page, int size);
+
+    /**
      * Lire les deals par statut
      */
     List<DealModele> lireParStatut(StatutDeal statut);
+
+    /**
+     * Lire les deals par statut avec pagination
+     * @param statut Statut du deal
+     * @param page Numéro de la page (commence à 0)
+     * @param size Taille de la page
+     * @return Page de deals
+     */
+    PageModele<DealModele> lireParStatut(StatutDeal statut, int page, int size);
 
     /**
      * Lire les deals d'un créateur
@@ -40,9 +58,27 @@ public interface DealService {
     List<DealModele> lireParCreateur(UUID createurUuid);
 
     /**
+     * Lire les deals d'un créateur avec pagination
+     * @param createurUuid UUID du créateur
+     * @param page Numéro de la page (commence à 0)
+     * @param size Taille de la page
+     * @return Page de deals
+     */
+    PageModele<DealModele> lireParCreateur(UUID createurUuid, int page, int size);
+
+    /**
      * Lire les deals d'une catégorie
      */
     List<DealModele> lireParCategorie(UUID categorieUuid);
+
+    /**
+     * Lire les deals d'une catégorie avec pagination
+     * @param categorieUuid UUID de la catégorie
+     * @param page Numéro de la page (commence à 0)
+     * @param size Taille de la page
+     * @return Page de deals
+     */
+    PageModele<DealModele> lireParCategorie(UUID categorieUuid, int page, int size);
 
     /**
      * Mettre à jour un deal

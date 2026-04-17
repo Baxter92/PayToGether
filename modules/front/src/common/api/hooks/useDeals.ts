@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { dealService } from "../services/dealService";
 import type {
   CreateDealDTO,
@@ -8,6 +9,8 @@ import type {
   StatutDealType,
   UpdateDealDTO,
 } from "../types";
+import type { PageResponse } from "@/common/types/pagination";
+import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from "@/common/types/pagination";
 import { apiClient } from "../services/apiClient";
 import {
   useImageUpload,
@@ -380,3 +383,157 @@ export const useToggleDealFavoris = () => {
     },
   });
 };
+
+// ===== HOOKS PAGINÉS =====
+
+/**
+ * Hook pour récupérer tous les deals avec pagination
+ */
+export const useDealsPaginated = () => {
+  const [page, setPage] = useState(DEFAULT_PAGE);
+  const [size, setSize] = useState(DEFAULT_PAGE_SIZE);
+
+  const { data, isLoading, error, refetch } = useQuery<
+    PageResponse<DealDTO>,
+    Error
+  >({
+    queryKey: ["deals", "paginated", page, size],
+    queryFn: () => dealService.getAllPaginated({ page, size }),
+  });
+
+  return {
+    deals: data?.content || [],
+    page: data?.page ?? 0,
+    size: data?.size ?? DEFAULT_PAGE_SIZE,
+    totalElements: data?.totalElements ?? 0,
+    totalPages: data?.totalPages ?? 0,
+    hasNext: data?.hasNext ?? false,
+    hasPrevious: data?.hasPrevious ?? false,
+    isFirst: data?.first ?? true,
+    isLast: data?.last ?? false,
+    isLoading,
+    error,
+    setPage,
+    setSize,
+    refetch,
+  };
+};
+
+/**
+ * Hook pour récupérer les deals par statut avec pagination
+ */
+export const useDealsByStatutPaginated = (statut: StatutDealType) => {
+  const [page, setPage] = useState(DEFAULT_PAGE);
+  const [size, setSize] = useState(DEFAULT_PAGE_SIZE);
+
+  const { data, isLoading, error, refetch } = useQuery<
+    PageResponse<DealDTO>,
+    Error
+  >({
+    queryKey: ["deals", "statut", statut, "paginated", page, size],
+    queryFn: () => dealService.getByStatutPaginated(statut, { page, size }),
+    enabled: !!statut,
+  });
+
+  return {
+    deals: data?.content || [],
+    page: data?.page ?? 0,
+    size: data?.size ?? DEFAULT_PAGE_SIZE,
+    totalElements: data?.totalElements ?? 0,
+    totalPages: data?.totalPages ?? 0,
+    hasNext: data?.hasNext ?? false,
+    hasPrevious: data?.hasPrevious ?? false,
+    isFirst: data?.first ?? true,
+    isLast: data?.last ?? false,
+    isLoading,
+    error,
+    setPage,
+    setSize,
+    refetch,
+  };
+};
+
+/**
+ * Hook pour récupérer les deals par créateur avec pagination
+ */
+export const useDealsByCreateurPaginated = (createurUuid?: string) => {
+  const [page, setPage] = useState(DEFAULT_PAGE);
+  const [size, setSize] = useState(DEFAULT_PAGE_SIZE);
+
+  const { data, isLoading, error, refetch } = useQuery<
+    PageResponse<DealDTO>,
+    Error
+  >({
+    queryKey: [
+      "deals",
+      "createur",
+      createurUuid,
+      "paginated",
+      page,
+      size,
+    ],
+    queryFn: () =>
+      dealService.getByCreateurPaginated(createurUuid ?? "", { page, size }),
+    enabled: !!createurUuid,
+  });
+
+  return {
+    deals: data?.content || [],
+    page: data?.page ?? 0,
+    size: data?.size ?? DEFAULT_PAGE_SIZE,
+    totalElements: data?.totalElements ?? 0,
+    totalPages: data?.totalPages ?? 0,
+    hasNext: data?.hasNext ?? false,
+    hasPrevious: data?.hasPrevious ?? false,
+    isFirst: data?.first ?? true,
+    isLast: data?.last ?? false,
+    isLoading,
+    error,
+    setPage,
+    setSize,
+    refetch,
+  };
+};
+
+/**
+ * Hook pour récupérer les deals par catégorie avec pagination
+ */
+export const useDealsByCategoriePaginated = (categorieUuid: string) => {
+  const [page, setPage] = useState(DEFAULT_PAGE);
+  const [size, setSize] = useState(DEFAULT_PAGE_SIZE);
+
+  const { data, isLoading, error, refetch } = useQuery<
+    PageResponse<DealDTO>,
+    Error
+  >({
+    queryKey: [
+      "deals",
+      "categorie",
+      categorieUuid,
+      "paginated",
+      page,
+      size,
+    ],
+    queryFn: () =>
+      dealService.getByCategoriePaginated(categorieUuid, { page, size }),
+    enabled: !!categorieUuid,
+  });
+
+  return {
+    deals: data?.content || [],
+    page: data?.page ?? 0,
+    size: data?.size ?? DEFAULT_PAGE_SIZE,
+    totalElements: data?.totalElements ?? 0,
+    totalPages: data?.totalPages ?? 0,
+    hasNext: data?.hasNext ?? false,
+    hasPrevious: data?.hasPrevious ?? false,
+    isFirst: data?.first ?? true,
+    isLast: data?.last ?? false,
+    isLoading,
+    error,
+    setPage,
+    setSize,
+    refetch,
+  };
+};
+

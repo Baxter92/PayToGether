@@ -3,6 +3,8 @@ package com.ulr.paytogether.provider.repository;
 import com.ulr.paytogether.provider.adapter.entity.CommentaireJpa;
 import com.ulr.paytogether.provider.adapter.entity.DealJpa;
 import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,6 +25,14 @@ public interface CommentaireRepository extends JpaRepository<CommentaireJpa, UUI
      * @return
      */
     List<CommentaireJpa> findByDealJpa(DealJpa dealJpa);
+
+    /**
+     * Recherche tous les commentaires d'un deal avec pagination
+     * @param dealJpa le deal
+     * @param pageable paramètres de pagination
+     * @return page de commentaires
+     */
+    Page<CommentaireJpa> findByDealJpa(DealJpa dealJpa, Pageable pageable);
 
     /**
      * Recherche tous les commentaires d'un auteur

@@ -1,5 +1,7 @@
 package com.ulr.paytogether.provider.repository;
 import com.ulr.paytogether.provider.adapter.entity.PubliciteJpa;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.List;
@@ -14,4 +16,9 @@ public interface PubliciteRepository extends JpaRepository<PubliciteJpa, UUID> {
      * Trouver les publicités actives
      */
     List<PubliciteJpa> findByActiveTrue();
+
+    /**
+     * Trouver les publicités actives avec pagination
+     */
+    Page<PubliciteJpa> findByActiveTrue(Pageable pageable);
 }

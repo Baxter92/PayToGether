@@ -4,6 +4,8 @@ import com.ulr.paytogether.provider.adapter.entity.CategorieJpa;
 import com.ulr.paytogether.provider.adapter.entity.DealJpa;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
 import com.ulr.paytogether.provider.adapter.entity.UtilisateurJpa;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -28,6 +30,14 @@ public interface DealRepository extends JpaRepository<DealJpa, UUID> {
     List<DealJpa> findByStatutOrderByFavorisDescDateCreationDesc(StatutDeal statut);
 
     /**
+     * Recherche tous les deals par statut avec pagination
+     * @param statut le statut du deal
+     * @param pageable paramètres de pagination
+     * @return page de deals
+     */
+    Page<DealJpa> findByStatut(StatutDeal statut, Pageable pageable);
+
+    /**
      * Recherche tous les deals (tous statuts confondus)
      * Tri : favoris en premier (DESC), puis par date de création (DESC)
      * @return la liste de tous les deals triée (favoris en premier)
@@ -42,11 +52,27 @@ public interface DealRepository extends JpaRepository<DealJpa, UUID> {
     List<DealJpa> findByMarchandJpa(UtilisateurJpa utilisateurJpa);
 
     /**
+     * Recherche tous les deals d'un créateur avec pagination
+     * @param utilisateurJpa le créateur
+     * @param pageable paramètres de pagination
+     * @return page de deals
+     */
+    Page<DealJpa> findByMarchandJpa(UtilisateurJpa utilisateurJpa, Pageable pageable);
+
+    /**
      * Recherche tous les deals d'une catégorie
      * @param categorieJpa la catégorie
      * @return la liste des deals
      */
     List<DealJpa> findByCategorieJpa(CategorieJpa categorieJpa);
+
+    /**
+     * Recherche tous les deals d'une catégorie avec pagination
+     * @param categorieJpa la catégorie
+     * @param pageable paramètres de pagination
+     * @return page de deals
+     */
+    Page<DealJpa> findByCategorieJpa(CategorieJpa categorieJpa, Pageable pageable);
 
     /**
      * Supprime tous les points forts d'un deal

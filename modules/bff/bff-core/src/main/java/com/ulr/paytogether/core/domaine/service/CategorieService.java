@@ -1,6 +1,7 @@
 package com.ulr.paytogether.core.domaine.service;
 
 import com.ulr.paytogether.core.modele.CategorieModele;
+import com.ulr.paytogether.core.modele.PageModele;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +31,14 @@ public interface CategorieService {
      * Lire toutes les catégories
      */
     List<CategorieModele> lireTous();
+
+    /**
+     * Lire toutes les catégories avec pagination
+     * @param page Numéro de la page (commence à 0)
+     * @param size Taille de la page
+     * @return Page de catégories
+     */
+    PageModele<CategorieModele> lireTous(int page, int size);
 
     /**
      * Mettre à jour une catégorie

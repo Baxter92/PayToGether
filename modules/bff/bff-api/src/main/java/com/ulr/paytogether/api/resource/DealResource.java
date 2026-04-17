@@ -59,40 +59,94 @@ public class DealResource {
 
     /**
      * Récupérer tous les deals
+     * @param page Numéro de la page (commence à 0, par défaut 0)
+     * @param size Taille de la page (par défaut 10)
+     * @return Liste paginée des deals ou liste complète si pas de pagination
      */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public ResponseEntity<List<DealResponseDto>> lireTous() {
-        log.debug("Récupération de tous les deals");
-        return ResponseEntity.ok(dealApiAdapter.lireTous());
+    public ResponseEntity<?> lireTous(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
+        log.debug("Récupération de tous les deals (page: {}, size: {})", page, size);
+
+        if (page != null && size != null) {
+            // Mode paginé
+            return ResponseEntity.ok(dealApiAdapter.lireTous(page, size));
+        } else {
+            // Mode liste complète (rétrocompatibilité)
+            return ResponseEntity.ok(dealApiAdapter.lireTous());
+        }
     }
 
     /**
      * Récupérer les deals par statut
+     * @param statut Statut du deal
+     * @param page Numéro de la page (commence à 0, par défaut 0)
+     * @param size Taille de la page (par défaut 10)
+     * @return Liste paginée des deals ou liste complète si pas de pagination
      */
     @GetMapping("/statut/{statut}")
-    public ResponseEntity<List<DealResponseDto>> lireParStatut(@PathVariable StatutDeal statut) {
-        log.debug("Récupération des deals avec le statut: {}", statut);
-        return ResponseEntity.ok(dealApiAdapter.lireTousByStatut(statut));
+    public ResponseEntity<?> lireParStatut(
+            @PathVariable StatutDeal statut,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
+        log.debug("Récupération des deals avec le statut: {} (page: {}, size: {})", statut, page, size);
+
+        if (page != null && size != null) {
+            // Mode paginé
+            return ResponseEntity.ok(dealApiAdapter.lireTousByStatut(statut, page, size));
+        } else {
+            // Mode liste complète (rétrocompatibilité)
+            return ResponseEntity.ok(dealApiAdapter.lireTousByStatut(statut));
+        }
     }
 
     /**
      * Récupérer les deals d'un créateur
+     * @param createurUuid UUID du créateur
+     * @param page Numéro de la page (commence à 0, par défaut 0)
+     * @param size Taille de la page (par défaut 10)
+     * @return Liste paginée des deals ou liste complète si pas de pagination
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'VENDEUR')")
     @GetMapping("/createur/{createurUuid}")
-    public ResponseEntity<List<DealResponseDto>> lireParCreateur(@PathVariable UUID createurUuid) {
-        log.debug("Récupération des deals du créateur: {}", createurUuid);
-        return ResponseEntity.ok(dealApiAdapter.lireTousByCreateurUuid(createurUuid));
+    public ResponseEntity<?> lireParCreateur(
+            @PathVariable UUID createurUuid,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
+        log.debug("Récupération des deals du créateur: {} (page: {}, size: {})", createurUuid, page, size);
+
+        if (page != null && size != null) {
+            // Mode paginé
+            return ResponseEntity.ok(dealApiAdapter.lireTousByCreateurUuid(createurUuid, page, size));
+        } else {
+            // Mode liste complète (rétrocompatibilité)
+            return ResponseEntity.ok(dealApiAdapter.lireTousByCreateurUuid(createurUuid));
+        }
     }
 
     /**
      * Récupérer les deals d'une catégorie (PUBLIC - Pas d'authentification requise)
+     * @param categorieUuid UUID de la catégorie
+     * @param page Numéro de la page (commence à 0, par défaut 0)
+     * @param size Taille de la page (par défaut 10)
+     * @return Liste paginée des deals ou liste complète si pas de pagination
      */
     @GetMapping("/categorie/{categorieUuid}")
-    public ResponseEntity<List<DealResponseDto>> lireParCategorie(@PathVariable UUID categorieUuid) {
-        log.debug("Récupération des deals de la catégorie: {}", categorieUuid);
-        return ResponseEntity.ok(dealApiAdapter.lireTousByCategorieUuid(categorieUuid));
+    public ResponseEntity<?> lireParCategorie(
+            @PathVariable UUID categorieUuid,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
+        log.debug("Récupération des deals de la catégorie: {} (page: {}, size: {})", categorieUuid, page, size);
+
+        if (page != null && size != null) {
+            // Mode paginé
+            return ResponseEntity.ok(dealApiAdapter.lireTousByCategorieUuid(categorieUuid, page, size));
+        } else {
+            // Mode liste complète (rétrocompatibilité)
+            return ResponseEntity.ok(dealApiAdapter.lireTousByCategorieUuid(categorieUuid));
+        }
     }
 
     /**

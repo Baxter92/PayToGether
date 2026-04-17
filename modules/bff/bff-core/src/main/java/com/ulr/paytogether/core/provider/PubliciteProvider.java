@@ -1,6 +1,7 @@
 package com.ulr.paytogether.core.provider;
 
 import com.ulr.paytogether.core.enumeration.StatutImage;
+import com.ulr.paytogether.core.modele.PageModele;
 import com.ulr.paytogether.core.modele.PubliciteModele;
 
 import java.util.List;
@@ -30,9 +31,25 @@ public interface PubliciteProvider {
     List<PubliciteModele> trouverTous();
 
     /**
+     * Trouver toutes les publicités avec pagination
+     * @param page Numéro de la page (commence à 0)
+     * @param size Taille de la page
+     * @return Page de publicités
+     */
+    PageModele<PubliciteModele> trouverTous(int page, int size);
+
+    /**
      * Trouver les publicités actives
      */
     List<PubliciteModele> trouverActives();
+
+    /**
+     * Trouver les publicités actives avec pagination
+     * @param page Numéro de la page (commence à 0)
+     * @param size Taille de la page
+     * @return Page de publicités actives
+     */
+    PageModele<PubliciteModele> trouverActives(int page, int size);
 
     /**
      * Mettre à jour une publicité

@@ -7,6 +7,7 @@ import com.ulr.paytogether.core.domaine.service.DealService;
 import com.ulr.paytogether.core.domaine.service.PaiementService;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
 import com.ulr.paytogether.core.enumeration.StatutImage;
+import com.ulr.paytogether.core.modele.PageModele;
 import com.ulr.paytogether.core.modele.PaiementModele;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -44,11 +45,51 @@ public class DealApiAdapter {
                 .toList();
     }
 
+    public PageResponse<DealResponseDto> lireTous(int page, int size) {
+        PageModele<com.ulr.paytogether.core.modele.DealModele> pageModele = dealService.lireTous(page, size);
+
+        List<DealResponseDto> content = pageModele.getContent().stream()
+                .map(dealMapper::versDTO)
+                .toList();
+
+        return PageResponse.<DealResponseDto>builder()
+                .content(content)
+                .page(pageModele.getPage())
+                .size(pageModele.getSize())
+                .totalElements(pageModele.getTotalElements())
+                .totalPages(pageModele.getTotalPages())
+                .first(pageModele.isFirst())
+                .last(pageModele.isLast())
+                .hasNext(!pageModele.isLast())
+                .hasPrevious(!pageModele.isFirst())
+                .build();
+    }
+
     public List<DealResponseDto> lireTousByStatut(StatutDeal statut) {
         var deals = dealService.lireParStatut(statut);
         return deals.stream()
                 .map(dealMapper::versDTO)
                 .toList();
+    }
+
+    public PageResponse<DealResponseDto> lireTousByStatut(StatutDeal statut, int page, int size) {
+        PageModele<com.ulr.paytogether.core.modele.DealModele> pageModele = dealService.lireParStatut(statut, page, size);
+
+        List<DealResponseDto> content = pageModele.getContent().stream()
+                .map(dealMapper::versDTO)
+                .toList();
+
+        return PageResponse.<DealResponseDto>builder()
+                .content(content)
+                .page(pageModele.getPage())
+                .size(pageModele.getSize())
+                .totalElements(pageModele.getTotalElements())
+                .totalPages(pageModele.getTotalPages())
+                .first(pageModele.isFirst())
+                .last(pageModele.isLast())
+                .hasNext(!pageModele.isLast())
+                .hasPrevious(!pageModele.isFirst())
+                .build();
     }
 
     public List<DealResponseDto> lireTousByCreateurUuid(UUID uuid) {
@@ -58,11 +99,51 @@ public class DealApiAdapter {
                 .toList();
     }
 
+    public PageResponse<DealResponseDto> lireTousByCreateurUuid(UUID uuid, int page, int size) {
+        PageModele<com.ulr.paytogether.core.modele.DealModele> pageModele = dealService.lireParCreateur(uuid, page, size);
+
+        List<DealResponseDto> content = pageModele.getContent().stream()
+                .map(dealMapper::versDTO)
+                .toList();
+
+        return PageResponse.<DealResponseDto>builder()
+                .content(content)
+                .page(pageModele.getPage())
+                .size(pageModele.getSize())
+                .totalElements(pageModele.getTotalElements())
+                .totalPages(pageModele.getTotalPages())
+                .first(pageModele.isFirst())
+                .last(pageModele.isLast())
+                .hasNext(!pageModele.isLast())
+                .hasPrevious(!pageModele.isFirst())
+                .build();
+    }
+
     public List<DealResponseDto> lireTousByCategorieUuid(UUID uuid) {
         var deals = dealService.lireParCategorie(uuid);
         return deals.stream()
                 .map(dealMapper::versDTO)
                 .toList();
+    }
+
+    public PageResponse<DealResponseDto> lireTousByCategorieUuid(UUID uuid, int page, int size) {
+        PageModele<com.ulr.paytogether.core.modele.DealModele> pageModele = dealService.lireParCategorie(uuid, page, size);
+
+        List<DealResponseDto> content = pageModele.getContent().stream()
+                .map(dealMapper::versDTO)
+                .toList();
+
+        return PageResponse.<DealResponseDto>builder()
+                .content(content)
+                .page(pageModele.getPage())
+                .size(pageModele.getSize())
+                .totalElements(pageModele.getTotalElements())
+                .totalPages(pageModele.getTotalPages())
+                .first(pageModele.isFirst())
+                .last(pageModele.isLast())
+                .hasNext(!pageModele.isLast())
+                .hasPrevious(!pageModele.isFirst())
+                .build();
     }
 
     public DealResponseDto mettreAJour(UUID uuid, MiseAJourDealDTO dto) {

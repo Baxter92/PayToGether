@@ -2,6 +2,7 @@ package com.ulr.paytogether.provider.adapter;
 
 import com.ulr.paytogether.core.exception.ResourceNotFoundException;
 import com.ulr.paytogether.core.modele.CommentaireModele;
+import com.ulr.paytogether.core.modele.PageModele;
 import com.ulr.paytogether.core.provider.CommentaireProvider;
 import com.ulr.paytogether.provider.adapter.entity.CommentaireJpa;
 import com.ulr.paytogether.provider.adapter.entity.DealJpa;
@@ -11,6 +12,10 @@ import com.ulr.paytogether.provider.repository.CommentaireRepository;
 import com.ulr.paytogether.provider.repository.DealRepository;
 import com.ulr.paytogether.provider.repository.UtilisateurRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,6 +84,68 @@ public class CommentaireProviderAdapter implements CommentaireProvider {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public PageModele<CommentaireModele> trouverParDeal(UUID dealUuid, int page, int size) {
+        DealJpa dealJpa = dealRepository.findById(dealUuid)
+                .orElseThrow(() -> ResourceNotFoundException.parUuid("deal", dealUuid));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateCreation"));
+        Page<CommentaireJpa> pageJpa = jpaRepository.findByDealJpa(dealJpa, pageable);
+
+        List<CommentaireModele> content = pageJpa.getContent().stream()
+                .map(mapper::versModele)
+                .collect(Collectors.toList());
+
+        return PageModele.<CommentaireModele>builder()
+                .content(content)
+                .page(pageJpa.getNumber())
+                .size(pageJpa.getSize())
+                .totalElements(pageJpa.getTotalElements())
+                .totalPages(pageJpa.getTotalPages())
+                .first(pageJpa.isFirst())
+                .last(pageJpa.isLast())
+                .build();
+    }
+
+    @Override
+    public List<CommentaireModele> trouverParUtilisateur(UUID utilisateurUuid) {
+        UtilisateurJpa utilisateurJpa = utilisateurRepository.findById(utilisateurUuid)
+                .orElseThrow(() -> ResourceNotFoundException.parUuid("utilisateur", utilisateurUuid));
+
+        return jpaRepository.findByUtilisateurJpa(utilisateurJpa)
+                .stream()
+                .map(mapper::versModele)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CommentaireModele> trouverTous() {
+        return jpaRepository.findAll()
+                .stream()
+                .map(mapper::versModele)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public PageModele<CommentaireModele> trouverTous(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "dateCreation"));
+        Page<CommentaireJpa> pageJpa = jpaRepository.findAll(pageable);
+
+        List<CommentaireModele> content = pageJpa.getContent().stream()
+                .map(mapper::versModele)
+                .collect(Collectors.toList());
+
+        return PageModele.<CommentaireModele>builder()
+                .content(content)
+                .page(pageJpa.getNumber())
+                .size(pageJpa.getSize())
+                .totalElements(pageJpa.getTotalElements())
+                .totalPages(pageJpa.getTotalPages())
+                .first(pageJpa.isFirst())
+                .last(pageJpa.isLast())
+                .build();
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public List<CommentaireModele> trouverReponsesParCommentaireParent(UUID commentaireParentUuid) {
@@ -104,25 +171,6 @@ public class CommentaireProviderAdapter implements CommentaireProvider {
 
         commentaire.setEstPertinent(estPertinent);
         jpaRepository.save(commentaire);
-    }
-
-    @Override
-    public List<CommentaireModele> trouverParUtilisateur(UUID utilisateurUuid) {
-        UtilisateurJpa utilisateurJpa = utilisateurRepository.findById(utilisateurUuid)
-                .orElseThrow(() -> ResourceNotFoundException.parUuid("utilisateur", utilisateurUuid));
-
-        return jpaRepository.findByUtilisateurJpa(utilisateurJpa)
-                .stream()
-                .map(mapper::versModele)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<CommentaireModele> trouverTous() {
-        return jpaRepository.findAll()
-                .stream()
-                .map(mapper::versModele)
-                .collect(Collectors.toList());
     }
 
     @Transactional(rollbackFor = Exception.class)
