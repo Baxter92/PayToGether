@@ -20,7 +20,7 @@ export interface PageResponse<T> {
   hasPrevious: boolean;
 }
 
-export const DEFAULT_PAGE_SIZE = 10;
+export const DEFAULT_PAGE_SIZE = 8;
 export const DEFAULT_PAGE = 0;
 
 export const PAGINATION_DEFAULTS = {
