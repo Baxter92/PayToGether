@@ -9,6 +9,7 @@ import com.ulr.paytogether.core.event.AccountDeactivationEvent;
 import com.ulr.paytogether.core.event.AccountValidationEvent;
 import com.ulr.paytogether.core.event.EventPublisher;
 import com.ulr.paytogether.core.event.PasswordResetEvent;
+import com.ulr.paytogether.core.exception.DuplicateResourceException;
 import com.ulr.paytogether.core.modele.MarchandAvecDealsModele;
 import com.ulr.paytogether.core.modele.UtilisateurModele;
 import com.ulr.paytogether.core.modele.ValidationTokenModele;
@@ -44,6 +45,11 @@ public class UtilisateurServiceImpl implements UtilisateurService {
         log.info("Création d'un utilisateur: {}", utilisateur.getEmail());
 
         utilisateurValidator.validerPourCreation(utilisateur);
+
+        // Vérifier si l'email existe déjà
+        if (utilisateurProvider.existeParEmail(utilisateur.getEmail())) {
+            throw DuplicateResourceException.emailExistant(utilisateur.getEmail());
+        }
 
         UtilisateurModele cree = utilisateurProvider.sauvegarder(utilisateur);
 

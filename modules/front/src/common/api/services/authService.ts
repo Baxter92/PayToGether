@@ -36,6 +36,19 @@ export type RegisterRequest = {
   photoProfil?: string;
 };
 
+export type RegisterResponse = {
+  uuid: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  motDePasse: string | null;
+  statut: string;
+  role: RoleUtilisateurType;
+  photoProfil: string | null;
+  dateCreation: string | null;
+  dateModification: string | null;
+};
+
 export const authService = {
   login: (username: string, password: string) =>
     apiClient.post<LoginResponse>("/auth/login", {
@@ -45,7 +58,7 @@ export const authService = {
       },
     }),
   register: (payload: RegisterRequest) =>
-    apiClient.post<void>("/auth/register", { body: payload }),
+    apiClient.post<RegisterResponse>("/auth/register", { body: payload }),
   me: () => apiClient.get<MeResponse>("/auth/me"),
   logout: () => apiClient.post<void>("/auth/logout"),
   forgotPassword: (email: string) =>

@@ -37,6 +37,7 @@ import Form from "@/common/containers/Form";
 import { toast } from "sonner";
 import { createUtilisateurSchema } from "@/common/schemas/utilisateur.schema";
 import { useI18n } from "@/common/hooks/useI18n";
+import { HttpError } from "@/common/api/module/client/HttpError";
 
 type UserRow = {
   uuid: string;
@@ -149,9 +150,16 @@ export default function AdminUsers(): ReactElement {
       });
       setOpenCreateModal(false);
     } catch (err: any) {
-      toast.error("Erreur lors de la création", {
-        description: err?.message ?? "Une erreur est survenue",
-      });
+      // Détecter l'erreur 409 (email existant)
+      if (err instanceof HttpError && err.status === 409) {
+        toast.error("Cet email existe déjà", {
+          description: `Un compte existe déjà avec l'email ${data.email}`,
+        });
+      } else {
+        toast.error("Erreur lors de la création", {
+          description: err?.message ?? "Une erreur est survenue",
+        });
+      }
     }
   };
 

@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { PATHS } from "@/common/constants/path";
 import { useI18n } from "@hooks/useI18n";
+import { toast } from "sonner";
 
 export default function Register() {
   const { register } = useAuth();
@@ -41,9 +42,20 @@ export default function Register() {
       setSuccess(true);
     } catch (err) {
       if (err instanceof Error) {
-        setError(i18n.exists(err.message) ? t(err.message) : t("registerError"));
+        const errorMessage = err.message;
+        
+        // Afficher un toast pour l'erreur d'email existant
+        if (errorMessage === "auth:registerEmailExists") {
+          toast.error(t("registerEmailExists") || "Cet email existe déjà");
+        } else {
+          toast.error(i18n.exists(errorMessage) ? t(errorMessage) : t("registerError"));
+        }
+        
+        setError(i18n.exists(errorMessage) ? t(errorMessage) : t("registerError"));
       } else {
-        setError(t("registerError"));
+        const genericError = t("registerError");
+        toast.error(genericError);
+        setError(genericError);
       }
     } finally {
       setLoading(false);
