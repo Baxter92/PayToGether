@@ -45,6 +45,7 @@ const orderStatusConfig: Record<
   [StatutCommande.EN_ATTENTE]: { labelKey: "pending", colorScheme: "warning" },
   [StatutCommande.EN_COURS]: { labelKey: "pending", colorScheme: "info" },
   [StatutCommande.COMPLETE]: { labelKey: "complete", colorScheme: "info" },
+  [StatutCommande.CONFIRMEE]: { labelKey: "complete", colorScheme: "info" },
   [StatutCommande.PAYOUT]: { labelKey: "payout", colorScheme: "info" },
   [StatutCommande.INVOICE_SELLER]: { labelKey: "invoiceSeller", colorScheme: "info" },
   [StatutCommande.INVOICE_CUSTOMER]: { labelKey: "invoiceCustomer", colorScheme: "info" },
