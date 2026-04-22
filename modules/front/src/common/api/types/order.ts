@@ -3,7 +3,7 @@ import type { PaymentDTO } from "./payment";
 export const StatutCommande = {
   EN_ATTENTE: "EN_ATTENTE",
   EN_COURS: "EN_COURS",
-  COMPLETE: "COMPLETE",
+  COMPLETE: "COMPLETEE",
   CONFIRMEE: "CONFIRMEE",
   PAYOUT: "PAYOUT",
   INVOICE_SELLER: "INVOICE_SELLER",
