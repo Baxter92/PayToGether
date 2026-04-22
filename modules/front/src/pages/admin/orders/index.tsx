@@ -160,7 +160,7 @@ export default function AdminOrders(): ReactElement {
             </Button>
 
             {/* Bouton Valider Payout (admin seulement, statut COMPLETE) */}
-            {isAdmin && statut === StatutCommande.COMPLETE && (
+            {isAdmin && (statut === StatutCommande.CONFIRMEE || statut === StatutCommande.COMPLETE) && (
               <Button
                 variant="outline"
                 size="sm"
@@ -241,6 +241,7 @@ export default function AdminOrders(): ReactElement {
           </Badge>
         );
       case StatutCommande.COMPLETE:
+      case StatutCommande.CONFIRMEE:
         return (
           <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
             {tStatus("complete")}

@@ -183,7 +183,7 @@ public class PaiementProviderAdapter implements PaiementProvider {
             }
 
             var dealComplete = dealJpa.getNbParticipants() == dealJpa.getParticipants().size();
-            StatutCommande statutCommande = dealComplete ? StatutCommande.CONFIRMEE : StatutCommande.EN_COURS;
+            StatutCommande statutCommande = dealComplete ? StatutCommande.COMPLETEE : StatutCommande.EN_COURS;
 
             dealRepository.save(dealJpa);
             commandeJpa.setStatut(statutCommande);

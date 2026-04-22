@@ -155,7 +155,7 @@ public class CommandeProviderAdapter implements CommandeProvider {
 
         long totalCommandes = toutesLesCommandes.size();
         long commandesConfirmees = toutesLesCommandes.stream()
-                .filter(c -> c.getStatut() == StatutCommande.CONFIRMEE)
+                .filter(c -> c.getStatut() == StatutCommande.COMPLETEE)
                 .count();
         long commandesEnCours = toutesLesCommandes.stream()
                 .filter(c -> c.getStatut() == StatutCommande.EN_COURS)

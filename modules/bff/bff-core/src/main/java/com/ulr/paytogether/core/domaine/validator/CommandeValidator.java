@@ -1,5 +1,6 @@
 package com.ulr.paytogether.core.domaine.validator;
 
+import com.ulr.paytogether.core.enumeration.StatutCommande;
 import com.ulr.paytogether.core.exception.ValidationException;
 import com.ulr.paytogether.core.modele.CommandeModele;
 import org.springframework.stereotype.Component;
@@ -114,7 +115,7 @@ public class CommandeValidator {
         }
 
         // Vérifier que la commande est confirmée
-        if (commande.getStatut() != com.ulr.paytogether.core.enumeration.StatutCommande.CONFIRMEE) {
+        if (commande.getStatut() != StatutCommande.COMPLETEE) {
             throw new ValidationException("commande.doit.etre.confirmee");
         }
     }

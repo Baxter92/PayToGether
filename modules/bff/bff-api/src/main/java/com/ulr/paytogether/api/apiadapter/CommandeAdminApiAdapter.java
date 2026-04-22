@@ -100,7 +100,7 @@ public class CommandeAdminApiAdapter {
     private Map<String, Long> calculerStatistiquesMarchand(List<CommandeModele> commandes) {
         long totalCommandes = commandes.size();
         long commandesConfirmees = commandes.stream()
-                .filter(c -> c.getStatut() == StatutCommande.CONFIRMEE || c.getStatut() == StatutCommande.TERMINEE)
+                .filter(c -> c.getStatut() == StatutCommande.COMPLETEE || c.getStatut() == StatutCommande.TERMINEE)
                 .count();
         long commandesEnCours = commandes.stream()
                 .filter(c -> c.getStatut() == StatutCommande.EN_COURS ||

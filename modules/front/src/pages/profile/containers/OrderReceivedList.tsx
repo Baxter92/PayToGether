@@ -68,6 +68,7 @@ export default function OrdersReceivedList(): JSX.Element {
           </Badge>
         );
       case StatutCommande.COMPLETE:
+      case StatutCommande.CONFIRMEE:
         return (
           <Badge variant="outline" className="bg-blue-100 text-blue-800">
             {tStatus("complete")}

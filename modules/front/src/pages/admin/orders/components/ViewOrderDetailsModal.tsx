@@ -81,6 +81,7 @@ export default function ViewOrderDetailsModal({
           </Badge>
         );
       case StatutCommande.COMPLETE:
+      case StatutCommande.CONFIRMEE:
         return (
           <Badge className="bg-blue-100 text-blue-800">
             {tStatus("complete")}
@@ -298,7 +299,7 @@ export default function ViewOrderDetailsModal({
                     order.statut !== StatutCommande.EN_ATTENTE &&
                     order.statut !== StatutCommande.EN_COURS
                   }
-                  current={order.statut === StatutCommande.COMPLETE}
+                  current={order.statut === StatutCommande.CONFIRMEE}
                 />
                 <TimelineItem
                   label="Payout effectué"
