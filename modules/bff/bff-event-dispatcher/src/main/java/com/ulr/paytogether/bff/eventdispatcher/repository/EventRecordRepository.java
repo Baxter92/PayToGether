@@ -52,10 +52,14 @@ public interface EventRecordRepository extends JpaRepository<EventRecordJpa, UUI
     /**
      * Claim atomique d'un événement : PENDING → PROCESSING uniquement si encore PENDING.
      * Retourne le nombre de lignes mises à jour (0 = déjà pris, 1 = succès).
-     * ✅ ANTI-DOUBLON : Protège contre les accès concurrents (multi-thead / multi-pod)
+     *
+     * ✅ ANTI-DOUBLON : UPDATE atomique WHERE status='PENDING' protège contre multi-thread/multi-pod
+     * ✅ clearAutomatically=true : vide le L1 cache JPA après l'UPDATE pour que findById()
+     *    retourne l'état frais (PROCESSING) et non l'état stale du cache de session
+     * ✅ Utilise les littéraux string 'PENDING'/'PROCESSING' (JPQL ne supporte pas les FQCN dans UPDATE)
      */
-    @Modifying
-    @Query("UPDATE EventRecordJpa e SET e.status = com.ulr.paytogether.bff.eventdispatcher.entity.EventRecordJpa.EventStatus.PROCESSING, e.lastAttemptAt = :now, e.updatedAt = :now WHERE e.eventId = :id AND e.status = com.ulr.paytogether.bff.eventdispatcher.entity.EventRecordJpa.EventStatus.PENDING")
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE EventRecordJpa e SET e.status = 'PROCESSING', e.lastAttemptAt = :now, e.updatedAt = :now WHERE e.eventId = :id AND e.status = 'PENDING'")
     int claimForProcessing(@Param("id") UUID id, @Param("now") LocalDateTime now);
 
     /**
@@ -67,7 +71,7 @@ public interface EventRecordRepository extends JpaRepository<EventRecordJpa, UUI
     /**
      * Met à jour le statut d'un événement
      */
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE EventRecordJpa e SET e.status = :status, e.updatedAt = :updatedAt WHERE e.eventId = :eventId")
     void updateStatus(@Param("eventId") UUID eventId, @Param("status") EventStatus status, @Param("updatedAt") LocalDateTime updatedAt);
 

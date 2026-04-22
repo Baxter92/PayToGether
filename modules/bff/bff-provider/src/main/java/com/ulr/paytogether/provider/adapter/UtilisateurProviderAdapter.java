@@ -109,6 +109,7 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
 
     // Cache profil utilisateur 10 min — cle : uuid en string
     @Cacheable(value = "utilisateur", key = "#uuid.toString()")
+    @Transactional(readOnly = true)
     @Override
     public Optional<UtilisateurModele> trouverParUuid(UUID uuid) {
         return jpaRepository.findById(uuid)

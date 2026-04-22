@@ -92,6 +92,7 @@ public class CommentaireProviderAdapter implements CommentaireProvider {
 
     // Cache les commentaires paginés par deal — cle : dealUuid + page + size
     @Cacheable(value = "commentaires", key = "#dealUuid.toString() + ':page:' + #page + ':size:' + #size")
+    @Transactional(readOnly = true)
     @Override
     public PageModele<CommentaireModele> trouverParDeal(UUID dealUuid, int page, int size) {
         DealJpa dealJpa = dealRepository.findById(dealUuid)

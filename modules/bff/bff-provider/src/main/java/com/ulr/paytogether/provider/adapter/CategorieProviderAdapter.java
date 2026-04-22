@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,6 +48,7 @@ public class CategorieProviderAdapter implements CategorieProvider {
 
     // Cache le detail par UUID — cle : uuid en string pour eviter pb de serialisation
     @Cacheable(value = "categorie", key = "#uuid.toString()")
+    @Transactional(readOnly = true)
     @Override
     public Optional<CategorieModele> trouverParUuid(UUID uuid) {
         return jpaRepository.findById(uuid)
@@ -61,6 +63,7 @@ public class CategorieProviderAdapter implements CategorieProvider {
 
     // Cache la liste complete — cle fixe 'all'
     @Cacheable(value = "categories", key = "'all'")
+    @Transactional(readOnly = true)
     @Override
     public List<CategorieModele> trouverTous() {
         return jpaRepository.findAll()
@@ -71,6 +74,7 @@ public class CategorieProviderAdapter implements CategorieProvider {
 
     // Cache les pages — cle composee page+size
     @Cacheable(value = "categories", key = "'page:' + #page + ':size:' + #size")
+    @Transactional(readOnly = true)
     @Override
     public PageModele<CategorieModele> trouverTous(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "nom"));

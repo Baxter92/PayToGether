@@ -5,6 +5,8 @@ import com.ulr.paytogether.provider.adapter.entity.DealJpa;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+
 /**
  * Mapper pour convertir entre JpaDeal (entité JPA) et DealModele (modèle métier)
  */
@@ -35,7 +37,11 @@ public class DealJpaMapper {
                 .createur(jpaDeal.getMarchandJpa() != null ? utilisateurJpaMapper.versModele(jpaDeal.getMarchandJpa()) : null)
                 .categorie(jpaDeal.getCategorieJpa() != null ? categorieJpaMapper.versModele(jpaDeal.getCategorieJpa()) : null)
                 .listeImages(jpaDeal.getImageDealJpas() != null ? jpaDeal.getImageDealJpas().stream().map(imageMapper::versModele).toList() : null)
-                .listePointsForts(jpaDeal.getListePointsForts())
+                // ✅ new ArrayList<>() obligatoire : évite de passer le PersistentBag Hibernate
+                // qui cause LazyInitializationException lors de la sérialisation Redis hors session JPA
+                .listePointsForts(jpaDeal.getListePointsForts() != null
+                        ? new ArrayList<>(jpaDeal.getListePointsForts())
+                        : new ArrayList<>())
                 .dateExpiration(jpaDeal.getDateExpiration())
                 .ville(jpaDeal.getVille())
                 .pays(jpaDeal.getPays())
