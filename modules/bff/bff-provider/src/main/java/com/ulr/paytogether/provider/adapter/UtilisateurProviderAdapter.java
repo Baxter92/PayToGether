@@ -23,7 +23,8 @@ import com.ulr.paytogether.wsclient.dto.UserRequest;
 import com.ulr.paytogether.wsclient.dto.UserResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -61,28 +62,53 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
     private final PaiementProvider paiementProvider;
     private final DealParticipantProvider dealParticipantProvider;
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public UtilisateurModele sauvegarder(UtilisateurModele utilisateur) {
+        // 1. Préparer l'entité JPA
         UtilisateurJpa entite = mapper.versEntite(utilisateur);
 
-        // Créer l'utilisateur dans Keycloak avant de le sauvegarder localement
-        creerkeycloackutilisateur(entite);
         // Hacher le mot de passe avec BCrypt si présent
         if (entite.getMotDePasse() != null && !entite.getMotDePasse().isEmpty()) {
             entite.setMotDePasse(passwordEncoder.encode(entite.getMotDePasse()));
         }
+
+        // Gérer photo de profil si présente
         if (entite.getPhotoProfil() != null) {
             entite.setPhotoProfilUnique(Tools.DIRECTORY_UTILISATEUR_IMAGES, entite.getPhotoProfil().getUrlImage());
         }
-        UtilisateurModele modele = mapper.versModele(jpaRepository.save(entite));
+
+        // 2. Persister en base locale EN PREMIER (dans la même transaction)
+        UtilisateurJpa sauvegarde = jpaRepository.save(entite);
+
+        // 3. Créer l'utilisateur dans Keycloak
+        // Si Keycloak échoue → RuntimeException propagée → @Transactional rollback automatique BDD
+        try {
+            creerkeycloackutilisateur(sauvegarde);
+        } catch (Exception e) {
+            log.error("Échec de la création dans Keycloak pour l'email {} : {} — rollback de la transaction BDD déclenché",
+                    entite.getEmail(), e.getMessage());
+            // On relance pour déclencher le rollback @Transactional sur la BDD locale
+            throw new RuntimeException("Impossible de créer l'utilisateur dans Keycloak : " + e.getMessage(), e);
+        }
+
+        // 4. Sauvegarder le keycloakId retourné sur l'entité (déjà géré dans creerkeycloackutilisateur)
+        jpaRepository.save(sauvegarde);
+
+        // 5. Mapper vers le modèle et générer l'URL présignée si photo présente
+        UtilisateurModele modele = mapper.versModele(sauvegarde);
         if (modele.getPhotoProfil() != null) {
-            String presignUrl = fileManager.generatePresignedUrl(Tools.DIRECTORY_UTILISATEUR_IMAGES, modele.getPhotoProfil().getUrlImage());
+            String presignUrl = fileManager.generatePresignedUrl(
+                    Tools.DIRECTORY_UTILISATEUR_IMAGES,
+                    modele.getPhotoProfil().getUrlImage());
             modele.setPresignUrlPhotoProfil(presignUrl);
         }
+
         return modele;
     }
 
+    // Cache profil utilisateur 10 min — cle : uuid en string
+    @Cacheable(value = "utilisateur", key = "#uuid.toString()")
     @Override
     public Optional<UtilisateurModele> trouverParUuid(UUID uuid) {
         return jpaRepository.findById(uuid)
@@ -151,6 +177,7 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
                 .build();
     }
 
+    @CacheEvict(value = "utilisateur", key = "#uuid.toString()")
     @Override
     public UtilisateurModele mettreAJour(UUID uuid, UtilisateurModele utilisateur, String token) {
         return jpaRepository.findById(uuid)
@@ -181,6 +208,8 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
         userApiClient.updateUser(token, sauvegarde.getKeycloakId(), userRequest);
     }
 
+    // Invalide le cache profil lors de la suppression
+    @CacheEvict(value = "utilisateur", key = "#uuid.toString()")
     @Override
     public void supprimerParUuid(UUID uuid, String token) {
         UtilisateurJpa utilisateurJpa = jpaRepository.findById(uuid)
@@ -290,6 +319,8 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
         userApiClient.resetPassword(loginResponse.getAccessToken(), utilisateur.getKeycloakId(), nouveauMotDePasse);
     }
 
+    // Invalide le cache profil lors de l'activation/désactivation
+    @CacheEvict(value = "utilisateur", key = "#utilisateurUuid.toString()")
     @Transactional
     @Override
     public void activerUtilisateur(UUID utilisateurUuid, boolean actif, String token) {
@@ -307,6 +338,8 @@ public class UtilisateurProviderAdapter implements UtilisateurProvider {
         userApiClient.enableUser(loginResponse.getAccessToken(), utilisateur.getKeycloakId(), actif);
     }
 
+    // Invalide le cache profil lors du changement de rôle
+    @CacheEvict(value = "utilisateur", key = "#utilisateurUuid.toString()")
     @Transactional
     @Override
     public void assignerRole(UUID utilisateurUuid, String nomRole, String token) {

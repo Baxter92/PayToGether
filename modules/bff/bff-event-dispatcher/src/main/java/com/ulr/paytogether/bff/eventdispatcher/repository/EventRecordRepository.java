@@ -50,6 +50,15 @@ public interface EventRecordRepository extends JpaRepository<EventRecordJpa, UUI
     List<EventRecordJpa> findByStatusAndEventType(EventStatus status, String eventType);
 
     /**
+     * Claim atomique d'un événement : PENDING → PROCESSING uniquement si encore PENDING.
+     * Retourne le nombre de lignes mises à jour (0 = déjà pris, 1 = succès).
+     * ✅ ANTI-DOUBLON : Protège contre les accès concurrents (multi-thead / multi-pod)
+     */
+    @Modifying
+    @Query("UPDATE EventRecordJpa e SET e.status = com.ulr.paytogether.bff.eventdispatcher.entity.EventRecordJpa.EventStatus.PROCESSING, e.lastAttemptAt = :now, e.updatedAt = :now WHERE e.eventId = :id AND e.status = com.ulr.paytogether.bff.eventdispatcher.entity.EventRecordJpa.EventStatus.PENDING")
+    int claimForProcessing(@Param("id") UUID id, @Param("now") LocalDateTime now);
+
+    /**
      * Trouve les événements bloqués (en traitement depuis trop longtemps)
      */
     @Query("SELECT e FROM EventRecordJpa e WHERE e.status = 'PROCESSING' AND e.lastAttemptAt < :threshold")

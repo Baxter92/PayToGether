@@ -63,10 +63,10 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-cache</artifactId>
     </dependency>
-    <!-- Caffeine pour le cache en mémoire -->
+    <!-- Redis comme broker de cache externe -->
     <dependency>
-      <groupId>com.github.ben-manes.caffeine</groupId>
-      <artifactId>caffeine</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis</artifactId>
     </dependency>
 
     <!-- Micrometer Prometheus Registry pour exposer les métriques -->

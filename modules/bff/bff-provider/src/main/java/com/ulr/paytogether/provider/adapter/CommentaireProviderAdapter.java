@@ -12,6 +12,8 @@ import com.ulr.paytogether.provider.repository.CommentaireRepository;
 import com.ulr.paytogether.provider.repository.DealRepository;
 import com.ulr.paytogether.provider.repository.UtilisateurRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +40,8 @@ public class CommentaireProviderAdapter implements CommentaireProvider {
     private final UtilisateurRepository utilisateurRepository;
     private final CommentaireJpaMapper mapper;
 
+    // Invalide le cache des commentaires du deal lors de la création
+    @CacheEvict(value = "commentaires", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public CommentaireModele sauvegarder(CommentaireModele commentaire) {
@@ -55,6 +59,8 @@ public class CommentaireProviderAdapter implements CommentaireProvider {
         return mapper.versModele(sauvegarde);
     }
 
+    // Invalide le cache lors de la mise à jour
+    @CacheEvict(value = "commentaires", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public CommentaireModele mettreAJour(UUID uuid, CommentaireModele commentaire) {
@@ -84,6 +90,8 @@ public class CommentaireProviderAdapter implements CommentaireProvider {
                 .collect(Collectors.toList());
     }
 
+    // Cache les commentaires paginés par deal — cle : dealUuid + page + size
+    @Cacheable(value = "commentaires", key = "#dealUuid.toString() + ':page:' + #page + ':size:' + #size")
     @Override
     public PageModele<CommentaireModele> trouverParDeal(UUID dealUuid, int page, int size) {
         DealJpa dealJpa = dealRepository.findById(dealUuid)
@@ -173,6 +181,8 @@ public class CommentaireProviderAdapter implements CommentaireProvider {
         jpaRepository.save(commentaire);
     }
 
+    // Invalide le cache lors de la suppression
+    @CacheEvict(value = "commentaires", allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void supprimerParUuid(UUID uuid) {

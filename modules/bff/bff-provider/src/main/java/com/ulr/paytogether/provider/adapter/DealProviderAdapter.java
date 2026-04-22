@@ -16,6 +16,8 @@ import com.ulr.paytogether.provider.utils.Tools;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -49,6 +51,11 @@ public class DealProviderAdapter implements DealProvider {
     private final AsyncPresignedUrlService asyncPresignedUrlService;
 
 
+    // Invalide toutes les entrees de cache deals lors de la creation
+    @Caching(evict = {
+            @CacheEvict(value = "deals", allEntries = true),
+            @CacheEvict(value = "deal",  allEntries = true)
+    })
     @Transactional(rollbackFor = Exception.class)
     @Override
     public DealModele sauvegarder(DealModele deal) {
@@ -280,6 +287,11 @@ public class DealProviderAdapter implements DealProvider {
                 .build();
     }
 
+    // Invalide la liste + l'entree specifique lors de la mise a jour
+    @Caching(evict = {
+            @CacheEvict(value = "deals", allEntries = true),
+            @CacheEvict(value = "deal",  key = "#uuid.toString()")
+    })
     @Transactional(rollbackFor = Exception.class)
     @Override
     public DealModele mettreAJour(UUID uuid, DealModele deal) {
@@ -321,6 +333,11 @@ public class DealProviderAdapter implements DealProvider {
         return mapper.versModele(sauvegarde);
     }
 
+    // Invalide toutes les entrees de cache deals lors de la suppression
+    @Caching(evict = {
+            @CacheEvict(value = "deals", allEntries = true),
+            @CacheEvict(value = "deal",  key = "#uuid.toString()")
+    })
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void supprimerParUuid(UUID uuid) {
@@ -403,6 +420,10 @@ public class DealProviderAdapter implements DealProvider {
         log.info("✅ Deal supprimé avec succès : {}", uuid);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "deals", allEntries = true),
+            @CacheEvict(value = "deal",  key = "#uuid.toString()")
+    })
     @Override
     public DealModele mettreAJourStatut(UUID uuid, StatutDeal statut) {
         DealJpa deal = jpaRepository.findById(uuid)
@@ -413,6 +434,10 @@ public class DealProviderAdapter implements DealProvider {
         return mapper.versModele(sauvegarde);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "deals", allEntries = true),
+            @CacheEvict(value = "deal",  key = "#uuid.toString()")
+    })
     @Transactional(rollbackFor = Exception.class)
     @Override
     public DealModele basculerFavoris(UUID uuid) {
@@ -430,6 +455,10 @@ public class DealProviderAdapter implements DealProvider {
         return mapper.versModele(sauvegarde);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "deals", allEntries = true),
+            @CacheEvict(value = "deal",  key = "#uuid.toString()")
+    })
     @Override
     public DealModele mettreAJourImages(UUID uuid, DealModele dealAvecNouvellesImages) {
         DealJpa deal = jpaRepository.findById(uuid)

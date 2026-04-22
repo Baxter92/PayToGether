@@ -2304,5 +2304,424 @@ ORDER BY installed_rank;
 
 ---
 
-**Date de dernière mise à jour** : 6 mars 2026  
+## 🔴 Cache Redis — Implémentation complète
+
+### Statut : VALIDÉ — À IMPLÉMENTER
+
+Le projet utilise **Redis** comme cache externe (Cache-Aside Pattern) via **Spring Cache** avec annotations.  
+Redis est **optionnel** : si Redis est indisponible, les appels passent directement par PostgreSQL.
+
+---
+
+### Architecture du cache
+
+```
+Frontend → BFF API → Service (bff-core) → ProviderAdapter (bff-provider)
+                                                    ↓
+                                         @Cacheable → Redis MISS → PostgreSQL
+                                                    ↓
+                                         Redis HIT → retour immédiat (sans BDD)
+                                                    ↓
+                                         @CacheEvict → invalidation à l'écriture
+```
+
+---
+
+### Fichiers à créer / modifier
+
+| Fichier | Action |
+|---|---|
+| `pom.xml` (bff-configuration) | Ajouter `spring-boot-starter-data-redis` |
+| `RedisCacheConfig.java` (NOUVEAU, bff-configuration) | Configurer `CacheManager`, TTL, Jackson |
+| `application.properties` | Ajouter config Redis + propriétés TTL |
+| `docker-compose.yml` | Ajouter service Redis |
+| `CategorieProviderAdapter.java` | `@Cacheable` / `@CacheEvict` |
+| `DealProviderAdapter.java` | `@Cacheable` / `@CachePut` / `@CacheEvict` |
+| `PubliciteProviderAdapter.java` | `@Cacheable` / `@CacheEvict` |
+| `UtilisateurProviderAdapter.java` | `@Cacheable` / `@CacheEvict` |
+| `CommentaireProviderAdapter.java` | `@Cacheable` / `@CacheEvict` |
+| `k8s/deployment-redis.yaml` (NOUVEAU) | Deploiement Redis en Kubernetes |
+| `k8s/service-redis.yaml` (NOUVEAU) | Service Redis Kubernetes |
+
+---
+
+### Dependance Maven (bff-configuration/pom.xml)
+
+```xml
+<!-- Cache Redis -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+```
+
+---
+
+### RedisCacheConfig.java (bff-configuration)
+
+```java
+package com.ulr.paytogether.configuration;
+
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+
+@Configuration
+@EnableCaching
+public class RedisCacheConfig {
+
+    // TTL configurables par application.properties
+    @Value("${cache.ttl.categories:1800}")    // 30 min
+    private long ttlCategories;
+
+    @Value("${cache.ttl.deals:1800}")         // 30 min
+    private long ttlDeals;
+
+    @Value("${cache.ttl.deal:1800}")          // 30 min
+    private long ttlDeal;
+
+    @Value("${cache.ttl.publicites:1800}")    // 30 min
+    private long ttlPublicites;
+
+    @Value("${cache.ttl.utilisateur:600}")    // 10 min
+    private long ttlUtilisateur;
+
+    @Value("${cache.ttl.commentaires:180}")   // 3 min
+    private long ttlCommentaires;
+
+    @Bean
+    public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+        // Serializer JSON avec type info pour deserialiser les bons types
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        objectMapper.activateDefaultTyping(
+                LaissezFaireSubTypeValidator.instance,
+                ObjectMapper.DefaultTyping.NON_FINAL,
+                JsonTypeInfo.As.PROPERTY
+        );
+
+        GenericJackson2JsonRedisSerializer jsonSerializer =
+                new GenericJackson2JsonRedisSerializer(objectMapper);
+
+        // Configuration par defaut (TTL = 5 min)
+        RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofMinutes(5))
+                .serializeKeysWith(RedisSerializationContext.SerializationPair
+                        .fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair
+                        .fromSerializer(jsonSerializer))
+                .disableCachingNullValues(); // Ne pas cacher les null
+
+        // TTL specifiques par cache
+        Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
+        cacheConfigs.put("categories",    defaultConfig.entryTtl(Duration.ofSeconds(ttlCategories)));
+        cacheConfigs.put("categorie",     defaultConfig.entryTtl(Duration.ofSeconds(ttlCategories)));
+        cacheConfigs.put("deals",         defaultConfig.entryTtl(Duration.ofSeconds(ttlDeals)));
+        cacheConfigs.put("deal",          defaultConfig.entryTtl(Duration.ofSeconds(ttlDeal)));
+        cacheConfigs.put("publicites",    defaultConfig.entryTtl(Duration.ofSeconds(ttlPublicites)));
+        cacheConfigs.put("utilisateur",   defaultConfig.entryTtl(Duration.ofSeconds(ttlUtilisateur)));
+        cacheConfigs.put("commentaires",  defaultConfig.entryTtl(Duration.ofSeconds(ttlCommentaires)));
+
+        return RedisCacheManager.builder(connectionFactory)
+                .cacheDefaults(defaultConfig)
+                .withInitialCacheConfigurations(cacheConfigs)
+                .build();
+    }
+}
+```
+
+---
+
+### application.properties — Proprietes Redis
+
+```properties
+# -------------------------------------------------------
+# Redis Cache
+# -------------------------------------------------------
+spring.data.redis.host=${REDIS_HOST:localhost}
+spring.data.redis.port=${REDIS_PORT:6379}
+spring.data.redis.password=${REDIS_PASSWORD:}
+spring.data.redis.timeout=3000ms
+spring.data.redis.lettuce.pool.max-active=8
+spring.data.redis.lettuce.pool.max-idle=8
+spring.data.redis.lettuce.pool.min-idle=2
+spring.cache.type=redis
+
+# TTL par cache (secondes)
+cache.ttl.categories=1800
+cache.ttl.deals=1800
+cache.ttl.deal=1800
+cache.ttl.publicites=1800
+cache.ttl.utilisateur=600
+cache.ttl.commentaires=180
+```
+
+---
+
+### Noms des caches et TTL
+
+| Nom cache | TTL | Entite |
+|---|---|---|
+| `categories` | 30 min | Liste de toutes les categories |
+| `categorie` | 30 min | Categorie par UUID |
+| `deals` | 30 min | Liste paginee de deals |
+| `deal` | 30 min | Deal par UUID |
+| `publicites` | 30 min | Liste paginee de publicites |
+| `utilisateur` | 10 min | Utilisateur par UUID |
+| `commentaires` | 3 min | Commentaires pagines par deal |
+
+---
+
+### Annotations par ProviderAdapter
+
+#### REGLES ABSOLUES
+- ✅ `@Cacheable` uniquement sur les methodes de **lecture** (`trouverParUuid`, `trouverTous`)
+- ✅ `@CacheEvict` sur **toutes** les methodes d'ecriture (`sauvegarder`, `mettreAJour`, `supprimer`)
+- ✅ `@CachePut` sur `mettreAJour` pour mettre a jour le cache directement (evite un aller-retour BDD)
+- ❌ JAMAIS de `@Cacheable` dans le Service (bff-core) — uniquement dans ProviderAdapter (bff-provider)
+- ❌ JAMAIS cacher les donnees avec images ou presignUrl (URLs expirent rapidement)
+
+#### CategorieProviderAdapter
+```java
+@Cacheable(value = "categories", key = "'all'")
+public List<CategorieModele> trouverTous() { ... }
+
+@Cacheable(value = "categories", key = "'page:' + #page + ':size:' + #size")
+public PageModele<CategorieModele> trouverTous(int page, int size) { ... }
+
+@Cacheable(value = "categorie", key = "#uuid.toString()")
+public Optional<CategorieModele> trouverParUuid(UUID uuid) { ... }
+
+@Caching(evict = {
+    @CacheEvict(value = "categories", allEntries = true),
+    @CacheEvict(value = "categorie", allEntries = true)
+})
+public CategorieModele sauvegarder(CategorieModele categorie) { ... }
+
+@Caching(evict = {
+    @CacheEvict(value = "categories", allEntries = true),
+    @CacheEvict(value = "categorie", key = "#uuid.toString()")
+})
+public CategorieModele mettreAJour(UUID uuid, CategorieModele categorie) { ... }
+
+@Caching(evict = {
+    @CacheEvict(value = "categories", allEntries = true),
+    @CacheEvict(value = "categorie", key = "#uuid.toString()")
+})
+public void supprimerParUuid(UUID uuid) { ... }
+```
+
+#### DealProviderAdapter
+```java
+// ⚠️ NE PAS cacher trouverParUuid car retourne presignUrl (URL expirant)
+// Cacher uniquement les listes sans images lorsque pertinent
+
+@Caching(evict = {
+    @CacheEvict(value = "deals", allEntries = true),
+    @CacheEvict(value = "deal", allEntries = true)
+})
+public DealModele sauvegarder(DealModele deal) { ... }
+
+@Caching(evict = {
+    @CacheEvict(value = "deals", allEntries = true),
+    @CacheEvict(value = "deal", key = "#uuid.toString()")
+})
+public DealModele mettreAJour(UUID uuid, DealModele deal) { ... }
+
+@Caching(evict = {
+    @CacheEvict(value = "deals", allEntries = true),
+    @CacheEvict(value = "deal", key = "#uuid.toString()")
+})
+public void supprimerParUuid(UUID uuid) { ... }
+```
+
+> **Note** : Les deals avec presignUrl ne sont PAS mis en cache (URL MinIO expirent a 900 secondes).
+> On invalide uniquement pour forcer la coherence entre Redis et PostgreSQL.
+
+#### PubliciteProviderAdapter
+```java
+// Meme logique que Deal : invalider a l'ecriture
+@CacheEvict(value = "publicites", allEntries = true)
+public PubliciteModele sauvegarder(PubliciteModele publicite) { ... }
+
+@CacheEvict(value = "publicites", allEntries = true)
+public PubliciteModele mettreAJour(UUID uuid, PubliciteModele publicite) { ... }
+
+@CacheEvict(value = "publicites", allEntries = true)
+public void supprimerParUuid(UUID uuid) { ... }
+```
+
+#### UtilisateurProviderAdapter
+```java
+@Cacheable(value = "utilisateur", key = "#uuid.toString()")
+public Optional<UtilisateurModele> trouverParUuid(UUID uuid) { ... }
+
+// ⚠️ Ne pas cacher trouverTous() — liste admin sensible, toujours fraiche
+
+@CacheEvict(value = "utilisateur", key = "#uuid.toString()")
+public UtilisateurModele mettreAJour(UUID uuid, UtilisateurModele utilisateur, String token) { ... }
+
+@CacheEvict(value = "utilisateur", key = "#uuid.toString()")
+public void supprimerParUuid(UUID uuid, String token) { ... }
+
+@CacheEvict(value = "utilisateur", key = "#utilisateurUuid.toString()")
+public void activerUtilisateur(UUID utilisateurUuid, boolean actif, String token) { ... }
+
+@CacheEvict(value = "utilisateur", key = "#utilisateurUuid.toString()")
+public void assignerRole(UUID utilisateurUuid, String nomRole, String token) { ... }
+```
+
+#### CommentaireProviderAdapter
+```java
+@Cacheable(value = "commentaires", key = "#dealUuid.toString() + ':page:' + #page + ':size:' + #size")
+public PageModele<CommentaireModele> trouverParDeal(UUID dealUuid, int page, int size) { ... }
+
+@CacheEvict(value = "commentaires", allEntries = true)
+public CommentaireModele sauvegarder(CommentaireModele commentaire) { ... }
+
+@CacheEvict(value = "commentaires", allEntries = true)
+public void supprimerParUuid(UUID uuid) { ... }
+```
+
+---
+
+### docker-compose.yml — Service Redis
+
+```yaml
+redis:
+  image: redis:7-alpine
+  container_name: paytogether-redis
+  ports:
+    - "6379:6379"
+  volumes:
+    - redis_data:/data
+  command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+  networks:
+    - paytogether-network
+  healthcheck:
+    test: ["CMD", "redis-cli", "ping"]
+    interval: 10s
+    timeout: 3s
+    retries: 3
+
+volumes:
+  redis_data:
+```
+
+---
+
+### k8s/deployment-redis.yaml
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: paytogether
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+          command: ["redis-server", "--appendonly", "yes",
+                    "--maxmemory", "256mb",
+                    "--maxmemory-policy", "allkeys-lru"]
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+      volumes:
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: redis-pvc
+```
+
+### k8s/service-redis.yaml
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: paytogether
+spec:
+  selector:
+    app: redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+  type: ClusterIP
+```
+
+---
+
+### Regles ABSOLUES Redis
+
+1. ✅ **Cache uniquement dans bff-provider** (ProviderAdapter) — JAMAIS dans bff-core
+2. ✅ **Serialisation JSON obligatoire** — Jamais de serialisation Java binaire
+3. ✅ **Invalider tous les caches dependants** a chaque mutation (@CacheEvict)
+4. ✅ **Ne jamais cacher les presignUrl** (URLs MinIO expirent en 900s)
+5. ✅ **Redis optionnel** — Si Redis est down, l'appel passe par PostgreSQL automatiquement
+6. ✅ **TTL configurable** via application.properties (cache.ttl.xxx=secondes)
+7. ✅ **@EnableCaching** dans RedisCacheConfig uniquement (pas dans les Adapters)
+8. ✅ **Cles de cache** : toujours utiliser `.toString()` sur les UUID pour eviter les problemes de serialisation
+9. ✅ **allEntries = true** pour les listes paginées (impossible de savoir quelle page invalider)
+10. ✅ **Methode trouverTous() admin** (utilisateurs) → ne pas cacher car liste sensible et pas stale-tolerant
+
+---
+
+### Checklist d'implementation Redis
+
+- [ ] Ajouter dependance `spring-boot-starter-data-redis` dans bff-configuration/pom.xml
+- [ ] Creer `RedisCacheConfig.java` dans bff-configuration
+- [ ] Ajouter proprietes Redis dans `application.properties`
+- [ ] Ajouter service Redis dans `docker-compose.yml`
+- [ ] Annoter `CategorieProviderAdapter` avec @Cacheable/@CacheEvict
+- [ ] Annoter `DealProviderAdapter` avec @CacheEvict (pas de @Cacheable car presignUrl)
+- [ ] Annoter `PubliciteProviderAdapter` avec @CacheEvict
+- [ ] Annoter `UtilisateurProviderAdapter` avec @Cacheable/@CacheEvict
+- [ ] Annoter `CommentaireProviderAdapter` avec @Cacheable/@CacheEvict
+- [ ] Creer `k8s/deployment-redis.yaml`
+- [ ] Creer `k8s/service-redis.yaml`
+- [ ] Tester le build : `./mvnw clean compile -pl modules/bff/bff-configuration -am -q`
+- [ ] Verifier que l'application demarre sans Redis (graceful degradation)
+
+---
+
+**Date de dernière mise à jour** : 21 avril 2026  
 **Auteur** : Équipe PayToGether

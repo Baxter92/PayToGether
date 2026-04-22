@@ -14,6 +14,7 @@ import com.ulr.paytogether.provider.utils.Tools;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +39,7 @@ public class PubliciteProviderAdapter implements PubliciteProvider {
     private final PubliciteJpaMapper mapper;
     private final FileManager fileManager;
 
+    @CacheEvict(value = "publicites", allEntries = true)
     @Transactional
     @Override
     public PubliciteModele sauvegarder(PubliciteModele publicite) {
@@ -140,6 +142,7 @@ public class PubliciteProviderAdapter implements PubliciteProvider {
                 .build();
     }
 
+    @CacheEvict(value = "publicites", allEntries = true)
     @Override
     public PubliciteModele mettreAJour(UUID uuid, PubliciteModele publicite) {
         PubliciteJpa entite = jpaRepository.findById(uuid)
@@ -179,6 +182,7 @@ public class PubliciteProviderAdapter implements PubliciteProvider {
         });
     }
 
+    @CacheEvict(value = "publicites", allEntries = true)
     @Override
     public void supprimerParUuid(UUID uuid) {
         jpaRepository.deleteById(uuid);

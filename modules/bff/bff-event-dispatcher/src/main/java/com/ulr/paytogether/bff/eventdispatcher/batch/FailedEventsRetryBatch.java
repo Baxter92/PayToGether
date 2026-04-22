@@ -1,9 +1,10 @@
 package com.ulr.paytogether.bff.eventdispatcher.batch;
 
-import com.ulr.paytogether.bff.eventdispatcher.consumer.EventConsumerService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.ulr.paytogether.bff.eventdispatcher.consumer.EventTransactionProcessor;
 import com.ulr.paytogether.bff.eventdispatcher.entity.EventRecordJpa;
 import com.ulr.paytogether.bff.eventdispatcher.repository.EventRecordRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Page;
@@ -21,37 +22,34 @@ import java.util.List;
  * ⚠️ DÉSACTIVÉ PAR DÉFAUT
  * Pour activer ce batch, ajouter dans application.properties :
  * events.retry.batch.enabled=true
- * events.retry.batch.olderThanHours=24  # Retraiter les événements échoués depuis plus de 24h
- * events.retry.batch.limit=50           # Limite de 50 événements par exécution
- *
- * ⚠️ EXCLUSIONS IMPORTANTES
- * Les événements de paiement sont EXCLUS du batch automatique :
- * - PaymentInitiatedEvent
- * - PaymentSuccessfulEvent
- * - PaymentFailedEvent
- *
- * Ces événements nécessitent un retraitement manuel via API admin pour éviter
- * les doublons (emails multiples, notifications, etc.)
- *
- * Exemple de configuration :
- * events.retry.batch.enabled=true
  * events.retry.batch.olderThanHours=24
  * events.retry.batch.limit=50
  *
- * Le batch s'exécute tous les jours à 3h du matin (cron: 0 0 3 * * ?)
+ * ⚠️ EXCLUSIONS IMPORTANTES
+ * Les événements de paiement sont EXCLUS du batch automatique :
+ * - PaymentInitiatedEvent, PaymentSuccessfulEvent, PaymentFailedEvent
+ * Ces événements nécessitent un retraitement manuel via API admin.
  */
 @Component
 @ConditionalOnProperty(
     name = "events.retry.batch.enabled",
     havingValue = "true",
-    matchIfMissing = false  // Désactivé par défaut
+    matchIfMissing = false
 )
-@RequiredArgsConstructor
 @Slf4j
 public class FailedEventsRetryBatch {
 
     private final EventRecordRepository eventRecordRepository;
-    private final EventConsumerService eventConsumerService;
+    private final EventTransactionProcessor eventTransactionProcessor;
+    private final ObjectMapper objectMapper;
+
+    public FailedEventsRetryBatch(EventRecordRepository eventRecordRepository,
+                                   EventTransactionProcessor eventTransactionProcessor) {
+        this.eventRecordRepository = eventRecordRepository;
+        this.eventTransactionProcessor = eventTransactionProcessor;
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.registerModule(new JavaTimeModule());
+    }
 
     /**
      * Retraite automatiquement les événements en échec.
@@ -127,14 +125,16 @@ public class FailedEventsRetryBatch {
                     event.setRetryCount(event.getRetryCount() + 1);
                     log.info("Retraitement #{} de l'événement {}", event.getRetryCount(), event.getEventId());
 
-                    // Réinitialiser l'événement à PENDING
-                    event.setStatus(EventRecordJpa.EventStatus.PENDING);
-                    event.setErrorMessage(null);
-                    event.setAttempts(0);
-                    eventRecordRepository.save(event);
+                    // Réinitialiser l'événement à PENDING via @Modifying (évite conflit @Version)
+                    eventRecordRepository.updateStatus(
+                            event.getEventId(),
+                            EventRecordJpa.EventStatus.PENDING,
+                            LocalDateTime.now());
 
-                    // Traiter immédiatement l'événement
-                    eventConsumerService.processEvent(event);
+                    // Traiter immédiatement dans sa propre transaction REQUIRES_NEW
+                    // ✅ Pas de conflit @Version : chaque événement est isolé
+                    eventTransactionProcessor.processerEvenement(
+                            event.getEventId(), List.of(), objectMapper);
 
                     successCount++;
                     log.info("✅ Événement {} retraité avec succès", event.getEventId());

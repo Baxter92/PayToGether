@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: bff
-          image: docker.io/14152021/dealtogether:bff-v1.0.54
+          image: docker.io/14152021/dealtogether:bff-v1.0.55
           ports:
             - containerPort: 8080
               name: http
@@ -34,3 +34,12 @@ spec:
             # Configuration Elasticsearch (service ClusterIP)
             - name: ELASTICSEARCH_URIS
               value: "http://elasticsearch-service:9200"
+            # Configuration Redis (service ClusterIP)
+            - name: REDIS_HOST
+              value: "redis-service"
+          envFrom:
+            # Injecte toutes les variables sensibles depuis le Secret Kubernetes
+            # DB_PASSWORD, JWT_SECRET, MINIO_ACCESS_SECRET, SQUARE_ACCESS_TOKEN,
+            # SQUARE_LOCATION_ID, API_AUTH_ADMIN_PASSWORD, REDIS_PASSWORD, etc.
+            - secretRef:
+                name: bff-secret

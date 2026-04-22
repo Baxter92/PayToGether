@@ -11,4 +11,7 @@ const baseURL = import.meta.env.DEV
 export const apiClient = new ApiClient({
   baseURL,
   plugins: [loggerPlugin(), authPlugin(localTokenStorage)],
+  // Timeout augmenté à 60s (défaut était 30s) pour les opérations longues
+  // comme la création d'utilisateur qui appelle Keycloak en externe
+  defaultTimeoutMs: 60_000,
 });
