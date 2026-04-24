@@ -83,7 +83,7 @@ public class DealJpa {
     @Builder.Default
     private int nombreDeVues = 0;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "deal_points_forts", joinColumns = @JoinColumn(name = "deal_uuid"))
     @Column(name = "point_fort")
     @Builder.Default
