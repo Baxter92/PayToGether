@@ -99,7 +99,7 @@ export const orderAdminService = {
 
   // Valider le payout (admin) - change le statut à PAYOUT
   validatePayout: (uuid: string, dateDepotPayout: string) =>
-    apiClient.patch<OrderDTO>(`/admin/commandes/${uuid}/payout`, {
+    apiClient.patch<OrderDTO>(`/admin/commandes/${uuid}/payout/valider`, {
       body: { dateDepotPayout },
     }),
 
