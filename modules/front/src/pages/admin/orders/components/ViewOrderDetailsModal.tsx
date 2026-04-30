@@ -51,12 +51,10 @@ export default function ViewOrderDetailsModal({
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case StatutCommande.TERMINE:
-      case StatutCommande.LIVRÉE:
+      case StatutCommande.TERMINEE:
         return <CheckCircle className="h-5 w-5 text-green-600" />;
-      case StatutCommande.ANNULÉE:
+      case StatutCommande.ANNULEE:
         return <XCircle className="h-5 w-5 text-red-600" />;
-      case StatutCommande.EN_ATTENTE:
       case StatutCommande.EN_COURS:
         return <Clock className="h-5 w-5 text-yellow-600" />;
       default:
@@ -66,21 +64,24 @@ export default function ViewOrderDetailsModal({
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case StatutCommande.TERMINE:
-      case StatutCommande.LIVRÉE:
+      case StatutCommande.TERMINEE:
         return (
           <Badge className="bg-green-100 text-green-800">
             {tStatus("completed")}
           </Badge>
         );
-      case StatutCommande.EN_ATTENTE:
       case StatutCommande.EN_COURS:
         return (
           <Badge className="bg-yellow-100 text-yellow-800">
             {tStatus("pending")}
           </Badge>
         );
-      case StatutCommande.COMPLETE:
+      case StatutCommande.COMPLETEE:
+        return (
+          <Badge className="bg-sky-100 text-sky-800">
+            {tStatus("complete")}
+          </Badge>
+        );
       case StatutCommande.CONFIRMEE:
         return (
           <Badge className="bg-blue-100 text-blue-800">
@@ -105,13 +106,25 @@ export default function ViewOrderDetailsModal({
             {tStatus("invoiceCustomer")}
           </Badge>
         );
-      case StatutCommande.REMBOURSÉE:
+      case StatutCommande.FACTURE_MARCHAND_RECUE:
+        return (
+          <Badge className="bg-teal-100 text-teal-800">
+            {tStatus("factureMarchandRecue")}
+          </Badge>
+        );
+      case StatutCommande.FACTURES_CLIENT_ENVOYEES:
+        return (
+          <Badge className="bg-emerald-100 text-emerald-800">
+            {tStatus("facturesClientEnvoyees")}
+          </Badge>
+        );
+      case StatutCommande.REMBOURSEE:
         return (
           <Badge className="bg-blue-100 text-blue-800">
             {tStatus("refunded")}
           </Badge>
         );
-      case StatutCommande.ANNULÉE:
+      case StatutCommande.ANNULEE:
         return (
           <Badge className="bg-red-100 text-red-800">
             {tStatus("cancelled")}
@@ -296,7 +309,6 @@ export default function ViewOrderDetailsModal({
                 <TimelineItem
                   label="Paiements complétés"
                   completed={
-                    order.statut !== StatutCommande.EN_ATTENTE &&
                     order.statut !== StatutCommande.EN_COURS
                   }
                   current={order.statut === StatutCommande.CONFIRMEE}
@@ -307,7 +319,7 @@ export default function ViewOrderDetailsModal({
                     order.statut === StatutCommande.PAYOUT ||
                     order.statut === StatutCommande.INVOICE_SELLER ||
                     order.statut === StatutCommande.INVOICE_CUSTOMER ||
-                    order.statut === StatutCommande.TERMINE
+                    order.statut === StatutCommande.TERMINEE
                   }
                   current={order.statut === StatutCommande.PAYOUT}
                 />
@@ -316,18 +328,18 @@ export default function ViewOrderDetailsModal({
                   completed={
                     order.statut === StatutCommande.INVOICE_SELLER ||
                     order.statut === StatutCommande.INVOICE_CUSTOMER ||
-                    order.statut === StatutCommande.TERMINE
+                    order.statut === StatutCommande.TERMINEE
                   }
                   current={order.statut === StatutCommande.INVOICE_SELLER}
                 />
                 <TimelineItem
                   label="Factures clients validées"
-                  completed={order.statut === StatutCommande.TERMINE}
+                  completed={order.statut === StatutCommande.TERMINEE}
                   current={order.statut === StatutCommande.INVOICE_CUSTOMER}
                 />
                 <TimelineItem
                   label="Commande terminée"
-                  completed={order.statut === StatutCommande.TERMINE}
+                  completed={order.statut === StatutCommande.TERMINEE}
                   current={false}
                 />
               </div>
@@ -348,7 +360,7 @@ export default function ViewOrderDetailsModal({
                   </h3>
                 </div>
                 {order.statut === StatutCommande.INVOICE_CUSTOMER ||
-                order.statut === StatutCommande.TERMINE ? (
+                order.statut === StatutCommande.TERMINEE ? (
                   <Badge
                     variant="outline"
                     className={
@@ -393,7 +405,7 @@ export default function ViewOrderDetailsModal({
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-lg">
-                          {formatCurrency(customer.montant)}
+                          {formatCurrency(customer.montant ?? 0)}
                         </p>
                         <p className="text-xs text-muted-foreground font-mono">
                           {customer.numeroPayment}

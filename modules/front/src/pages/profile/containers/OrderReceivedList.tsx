@@ -49,25 +49,24 @@ export default function OrdersReceivedList(): JSX.Element {
     });
   };
 
-  const handleValidateCustomers = async (
-    validations: { utilisateurUuids: string }[],
-  ): Promise<void> => {
+  // ✅ Signature alignée avec useAdminValidateCustomerInvoices : string[]
+  const handleValidateCustomers = async (utilisateurUuids: string[]): Promise<void> => {
     if (!selectedOrder?.uuid) return;
     await validateCustomersMutation.mutateAsync({
       uuid: selectedOrder.uuid,
-      validations,
+      utilisateurUuids,
     });
   };
 
   const getStatusBadge = (status: string): JSX.Element => {
     switch (status) {
-      case StatutCommande.TERMINE:
+      case StatutCommande.TERMINEE:
         return (
           <Badge variant="outline" className="bg-green-100 text-green-800">
             {tStatus("completed")}
           </Badge>
         );
-      case StatutCommande.COMPLETE:
+      case StatutCommande.COMPLETEE:
       case StatutCommande.CONFIRMEE:
         return (
           <Badge variant="outline" className="bg-blue-100 text-blue-800">
@@ -92,20 +91,31 @@ export default function OrdersReceivedList(): JSX.Element {
             {tStatus("invoiceCustomer")}
           </Badge>
         );
-      case StatutCommande.EN_ATTENTE:
+      case StatutCommande.FACTURE_MARCHAND_RECUE:
+        return (
+          <Badge variant="outline" className="bg-teal-100 text-teal-800">
+            {tStatus("factureMarchandRecue")}
+          </Badge>
+        );
+      case StatutCommande.FACTURES_CLIENT_ENVOYEES:
+        return (
+          <Badge variant="outline" className="bg-emerald-100 text-emerald-800">
+            {tStatus("facturesClientEnvoyees")}
+          </Badge>
+        );
       case StatutCommande.EN_COURS:
         return (
           <Badge variant="outline" className="bg-yellow-100 text-yellow-800">
             {tStatus("pending")}
           </Badge>
         );
-      case StatutCommande.ANNULÉE:
+      case StatutCommande.ANNULEE:
         return (
           <Badge variant="outline" className="bg-red-100 text-red-800">
             {tStatus("cancelled")}
           </Badge>
         );
-      case StatutCommande.REMBOURSÉE:
+      case StatutCommande.REMBOURSEE:
         return (
           <Badge variant="outline" className="bg-gray-100 text-gray-800">
             {tStatus("refunded")}
@@ -191,8 +201,8 @@ export default function OrdersReceivedList(): JSX.Element {
               </Button>
             )}
 
-            {/* Bouton Voir validations (statut TERMINE) */}
-            {statut === StatutCommande.TERMINE && (
+            {/* Bouton Voir validations (statut TERMINEE) */}
+            {statut === StatutCommande.TERMINEE && (
               <Button
                 variant="ghost"
                 size="sm"
@@ -265,7 +275,7 @@ export default function OrdersReceivedList(): JSX.Element {
             order={selectedOrder}
             customers={customers}
             onValidate={handleValidateCustomers}
-            isReadOnly={selectedOrder?.statut === StatutCommande.TERMINE}
+            isReadOnly={selectedOrder?.statut === StatutCommande.TERMINEE}
           />
         </>
       )}
