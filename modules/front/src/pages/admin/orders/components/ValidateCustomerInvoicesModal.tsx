@@ -41,11 +41,10 @@ export default function ValidateCustomerInvoicesModal({
 
   const handleToggleValidation = (utilisateurUuid: string) => {
     if (isReadOnly) return;
+    // Bloquer uniquement les utilisateurs déjà validés côté API (customer.valide === true)
+    const customer = customers.find((c) => c.utilisateurUuid === utilisateurUuid);
+    if (customer?.valide) return; // déjà validé en base → non modifiable
     const currentValue = validations.get(utilisateurUuid) || false;
-    if (currentValue) {
-      toast.warning(t("orders.validation.cannotUnvalidate"));
-      return;
-    }
     setValidations(new Map(validations.set(utilisateurUuid, !currentValue)));
   };
 
@@ -115,8 +114,8 @@ export default function ValidateCustomerInvoicesModal({
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
           {customers.map((customer) => {
             const isValidated = validations.get(customer.utilisateurUuid) || false;
-            const isAlreadyValidated = customer.valide;
-            const isClickable = !isReadOnly && !isAlreadyValidated;
+            const isAlreadyValidated = customer.valide; // validé côté API → verrouillé
+            const isClickable = !isReadOnly && !isAlreadyValidated; // sélectionnable ET désélectionnable
 
             return (
               <div

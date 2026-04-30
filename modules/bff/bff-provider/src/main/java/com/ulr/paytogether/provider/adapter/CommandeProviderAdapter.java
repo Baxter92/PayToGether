@@ -269,7 +269,7 @@ public class CommandeProviderAdapter implements CommandeProvider {
     @Transactional
     public void validerUtilisateurCommande(UUID commandeUuid, UUID utilisateurUuid) {
         CommandeUtilisateurJpa commandeUtilisateur = commandeUtilisateurRepository
-            .findByCommandeJpaUuidAndUtilisateurJpaUuid(commandeUuid, utilisateurUuid)
+            .findFirstByCommandeJpaUuidAndUtilisateurJpaUuid(commandeUuid, utilisateurUuid)
             .orElseThrow(() -> new RuntimeException(
                 "Utilisateur " + utilisateurUuid + " non trouvé pour la commande " + commandeUuid));
         

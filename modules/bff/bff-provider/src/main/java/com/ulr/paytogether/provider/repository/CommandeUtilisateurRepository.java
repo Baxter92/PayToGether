@@ -31,10 +31,12 @@ public interface CommandeUtilisateurRepository extends JpaRepository<CommandeUti
     List<CommandeUtilisateurJpa> findByUtilisateurJpaUuid(UUID utilisateurJpaUuid);
     
     /**
-     * Trouve un utilisateur spécifique d'une commande
+     * Trouve un utilisateur spécifique d'une commande.
+     * Utilise findFirst pour éviter l'erreur "Query did not return a unique result"
+     * en cas de doublons résiduels en base (la contrainte unique V9 nettoie ce problème).
      */
-    Optional<CommandeUtilisateurJpa> findByCommandeJpaUuidAndUtilisateurJpaUuid(UUID commandeUuid, UUID utilisateurUuid);
-    
+    Optional<CommandeUtilisateurJpa> findFirstByCommandeJpaUuidAndUtilisateurJpaUuid(UUID commandeUuid, UUID utilisateurUuid);
+
     /**
      * Compte le nombre d'utilisateurs validés pour une commande
      */
