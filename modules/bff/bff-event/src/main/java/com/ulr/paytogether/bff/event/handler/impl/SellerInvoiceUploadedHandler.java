@@ -3,6 +3,7 @@ package com.ulr.paytogether.bff.event.handler.impl;
 import com.ulr.paytogether.bff.event.annotation.FunctionalHandler;
 import com.ulr.paytogether.bff.event.handler.ConsumerHandler;
 import com.ulr.paytogether.core.enumeration.StatutCommande;
+import com.ulr.paytogether.core.enumeration.StatutPaiement;
 import com.ulr.paytogether.core.event.SellerInvoiceUploadedEvent;
 import com.ulr.paytogether.core.domaine.service.CommandeService;
 import com.ulr.paytogether.core.domaine.service.EmailNotificationService;
@@ -65,10 +66,14 @@ public class SellerInvoiceUploadedHandler implements ConsumerHandler {
                 throw new IllegalArgumentException("Commande non trouvée: " + event.getCommandeUuid());
             }
             
-            // Récupérer tous les paiements de la commande (opération critique avec retry)
-            List<PaiementModele> paiements = paiementService.lireParCommande(event.getCommandeUuid());
-            if (paiements == null || paiements.isEmpty()) {
-                log.warn("Aucun paiement trouvé pour la commande: {}", event.getCommandeUuid());
+            // Récupérer uniquement les paiements CONFIRMÉS (les seuls qui ont réellement payé)
+            List<PaiementModele> paiements = paiementService.lireParCommande(event.getCommandeUuid())
+                .stream()
+                .filter(p -> StatutPaiement.CONFIRME.equals(p.getStatut()))
+                .filter(p -> p.getUtilisateur() != null)
+                .toList();
+            if (paiements.isEmpty()) {
+                log.warn("Aucun paiement CONFIRME trouvé pour la commande: {} — vérifier que les paiements sont bien au statut CONFIRME", event.getCommandeUuid());
                 return;
             }
             
@@ -100,7 +105,15 @@ public class SellerInvoiceUploadedHandler implements ConsumerHandler {
         
         for (PaiementModele paiement : paiements) {
             try {
-                // Déterminer si c'est une livraison à domicile ou pickup
+                // Garde-fous : s'assurer que les données essentielles sont présentes
+                if (paiement.getUtilisateur() == null) {
+                    log.warn("⚠️ Paiement {} ignoré : utilisateur null", paiement.getUuid());
+                    continue;
+                }
+                if (commande.getDealModele() == null) {
+                    log.error("❌ DealModele null sur la commande {} — impossible de générer les factures", commande.getUuid());
+                    break;
+                }
                 boolean isHomeDelivery = determinerTypeLivraison(paiement);
                 String adresseLivraison = obtenirAdresseLivraison(paiement, isHomeDelivery);
                 
@@ -159,8 +172,11 @@ public class SellerInvoiceUploadedHandler implements ConsumerHandler {
             } catch (Exception e) {
                 // En cas d'erreur sur une facture, on log et on continue avec les autres
                 // On ne propage PAS l'exception pour éviter un retry complet
-                log.error("⚠️ Erreur lors de la génération/envoi de la facture pour le paiement {}: {}", 
-                    paiement.getUuid(), e.getMessage(), e);
+                log.error("⚠️ [{}] Erreur lors de la génération/envoi de la facture pour le paiement {} (utilisateur: {}): {}",
+                    e.getClass().getSimpleName(),
+                    paiement.getUuid(),
+                    paiement.getUtilisateur() != null ? paiement.getUtilisateur().getEmail() : "inconnu",
+                    e.getMessage(), e);
             }
         }
         

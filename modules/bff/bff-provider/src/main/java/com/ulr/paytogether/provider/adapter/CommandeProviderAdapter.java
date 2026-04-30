@@ -185,6 +185,7 @@ public class CommandeProviderAdapter implements CommandeProvider {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CommandeModele lireParUuid(UUID uuid) {
         return jpaRepository.findById(uuid)
                 .map(mapper::versModele)
@@ -233,6 +234,15 @@ public class CommandeProviderAdapter implements CommandeProvider {
     @Transactional(readOnly = true)
     public List<CommandeUtilisateurModele> trouverUtilisateursCommande(UUID commandeUuid) {
         return commandeUtilisateurRepository.findByCommandeJpaUuid(commandeUuid)
+            .stream()
+            // Dédupliquer par utilisateur UUID : en cas de vrais doublons en base,
+            // conserver la ligne dont la dateCreation est la plus récente.
+            .collect(Collectors.toMap(
+                cu -> cu.getUtilisateurJpa() != null ? cu.getUtilisateurJpa().getUuid() : cu.getUuid(),
+                cu -> cu,
+                (cu1, cu2) -> cu1.getDateCreation().isAfter(cu2.getDateCreation()) ? cu1 : cu2
+            ))
+            .values()
             .stream()
             .map(cu -> {
                 CommandeUtilisateurModele modele = commandeUtilisateurMapper.versModele(cu);

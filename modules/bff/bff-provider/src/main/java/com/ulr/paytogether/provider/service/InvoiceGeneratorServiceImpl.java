@@ -57,8 +57,9 @@ public class InvoiceGeneratorServiceImpl implements InvoiceGeneratorService {
             context.setVariable("clientEmail", paiement.getUtilisateur().getEmail());
             context.setVariable("dealTitre", dealTitre);
             context.setVariable("adresseLivraison", adresseLivraison);
-            context.setVariable("typelivraison", isHomeDelivery ? "Home Delivery" : "Pickup");
-            
+            context.setVariable("typelivraison", isHomeDelivery ? "Home Delivery" : "Pickup"); // compatibilité ancienne variable
+            context.setVariable("typeLivraison", isHomeDelivery ? "Home Delivery" : "Pickup"); // variable correcte utilisée dans le template
+
             // Montants
             context.setVariable("sousTotal", breakdown.sousTotal);
             context.setVariable("fraisService", breakdown.fraisService);

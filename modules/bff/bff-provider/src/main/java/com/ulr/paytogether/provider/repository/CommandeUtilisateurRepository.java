@@ -3,6 +3,8 @@ package com.ulr.paytogether.provider.repository;
 import com.ulr.paytogether.core.enumeration.StatutCommandeUtilisateur;
 import com.ulr.paytogether.provider.adapter.entity.CommandeUtilisateurJpa;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,9 +18,10 @@ import java.util.UUID;
 public interface CommandeUtilisateurRepository extends JpaRepository<CommandeUtilisateurJpa, UUID> {
     
     /**
-     * Trouve tous les utilisateurs d'une commande
+     * Trouve tous les utilisateurs d'une commande (DISTINCT pour éviter les doublons JPA).
      */
-    List<CommandeUtilisateurJpa> findByCommandeJpaUuid(UUID commandeUuid);
+    @Query("SELECT DISTINCT cu FROM CommandeUtilisateurJpa cu WHERE cu.commandeJpa.uuid = :commandeUuid")
+    List<CommandeUtilisateurJpa> findByCommandeJpaUuid(@Param("commandeUuid") UUID commandeUuid);
 
     /**
      *

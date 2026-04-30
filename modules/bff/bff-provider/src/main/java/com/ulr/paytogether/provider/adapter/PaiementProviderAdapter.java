@@ -13,6 +13,7 @@ import com.ulr.paytogether.provider.adapter.mapper.PaiementJpaMapper;
 import com.ulr.paytogether.provider.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -137,7 +138,11 @@ public class PaiementProviderAdapter implements PaiementProvider {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PaiementModele> trouverParCommande(UUID commandeUuid) {
+        // @Transactional(readOnly = true) est obligatoire ici :
+        // DealJpa.imageDealJpas est LAZY → accédé pendant mapper::versModele
+        // → nécessite une session Hibernate ouverte pour éviter LazyInitializationException
         return jpaRepository.findByCommandeJpaUuidOrderByDatePaiementDesc(commandeUuid)
                 .stream()
                 .map(mapper::versModele)
