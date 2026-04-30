@@ -4,6 +4,9 @@ import type {
   CreateOrderDTO,
   StatutCommandeType,
   OrderListResponseDTO,
+  CommandeListDTO,
+  CommandeUtilisateurDTO,
+  ValidationFacturesClientResponseDTO,
 } from "../types";
 import { apiClient } from "./apiClient";
 
@@ -97,19 +100,20 @@ export const orderAdminService = {
   // Supprimer une commande (admin)
   delete: (uuid: string) => apiClient.delete<void>(`/admin/commandes/${uuid}`),
 
-  // Valider le payout (admin) - change le statut à PAYOUT
+  // ✅ Valider le payout (admin) - retourne CommandeListDTO
   validatePayout: (uuid: string, dateDepotPayout: string) =>
-    apiClient.patch<OrderDTO>(`/admin/commandes/${uuid}/payout/valider`, {
+    apiClient.post<CommandeListDTO>(`/admin/commandes/${uuid}/payout/valider`, {
       body: { dateDepotPayout },
     }),
 
-  // Uploader la facture du vendeur (marchand) - change le statut à INVOICE_SELLER
+  // ✅ Uploader la facture du vendeur - form field doit être "facture" (backend @RequestParam("facture"))
+  // Retourne CommandeListDTO
   uploadSellerInvoice: (uuid: string, file: File) => {
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("facture", file); // ✅ "facture" correspond au @RequestParam("facture") côté backend
 
-    return apiClient.post<OrderDTO>(
-      `/admin/commandes/${uuid}/invoice/seller`,
+    return apiClient.post<CommandeListDTO>(
+      `/admin/commandes/${uuid}/facture/upload`,
       {
         body: formData,
         headers: {
@@ -119,29 +123,26 @@ export const orderAdminService = {
     );
   },
 
-  // Valider les factures clients (marchand/admin) - peut passer à TERMINE si tout est validé
+  // ✅ Valider les factures clients - payload { utilisateurUuids: [...] } + retourne ValidationFacturesClientResponseDTO
   validateCustomerInvoices: (
     uuid: string,
-    validations: { customerUuid: string; valide: boolean }[],
+    utilisateurUuids: string[],
   ) =>
-    apiClient.patch<OrderDTO>(`/admin/commandes/${uuid}/invoice/validate`, {
-      body: { validations },
-    }),
+    apiClient.post<ValidationFacturesClientResponseDTO>(
+      `/admin/commandes/${uuid}/factures/valider`,
+      {
+        body: { utilisateurUuids },
+      },
+    ),
 
-  // Récupérer les clients d'une commande pour validation
+  // ✅ Récupérer les clients d'une commande pour validation
   getOrderCustomers: (uuid: string) =>
-    apiClient.get<Customer[]>(`/admin/commandes/${uuid}/customers`),
+    apiClient.get<CommandeUtilisateurDTO[]>(
+      `/admin/commandes/user/command/${uuid}`,
+    ),
 };
 
-interface Customer {
-  uuid: string;
-  nom: string;
-  prenom: string;
-  email: string;
-  montant: number;
-  numeroPayment: string;
-  valide: boolean;
-}
-
-export type { Customer };
+// ⚠️ Déprécié : utiliser CommandeUtilisateurDTO (importé depuis types/order.ts)
+/** @deprecated Utiliser CommandeUtilisateurDTO à la place */
+export type Customer = CommandeUtilisateurDTO;
 

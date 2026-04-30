@@ -214,10 +214,15 @@ public class CommandeAdminApiAdapter {
                 .dateCreation(commande.getDateCreation())
                 .montantTotalPaiements(commande.getMontantTotalPaiements())
                 .statut(commande.getStatut())
+                // Flux payout / facturation
+                .dateDepotPayout(commande.getDateDepotPayout())
+                .factureMarchandUrl(commande.getFactureMarchandUrl())
                 .build();
     }
 
     private CommandeUtilisateurDto mapperVersCommandeUtilisateurDTO(CommandeUtilisateurModele cu) {
+        boolean valide = cu.getStatutCommandeUtilisateur() != null
+            && cu.getStatutCommandeUtilisateur().name().equals("VALIDEE");
         return CommandeUtilisateurDto.builder()
                 .uuid(cu.getUuid())
                 .commandeUuid(cu.getCommandeUuid())
@@ -225,7 +230,11 @@ public class CommandeAdminApiAdapter {
                 .nom(cu.getUtilisateur() != null ? cu.getUtilisateur().getNom() : null)
                 .prenom(cu.getUtilisateur() != null ? cu.getUtilisateur().getPrenom() : null)
                 .email(cu.getUtilisateur() != null ? cu.getUtilisateur().getEmail() : null)
-                .statutCommandeUtilisateur(cu.getStatutCommandeUtilisateur().name())
+                .statutCommandeUtilisateur(cu.getStatutCommandeUtilisateur() != null
+                    ? cu.getStatutCommandeUtilisateur().name() : null)
+                .valide(valide)
+                .montant(cu.getMontant())
+                .numeroPayment(cu.getNumeroPayment())
                 .build();
     }
 }

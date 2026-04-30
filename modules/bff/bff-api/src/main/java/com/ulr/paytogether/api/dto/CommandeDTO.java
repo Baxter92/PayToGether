@@ -50,4 +50,11 @@ public class CommandeDTO {
     private LocalDateTime dateCreation;
 
     private LocalDateTime dateModification;
+
+    private String numeroCommande;
+
+    @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime dateDepotPayout;
+
+    private String factureMarchandUrl;
 }

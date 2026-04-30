@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -25,5 +26,9 @@ public class CommandeUtilisateurModele {
     private StatutCommandeUtilisateur statutCommandeUtilisateur;
     private LocalDateTime dateCreation;
     private LocalDateTime dateModification;
-}
 
+    /** Montant du paiement de cet utilisateur pour cette commande (calculé) */
+    private BigDecimal montant;
+    /** Numéro de transaction du paiement (transactionId ou squarePaymentId) */
+    private String numeroPayment;
+}

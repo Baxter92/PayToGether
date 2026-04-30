@@ -230,10 +230,28 @@ public class CommandeProviderAdapter implements CommandeProvider {
     }
     
     @Override
+    @Transactional(readOnly = true)
     public List<CommandeUtilisateurModele> trouverUtilisateursCommande(UUID commandeUuid) {
         return commandeUtilisateurRepository.findByCommandeJpaUuid(commandeUuid)
             .stream()
-            .map(commandeUtilisateurMapper::versModele)
+            .map(cu -> {
+                CommandeUtilisateurModele modele = commandeUtilisateurMapper.versModele(cu);
+                // Enrichissement avec les données de paiement (montant + numeroPayment)
+                if (cu.getUtilisateurJpa() != null) {
+                    paiementRepository
+                        .findFirstByCommandeJpaUuidAndUtilisateurJpaUuidOrderByDatePaiementDesc(
+                            commandeUuid, cu.getUtilisateurJpa().getUuid())
+                        .ifPresent(p -> {
+                            modele.setMontant(p.getMontant());
+                            // Utilise transactionId ou squarePaymentId selon disponibilité
+                            String numero = p.getTransactionId() != null
+                                ? p.getTransactionId()
+                                : p.getSquarePaymentId();
+                            modele.setNumeroPayment(numero);
+                        });
+                }
+                return modele;
+            })
             .collect(Collectors.toList());
     }
     

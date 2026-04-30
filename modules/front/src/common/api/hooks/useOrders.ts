@@ -1,11 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { orderService, orderAdminService, type Customer } from "../services/orderService";
+import { orderService, orderAdminService } from "../services/orderService";
 import type {
   OrderDTO,
   CreateOrderDTO,
   UpdateOrderDTO,
   StatutCommandeType,
   OrderListResponseDTO,
+  CommandeListDTO,
+  CommandeUtilisateurDTO,
+  ValidationFacturesClientResponseDTO,
 } from "../types";
 import { createResourceHooks } from "./factories/createResourceHooks";
 
@@ -264,12 +267,12 @@ export const useAdminDeleteOrder = () => {
   });
 };
 
-// Hook pour valider le payout (admin)
+// Hook pour valider le payout (admin) - retourne CommandeListDTO
 export const useAdminValidatePayout = () => {
   const queryClient = useQueryClient();
 
   return useMutation<
-    OrderDTO,
+    CommandeListDTO,
     Error,
     { uuid: string; dateDepotPayout: string }
   >({
@@ -284,11 +287,11 @@ export const useAdminValidatePayout = () => {
   });
 };
 
-// Hook pour uploader la facture du vendeur
+// Hook pour uploader la facture du vendeur - retourne CommandeListDTO
 export const useAdminUploadSellerInvoice = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<OrderDTO, Error, { uuid: string; file: File }>({
+  return useMutation<CommandeListDTO, Error, { uuid: string; file: File }>({
     mutationFn: ({ uuid, file }) =>
       orderAdminService.uploadSellerInvoice(uuid, file),
     onSuccess: (updatedOrder) => {
@@ -302,7 +305,7 @@ export const useAdminUploadSellerInvoice = () => {
 
 // Hook pour récupérer les clients d'une commande
 export const useOrderCustomers = (uuid: string) => {
-  return useQuery<Customer[], Error>({
+  return useQuery<CommandeUtilisateurDTO[], Error>({
     queryKey: ["admin", "commandes", uuid, "customers"],
     queryFn: () => orderAdminService.getOrderCustomers(uuid),
     enabled: !!uuid,
@@ -310,26 +313,24 @@ export const useOrderCustomers = (uuid: string) => {
 };
 
 // Hook pour valider les factures clients
+// ✅ Envoie { utilisateurUuids: [...] } et retourne ValidationFacturesClientResponseDTO
 export const useAdminValidateCustomerInvoices = () => {
   const queryClient = useQueryClient();
 
   return useMutation<
-    OrderDTO,
+    ValidationFacturesClientResponseDTO,
     Error,
-    {
-      uuid: string;
-      validations: { customerUuid: string; valide: boolean }[];
-    }
+    { uuid: string; utilisateurUuids: string[] }
   >({
-    mutationFn: ({ uuid, validations }) =>
-      orderAdminService.validateCustomerInvoices(uuid, validations),
-    onSuccess: (updatedOrder) => {
+    mutationFn: ({ uuid, utilisateurUuids }) =>
+      orderAdminService.validateCustomerInvoices(uuid, utilisateurUuids),
+    onSuccess: (_result, variables) => {
       queryClient.invalidateQueries({ queryKey: ["admin", "commandes"] });
       queryClient.invalidateQueries({
-        queryKey: orderKeys.detail(updatedOrder.uuid),
+        queryKey: orderKeys.detail(variables.uuid),
       });
       queryClient.invalidateQueries({
-        queryKey: ["admin", "commandes", updatedOrder.uuid, "customers"],
+        queryKey: ["admin", "commandes", variables.uuid, "customers"],
       });
     },
   });

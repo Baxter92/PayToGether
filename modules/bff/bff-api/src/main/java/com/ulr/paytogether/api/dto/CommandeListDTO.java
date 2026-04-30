@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+
 /**
  * DTO pour représenter une commande dans la liste admin
  */
@@ -39,5 +40,11 @@ public class CommandeListDTO {
 
     private BigDecimal montantTotalPaiements;
     private StatutCommande statut;
+
+    // Champs flux payout / facturation
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime dateDepotPayout;
+
+    private String factureMarchandUrl;
 }
 

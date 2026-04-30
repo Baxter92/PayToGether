@@ -224,10 +224,7 @@ public class CommandeServiceImpl implements CommandeService {
         if (commande == null) {
             throw new IllegalArgumentException("Commande non trouvée avec l'UUID: " + commandeUuid);
         }
-
-        if (commande.getStatut() != StatutCommande.FACTURES_CLIENT_ENVOYEES) {
-            throw new IllegalStateException("La commande doit être au statut FACTURES_CLIENT_ENVOYEES pour reccupérer : " + commande.getStatut());
-        }
+        // Accessible pour tous les statuts (l'admin doit pouvoir consulter la liste à tout moment)
         return commandeProvider.trouverUtilisateursCommande(commandeUuid);
     }
 }

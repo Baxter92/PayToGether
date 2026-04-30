@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
@@ -18,5 +19,12 @@ public class CommandeUtilisateurDto {
     private String nom;
     private String prenom;
     private String email;
+    /** Statut brut de la validation (EN_ATTENTE ou VALIDEE) */
     private String statutCommandeUtilisateur;
+    /** true si le statut est VALIDEE */
+    private Boolean valide;
+    /** Montant du paiement de cet utilisateur pour cette commande */
+    private BigDecimal montant;
+    /** Numéro de transaction du paiement (transactionId ou squarePaymentId) */
+    private String numeroPayment;
 }

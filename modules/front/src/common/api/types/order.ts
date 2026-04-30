@@ -1,24 +1,27 @@
 import type { PaymentDTO } from "./payment";
 
+// ✅ Valeurs alignées exactement avec StatutCommande côté backend Java
 export const StatutCommande = {
-  EN_ATTENTE: "EN_ATTENTE",
   EN_COURS: "EN_COURS",
-  COMPLETE: "COMPLETEE",
+  COMPLETEE: "COMPLETEE",
   CONFIRMEE: "CONFIRMEE",
   PAYOUT: "PAYOUT",
   INVOICE_SELLER: "INVOICE_SELLER",
   INVOICE_CUSTOMER: "INVOICE_CUSTOMER",
-  TERMINE: "TERMINE",
-  LIVRÉE: "LIVRÉE",
-  ANNULÉE: "ANNULÉE",
-  REMBOURSÉE: "REMBOURSÉE",
+  FACTURE_MARCHAND_RECUE: "FACTURE_MARCHAND_RECUE",
+  FACTURES_CLIENT_ENVOYEES: "FACTURES_CLIENT_ENVOYEES",
+  TERMINEE: "TERMINEE",
+  ANNULEE: "ANNULEE",
+  REMBOURSEE: "REMBOURSEE",
 } as const;
 
 export type StatutCommandeType =
   (typeof StatutCommande)[keyof typeof StatutCommande];
 
+/** DTO de commande retourné par les endpoints standard /commandes */
 export interface OrderDTO {
   uuid: string;
+  numeroCommande?: string;
   utilisateurUuid: string;
   utilisateurNom: string;
   utilisateurPrenom: string;
@@ -30,6 +33,10 @@ export interface OrderDTO {
   dateCommande: string;
   dateCreation: string;
   dateModification: string;
+  /** Date à laquelle le payout a été déposé (PAYOUT step) */
+  dateDepotPayout?: string;
+  /** URL MinIO de la facture du marchand */
+  factureMarchandUrl?: string;
   paiements?: PaymentDTO[];
 }
 
@@ -37,14 +44,13 @@ export interface CreateOrderDTO {
   utilisateurUuid: string;
   dealUuid: string;
   montantTotal: number;
-  statut: typeof StatutCommande.EN_ATTENTE;
 }
 
 export type UpdateOrderDTO = Partial<
   Omit<OrderDTO, "uuid" | "dateCreation" | "dateModification">
 >;
 
-// Type pour la réponse des listes de commandes (admin)
+/** DTO retourné par les endpoints admin liste /admin/commandes */
 export interface CommandeListDTO {
   uuid: string;
   numeroCommande: string;
@@ -57,6 +63,10 @@ export interface CommandeListDTO {
   dateCreation: string;
   montantTotalPaiements: number;
   statut: StatutCommandeType;
+  /** Date à laquelle le payout a été déposé (PAYOUT step) */
+  dateDepotPayout?: string;
+  /** URL MinIO de la facture du marchand */
+  factureMarchandUrl?: string;
 }
 
 export interface CommandeStatsDTO {
@@ -70,4 +80,32 @@ export interface CommandeStatsDTO {
 export interface OrderListResponseDTO {
   commandes: CommandeListDTO[];
   statistiques: CommandeStatsDTO;
+}
+
+/** DTO pour un utilisateur participant à une commande */
+export interface CommandeUtilisateurDTO {
+  uuid: string;
+  commandeUuid: string;
+  utilisateurUuid: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  /** Statut brut : EN_ATTENTE ou VALIDEE */
+  statutCommandeUtilisateur: string;
+  /** true si le statut est VALIDEE */
+  valide: boolean;
+  /** Montant payé par cet utilisateur pour cette commande */
+  montant?: number;
+  /** Numéro de transaction du paiement */
+  numeroPayment?: string;
+}
+
+/** DTO de réponse après validation des factures clients */
+export interface ValidationFacturesClientResponseDTO {
+  commandeUuid: string;
+  numeroCommande: string;
+  nombreValidations: number;
+  nombreTotal: number;
+  toutesValidees: boolean;
+  message: string;
 }

@@ -50,7 +50,7 @@ export default function OrdersReceivedList(): JSX.Element {
   };
 
   const handleValidateCustomers = async (
-    validations: { customerUuid: string; valide: boolean }[],
+    validations: { utilisateurUuids: string }[],
   ): Promise<void> => {
     if (!selectedOrder?.uuid) return;
     await validateCustomersMutation.mutateAsync({

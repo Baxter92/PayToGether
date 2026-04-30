@@ -9,16 +9,24 @@ import {
   DialogTitle,
 } from "@/common/components/ui/dialog";
 import { Button } from "@/common/components/ui/button";
-import { Input } from "@/common/components/ui/input";
 import { Label } from "@/common/components/ui/label";
-import { Calendar } from "lucide-react";
 import { toast } from "sonner";
+import DateTimeInput from "@/common/components/DateTimeInput";
 
 interface ValidatePayoutModalProps {
   open: boolean;
   onClose: () => void;
   order: any;
   onConfirm: (dateDepotPayout: string) => Promise<void>;
+}
+
+/** Formate un Date en "yyyy-MM-dd'T'HH:mm:ss" pour le backend */
+function formatForBackend(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return (
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+    `T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+  );
 }
 
 export default function ValidatePayoutModal({
@@ -28,7 +36,7 @@ export default function ValidatePayoutModal({
   onConfirm,
 }: ValidatePayoutModalProps) {
   const { t } = useI18n("admin");
-  const [dateDepotPayout, setDateDepotPayout] = useState("");
+  const [dateDepotPayout, setDateDepotPayout] = useState<Date | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,10 +49,10 @@ export default function ValidatePayoutModal({
 
     setIsLoading(true);
     try {
-      await onConfirm(dateDepotPayout);
+      await onConfirm(formatForBackend(dateDepotPayout));
       toast.success(t("orders.payout.validated"));
       onClose();
-      setDateDepotPayout("");
+      setDateDepotPayout(null);
     } catch (error) {
       console.error("Erreur validation payout:", error);
       toast.error(t("orders.payout.error"));
@@ -53,8 +61,15 @@ export default function ValidatePayoutModal({
     }
   };
 
+  const handleClose = () => {
+    if (!isLoading) {
+      onClose();
+      setDateDepotPayout(null);
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("orders.payout.title")}</DialogTitle>
@@ -68,23 +83,15 @@ export default function ValidatePayoutModal({
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="dateDepotPayout">
-                {t("orders.payout.dateLabel")}
-              </Label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="dateDepotPayout"
-                  type="datetime-local"
-                  value={dateDepotPayout}
-                  onChange={(e) => setDateDepotPayout(e.target.value)}
-                  className="pl-10"
-                  required
-                />
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {t("orders.payout.dateHelp")}
-              </p>
+              <Label>{t("orders.payout.dateLabel")}</Label>
+
+              {/* Sélecteur date + heure avec calendar shadcn */}
+              <DateTimeInput
+                value={dateDepotPayout}
+                onChange={setDateDepotPayout}
+                disabled={isLoading}
+                helperText={t("orders.payout.dateHelp")}
+              />
             </div>
           </div>
 
@@ -92,13 +99,15 @@ export default function ValidatePayoutModal({
             <Button
               type="button"
               variant="outline"
-              onClick={onClose}
+              onClick={handleClose}
               disabled={isLoading}
             >
               {t("orders.payout.cancel")}
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? t("orders.payout.loading") : t("orders.payout.validate")}
+            <Button type="submit" disabled={isLoading || !dateDepotPayout}>
+              {isLoading
+                ? t("orders.payout.loading")
+                : t("orders.payout.validate")}
             </Button>
           </DialogFooter>
         </form>
@@ -106,4 +115,3 @@ export default function ValidatePayoutModal({
     </Dialog>
   );
 }
-

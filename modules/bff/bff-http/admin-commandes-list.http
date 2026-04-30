@@ -111,6 +111,11 @@ GET {{baseUrl}}/admin/commandes/marchand/{{vendeurUuid}}
 Authorization: {{vendeurToken}}
 
 ### Expected: 200 OK
+@commandeUUid = 123e4567-e89b-12d3-a456-426614174000
+
+GET {{baseUrl}}/admin/commandes/user/command/{{commandeUUid}}
+Authorization: {{adminToken}}
+### Expected: 200 OK
 ### Le vendeur voit uniquement ses propres commandes
 
 ###

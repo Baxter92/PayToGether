@@ -138,14 +138,14 @@ public class CommandeAdminResource {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/user/command/{commandeUUid}")
+    @GetMapping("/user/command/{commandeUuid}")
     @PreAuthorize("hasAnyRole('ADMIN', 'VENDEUR')")
-    public ResponseEntity<List<CommandeUtilisateurDto>> listerCommandesParUtilisateur(UUID commandeUUid) {
-        log.info("Admin : Récupération des commandes pour la commande : {}", commandeUUid);
+    public ResponseEntity<List<CommandeUtilisateurDto>> listerCommandesParUtilisateur(@PathVariable UUID commandeUuid) {
+        log.info("Admin : Récupération des commandes pour la commande : {}", commandeUuid);
 
-        List<CommandeUtilisateurDto> response = commandeAdminApiAdapter.listerUtilisateursParCommande(commandeUUid);
+        List<CommandeUtilisateurDto> response = commandeAdminApiAdapter.listerUtilisateursParCommande(commandeUuid);
 
-        log.info("Admin : {} commandes trouvées pour l'utilisateur {}", response.size(), commandeUUid);
+        log.info("Admin : {} utilisateurs trouvés pour la commande {}", response.size(), commandeUuid);
         return ResponseEntity.ok(response);
     }
 

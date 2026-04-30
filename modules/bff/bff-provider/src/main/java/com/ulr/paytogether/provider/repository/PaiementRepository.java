@@ -82,4 +82,14 @@ public interface PaiementRepository extends JpaRepository<PaiementJpa, UUID> {
      * @return le paiement trouvé
      */
     Optional<PaiementJpa> findFirstByUtilisateurJpaUuidAndCommandeJpaDealJpaUuidOrderByDatePaiementDesc(UUID utilisateurUuid, UUID dealUuid);
+
+    /**
+     * Recherche le paiement d'un utilisateur pour une commande spécifique
+     * Utilisé pour récupérer montant et numeroPayment dans la liste des utilisateurs d'une commande
+     *
+     * @param commandeUuid UUID de la commande
+     * @param utilisateurUuid UUID de l'utilisateur
+     * @return le paiement trouvé
+     */
+    Optional<PaiementJpa> findFirstByCommandeJpaUuidAndUtilisateurJpaUuidOrderByDatePaiementDesc(UUID commandeUuid, UUID utilisateurUuid);
 }

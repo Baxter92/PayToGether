@@ -13,24 +13,16 @@ import { Checkbox } from "@/common/components/ui/checkbox";
 import { Badge } from "@/common/components/ui/badge";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-
-interface Customer {
-  uuid: string;
-  nom: string;
-  prenom: string;
-  email: string;
-  montant: number;
-  numeroPayment: string;
-  valide: boolean;
-}
+import type { CommandeUtilisateurDTO } from "@/common/api/types/order";
 
 interface ValidateCustomerInvoicesModalProps {
   open: boolean;
   onClose: () => void;
   order: any;
-  customers: Customer[];
-  onValidate: (validations: { customerUuid: string; valide: boolean }[]) => Promise<void>;
-  isReadOnly?: boolean; // Pour l'admin qui peut seulement consulter
+  customers: CommandeUtilisateurDTO[];
+  /** Reçoit la liste des UUIDs des utilisateurs à valider */
+  onValidate: (utilisateurUuids: string[]) => Promise<void>;
+  isReadOnly?: boolean;
 }
 
 export default function ValidateCustomerInvoicesModal({
@@ -71,14 +63,12 @@ export default function ValidateCustomerInvoicesModal({
 
     setIsLoading(true);
     try {
-      const validationsList = Array.from(validations.entries()).map(
-        ([customerUuid, valide]) => ({
-          customerUuid,
-          valide,
-        }),
-      );
+      // ✅ Envoie uniquement les UUIDs des utilisateurs checkés (non encore validés)
+      const utilisateurUuids = Array.from(validations.entries())
+        .filter(([, checked]) => checked)
+        .map(([uuid]) => uuid);
 
-      await onValidate(validationsList);
+      await onValidate(utilisateurUuids);
 
       const allValidated = Array.from(validations.values()).every((v) => v);
       if (allValidated) {
@@ -189,7 +179,7 @@ export default function ValidateCustomerInvoicesModal({
                       <span className="text-muted-foreground">
                         {t("orders.validation.amount")}:{" "}
                         <span className="font-medium text-foreground">
-                          ${customer.montant.toFixed(2)}
+                          ${customer.montant?.toFixed(2)}
                         </span>
                       </span>
                     </div>

@@ -30,8 +30,6 @@ import { mapDealToView } from "@/common/api/mappers/catalog";
 import { useAuth } from "@/common/context/AuthContext";
 
 export default function AdminOrders(): ReactElement {
-  // const [searchQuery, setSearchQuery] = useState("");
-  // const [statusFilter, setStatusFilter] = useState("all");
   const [openViewDetails, setOpenViewDetails] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [openDealDetails, setOpenDealDetails] = useState(false);
@@ -76,14 +74,89 @@ export default function AdminOrders(): ReactElement {
     });
   };
 
+  // ✅ Signature alignée avec useAdminValidateCustomerInvoices : { uuid, utilisateurUuids }
   const handleValidateCustomers = async (
-    validations: { customerUuid: string; valide: boolean }[],
+    utilisateurUuids: string[],
   ): Promise<void> => {
     if (!selectedOrder?.uuid) return;
     await validateCustomersMutation.mutateAsync({
       uuid: selectedOrder.uuid,
-      validations,
+      utilisateurUuids,
     });
+  };
+
+  // ✅ getStatusBadge avec valeurs enum correctes (TERMINEE, ANNULEE, REMBOURSEE, COMPLETEE)
+  const getStatusBadge = (status: string): ReactElement => {
+    switch (status) {
+      case StatutCommande.TERMINEE:
+        return (
+          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+            {tStatus("completed")}
+          </Badge>
+        );
+      case StatutCommande.EN_COURS:
+        return (
+          <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
+            {tStatus("pending")}
+          </Badge>
+        );
+      case StatutCommande.COMPLETEE:
+        return (
+          <Badge className="bg-sky-100 text-sky-800 hover:bg-sky-100">
+            {tStatus("complete")}
+          </Badge>
+        );
+      case StatutCommande.CONFIRMEE:
+        return (
+          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+            {tStatus("complete")}
+          </Badge>
+        );
+      case StatutCommande.PAYOUT:
+        return (
+          <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">
+            {tStatus("payout")}
+          </Badge>
+        );
+      case StatutCommande.INVOICE_SELLER:
+        return (
+          <Badge className="bg-indigo-100 text-indigo-800 hover:bg-indigo-100">
+            {tStatus("invoiceSeller")}
+          </Badge>
+        );
+      case StatutCommande.INVOICE_CUSTOMER:
+        return (
+          <Badge className="bg-cyan-100 text-cyan-800 hover:bg-cyan-100">
+            {tStatus("invoiceCustomer")}
+          </Badge>
+        );
+      case StatutCommande.FACTURE_MARCHAND_RECUE:
+        return (
+          <Badge className="bg-teal-100 text-teal-800 hover:bg-teal-100">
+            {tStatus("factureMarchandRecue")}
+          </Badge>
+        );
+      case StatutCommande.FACTURES_CLIENT_ENVOYEES:
+        return (
+          <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">
+            {tStatus("facturesClientEnvoyees")}
+          </Badge>
+        );
+      case StatutCommande.REMBOURSEE:
+        return (
+          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+            {tStatus("refunded")}
+          </Badge>
+        );
+      case StatutCommande.ANNULEE:
+        return (
+          <Badge className="bg-destructive/10 text-destructive hover:bg-destructive/10">
+            {tStatus("cancelled")}
+          </Badge>
+        );
+      default:
+        return <Badge>{status}</Badge>;
+    }
   };
 
   const columns = [
@@ -147,7 +220,7 @@ export default function AdminOrders(): ReactElement {
 
         return (
           <div className="flex items-center gap-2">
-            {/* Bouton Voir les détails */}
+            {/* Voir les détails */}
             <Button
               variant="ghost"
               size="icon"
@@ -159,23 +232,31 @@ export default function AdminOrders(): ReactElement {
               <Eye className="h-4 w-4" />
             </Button>
 
-            {/* Bouton Valider Payout (admin seulement, statut COMPLETE) */}
-            {isAdmin && (statut === StatutCommande.CONFIRMEE || statut === StatutCommande.COMPLETE) && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setSelectedOrder(order);
-                  setOpenPayoutModal(true);
-                }}
-              >
-                <DollarSign className="h-4 w-4 mr-1" />
-                Payout
-              </Button>
-            )}
+            {/* Valider Payout — admin, statut COMPLETEE ou CONFIRMEE */}
+            {isAdmin &&
+              (statut === StatutCommande.COMPLETEE ||
+                statut === StatutCommande.CONFIRMEE) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedOrder(order);
+                    setOpenPayoutModal(true);
+                  }}
+                >
+                  <DollarSign className="h-4 w-4 mr-1" />
+                  Payout
+                </Button>
+              )}
 
-            {/* Bouton Upload Facture Vendeur (statut PAYOUT) */}
-            {statut === StatutCommande.PAYOUT && (
+            {/*
+             * Upload Facture Vendeur :
+             * - Tout vendeur peut uploader quand statut = PAYOUT
+             * - L'ADMIN peut aussi uploader, y compris quand statut = INVOICE_SELLER
+             *   (pour remplacer une facture incorrecte)
+             */}
+            {(statut === StatutCommande.PAYOUT ||
+              (isAdmin && statut === StatutCommande.INVOICE_SELLER)) && (
               <Button
                 variant="outline"
                 size="sm"
@@ -185,13 +266,15 @@ export default function AdminOrders(): ReactElement {
                 }}
               >
                 <Upload className="h-4 w-4 mr-1" />
-                Invoice
+                {statut === StatutCommande.INVOICE_SELLER
+                  ? tAdmin("orders.invoice.reupload")
+                  : tAdmin("orders.invoice.upload")}
               </Button>
             )}
 
-            {/* Bouton Valider Factures Clients (statut INVOICE_CUSTOMER ou TERMINE) */}
+            {/* Valider Factures Clients */}
             {(statut === StatutCommande.INVOICE_CUSTOMER ||
-              statut === StatutCommande.TERMINE) && (
+              statut === StatutCommande.TERMINEE) && (
               <Button
                 variant="outline"
                 size="sm"
@@ -201,7 +284,9 @@ export default function AdminOrders(): ReactElement {
                 }}
               >
                 <CheckCircle2 className="h-4 w-4 mr-1" />
-                {statut === StatutCommande.TERMINE ? "Voir" : "Valider"}
+                {statut === StatutCommande.TERMINEE
+                  ? tAdmin("orders.invoice.view")
+                  : tAdmin("orders.invoice.validate")}
               </Button>
             )}
           </div>
@@ -209,78 +294,6 @@ export default function AdminOrders(): ReactElement {
       },
     },
   ];
-
-  // const filteredOrders = orders.filter((order) => {
-  //   const matchesSearch =
-  //     order.numeroCommande
-  //       ?.toLowerCase?.()
-  //       .includes(searchQuery.toLowerCase?.()) ||
-  //     order.marchandNom
-  //       ?.toLowerCase?.()
-  //       .includes(searchQuery.toLowerCase?.()) ||
-  //     order.dealTitre?.toLowerCase?.().includes(searchQuery.toLowerCase?.());
-  //   const matchesStatus =
-  //     statusFilter === "all" || order.statut === statusFilter;
-  //   return matchesSearch && matchesStatus;
-  // });
-
-  const getStatusBadge = (status: string): ReactElement => {
-    switch (status) {
-      case StatutCommande.TERMINE:
-      case StatutCommande.LIVRÉE:
-        return (
-          <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-            {tStatus("completed")}
-          </Badge>
-        );
-      case StatutCommande.EN_ATTENTE:
-      case StatutCommande.EN_COURS:
-        return (
-          <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
-            {tStatus("pending")}
-          </Badge>
-        );
-      case StatutCommande.COMPLETE:
-      case StatutCommande.CONFIRMEE:
-        return (
-          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-            {tStatus("complete")}
-          </Badge>
-        );
-      case StatutCommande.PAYOUT:
-        return (
-          <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">
-            {tStatus("payout")}
-          </Badge>
-        );
-      case StatutCommande.INVOICE_SELLER:
-        return (
-          <Badge className="bg-indigo-100 text-indigo-800 hover:bg-indigo-100">
-            {tStatus("invoiceSeller")}
-          </Badge>
-        );
-      case StatutCommande.INVOICE_CUSTOMER:
-        return (
-          <Badge className="bg-cyan-100 text-cyan-800 hover:bg-cyan-100">
-            {tStatus("invoiceCustomer")}
-          </Badge>
-        );
-      case StatutCommande.REMBOURSÉE:
-        return (
-          <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-            {tStatus("refunded")}
-          </Badge>
-        );
-      case StatutCommande.ANNULÉE:
-        return (
-          <Badge className="bg-destructive/10 text-destructive hover:bg-destructive/10">
-            {tStatus("cancelled")}
-          </Badge>
-        );
-      default:
-        return <Badge>{tStatus(status.toLowerCase())}</Badge>;
-    }
-  };
 
   const stats = [
     {
@@ -351,38 +364,6 @@ export default function AdminOrders(): ReactElement {
 
       <Card>
         <CardContent>
-          {/* <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder={tAdmin("orders.search")}
-                className="pl-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Select
-                value={statusFilter}
-                onValueChange={(val) => setStatusFilter(val)}
-                items={[
-                  { label: tAdmin("orders.filter.all"), value: "all" },
-                  { label: tStatus("completed"), value: StatutCommande.LIVRÉE },
-                  { label: tStatus("pending"), value: StatutCommande.EN_COURS },
-                  {
-                    label: tStatus("cancelled"),
-                    value: StatutCommande.ANNULÉE,
-                  },
-                  {
-                    label: tStatus("refunded"),
-                    value: StatutCommande.REMBOURSÉE,
-                  },
-                ]}
-                wrapperClassName="w-[200px]"
-              />
-            </div>
-          </div> */}
-
           <DataTable
             columns={columns}
             data={orders}
@@ -412,29 +393,23 @@ export default function AdminOrders(): ReactElement {
           />
           <ValidatePayoutModal
             open={openPayoutModal}
-            onClose={() => {
-              setOpenPayoutModal(false);
-            }}
+            onClose={() => setOpenPayoutModal(false)}
             order={selectedOrder}
             onConfirm={handleValidatePayout}
           />
           <UploadSellerInvoiceModal
             open={openInvoiceModal}
-            onClose={() => {
-              setOpenInvoiceModal(false);
-            }}
+            onClose={() => setOpenInvoiceModal(false)}
             order={selectedOrder}
             onUpload={handleUploadInvoice}
           />
           <ValidateCustomerInvoicesModal
             open={openValidationModal}
-            onClose={() => {
-              setOpenValidationModal(false);
-            }}
+            onClose={() => setOpenValidationModal(false)}
             order={selectedOrder}
             customers={customers}
             onValidate={handleValidateCustomers}
-            isReadOnly={selectedOrder?.statut === StatutCommande.TERMINE}
+            isReadOnly={selectedOrder?.statut === StatutCommande.TERMINEE}
           />
         </>
       )}

@@ -58,6 +58,9 @@ public class CommandeMapper {
                 .dateCommande(modele.getDateCommande())
                 .dateCreation(modele.getDateCreation())
                 .dateModification(modele.getDateModification())
+                .numeroCommande(modele.getNumeroCommande())
+                .dateDepotPayout(modele.getDateDepotPayout())
+                .factureMarchandUrl(modele.getFactureMarchandUrl())
                 .build();
     }
 
