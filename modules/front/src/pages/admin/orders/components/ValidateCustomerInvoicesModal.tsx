@@ -9,9 +9,8 @@ import {
   DialogTitle,
 } from "@/common/components/ui/dialog";
 import { Button } from "@/common/components/ui/button";
-import { Checkbox } from "@/common/components/ui/checkbox";
 import { Badge } from "@/common/components/ui/badge";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Circle, Loader2, User } from "lucide-react";
 import { toast } from "sonner";
 import type { CommandeUtilisateurDTO } from "@/common/api/types/order";
 
@@ -35,48 +34,32 @@ export default function ValidateCustomerInvoicesModal({
 }: ValidateCustomerInvoicesModalProps) {
   const { t } = useI18n("admin");
   const [validations, setValidations] = useState<Map<string, boolean>>(
-    new Map(customers.map((c) => [c.uuid, c.valide])),
+    // ✅ Clé = utilisateurUuid (UUID de l'utilisateur réel)
+    new Map(customers.map((c) => [c.utilisateurUuid, c.valide])),
   );
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleToggleValidation = (customerUuid: string) => {
+  const handleToggleValidation = (utilisateurUuid: string) => {
     if (isReadOnly) return;
-
-    const currentValue = validations.get(customerUuid) || false;
-
-    // Ne pas permettre de dévalider un client déjà validé
+    const currentValue = validations.get(utilisateurUuid) || false;
     if (currentValue) {
       toast.warning(t("orders.validation.cannotUnvalidate"));
       return;
     }
-
-    setValidations(new Map(validations.set(customerUuid, !currentValue)));
+    setValidations(new Map(validations.set(utilisateurUuid, !currentValue)));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (isReadOnly) {
-      onClose();
-      return;
-    }
-
+    if (isReadOnly) { onClose(); return; }
     setIsLoading(true);
     try {
-      // ✅ Envoie uniquement les UUIDs des utilisateurs checkés (non encore validés)
       const utilisateurUuids = Array.from(validations.entries())
         .filter(([, checked]) => checked)
         .map(([uuid]) => uuid);
-
       await onValidate(utilisateurUuids);
-
       const allValidated = Array.from(validations.values()).every((v) => v);
-      if (allValidated) {
-        toast.success(t("orders.validation.allComplete"));
-      } else {
-        toast.success(t("orders.validation.saved"));
-      }
-
+      toast.success(allValidated ? t("orders.validation.allComplete") : t("orders.validation.saved"));
       onClose();
     } catch (error) {
       console.error("Erreur validation factures:", error);
@@ -88,119 +71,137 @@ export default function ValidateCustomerInvoicesModal({
 
   const allValidated = Array.from(validations.values()).every((v) => v);
   const validatedCount = Array.from(validations.values()).filter((v) => v).length;
+  const total = customers.length;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {isReadOnly
-              ? t("orders.validation.viewTitle")
-              : t("orders.validation.title")}
-          </DialogTitle>
-          <DialogDescription>
-            {isReadOnly
-              ? t("orders.validation.viewDescription", {
-                orderNumber: order?.numeroCommande,
-              })
-              : t("orders.validation.description", {
-                orderNumber: order?.numeroCommande,
-              })}
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden">
+        {/* ── Header ── */}
+        <div className="px-6 pt-6 pb-4 border-b">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold">
+              {isReadOnly ? t("orders.validation.viewTitle") : t("orders.validation.title")}
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              {isReadOnly
+                ? t("orders.validation.viewDescription", { orderNumber: order?.numeroCommande })
+                : t("orders.validation.description", { orderNumber: order?.numeroCommande })}
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="space-y-4">
-          {/* Statistiques de validation */}
-          <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-            <CheckCircle2 className="h-5 w-5 text-green-600" />
-            <span className="text-sm font-medium">
-              {t("orders.validation.progress", {
-                validated: validatedCount,
-                total: customers.length,
-              })}
-            </span>
-            {allValidated && (
-              <Badge className="ml-auto bg-green-100 text-green-800">
-                {t("orders.validation.complete")}
-              </Badge>
-            )}
-          </div>
-
-          {/* Liste des clients */}
-          <div className="space-y-3">
-            {customers.map((customer) => {
-              const isValidated = validations.get(customer.uuid) || false;
-              const isAlreadyValidated = customer.valide;
-
-              return (
-                <div
-                  key={customer.uuid}
-                  className={`flex items-start gap-3 p-4 border rounded-lg transition-colors ${
-                    isValidated
-                      ? "bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800"
-                      : "bg-background"
-                  }`}
-                >
-                  {!isReadOnly && (
-                    <Checkbox
-                      checked={isValidated}
-                      onCheckedChange={() =>
-                        handleToggleValidation(customer.uuid)
-                      }
-                      disabled={isAlreadyValidated || isReadOnly}
-                      className="mt-1"
-                    />
-                  )}
-
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">
-                        {customer.prenom} {customer.nom}
-                      </span>
-                      {isAlreadyValidated && (
-                        <Badge
-                          variant="outline"
-                          className="bg-green-100 text-green-800"
-                        >
-                          {t("orders.validation.validated")}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {customer.email}
-                    </p>
-                    <div className="flex items-center gap-4 text-sm">
-                      <span className="text-muted-foreground">
-                        {t("orders.validation.paymentNumber")}:{" "}
-                        <span className="font-mono font-medium text-foreground">
-                          {customer.numeroPayment}
-                        </span>
-                      </span>
-                      <span className="text-muted-foreground">
-                        {t("orders.validation.amount")}:{" "}
-                        <span className="font-medium text-foreground">
-                          ${customer.montant?.toFixed(2)}
-                        </span>
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+          {/* Progress bar */}
+          <div className="mt-4 space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                {t("orders.validation.progress", { validated: validatedCount, total })}
+              </span>
+              {allValidated && (
+                <Badge className="bg-green-100 text-green-800 hover:bg-green-100 text-xs">
+                  {t("orders.validation.complete")}
+                </Badge>
+              )}
+            </div>
+            <div className="h-2 rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full rounded-full bg-green-500 transition-all duration-300"
+                style={{ width: total > 0 ? `${(validatedCount / total) * 100}%` : "0%" }}
+              />
+            </div>
           </div>
         </div>
 
-        <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-            disabled={isLoading}
-          >
+        {/* ── Customer list ── */}
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
+          {customers.map((customer) => {
+            const isValidated = validations.get(customer.utilisateurUuid) || false;
+            const isAlreadyValidated = customer.valide;
+            const isClickable = !isReadOnly && !isAlreadyValidated;
+
+            return (
+              <div
+                key={customer.uuid}
+                onClick={() => isClickable && handleToggleValidation(customer.utilisateurUuid)}
+                role={isClickable ? "button" : undefined}
+                tabIndex={isClickable ? 0 : undefined}
+                onKeyDown={(e) => {
+                  if (isClickable && (e.key === "Enter" || e.key === " ")) {
+                    e.preventDefault();
+                    handleToggleValidation(customer.utilisateurUuid);
+                  }
+                }}
+                className={`
+                  relative flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-200
+                  ${isValidated
+                    ? "border-green-400 bg-green-50 dark:bg-green-950/40 dark:border-green-700"
+                    : "border-border bg-card"
+                  }
+                  ${isClickable
+                    ? "cursor-pointer hover:border-green-300 hover:bg-green-50/50 dark:hover:bg-green-950/20 hover:shadow-sm select-none"
+                    : "cursor-default"
+                  }
+                `}
+              >
+                {/* Icône état */}
+                <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+                  isValidated ? "bg-green-500 text-white" : "bg-muted text-muted-foreground"
+                }`}>
+                  {isValidated
+                    ? <CheckCircle2 className="h-5 w-5" />
+                    : <User className="h-4 w-4" />
+                  }
+                </div>
+
+                {/* Infos client */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-sm truncate">
+                      {customer.prenom} {customer.nom}
+                    </span>
+                    {isAlreadyValidated && (
+                      <Badge className="bg-green-100 text-green-700 hover:bg-green-100 text-xs shrink-0">
+                        {t("orders.validation.validated")}
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate mt-0.5">{customer.email}</p>
+                  <div className="flex items-center gap-4 mt-1.5 text-xs text-muted-foreground">
+                    <span>
+                      {t("orders.validation.paymentNumber")}:{" "}
+                      <span className="font-mono font-medium text-foreground">
+                        {customer.numeroPayment ?? "—"}
+                      </span>
+                    </span>
+                    <span>
+                      {t("orders.validation.amount")}:{" "}
+                      <span className="font-semibold text-foreground">
+                        ${customer.montant?.toFixed(2) ?? "—"}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* Indicateur toggle (droite) */}
+                {!isReadOnly && (
+                  <div className="flex-shrink-0">
+                    {isValidated
+                      ? <CheckCircle2 className="h-5 w-5 text-green-500" />
+                      : <Circle className="h-5 w-5 text-muted-foreground/40" />
+                    }
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Footer ── */}
+        <DialogFooter className="px-6 py-4 border-t gap-2">
+          <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
             {isReadOnly ? t("common.close") : t("orders.validation.cancel")}
           </Button>
           {!isReadOnly && (
-            <Button onClick={handleSubmit} disabled={isLoading}>
+            <Button onClick={handleSubmit} disabled={isLoading} className="min-w-[140px]">
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -216,4 +217,3 @@ export default function ValidateCustomerInvoicesModal({
     </Dialog>
   );
 }
-
