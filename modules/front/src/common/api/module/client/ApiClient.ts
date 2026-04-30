@@ -148,8 +148,11 @@ export class ApiClient {
     if (ctx.body !== undefined && ctx.body !== null) {
       if (isBinary) {
         axiosConfig.data = ctx.body;
-        // For presigned PUT, often Content-Type must match: keep header if provided, otherwise don't set it
-        // If header didn't include content-type and data is FormData, axios will set multipart boundary automatically.
+        // Si le body est un FormData, supprimer le Content-Type pour laisser Axios
+        // définir automatiquement "multipart/form-data; boundary=..." avec le bon boundary.
+        if (typeof FormData !== "undefined" && ctx.body instanceof FormData) {
+          delete (axiosConfig.headers as Record<string, string>)["Content-Type"];
+        }
       } else {
         // JSON payload (axios will stringify objects automatically if header is application/json)
         axiosConfig.data = ctx.body;

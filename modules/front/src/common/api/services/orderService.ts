@@ -114,12 +114,9 @@ export const orderAdminService = {
 
     return apiClient.post<CommandeListDTO>(
       `/admin/commandes/${uuid}/facture/upload`,
-      {
-        body: formData,
-        headers: {
-          // Ne pas définir Content-Type, le navigateur le fera automatiquement avec boundary
+        {
+            body: formData,
         },
-      },
     );
   },
 
