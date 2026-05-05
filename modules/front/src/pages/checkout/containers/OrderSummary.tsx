@@ -75,7 +75,7 @@ export default function OrderSummary({
             </span>
           </HStack>
           <HStack justify="between" className="text-sm">
-            <span className="text-muted-foreground">{t("taxName")} (5%)</span>
+            <span className="text-muted-foreground">{t("taxName")} (5% {t("serviceFees").toLowerCase()})</span>
             <span className="font-medium text-foreground">
               {formatCurrency(tax)}
             </span>

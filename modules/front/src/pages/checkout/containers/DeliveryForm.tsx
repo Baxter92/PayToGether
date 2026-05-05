@@ -31,13 +31,17 @@ export function DeliveryForm({
       name: "deliveryMethod",
       label: t("deliveryTitle"),
       type: "radio",
-      defaultValue: "pickup",
+      defaultValue: "home",
       items: [
         {
           label: `${t("homeDelivery")} (${formatCurrency(deliveryFee)})`,
           value: "home",
         },
-        { label: t("pickupDelivery"), value: "pickup" },
+        {
+          label: t("pickupDelivery"),
+          value: "pickup",
+          disabled: true, // Pickup temporairement désactivé
+        },
       ],
     },
   ];
@@ -47,7 +51,7 @@ export function DeliveryForm({
       fields={fields}
       schema={deliverySchema}
       defaultValues={{
-        deliveryMethod: "pickup",
+        deliveryMethod: "home",
       }}
       onSubmit={({ data }) => onSubmit(data as DeliveryData)}
       submitLabel={isSubmitting ? t("processing") : t("continue")}

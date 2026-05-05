@@ -162,29 +162,13 @@ public class DealServiceImpl implements DealService {
     @Cacheable(value = "deal-statut", key = "#statut")
     @Override
     public List<DealModele> lireParStatut(StatutDeal statut) {
-        // Vérifier et mettre à jour les deals expirés avant de retourner les résultats
-        verifierEtMettreAJourDealsExpires();
-
-        return dealProvider.trouverParStatut(statut).stream()
-                .map(this::enrichirAvecStatistiques)
-                .collect(Collectors.toList());
+        return dealProvider.trouverParStatut(statut);
     }
 
     @Transactional(readOnly = true)
     @Override
     public PageModele<DealModele> lireParStatut(StatutDeal statut, int page, int size) {
-        // Vérifier et mettre à jour les deals expirés avant de retourner les résultats
-        verifierEtMettreAJourDealsExpires();
-
-        PageModele<DealModele> pageModele = dealProvider.trouverParStatut(statut, page, size);
-
-        // Enrichir chaque deal avec les statistiques
-        List<DealModele> dealsEnrichis = pageModele.getContent().stream()
-                .map(this::enrichirAvecStatistiques)
-                .collect(Collectors.toList());
-
-        pageModele.setContent(dealsEnrichis);
-        return pageModele;
+        return dealProvider.trouverParStatut(statut, page, size);
     }
 
     @Transactional(readOnly = true)

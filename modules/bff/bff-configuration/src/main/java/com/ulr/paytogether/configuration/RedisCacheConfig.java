@@ -71,6 +71,10 @@ public class RedisCacheConfig {
     @Value("${cache.ttl.commentaires:180}")
     private long ttlCommentaires;
 
+    // Token admin Keycloak : 23h (token expire en 24h, on garde une marge)
+    @Value("${cache.ttl.admin-token:82800}")
+    private long ttlAdminToken;
+
     /**
      * Bean LettuceConnectionFactory configuré manuellement pour :
      * - Forcer RESP2 (évite le bug HELLO/NOAUTH avec Redis 7+)
@@ -130,6 +134,8 @@ public class RedisCacheConfig {
         cacheConfigs.put("publicites",   defaultConfig.entryTtl(Duration.ofSeconds(ttlPublicites)));
         cacheConfigs.put("utilisateur",  defaultConfig.entryTtl(Duration.ofSeconds(ttlUtilisateur)));
         cacheConfigs.put("commentaires", defaultConfig.entryTtl(Duration.ofSeconds(ttlCommentaires)));
+        // Token admin Keycloak — 23h pour éviter le re-login à chaque opération admin
+        cacheConfigs.put("admin-token",  defaultConfig.entryTtl(Duration.ofSeconds(ttlAdminToken)));
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(defaultConfig)

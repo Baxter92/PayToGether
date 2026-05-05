@@ -23,6 +23,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 public abstract class AbstractRestClient<R, T> {
 
+    // Réutilisé sur toutes les requêtes — ObjectMapper est thread-safe
+    private static final ObjectMapper SHARED_OBJECT_MAPPER = new ObjectMapper();
+
     protected final RestClient restClient;
 
     /**
@@ -54,9 +57,8 @@ public abstract class AbstractRestClient<R, T> {
      */
     public T post(String url, R request, Map<String, String> headers) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            if (request  != null) {
-                log.debug("POST request (void) to: {} with request: {}", url, objectMapper.writeValueAsString(request));
+            if (request != null) {
+                log.debug("POST request to: {} with body: {}", url, SHARED_OBJECT_MAPPER.writeValueAsString(request));
             }
 
             RestClient.RequestBodySpec requestSpec = restClient.post()

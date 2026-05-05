@@ -33,8 +33,8 @@ export default function CheckoutPage(): JSX.Element {
 
   const defaultDeliveryFee = 15;
 
-  // Taxes : 5% sur (sous-total + frais de service)
-  const tax = useMemo(() => (subtotal + serviceFees) * 0.05, [subtotal, serviceFees]);
+  // GST : 5% sur les frais de service uniquement
+  const tax = useMemo(() => serviceFees * 0.05, [serviceFees]);
 
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);

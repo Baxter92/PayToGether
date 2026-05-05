@@ -6,6 +6,8 @@ import com.ulr.paytogether.wsclient.service.AuthKeycloackService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -50,8 +52,22 @@ public class AuthApiCLient {
         return LoginResponse.builder().build();
     }
 
-    public LoginResponse loginAdmin(){
+    /**
+     * Obtient le token admin et le met en cache (TTL 23h via Redis).
+     * Évite un aller-retour réseau vers Keycloak à chaque opération admin.
+     */
+    @Cacheable(value = "admin-token", key = "'current'")
+    public LoginResponse loginAdmin() {
+        log.debug("🔑 Obtention d'un nouveau token admin (mise en cache)");
         return this.getToken(adminUtilisateur, adminMotDePasse);
+    }
+
+    /**
+     * Invalide le cache du token admin si nécessaire (ex : token révoqué).
+     */
+    @CacheEvict(value = "admin-token", key = "'current'")
+    public void invaliderCacheTokenAdmin() {
+        log.info("♻️ Cache token admin invalidé");
     }
 
     public String checkToken(String token) {

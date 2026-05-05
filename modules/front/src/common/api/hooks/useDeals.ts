@@ -125,6 +125,8 @@ export const useDealsByStatut = (statut: StatutDealType) => {
     queryKey: dealKeys.byStatut(statut),
     queryFn: () => dealService.getByStatut(statut),
     enabled: !!statut,
+    staleTime: 2 * 60 * 1000,  // ⚡ 2 min — liste publique, pas besoin de re-fetch constant
+    gcTime: 5 * 60 * 1000,
   });
 };
 
@@ -141,6 +143,8 @@ export const useDealsByCategorie = (categorieUuid: string) => {
     queryKey: dealKeys.byCategorie(categorieUuid),
     queryFn: () => dealService.getByCategorie(categorieUuid),
     enabled: !!categorieUuid,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
   });
 };
 
@@ -148,6 +152,8 @@ export const useDealVilles = () => {
   return useQuery<string[], Error>({
     queryKey: dealKeys.villes(),
     queryFn: () => dealService.getVilles(),
+    staleTime: 10 * 60 * 1000, // ⚡ 10 min — les villes changent très rarement
+    gcTime: 15 * 60 * 1000,
   });
 };
 
@@ -399,6 +405,8 @@ export const useDealsPaginated = () => {
   >({
     queryKey: ["deals", "paginated", page, size],
     queryFn: () => dealService.getAllPaginated({ page, size }),
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
   });
 
   return {
@@ -433,6 +441,8 @@ export const useDealsByStatutPaginated = (statut: StatutDealType) => {
     queryKey: ["deals", "statut", statut, "paginated", page, size],
     queryFn: () => dealService.getByStatutPaginated(statut, { page, size }),
     enabled: !!statut,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
   });
 
   return {

@@ -7,6 +7,7 @@ import com.ulr.paytogether.core.domaine.service.DealService;
 import com.ulr.paytogether.core.domaine.service.PaiementService;
 import com.ulr.paytogether.core.enumeration.StatutDeal;
 import com.ulr.paytogether.core.enumeration.StatutImage;
+import com.ulr.paytogether.core.modele.DealModele;
 import com.ulr.paytogether.core.modele.PageModele;
 import com.ulr.paytogether.core.modele.PaiementModele;
 import lombok.RequiredArgsConstructor;
@@ -73,7 +74,7 @@ public class DealApiAdapter {
     }
 
     public PageResponse<DealResponseDto> lireTousByStatut(StatutDeal statut, int page, int size) {
-        PageModele<com.ulr.paytogether.core.modele.DealModele> pageModele = dealService.lireParStatut(statut, page, size);
+        PageModele<DealModele> pageModele = dealService.lireParStatut(statut, page, size);
 
         List<DealResponseDto> content = pageModele.getContent().stream()
                 .map(dealMapper::versDTO)

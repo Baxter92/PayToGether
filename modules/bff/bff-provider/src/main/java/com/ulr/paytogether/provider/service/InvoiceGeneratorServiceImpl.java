@@ -95,24 +95,24 @@ public class InvoiceGeneratorServiceImpl implements InvoiceGeneratorService {
         breakdown.fraisLivraison = isHomeDelivery ? 
             BigDecimal.valueOf(HOME_DELIVERY_FEE) : BigDecimal.ZERO;
         
-        // Calcul inverse:
-        // Total = sousTotal + (sousTotal × 0.05) + ((sousTotal + sousTotal × 0.05) × 0.05) + fraisLivraison
-        // Total = sousTotal × (1 + 0.05 + 0.05 + 0.05²) + fraisLivraison
-        // Total = sousTotal × 1.1025 + fraisLivraison
-        // sousTotal = (Total - fraisLivraison) / 1.1025
+        // Calcul inverse (GST = 5% des frais de service uniquement) :
+        // fraisService = sousTotal × 0.05
+        // tva (GST)    = fraisService × 0.05 = sousTotal × 0.0025
+        // Total = sousTotal + sousTotal×0.05 + sousTotal×0.0025 + fraisLivraison
+        // Total = sousTotal × 1.0525 + fraisLivraison
+        // sousTotal = (Total - fraisLivraison) / 1.0525
 
         BigDecimal montantSansFraisLivraison = montantTotal.subtract(breakdown.fraisLivraison);
         breakdown.sousTotal = montantSansFraisLivraison
-            .divide(BigDecimal.valueOf(1.1025), 2, RoundingMode.HALF_UP);
-        
+            .divide(BigDecimal.valueOf(1.0525), 2, RoundingMode.HALF_UP);
+
         // Frais de service = sous-total × 5%
         breakdown.fraisService = breakdown.sousTotal
             .multiply(BigDecimal.valueOf(SERVICE_FEE_RATE))
             .setScale(2, RoundingMode.HALF_UP);
 
-        // TVA = (sous-total + frais de service) × 5%
-        BigDecimal baseAvantTva = breakdown.sousTotal.add(breakdown.fraisService);
-        breakdown.tva = baseAvantTva
+        // TVA (GST) = frais de service × 5% seulement
+        breakdown.tva = breakdown.fraisService
             .multiply(BigDecimal.valueOf(TVA_RATE))
             .setScale(2, RoundingMode.HALF_UP);
         
