@@ -198,23 +198,13 @@ public class DealServiceImpl implements DealService {
     @Cacheable(value = "deal-categorie", key = "#categorieUuid")
     @Override
     public List<DealModele> lireParCategorie(UUID categorieUuid) {
-        return dealProvider.trouverParCategorie(categorieUuid).stream()
-                .map(this::enrichirAvecStatistiques)
-                .collect(Collectors.toList());
+        return dealProvider.trouverParCategorie(categorieUuid);
     }
 
     @Transactional(readOnly = true)
     @Override
     public PageModele<DealModele> lireParCategorie(UUID categorieUuid, int page, int size) {
-        PageModele<DealModele> pageModele = dealProvider.trouverParCategorie(categorieUuid, page, size);
-
-        // Enrichir chaque deal avec les statistiques
-        List<DealModele> dealsEnrichis = pageModele.getContent().stream()
-                .map(this::enrichirAvecStatistiques)
-                .collect(Collectors.toList());
-
-        pageModele.setContent(dealsEnrichis);
-        return pageModele;
+        return dealProvider.trouverParCategorie(categorieUuid, page, size);
     }
 
     @Transactional
